@@ -1440,3 +1440,148 @@ O laço do aeroporto (cliente chega → fila com paciência → estação atende
 Estimativa não medida: de 5–7 semanas até o APK (raia C) para 3–4.
 
 **Relação com o slot idle.** O Forge Street está em desenvolvimento e o Underground é a alternativa. Este jogo só entra se o formato idle validar. Com os diferenciais do §50, ele deixa de ser "reskin do Forge" e passa a ser o idle do portfólio com **pressão de horário**, que nem o Forge nem o Underground têm. Se o Forge validar, os criativos de TA-1 e TA-3 podem entrar no mesmo teste de criativos, gravados de um greybox sobre o núcleo do Forge, para medir o tema aeroporto antes de qualquer arte.
+
+---
+
+## Lições do estúdio aplicadas a Tiny Airport Empire (do Dungeon Courier, 2026-10-16)
+
+> **Status: PROPOSTO.** Nada desta seção foi implementado nem testado. O jogo continua **NO-GO nesta rodada** (§51): estas lições valem para quando, e se, ele entrar. "Tiny Airport Empire" é nome provisório (§52).
+
+O Dungeon Courier (DC) chegou à 1.4.1-beta em 2026-10-16 com o GDD inteiro feito, arte v2, tutorial guiado, anúncios e compras integrados e AAB assinado. Cada lição abaixo foi paga lá com tempo, crédito ou retrabalho. A versão completa está no playbook [`LICOES_PARA_O_ESTUDIO.md`](https://github.com/Vvs2705/dungeon-courier/blob/main/docs/LICOES_PARA_O_ESTUDIO.md), com cópia na memória do estúdio (`C:\Users\VINICIUS\Videos\MEUS PROJETOS\Agentes\_memoria\PLAYBOOK_ESTUDIO_DUNGEON_COURIER.md`). Esta seção traduz o playbook para o aeroporto e complementa o §53: o Forge Street dá o laço de fila e a economia, e o DC dá o processo, a rota de arte para NPCs em massa, o tutorial, a interface e o caminho até a loja. Convenção: `dc:` = repo `Vvs2705/dungeon-courier` (pasta `JOGOS NOVOS/06_DUNGEON_COURIER`); `fs:` = repo `Vvs2705/forge-street` (pasta `JOGOS NOVOS/03_FORGE_STREET`). Os clipes Mixamo ficam **fora do git** nos dois jogos: o reuso é cópia do disco, registrada em `docs/PROVENIENCIA.md`. O aval do Vinicius de 2026-10-09 cobre reusar, como cópia, os clipes Mixamo que já estão no disco (`dc:docs/PROVENIENCIA.md` §3).
+
+### Processo
+- **Nome antes de tudo o que grava o nome.** **Fazer:** decidir o §52 (com busca no INPI, USPTO e EUIPO) antes do `Setup.cs`. Dependem do nome: o appId `br.com.vstack.<nome>`, o logo, o ícone, o app no LevelPlay, a pasta da chave de upload, a política de privacidade e as capturas e criativos em 4 idiomas. **Por quê:** no DC, cada troca de arte obrigou a refazer loja e criativos (8 capturas × 4 idiomas e 13 vídeos × 4); com o nome, o retrabalho é o mesmo, mais o appId, que não muda depois de publicado.
+- **Contrato da v0.1 antes de codar.** **Fazer:** `docs/CONTRATO_V01.md` com o MVP do §46: 1 pista, 1 avião, check-in, segurança, portão e loja; 1 tipo de passageiro em sprites com pooling; velocidade, capacidade e 1 funcionário automatizando cada estação; terminal em 3 marcos; offline de 2 h; rewarded 2× no offline e 2× receita por 5 min; quadro de partidas com 2 voos (TA-1). Também os números iniciais e o critério de pronto (KPIs do §51). Em `docs/CONTRATO_LANCAMENTO.md`, a matriz "§ do GDD × feito". **Por quê:** no DC, o contrato deixou núcleo e View andarem em paralelo sem quebrar a API, e a matriz impediu dar o jogo por pronto antes da hora. **Reaproveitar:** `dc:docs/CONTRATO_V01.md` e `dc:docs/CONTRATO_LANCAMENTO.md` §1.
+- **Memória de retomada.** **Fazer:** criar `_memoria/STATUS_tiny-airport-empire.md`, com um bloco "CONTINUAR DAQUI" a cada pausa. **Por quê:** o Vinicius retoma dizendo só "vamos continuar". **Reaproveitar:** `_memoria/STATUS_dungeon-courier-v01.md` como modelo.
+- **Fotos antes do PR e um processo pesado por vez.** **Fazer:** fotos 540×960 de cada tela antes do PR, incluindo uma com 60 passageiros na tela (a cena do K3). Unity, Blender e emulador nunca rodam juntos (PC de 7,7 GB). **Por quê:** no DC, as fotos acharam texto sobreposto e um controle tampando o personagem, e nenhum dos 169 testes verdes pegou isso.
+- **Arte crua fora do git, com backup.** **Fazer:** zips do Tripo, FBX e `.blend` com modelo pago ficam no **checkout principal** (o worktree some quando é apagado) e num drive privado. Logo, ícones e retratos pintados entram no git. **Por quê:** o repositório é público e a licença dos modelos não permite redistribuir. **Reaproveitar:** `dc:docs/PROVENIENCIA.md`.
+
+### Código e testes
+- **Esqueleto do projeto: copiar, não reescrever.** **Fazer:** o laço do aeroporto é o do Forge (cliente chega → fila com paciência → estação atende → paga). O núcleo vem de `fs:client/Assets/_FS/Scripts/Core/`: `Sim.cs` (estações, fila, `Patience` por cliente, balcão 4 → 8, VIP determinístico por Weyl para o TA-3), `Equipe.cs` (worker fixo e nomeado, sem traço sorteado: Lara e Marco do §11, e o TA-5), `Metas.cs` (diárias e semanais do §21, com o dia virando às 04:00 no fuso gravado), `Encomendas.cs` (missões dimensionadas pela renda real), `SaveEnvelope.cs` e `Anuncios.cs`. A casca vem do DC, em `dc:client/Assets/_DC/`: `Editor/Setup.cs`, `Editor/SpriteImport.cs` e, em `Scripts/View/`, `Art.cs`, `Tour.cs`, `Textos.cs`, `Exportar.cs`, `AreaSegura.cs`, `Dp.cs`, `SpriteSheet.cs` e `Joystick.cs` (a lógica de arrastar e de toque rápido serve ao TA-2). Mais `client/tools/coretests` e `viewcheck`. Namespace `TA` e `TA.Core`, com a API documentada no topo do `Sim.cs`. **Por quê:** o DC roda 169 testes em 2–3 min sem abrir o Unity, e o Forge mediu esse laço num POCO F4 (60 fps, 0 crash).
+- **Relógio do quadro em tempo de jogo.** **Fazer:** o horário de cada voo (TA-1) e a frente fria (TA-4) correm no passo fixo do núcleo, com semente. O núcleo nunca lê o relógio do aparelho: recebe `nowUnix` de fora, como o `Metas.cs` do Forge. **Por quê:** assim o voo perdido é reproduzível no teste, no bot e no `-record` do criativo "o voo das 18h vai sair!".
+- **Bot, perfis e `-autoplay`.** **Fazer:** o `-autoplay N` imprime o embarque médio por voo (TA-1: ≥ 85% no bot bom, ≥ 60% no lento ×0,4), o ganho de mover a equipe (TA-2: ≥ 10%; se não render, o diferencial é falso), a rota que domina (TA-6) e o tempo até cada marco do terminal. **Por quê:** no DC, o bot fez o balance e o portão. No Forge, a pessoa real foi 1,7–3,7× mais lenta que o bot, então a duração se mede com gente (diário). **Reaproveitar:** `fs:client/Assets/_FS/Scripts/Core/Bot.cs` (perfis F2P, Slow, AdWatcher) e `fs:client/tools/econsim`.
+- **Invariantes do §50 viram testes negativos nomeados.** **Fazer:** perder um voo nunca custa mais que a receita daquele voo; offline nunca perde voo nem satisfação; nenhum gerente, funcionário ou avião sai de sorteio pago; booster pago não vale em ranking; toda concessão tem id de transação. **Por quê:** regra que mora só em prosa não sobrevive ao código. **Reaproveitar:** `fs:client/Assets/_FS/Tests/EditMode/ExploitTests.cs`.
+- **Flags de teste**, só com `-testsession` (não lê nem grava save, semente 1): `-tela <nome>`, `-onda K` (começa na onda de voos K), `-passageiros N` (estresse com 60 na tela, para o p10 de FPS do K3), `-bot`, `-dev-desbloqueia`, `-lang pt|en|es|id`, `-shot arq -shotdelay s`, `-record pasta …`, `-tutorial` e `-adtestsuite`. **Por quê:** no DC, fotos da loja, criativos e QA saíram do jogo real sem tocar no save. **Reaproveitar:** a leitura de argumentos do `dc:Scripts/View/Game.cs`.
+- **Diário CSV de playtest.** **Fazer:** eventos `flight_depart` (embarcados/total), `flight_missed`, `staff_move`, `queue_length`, `station_upgrade`, `story_delivered`, `offline_claim` e `tour_step`, sem dado pessoal. O relatório calcula o K2 (≥ 60% agem na estação vermelha em até 60 s) e o embarque médio. **Reaproveitar:** `dc:Scripts/View/Exportar.cs` + `dc:client/tools/diario_report.py`.
+- **Textos em 4 idiomas, com tabela.** **Fazer:** as 100+ histórias do TA-3 e todo texto fixo vão em `L(pt, en, es, id)`: frase inteira por idioma, nome e horário por `{0}`, só Latin-1 ("Florianópolis" passa). Escrita com IA e revisão humana, escolhida por sequência determinística e sem repetir na semana. Tipos de passageiro, classes de avião e estações ficam indexados por enum com reserva procedural; enum salvo só cresce no fim. **Reaproveitar:** `dc:Scripts/View/Textos.cs`.
+- **Áudio sintetizado.** **Fazer:** a chamada de aeroporto (3 notas), o bipe do scanner, a esteira, a caixa, o upgrade e a música ambiente saem de script. O motor de avião sintetizado é o risco: testar cedo e, se soar pobre, registrar uma alternativa com licença em `docs/PROVENIENCIA.md`. **Reaproveitar:** `dc:client/tools/audio_gen.py`.
+- **Portão antes de todo PR.** `dotnet test client/tools/coretests` · `dotnet build client/tools/viewcheck/view` · Unity EditMode · build Windows · `-autoplay 30` com 0 exceções · fotos 540×960. Armadilhas já pagas: NUnit 3.14 no dotnet e 3.5 no Unity; DLLs de `Library/ScriptAssemblies` no viewcheck de worktree novo; `Packages/manifest.json` reescrito pelo Unity ao criar o projeto; `PlayerPrefs` fora de inicializador de campo. **Reaproveitar:** `fs:client/tools/verify.sh`.
+
+### Arte e animação
+- **Rota: 3D modelado → sprites isométricos pré-renderizados** (a revisão do §39). **Fazer:** Tripo (imagem grátis → modelo HD → Auto Rig Mixamo) → Blender → `render_sprites.py`, com câmera de isometria (`--elev` a medir: o DC usa 60°), `--dirs 4` ou `8` com `--mirror` e luz chapada com contorno. Zero skinning no aparelho, com pooling. Pista, pátio e grama saem pintados no gerador grátis ou em tiles procedurais. **Por quê:** é a rota que já entregou o elenco do DC e os clientes do Forge. **Reaproveitar:** `dc:client/tools/render_sprites.py`, `render_sprites.ps1`, `folhas.py` e `dc:docs/RENDER_SPRITES.md`.
+- **O que gerar no Tripo: Lote 1 do MVP, ≈ 400 créditos (teto ≈ 530).** Créditos só com aval por lote.
+
+  | Peça | Como | Créditos |
+  |---|---|---|
+  | Passageiro base (adulto, roupa civil) | modelo HD 45 + rig 20 | 65 |
+  | 2º corpo de passageiro | só se a fila parecer clonada mesmo com troca de cor | +65 |
+  | Funcionário base de uniforme | HD + rig; atendente, segurança e bagageiro saem do mesmo corpo com colete de outra cor | 65 |
+  | Lara, Chefe de Terminal (§11) | no MVP, retrato pintado + o corpo do funcionário com outra cor | 0 (+65 com modelo próprio, quando os gerentes entrarem) |
+  | Avião regional genérico | sem rig, sem logotipo e sem forma de fabricante real | 45 |
+  | Check-in, pórtico do raio-x com esteira, portão, loja | sem rig, 45 cada | 180 |
+  | Terminal | 1 modelo; os 3 marcos saem por edição no Blender (alongar, 2º andar) | 45 |
+  | Mala de rodinha e mochila | por script no Blender, presas ao osso (regra do Vinicius: item separado do personagem) | 0 |
+
+  Depois do MVP: piloto e mecânico (troca de cor), aviões narrow-body, wide-body e cargo, veículos de pátio e os serviços do §20, a 45 cada. Nunca gerar o passageiro com a mala junto: o Tripo funde item e mão, e o rig arrasta o item errado. Confira o saldo antes e depois de cada geração e registre em `docs/PROVENIENCIA.md`; na 1ª peça de cada sessão, confira a receita do painel (o Tripo já voltou com 8K e 2 M polígonos).
+- **Itens presos ao osso.** Mala na mão (`--attach mala.fbx:mixamorig:RightHand:…`), mochila nas costas (`mixamorig:Spine2`, como a `ferreiro_mochila` do Forge), rádio e scanner de mão da segurança. **Reaproveitar:** `fs:client/tools/props_blender.py` e o registro da mochila em `fs:docs/PROVENIENCIA.md`.
+- **Clipes reaproveitados:** todos já estão no disco, no esqueleto `mixamorig:` (0 download, 0 crédito). Os do `_blender/` estão em `06_DUNGEON_COURIER/arte/mixamo/_blender/`.
+
+  | Uso | Clipe | Detalhe |
+  |---|---|---|
+  | Passageiro andando | `03_FORGE_STREET/arte/mixamo/Walking.fbx` ou ARKANA `mixamo-loc-andar-frente.fbx` | In Place; no do ARKANA, o render tira o root motion |
+  | Na fila | Forge `Idle.fbx` (Breathing Idle) | janela 199–289, preset `BREATH` |
+  | Paciência baixa | Forge `LookingAround.fbx` e uma janela curta do `Angry.fbx` | Standing Angrily: o DC descartou para rugido, mas aqui é exatamente "parado com raiva" |
+  | Carregando bagagem | `06_DUNGEON_COURIER/arte/mixamo/Hold.fbx` + o andar | com `--hold`, os clipes Carry* herdam os braços dele |
+  | Puxando mala de rodinha | não existe no disco | clipe novo no `dc:client/tools/anim_blender.py`, 0 crédito |
+  | Funcionário movido (TA-2) | ARKANA `mixamo-loc-correr-frente.fbx` | corre 2–3 s; o render tira o root motion e grava o `stride_mps` |
+  | Segurança no raio-x | `_blender/GuardIdle.fbx` | guarda em pé, laço de 60 quadros |
+  | Atendente entregando o cartão de embarque | `_blender/Grab.fbx` | 0,5 s |
+  | Bagageiro jogando a mala na esteira | `_blender/KoboldToss.fbx` | arremesso por baixo; soltura no quadro 7 de 12 |
+  | Lara avisando da frente fria (TA-4) | `_blender/Call.fbx` | mão na boca |
+  | Embarcou a tempo, história entregue (TA-3) | Forge `Cheering.fbx`, `Thankful.fbx` | — |
+  | Tchau no portão | Forge `Waving.fbx` | — |
+  | Perdeu o voo | `_blender/Shrug.fbx` | dá de ombros de frente: a punição leve do TA-1 fica legível sem texto |
+
+  O que faltar se anima no Blender, por keyframe em script e com retarget por delta de rotação sobre o repouso. A origem e o SHA de cada clipe estão em `dc:docs/PROVENIENCIA.md` §3.
+- **Aviões sem esqueleto.** **Fazer:** pouso, táxi e decolagem por caminho e tween no Unity, a partir de 8 direções renderizadas do modelo parado. Hélice e trem de pouso são peças separadas, animadas no Blender por script. **Por quê:** no DC, os 7 clipes do dragão saíram por keyframe em script, sem Mixamo. **Reaproveitar:** `dc:client/tools/dragao_blender.py` (o método) e `anim_blender.py`.
+- **No Blender, sem crédito.** **Fazer:** por troca de cor:
+  - as liveries das companhias fictícias do §13 (SkyFox, BlueWing, Aurora Air, SunJet, Atlas Cargo);
+  - as variantes do álbum do §28;
+  - os uniformes por função;
+  - dezenas de combinações de roupa de passageiro a partir de 1 corpo;
+  - os temas de terminal do §36.
+
+  Com luz chapada, a troca é feita direto na folha renderizada. Também: `.blend` salvo depois do 1º import (o FBX do Tripo leva mais de 10 min) e `timeout` em todo render. **Por quê:** assim o álbum e os cosméticos custam 0 crédito de arte. **Reaproveitar:** `dc:client/tools/roupas_cor.py`, `roupas_2d.py` e `roupas_courier.py`.
+- **Nitidez e memória.** **Fazer:** os personagens são "pequenos, mas legíveis" (§39): use `--hd K` e `--escala E`, com K = min(1,5; 4096 / (quadros × célula)), e um teto de quadros por clipe (`--max-frames`). Meça o PSS no aparelho com 60 passageiros. Hipótese não testada no DC: trocar a cor da roupa em tempo real (tinta por máscara) em vez de gravar uma folha por variante, para economizar APK e memória. **Por quê:** com as folhas HD, o APK do DC foi de 67,7 para 83 MiB, e aqui há variantes em massa. **Reaproveitar:** `dc:client/tools/elenco_hd.sh`.
+- **Arte de interface pintada no gerador grátis.** **Fazer:** sobre azul-marinho liso e recortados por script: logo (com o nome decidido); ícones das estações, avião, relógio, mala e história; retratos de Lara e Marco (§11); 10–20 rostos dos passageiros com história (TA-3) num lote só; fundo do menu. **Por quê:** no DC, o retrato pintado ficou muito mais vistoso que o render 3D recortado. **Reaproveitar:** `dc:client/tools/ui_assets.py`.
+
+### Interface e marca
+- **O quadro de partidas (TA-1) é a peça central da UI.** **Fazer:** um painel amarelo sobre preto, gerado por código em 9 fatias (`Moldura` + `Letreiro`), com o horário numa fonte mono OFL (ex.: Space Mono) e o resto em Lilita One e Nunito ExtraBold, como no DC. Também: `Balao` para a fala do passageiro com história, `Contorno` no tutorial e `Aperta` (escala 0,95 no toque) em todo botão. **Reaproveitar:** `dc:Scripts/View/Art.cs`, com as fontes e a licença OFL em `Resources/Fonts`.
+- **Alvo de toque maior que o boneco.** **Fazer:** o funcionário que se arrasta (TA-2) tem alvo de pelo menos 48 dp em volta do sprite (`Dp`), arrastar e tocar têm limiar separado, e o boneco arrastado aparece acima do dedo, sem tampar a estação de destino. **Por quê:** no DC, o joystick desenhado no dedo tampava o courier, e a correção foi o mesmo controle sem desenho.
+- **Retrato e 20:9.** CanvasScaler com referência 1080×1920 casando a largura e `AreaSegura` para o notch. Nas telas 20:9, o pátio e a grama, escurecidos, continuam até a borda: faixa lisa parece bug.
+- **Ícone adaptativo.** Fundo + frente, com o avião ou a torre a no máximo 0,64 da camada, conferido nas máscaras círculo, squircle e quadrado; o ícone da loja (512) é o mesmo. **Reaproveitar:** `dc:client/tools/icone_app.py` e `Setup.Icones`.
+
+### Onboarding (tutorial guiado)
+A tela congela e só o alvo fica aceso (véu com buraco, contorno dourado e seta). Cada passo aparece uma vez, com "Pular tutorial" e "REVER TUTORIAL" nas configurações, e fica desligado no `-testsession`. Os gatilhos leem o estado do núcleo, e passo de botão se cancela se a tela mudar (no DC, um passo preso sem alvo congelava o jogo). **Reaproveitar:** `dc:Scripts/View/Tour.cs`; troque só a lista de passos e os textos. O campo `Arrastar` já mostra o dedo arrastando, que é o gesto do TA-2, e o `Fala` põe retrato e balão.
+
+**Cartão de contexto no lugar de cutscene.** Antes do 1º toque, aparece o retrato pintado da **Lara, Chefe de Terminal** (o GDD já tem nome e cargo para ela, §11), com o balão: *"Este aeroclube estava abandonado, mas hoje sai o primeiro voo: 18h, para Campinas. Tem gente que não pode perder esse avião. Vamos abrir o check-in?"* No 1º voo, um passageiro tem história (TA-3, PROPOSTO: "Dona Rosa vai ao casamento da neta"). O ciclo fecha na 1ª decolagem, com a Lara de novo: *"Todo mundo a bordo! Amanhã a gente cresce."* **Por quê:** no DC, uma cutscene atrasaria o 1º toque e somaria com o tutorial; o cartão do cliente resolveu com uma fala e um retrato, e a cena de entrega fechou o ciclo.
+
+| # | Passo (tipo) | Quando | Por quê |
+|---|---|---|---|
+| 1 | Cartão da Lara (explicação) | 1ª abertura | contexto e o horário do 1º voo numa frase |
+| 2 | "Toque no check-in" (ação) | 1º passageiro na fila | o verbo manual do §5, antes de qualquer escolha |
+| 3 | "Toque na segurança" (ação: raio-x) | passageiro no raio-x | a cadeia, uma estação por vez |
+| 4 | "Este é o quadro de partidas" (explicação: o painel) | quando o 1º passageiro passa da segurança | a regra que cria a decisão (TA-1): o portão fecha na hora, e quem fica custa só a receita do assento |
+| 5 | "Embarque no portão" (ação) → 1ª decolagem e 1ª receita | o passageiro chega ao portão | fecha o 1º ciclo no 1º minuto |
+| 6 | "Contrate a atendente do check-in" (ação) | 1º Cash suficiente | pilar Automação |
+| 7 | "Arraste a funcionária da loja para a segurança" (ação, dedo arrastando) | 1ª onda com a segurança vermelha | ensinar o verbo do TA-2 antes de "qual voo eu salvo?"; é o que o K2 mede |
+| 8 | "Vermelho é gargalo: mover ou melhorar" (explicação) | logo depois do 7 | as duas respostas existem e competem (§7 revisado) |
+| 9 | "Melhore a velocidade da segurança" (ação) | Cash suficiente | ensina o menu de upgrade |
+| 10 | "Este passageiro tem uma história" (explicação: balão do TA-3) | 1º passageiro com história depois do tutorial | o álbum: embarcá-lo a tempo guarda a história |
+| 11 | "O terminal cresceu" (explicação) | 1º marco do terminal | pilar Crescimento visual (§3) |
+| 12 | "O aeroporto rendeu enquanto você estava fora" (explicação: cofre) | 1ª volta com ≥ 60 s fora | teto de 2 h, nenhum voo perdido no offline, 2× opcional |
+
+- **Ritmo:** os passos 1–5 cabem no 1º minuto; os outros nascem dos gatilhos, espaçados, para não virar parede de texto. Se a frente fria (TA-4) entrar, ganha um passo no 1º aviso.
+- **Controle:** sem joystick. O gesto central é arrastar a equipe, o mesmo desenho do "arrastar com a carga → soltar" do DC, sem nada desenhado no dedo.
+
+### Monetização e compliance
+- **1 moeda (Cash) na v0.1** (§8 já revisado). O offline nunca dá gem nem moeda de evento.
+- **Nada aleatório pago.** Gerentes por marco (§10, §11, TA-5) e pacotes de conteúdo fixo (§26) já estão alinhados. Falta alinhar aviões e temporada (ver os conflitos).
+- **Rewarded sempre opcional:** 2× offline, 2× receita por 5 min e "VIP flight" com resultado fixo, como o "Chamar VIP" do Forge.
+- **Anúncio não personalizado para todos, sem `AD_ID`.** `LevelPlayPrivacySettings` com GDPR sem consentimento, CCPA opt-out e COPPA desligado, antes do `Init`; `Setup.SemIdDePublicidade` (pós-geração do Gradle) tira o `AD_ID` e as 3 permissões do Privacy Sandbox do manifesto; na Play, a declaração de ID de publicidade é **não**. O app do jogo nasce na conta **V-STACK** do LevelPlay (o Forge tinha ficado em outra conta). **Reaproveitar:** `dc:Scripts/View/Anuncios.cs`, `AnunciosLevelPlay.cs` e `dc:docs/MONETIZACAO.md` §4.
+- **Interstitial desligado na v0.1** (§26). Se entrar, a regra de quando mostrar mora no núcleo, nunca no SDK (no DC: `sim.InterstitialDue`).
+- **Offline com teto de 2 h como trava no código.** O Tuning só encurta (como o `Balance.OfflineCapSeconds` do Forge). Também valem o teto relativo, Δt ≤ 0 pagando 0 e um id de transação por claim. **Reaproveitar:** `fs:Scripts/Core/Sim.cs` (`ApplyOffline`).
+- **IAP, só quando o Vinicius aprovar.** Unity IAP 5.4.3 atrás de uma interface, com loja falsa no PC; compra em 2 passos (o núcleo concede e só então confirma); restaurar compras. **Reaproveitar:** `dc:Scripts/View/Loja.cs` e `LojaIap.cs`.
+- **Licença e privacidade.** Companhias fictícias (§13) e aviões genéricos, sem forma nem pintura de fabricante ou companhia real (prompt do Tripo registrado em `docs/PROVENIENCIA.md`). A telemetria de filas do §43 tem só eventos de jogo, sem dado pessoal. A política de privacidade fica pública no GitHub Pages (4 idiomas) e cita exatamente as redes usadas.
+
+### Play e lançamento
+- **Conta de organização.** A Play Console da V-STACK espera o D-U-N-S grátis pedido no DC (previsão 2026-11-25), e a mesma conta publica este jogo. Não abra conta pessoal. A lição do DC é que a burocracia de conta leva ~30 dias úteis: começa no início do projeto, nunca no fim.
+- **Chave de upload fora do git**, com backup fora do PC: `%USERPROFILE%/.<nome>/upload.jks` + `upload.properties`, como o DC faz em `.dungeoncourier/`.
+- **AAB assinado** por `Setup.BuildAndroidBundle`. No DC, isso foi conferido: targetSdk 36, bibliotecas nativas alinhadas a 16 KB e Google Play Billing 9.
+- **Loja e criativos por script, do jogo real:** capturas × 4 idiomas do build de release, ícone 512, feature graphic e os vídeos 9:16 do §45 ("o voo das 18h vai sair!", arrastar a equipe e ver a fila sumir, "ela vai perder o casamento?"), gravados com `-record`. O "conserte este aeroporto caótico" só vale se o caos existir no build (a 1ª onda com a segurança vermelha): a regra do estúdio é criativo só de gameplay real. **Reaproveitar:** `dc:client/tools/loja_fotos.sh`, `loja_assets.py`, `criativos.py`, `dc:docs/LOJA.md` e `CRIATIVOS.md`.
+- **Pré-release no GitHub** a cada versão, com APK, AAB, zip Windows e o pacote da loja.
+
+### Android
+- **Taxa de quadros:** `QualitySettings.vSyncCount = 0` e `Application.targetFrameRate = 60` logo no início (no DC, o POCO F4 foi de 28–36 para 55 fps). Com 60 passageiros, a meta do K3 é p10 ≥ 30 FPS num aparelho **de entrada**: o POCO de 4 anos se limita depois de 1 min e não serve de régua. Se a temperatura subir, um teto de 30 fps é decisão medida, não chute. **Reaproveitar:** `fs:client/tools/medir_aparelho.sh`.
+- **APK de worktree:** gere via `subst R: <client>`, porque caminho longo com espaço quebra o CMake do Gradle. O worktree vai em caminho curto, nunca no scratchpad (estoura o MAX_PATH).
+- **adb no Git Bash:** `adb shell "am start -n <pkg>/<act> -e unity '-a -b'"`, com as aspas por dentro.
+- **Aparelho:** mantenha só o APK atual. Pergunte ao Vinicius antes de usar o celular dele e fotografe só com o jogo em primeiro plano.
+
+### Conflitos com o GDD atual
+Os conflitos ficam só apontados aqui; as outras seções do GDD não foram editadas. Todos pedem decisão do Vinicius.
+1. **§25, "melhorias aumentam limite" e "com upgrades, no máximo 8 h", contra o guardrail de 2 h.** **Recomendação:** 2 h como trava no código na v0.1. O research do §17 (+5% lucro offline) sobe a **taxa**, não o teto.
+2. **§26 (interstitial "poucos, em transições naturais") contra o TA-5 ("zero interstitial e zero banner") e a v0.1 sem interstitial.** **Recomendação:** decidir se o TA-5 é promessa pública (vai na página da loja e não volta atrás) antes de escrever a loja. Se o interstitial entrar, que seja como no DC: um ponto só, nunca nos 3 primeiros do dia, no máximo 1 a cada 4 min, decidido pelo núcleo, sumindo com Remove Ads.
+3. **§12 (avião com "raridade"), §28 ("jogador desbloqueia variantes"), §35 (temporada com aviões, managers e gems) e §26 (Gems à venda).** Juntos, abrem caminho para avião raro por gem comprada, que é aleatório pago e segunda moeda premium. **Recomendação:** avião e variante saem por marco, rota ou companhia, ou em pacote de conteúdo fixo; o premium da temporada fica em cosmético e conteúdo listado; gems só com IAP aprovado e com ralo.
+4. **§30 (D1 com "desbloqueia restaurante") contra o §46 (MVP com loja, sem restaurante).** O tutorial acima segue o MVP. **Recomendação:** alinhar o §30 no contrato da v0.1.
+5. **§45 ("conserte este aeroporto caótico") contra o guardrail "criativos gravados do jogo real".** **Recomendação:** o caos tem que existir no build (onda forte sem equipe movida) e ser gravado com `-record`; nada de cena montada que o jogo não entrega.
+6. **§39 ("personagens pequenos, mas legíveis") contra o alvo de 48 dp do TA-2.** **Recomendação:** alvo de toque invisível maior que o sprite e o boneco arrastado acima do dedo (ver Interface).
+7. **§52 (nome em aberto) contra tudo o que grava o nome.** **Recomendação:** decidir o nome antes do `Setup.cs` e de qualquer arte de marca.
+
+### Primeiros passos recomendados
+1. Enquanto o jogo é NO-GO: nada de projeto Unity, arte ou crédito. Só as decisões baratas: o nome (§52, com busca de marca) e os conflitos 1–3.
+2. Se o slot idle validar e o Vinicius pedir o projeto neste grupo: escrever `docs/CONTRATO_V01.md` e a matriz `docs/CONTRATO_LANCAMENTO.md`, e abrir `_memoria/STATUS_tiny-airport-empire.md`.
+3. Montar o esqueleto (núcleo do Forge + casca do DC, namespace `TA`) com o portão verde ainda vazio.
+4. Fazer o greybox procedural sobre o núcleo do Forge e provar, só com o bot, o TA-1 (≥ 85% / ≥ 60% de embarque) e o TA-2 (≥ 10% de ganho), antes de qualquer arte.
+5. Pôr o tutorial (passos 1–9), o cartão da Lara e o diário no greybox, e medir o K2 com gente.
+6. Gravar os criativos do TA-1 e do TA-3 do greybox com `-record`, para entrar no mesmo teste de criativos do slot idle (§53).
+7. Só com o jogo validado: Lote 1 de arte (≈ 400–530 créditos, com aval), UI pintada grátis (retratos de Lara e Marco), ícone adaptativo, appId e chave de upload com backup.
