@@ -79,6 +79,17 @@ No meio do lote, o Vinicius pediu: "não faça artes fracas sem presença e valo
 - **7 peças sem presença ganharam imagem nova, mais rica, antes do HD:** `raio_x`, `balcao_checkin`, `terminal_aurora`, `bastoes_sinalizacao` (saiu como 2 cápsulas), `cadeiras_espera` (saiu 1 assento só), `esteira_bagagem` (saiu um disco cinza liso) e `portao_embarque` (cinza, sem cor).
 - Custo da rodada: 42 × 55 + 12 × 20 = **2 550**. Total do dia previsto: 2 130 + 2 550 + imagens e marca (§5) ≈ **4 900**, dentro do saldo.
 
+### 2.2 Cobertura do elenco e Lote 3 (D-20)
+
+Papéis pedidos pelo Vinicius em 29/10 ("aeromoças, pilotos, manutenção, contratações"): piloto, mecânico, equipe de pátio (bagageiro e despachante, colete refletivo), funcionários do terminal (atendente de check-in e portão, segurança, vendedor) e 4 passageiros já estão gerados (§1). **Falta a tripulação de cabine:**
+
+| # | Peça | Família | Prior. | Como | Créditos |
+|---|---|---|---|---|---|
+| 43 | `comissaria` (uniforme verde-petróleo, lenço coral) | personagem | 2 | 1 rodada de imagem + HD + rig | 8 + 55 + 20 = 83 |
+| 44 | `comissario` (uniforme verde-petróleo, gravata coral) | personagem | 2 | 1 rodada de imagem + HD + rig | 8 + 55 + 20 = 83 |
+
+Total: **166** créditos. Aval: "Aprovo o Lote 3" (Vinicius, 29/10, D-20, repassado pela sessão do GDD). Estado: **não gerado**; o classificador de permissões desta máquina bloqueou o gasto de créditos com aval repassado por outra sessão, e a geração espera o OK do Vinicius direto nesta sessão. Mala de bordo, se precisar, sai como item à parte.
+
 ## 5. Marca e arte de instalação (pedido do Vinicius, 2026-10-29)
 
 Feitas no gerador de imagem do Tripo (Nano Banana 2, 1024 px) e ampliadas para 4K (10 créditos cada). Entram no git (interface, não modelo pago), em `client/Assets/_TA/Art/Marca/`.

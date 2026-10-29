@@ -10,9 +10,10 @@
 
 ## 2. Câmera e projeção
 
-- **Sprites 2D pré-renderizados** de modelos 3D (rota do DC: Tripo → Auto Rig Mixamo → Blender → `render_sprites.py`). Zero skinning no aparelho, com pooling (GDD §10.4).
+- **Rota híbrida (GDD §10.2, D-18):** as **pessoas** viram sprites 2D pré-renderizados (Tripo → Auto Rig Mixamo → Blender → `render_sprites.py`), sem skinning no aparelho e com pooling; **prédios, aviões e veículos** entram no Unity como **malha em tempo real**, decimada no Blender a partir da HD, com material simples e pivô no chão.
+- **Uniforme trocável (pedido do Vinicius, 29/10):** o funcionário veste o uniforme do setor onde chega. No Blender, o uniforme (colete, boné ou camisa) vai para um material próprio, e o render sai com uma **máscara do uniforme** separada do corpo; a View tinge a máscara em tempo de execução. Clipes por personagem: andar, parado e atendendo no balcão; passageiros: andar e parado na fila.
 - **Ortográfica, azimute 45°** (isometria clássica: a estação mostra frente e lateral). **Elevação a medir** com um render de teste de 0 crédito (terminal + fila de 6 passageiros + avião): candidatos **30°** (dimetria 2:1, mostra fachadas e a lateral do avião), **45°** e **60°** (o padrão do DC, mostra o topo e as filas sem oclusão). Vence a que deixa ler a fila inteira e o portão sem esconder ninguém; padrão provisório 45°.
-- **Direções:** passageiros e funcionários com 4 direções diagonais + espelho (andam em corredores isométricos); aviões com 8 direções do modelo parado (táxi e decolagem por tween no Unity); estações e terminal com 1.
+- **Direções:** passageiros e funcionários com 4 direções diagonais + espelho (andam em corredores isométricos). Aviões, veículos, estações e terminais não têm folha: giram como malha no Unity.
 - **Luz gravada:** Workbench chapado + cavidade + contorno de tinta de 3 px (`--outline 3`), uma direção de luz para tudo (do alto à esquerda). Sombra de ator como elipse no chão, não sombra dinâmica.
 - **Escala:** 1 unidade = 1 m na View; textura a 120 px/m (`--scale 120`) com `--hd K`, K = min(1,5; 4096 / (quadros × célula)); altura normalizada no Blender (`--height`), nunca no Unity. Passageiro ≈ 1,7 m de projeto.
 
