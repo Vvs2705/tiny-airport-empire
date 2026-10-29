@@ -38,6 +38,11 @@
 | 15:34–15:35 | 11 modelos HD do Lote 6 (nível 3 das estações e nível 2 dos terminais) | 6 373 | 605 | 11 × 55 |
 | 15:40–16:10 | 4 exports HD do Lote 6; os outros 7 ficaram pendentes (o PC caiu para 0,2 GB de RAM livre e o Chrome travou no export). Export não cobra: dá para baixar depois, com o saldo vencido | 6 373 | 0 | — |
 | 16:25 | **Fim do Lote 6: 649 créditos. Total do dia: 8 222** | **6 373** | 649 | 4 878 + 1 869 + 826 + 649 |
+| 16:33 | 1 modelo HD de imagem única fora da lista do `ASSETS.md`: o 3D do emblema (`emblema_tripo_v1`), da sessão da logo | 6 318 | 55 | Lido no histórico de uso da conta, linha `-55` às 16:33:52. Total do dia: **8 277** |
+| 16:55 | Painel de plano ainda mostrava **Max, "Expirar 2026-10-29"** (sem hora) e 6 318 créditos | 6 318 | 0 | Sessão do Lote 7 lê o saldo e prepara a lista (`ASSETS.md` §2.6) |
+| 16:58 | 1 export FBX "Blender, 4K" (`terminal_aurora_n2`) | 6 318 | 0 | zip de 13,2 MiB guardado (§2.3) |
+| ~17:03 | **A conta deslogou no Chrome** ("Registrar/Entrar", ativos vazios) | — | — | Parado, como manda a regra; o Vinicius entrou de novo às ~17:10 |
+| ~17:10 | **Plano Max venceu: plano Gratuito, saldo 0.** 6 318 créditos perdidos | **0** | 6 318 (vencidos) | O Lote 7 (76 peças, ≈ 4 800 créditos) **não foi gerado**. A conta guarda os modelos, mas o **export no plano gratuito pede assinatura** (tela de upgrade: Starter R$ 10/mês, Pro R$ 44/mês); nada foi assinado nem comprado. Também aparece "limite de armazenamento atingido" (333 de 10) |
 
 ## 2. Registro por peça (Tripo)
 
@@ -189,7 +194,7 @@ Só HD (4K, 50 000 faces), objetos em FBX "Blender 4K". Imagem escolhida entre 2
 
 ### 2.3 Lote 6 (2026-10-29, fim da tarde)
 
-Só HD (4K, 50 000 faces), objetos em FBX "Blender 4K". Imagem escolhida entre 2 opções. Licença `tripo_pago`, Privado. **7 exports pendentes**: os modelos estão pagos e guardados na conta; o task id do `hangar_manutencao_n3` não foi lido na geração e sai do painel de ativos no export.
+Só HD (4K, 50 000 faces), objetos em FBX "Blender 4K". Imagem escolhida entre 2 opções. Licença `tripo_pago`, Privado. **6 exports pendentes e bloqueados**: os modelos estão pagos e guardados na conta, mas o plano venceu às ~17:10 (§1) e o plano gratuito não exporta (pede assinatura). Só o `terminal_aurora_n2` saiu a tempo, às 16:58. O task id do `hangar_manutencao_n3` não foi lido na geração e sai do painel de ativos (6º cartão da grade, ordem do mais novo para o mais antigo) quando houver export.
 
 | Peça | Hora | Imagem | Task id | Créditos | Saldo depois | Arquivo (`arte/tripo/`) | Tamanho | SHA-256 do zip | SHA-256 do FBX |
 |---|---|---|---|---|---|---|---|---|---|
@@ -197,13 +202,13 @@ Só HD (4K, 50 000 faces), objetos em FBX "Blender 4K". Imagem escolhida entre 2
 | raio_x_n3 | 15:34 | #2 de 2 | `ee87d05d-49fe-490d-8c1d-0711091c8cf7` | 4 img + 55 | 6868 | `raio_x_n3_hd/raio_x_n3_hd.zip` | 9.4 MiB | `cf06660ebb7b4a37c4bf2d0e835400fe96c17c96c07885263637704cfa8cf431` | `83f5584f0388f0398daccea5ba1f6b3fbb91e727e093bebe04c853a93dd09d71` |
 | esteira_bagagem_n3 | 15:34 | #2 de 2 | `e272641d-b872-4ccb-884d-80820c367537` | 4 img + 55 | 6813 | `esteira_bagagem_n3_hd/esteira_bagagem_n3_hd.zip` | 10.8 MiB | `79ddb68701d1e846048975b5be840d33966aaf2d307a2f0f104bf715d91a0ef9` | `fbbeb3f1ff2fbb6c70bc051333723df3fc45ef931e46d1b0aa6ea4f706714f64` |
 | portao_embarque_n3 | 15:34 | #1 de 2 | `de15e212-3495-48c2-a826-be96ca883fd9` | 4 img + 55 | 6758 | `portao_embarque_n3_hd/portao_embarque_n3_hd.zip` | 10.7 MiB | `66bcd05b3fca1f0847e8886cdcf2f5feba2b084c53273c21ace26802b5ce3f5d` | `f3859d1aad488ab287c86aac786fb7ae2ba4118a23c127a51320a1781299c11e` |
-| loja_n3 | 15:35 | #1 de 2 | `4b2ae957-e9b2-4b39-8b3a-e2562fb38fbc` | 4 img + 55 | 6703 | **export pendente** | — | — | — |
-| alimentacao_n3 | 15:35 | #1 de 2 | `c79b346f-b6d5-4c02-b296-ab80281261d1` | 4 img + 55 | 6648 | **export pendente** | — | — | — |
-| hangar_manutencao_n3 | 15:35 | #2 de 2 | ler no painel de ativos no export | 4 img + 55 | 6593 | **export pendente** | — | — | — |
-| torre_controle_n3 | 15:35 | #2 de 2 | `5ab297ca-b111-4ecf-9d02-59e828b52616` | 4 img + 55 | 6538 | **export pendente** | — | — | — |
-| terminal_vale_verde_n2 | 15:35 | #1 de 2 | `d8ae9ef4-5eb3-4d57-9e93-a1b4847accf3` | 4 img + 55 | 6483 | **export pendente** | — | — | — |
-| terminal_costa_azul_n2 | 15:35 | #2 de 2 | `a8963395-6f79-4fa9-9009-af39bdaf1bee` | 4 img + 55 | 6428 | **export pendente** | — | — | — |
-| terminal_aurora_n2 | 15:35 | #1 de 2 | `7af1f624-a33a-44c2-8813-a0eadb8bb229` | 4 img + 55 | 6373 | **export pendente** | — | — | — |
+| loja_n3 | 15:35 | #1 de 2 | `4b2ae957-e9b2-4b39-8b3a-e2562fb38fbc` | 4 img + 55 | 6703 | **export bloqueado (plano venceu)** | — | — | — |
+| alimentacao_n3 | 15:35 | #1 de 2 | `c79b346f-b6d5-4c02-b296-ab80281261d1` | 4 img + 55 | 6648 | **export bloqueado (plano venceu)** | — | — | — |
+| hangar_manutencao_n3 | 15:35 | #2 de 2 | ler no painel de ativos no export | 4 img + 55 | 6593 | **export bloqueado (plano venceu)** | — | — | — |
+| torre_controle_n3 | 15:35 | #2 de 2 | `5ab297ca-b111-4ecf-9d02-59e828b52616` | 4 img + 55 | 6538 | **export bloqueado (plano venceu)** | — | — | — |
+| terminal_vale_verde_n2 | 15:35 | #1 de 2 | `d8ae9ef4-5eb3-4d57-9e93-a1b4847accf3` | 4 img + 55 | 6483 | **export bloqueado (plano venceu)** | — | — | — |
+| terminal_costa_azul_n2 | 15:35 | #2 de 2 | `a8963395-6f79-4fa9-9009-af39bdaf1bee` | 4 img + 55 | 6428 | **export bloqueado (plano venceu)** | — | — | — |
+| terminal_aurora_n2 | 15:35 | #1 de 2 | `7af1f624-a33a-44c2-8813-a0eadb8bb229` | 4 img + 55 | 6373 | `terminal_aurora_n2_hd/terminal_aurora_n2_hd.zip` (export 16:58) | 13.2 MiB | `5d8466cf313e45ac81f2e54760ba8ca844f4ac6f80b5bbfe52ffa2a39249935d` | `75baf5ed866496195717af4c3ec1adc2313ee05d4abc05b9b96ad8c9ce710686` |
 
 ## 3. Marca e arte de instalação (imagem, sem modelo 3D)
 

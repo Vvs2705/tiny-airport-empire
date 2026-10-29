@@ -4,6 +4,7 @@ Formato: [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/); versões e
 
 ## [Unreleased]
 ### Adicionado
+- Tripo, 2026-10-29, fim do dia: o plano Max venceu às ~17:10 com 6 318 créditos sem uso. O Lote 7 (76 peças, 4 804 créditos) ficou só planejado em `docs/ASSETS.md` §2.6. Do Lote 6, 5 de 11 exports estão guardados e 6 estão bloqueados pelo plano gratuito (`docs/PROVENIENCIA.md` §1 e §2.3).
 - GDD v1.2 (2026-10-29), com o padrão de mercado:
   - tripulação de pilotos e comissários (§5.11);
   - pátio e manutenção (§5.12);
