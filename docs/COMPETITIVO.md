@@ -118,6 +118,12 @@ Critério: o que os similares **não têm ou fazem mal**, que seja **barato para
 - **Risco:** escopo (2º aeroporto inteiro). Só depois do MVP validar.
 - **Validar barato:** bot: o 2º aeroporto chega ≥ 20% mais rápido com o hub, sem precisar de reset.
 
+### TA-8. Aeroporto de verdade: tripulação e manutenção com escolha — custo **G** (2026-10-29)
+- **Por que importa:** nos líderes (§g), o pátio e o hangar são animação ou cronômetro com botão de pular. Aqui a escala da tripulação e a hora de mandar o avião ao hangar viram decisão, ligada ao quadro de partidas (TA-1). É o pedido do Vinicius: "manutenção. Contratações de funcionários, aeromoças, pilotos".
+- **Como funciona:** GDD §5.11 (pilotos e comissários com escala e descanso) e §5.12 (turnaround como 2º gargalo, desgaste, checagem no pátio e revisão no hangar).
+- **Risco:** virar microgestão. Mitigação: a escala e o pátio são automáticos por padrão; o jogador só intervém no rush.
+- **Validar barato:** bot: quem escala e manda ao hangar na hora certa rende ≥ 1,10 × o bot que deixa tudo no automático (GDD §5.13). Se não render, fica só visual.
+
 ---
 
 ## e) Os 3 que eu faria primeiro
@@ -158,6 +164,26 @@ O "Tiny" ainda lembra Tiny Tower, da NimbleBit, que também fez Pocket Planes (a
 | Skyhub Tycoon (descartado) | "Skyhub" e "Sky Hub – Chat" na Play; "Sky Haven Tycoon" no PC ([ref.](https://www.gamepressure.com/games/sky-haven/zc5dba)) | Colisão parcial |
 
 **Recomendação [O]:** "Little Terminal", com o subtítulo de loja "Airport Idle" para busca. É curto, descreve o jogo e mantém o "pequeno que cresce" sem colar na NimbleBit nem no "Empire". "Jetway Tycoon" é a 2ª opção (mais "tycoon", menos charmoso). Decisão do Vinicius: appId e nome são irreversíveis depois de publicados.
+
+## g) Padrão visual e de mecânica dos líderes (prints e trailer de 2026-10-29)
+
+**Pedido do Vinicius:** "nosso jogo tem que ter nível de qualidade, funcionalidade, mecanismos, quero algo que possa se aproximar de um aeroporto real (...) é um jogo mobile que precisa vender, e vencer o que tem no mercado, não apenas mais um". Ele mandou 11 prints, tirados do celular, e um trailer de 30 s. **Os prints e o vídeo não entram no git:** são de terceiros, e o repositório é público.
+
+| Referência | O que mostra | O que vira régua para nós |
+|---|---|---|
+| **Airport Inc.** (4 prints: abertura, jogo, tecnologia e loja em pt-BR) **[F]** | 3D low-poly isométrico. O terminal tem o teto aberto num círculo, e lá dentro aparecem raio-x, balcões com fila entre fitas, bancos e funcionários com anel de progresso verde. Passageiros com balão de humor (feliz ou irritado). No pátio: avião no estande, equipe de colete amarelo, caminhão de combustível, caminhão-escada, carrinho de bagagem e ônibus. Também aparecem a torre, a árvore de tecnologia com cronômetro e "terminar agora" por moeda premium, e o elenco de abertura (piloto, executivo, engenheira de capacete) | o terminal em corte, o turnaround visível, o anel de progresso, o balão de humor e o elenco com cara |
+| **Simulador de torre de controle** (1 print, realista) **[F]** | controladores nas mesas de radar e o pátio real pela janela | sabor de "aeroporto de verdade": a torre de despacho (estação 8) mostra gente trabalhando |
+| **Jogo de UI roxa** (5 prints) e **trailer "Airplane Manager Tycoon Empire"** **[F]** e **[I]**: mesmo heliponto, posto e barra de fase; parecem ser o mesmo jogo | O mapa começa com 1 avião pequeno e uma casinha de controle, cercado de terrenos de terra para liberar. Depois vêm estacionamento de aeronaves, 2 pistas, heliponto, posto de combustível, terminal de carga e hangares com anel de progresso. Aviões taxiam o tempo todo, com ícones do serviço que falta em cima deles (chave, combustível, limpeza) e números de receita subindo. Há biomas (campo, neve, deserto, cidade), uma barra de tarefas da fase com prêmio, gerentes com retrato presos ao prédio e "x2 Income" | o mapa que cresce por terrenos, o prédio que muda a cada nível, muito movimento na tela, metas de fase visíveis e o ícone de serviço sobre o avião |
+
+**O que copiamos: nada.** Layout, arte, nomes, UI e marcas desses jogos ficam de fora. Eles marcam o **nível**: mundo 3D vivo, câmera isométrica com pan e zoom, tudo se mexe e todo sistema aparece no mapa (GDD §5.13).
+
+**Onde eles perdem para nós [I]:**
+- o fluxo deles é contínuo; o nosso tem horário (TA-1);
+- o gerente deles fica parado no prédio; a nossa equipe anda e troca de uniforme (TA-2);
+- o pátio e o hangar deles são cronômetro; os nossos são escolha (TA-8);
+- eles vendem gerente com cronômetro de 70% OFF, "terminar agora" por moeda premium e 2× por vídeo; nós não (TA-5).
+
+**Fora da régua:** realismo de simulador (o print da torre). O estilo continua low-poly acolhedor (GDD §10.1); o "real" vem dos sistemas (tripulação, pátio, manutenção) e do ciclo completo do avião, não da textura.
 
 ## Posicionamento (uma frase)
 
