@@ -5,3 +5,4 @@
 *.fbx binary
 *.blend binary
 *.wav binary
+*.sh text eol=lf
