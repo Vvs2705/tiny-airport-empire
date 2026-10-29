@@ -43,7 +43,108 @@ namespace TA.Core
                     sb.Append("voo.").Append(v.Indice).Append('=').Append(v.Criados).Append(',').Append(v.Embarcados).Append(',').Append(v.Receita)
                       .Append(',').Append(v.Embarque ? 1 : 0).Append(',').Append(v.Partiu ? 1 : 0).Append('\n');
             Anuncios.Save(sb);
+            SalvaFaseC(sb);
             return SaveEnvelope.Wrap(sb.ToString(), content, nowUnix);
+        }
+
+        /// <summary>Schema 2 (CONTRATO_FASE_C §6): avioes (desgaste, onde esta, voo, checagem, hangar), servicos do turnaround, tripulacao
+        /// (trechos, tempo na sala, a bordo de qual aviao), equipe e veiculos de patio.</summary>
+        void SalvaFaseC(StringBuilder sb)
+        {
+            foreach (Aviao a in Avioes)
+            {
+                sb.Append("aviao.").Append(a.Id).Append('=').Append(a.Desgaste).Append(',').Append(a.Chega.ToString(Ci)).Append(',').Append(a.NoPatio ? 1 : 0)
+                  .Append(',').Append(a.VooId).Append(',').Append(a.FechouEm.ToString(Ci)).Append(',').Append(a.Check).Append(',').Append(a.Inspecao ? 1 : 0)
+                  .Append(',').Append(a.Checou ? 1 : 0).Append(',').Append(a.Hangar).Append(',').Append(a.AvisouTrip ? 1 : 0).Append('\n');
+                sb.Append("srv.").Append(a.Id).Append('=');
+                for (int s = 0; s < 4; s++) sb.Append(a.Falta[s]).Append(a.Fazendo[s] ? ":1" : ":0").Append(s < 3 ? "," : "\n");
+            }
+            foreach (Tripulante t in Tripulacao)
+                sb.Append("trip.").Append(t.Id).Append('=').Append((int)t.Funcao).Append(',').Append(t.Trechos).Append(',').Append(t.Sala).Append(',').Append(t.Aviao).Append('\n');
+            Kv(sb, "patio", EquipePatio); Kv(sb, "patioatraso", AtrasosPatio);
+            for (int s = 0; s < 4; s++) if (PatioVel[s] != 0 || PatioCap[s] != 0) sb.Append("pv.").Append(s).Append('=').Append(PatioVel[s]).Append(',').Append(PatioCap[s]).Append('\n');
+        }
+
+        /// <summary>Le o schema 2, com tudo limitado (lixo vira o padrao). Schema 1 (a v0.1) nao tem estas chaves: Migra1 poe o padrao.</summary>
+        void CarregaFaseC(Dictionary<string, string> kv, int schema)
+        {
+            if (schema < 2) { Migra1(); return; }
+            EquipePatio = (int)Math.Max(T.PatioIniciais, Math.Min(T.PatioIniciais + T.PatioContratacao.Length, Get(kv, "patio", T.PatioIniciais)));
+            AtrasosPatio = (int)Math.Max(0, Math.Min(int.MaxValue, Get(kv, "patioatraso", 0)));
+            for (int s = 0; s < 4; s++)
+            {
+                int[] n = Ints(kv, "pv." + s);
+                if (n.Length >= 2) { PatioVel[s] = Math.Max(0, Math.Min(T.PatioVelNiveis, n[0])); PatioCap[s] = Math.Max(0, Math.Min(T.PatioCapNiveis, n[1])); }
+            }
+            int maxCheck = Math.Max(Passos(T.CheckSeg), Passos(T.InspecaoSeg)), fazendo = 0;
+            foreach (Aviao a in Avioes)
+            {
+                long[] n = Longs(kv, "aviao." + a.Id);
+                if (n.Length < 10) { Migra1(a); continue; }
+                a.Desgaste = (int)Math.Max(0, Math.Min(100, n[0]));
+                a.Hangar = (int)Math.Max(0, Math.Min(Passos(T.HangarSeg), n[8]));
+                a.NoPatio = n[2] != 0 && a.Hangar == 0;
+                a.Chega = Math.Max(-1, Math.Min(Steps + Passos(T.Trecho), n[1]));   // volta de trecho no maximo um trecho a frente
+                a.VooId = (int)Math.Max(-1, Math.Min(int.MaxValue, n[3]));
+                a.FechouEm = a.NoPatio && a.VooId >= 0 ? Math.Max(-1, Math.Min(Steps, n[4])) : -1;
+                // voo valido: o desta onda (fechado so se ja partiu) ou, esperando decolar, o da onda anterior
+                Voo v = Voos[a.Id];
+                bool atual = v != null && v.Id == a.VooId, anterior = v != null && v.Id - 2 == a.VooId;
+                if (a.FechouEm >= 0 && !(atual && v.Partiu || anterior)) a.FechouEm = -1;
+                if (!a.NoPatio || a.FechouEm < 0 && !atual) a.VooId = -1;
+                a.Check = a.NoPatio ? (int)Math.Max(0, Math.Min(maxCheck, n[5])) : 0;
+                a.Inspecao = n[6] != 0 && a.Check > 0; a.Checou = n[7] != 0; a.AvisouTrip = n[9] != 0;
+                string[] sv = kv.TryGetValue("srv." + a.Id, out string x) ? x.Split(',') : new string[0];
+                for (int s = 0; s < 4; s++)
+                {
+                    string[] p = s < sv.Length ? sv[s].Split(':') : new string[0];
+                    a.Falta[s] = a.NoPatio && p.Length == 2 ? (int)Math.Max(0, Math.Min(ServicoPassos((Servico)s), L(p[0], 0))) : 0;
+                    a.Fazendo[s] = a.Falta[s] > 0 && L(p[1], 0) != 0 && fazendo++ < EquipePatio;
+                }
+                if (a.NoPatio && a.VooId < 0 && a.FechouEm < 0 && Voos[a.Id] != null && !Voos[a.Id].Partiu) Liga(a);
+                if (!a.NoPatio && a.Hangar == 0 && a.Chega < 0 && Onda >= 0) a.Chega = ChegadaNaOnda(Onda, a.Id);
+            }
+            var lista = new List<Tripulante>();
+            for (int i = 0; ; i++)
+            {
+                int[] t = Ints(kv, "trip." + i);
+                if (t.Length < 4) break;
+                var f = (Funcao)Math.Max(0, Math.Min(T.TripPorVoo.Length - 1, t[0]));
+                int quantos = 0;
+                foreach (Tripulante o in lista) if (o.Funcao == f) quantos++;
+                if (quantos >= T.TripIniciais + T.TripCusto[(int)f].Length) continue;   // acima do teto: sai
+                int av = t[3] >= 0 && t[3] < Avioes.Length && (Avioes[t[3]].NoPatio || Avioes[t[3]].Hangar == 0) ? t[3] : -1;
+                lista.Add(new Tripulante { Id = lista.Count, Indice = quantos, Funcao = f, Trechos = Math.Max(0, Math.Min(T.TrechosAteDescanso, t[1])),
+                    Sala = Math.Max(0, Math.Min(DescansoPassos, t[2])), Aviao = av });
+            }
+            if (lista.Count == 0) return;   // sem tripulacao no save: fica a inicial
+            Tripulacao.Clear();
+            foreach (Tripulante t in lista)
+            {
+                if (t.Aviao >= 0 && ABordo(t.Aviao, t.Funcao) >= T.TripPorVoo[(int)t.Funcao]) t.Aviao = -1;   // vaga ja cheia
+                Tripulacao.Add(t);
+            }
+        }
+
+        /// <summary>Migracao do schema 1 (save da v0.1): os dois avioes no patio, prontos (servicos feitos), desgaste 0, cada um no voo dele
+        /// da onda gravada e com a tripulacao inicial a bordo; 1 pessoa de patio. O voo que estava na fila embarca como antes.</summary>
+        void Migra1()
+        {
+            foreach (Aviao a in Avioes) Migra1(a);
+        }
+
+        void Migra1(Aviao a)
+        {
+            a.NoPatio = true; a.Chega = Steps; a.Hangar = 0; a.Check = 0; a.Desgaste = 0;
+            for (int s = 0; s < 4; s++) { a.Falta[s] = 0; a.Fazendo[s] = false; }
+            Liga(a);
+            if (a.VooId < 0) return;
+            for (int f = 0; f < T.TripPorVoo.Length; f++)
+                for (int n = ABordo(a.Id, (Funcao)f); n < T.TripPorVoo[f]; n++)
+                {
+                    Tripulante t = Tripulacao.Find(x => x.Funcao == (Funcao)f && Livre(x));
+                    if (t != null) t.Aviao = a.Id;
+                }
         }
 
         static void Kv(StringBuilder sb, string k, long v) => sb.Append(k).Append('=').Append(v.ToString(Ci)).Append('\n');
@@ -91,6 +192,7 @@ namespace TA.Core
             if (onda >= 0 && onda == (int)(s.Steps / s.OndaPassos)) s.CarregaOnda(onda, kv);   // onda que nao bate com o relogio: comeca a dele
             foreach (KeyValuePair<string, string> p in kv)
                 if (p.Key.StartsWith("ad.", StringComparison.Ordinal)) s.Anuncios.Load(p.Key.Substring(3), p.Value);
+            s.CarregaFaseC(kv, r.Schema);
             return s;
         }
 
@@ -143,6 +245,15 @@ namespace TA.Core
         static Estacao Est(int i) => (Estacao)Math.Max(0, Math.Min(3, i));
 
         static long Get(Dictionary<string, string> kv, string k, long def) => kv.TryGetValue(k, out string v) ? L(v, def) : def;
+
+        static long[] Longs(Dictionary<string, string> kv, string k)
+        {
+            if (!kv.TryGetValue(k, out string v)) return new long[0];
+            string[] p = v.Split(',');
+            var r = new long[p.Length];
+            for (int i = 0; i < p.Length; i++) r[i] = L(p[i], 0);
+            return r;
+        }
 
         static int[] Ints(Dictionary<string, string> kv, string k)
         {

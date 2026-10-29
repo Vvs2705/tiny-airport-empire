@@ -2,8 +2,9 @@ using System;
 using System.Collections.Generic;
 
 // API do nucleo para a View (TA.Core, C# puro, deterministico, passo fixo de 1/30 s; nunca le o relogio do aparelho).
-// Regras e numeros: docs/CONTRATO_V01.md §3 e §4 (Defs.cs, Tuning). Arquivos: Sim.cs (relogio, onda, filas, equipe), Sim.Estados.cs
-// (estado das estacoes), Sim.Save.cs, Sim.Offline.cs (cofre e dia local), Anuncios.cs (2 rewarded), Bot.cs.
+// Regras e numeros: docs/CONTRATO_V01.md §3 e §4 e docs/CONTRATO_FASE_C.md (Defs.cs, Tuning). Arquivos: Sim.cs (relogio, onda, filas,
+// equipe), Sim.Estados.cs (estado das estacoes), Sim.Patio.cs (ciclo do aviao, patio e manutencao), Sim.Tripulacao.cs, Sim.Save.cs,
+// Sim.Offline.cs (cofre e dia local), Anuncios.cs (2 rewarded), Bot.cs.
 //
 //   Abrir:      var sim = Sim.Load(texto) ("" ou null = jogo novo; Sim.Load(texto, tuning, semente) para teste). sim.SaveRefused => save
 //               de schema futuro ou corrompido: avise e NUNCA grave por cima (sim.Save devolve null). Depois: sim.Agora(nowUnix, fusoSeg)
@@ -11,11 +12,18 @@ using System.Collections.Generic;
 //   Jogar:      a cada quadro sim.Tick(dt) (passos fixos de Sim.Step; dt invalido ou <= 0 nao anda; teto Sim.MaxFrame). Depois leia
 //               sim.Events (as intencoes desde o Tick anterior e o que aconteceu neste Tick). Intencoes: sim.Tap(estacao), sim.Move(funcionario, estacao), sim.Buy(estacao, melhoria),
 //               sim.Hire(). Todas devolvem bool (false = nada mudou) e emitem o Ev correspondente.
+//   Fase C:     sim.HireTripulante(funcao), sim.Escala(voo, tripulante) (troca no quadro: so com o aviao no patio e antes do embarque),
+//               sim.HirePatio(), sim.BuyPatio(servico, melhoria), sim.Checagem(aviao) e sim.Hangar(aviao) (so Cash e tempo). O resto e' o
+//               padrao do nucleo: escala automatica (1o livre na ordem), servicos do patio, inspecao obrigatoria do aviao pendente.
 //   Ler:        sim.Time, sim.Cash, sim.Voos[0..1] (quadro da onda: horario em passos da onda, sim.PassoNaOnda), sim.Stations[e]
 //               (fila, atendendo, Estado/Folga/VooEmRisco), sim.Staff (Em, Andando), sim.Presentes(e), sim.Custo(e, m),
 //               sim.CustoContratar(), sim.Marco, sim.Tarifa, sim.Album, sim.BoostLeft, sim.Anuncios (Pode/Oferta/Pagar).
+//               Fase C: sim.Avioes[f] (o aviao do voo f: Desgaste, NoPatio, Falta/Fazendo por Servico, Check/Inspecao, Hangar, VooId),
+//               sim.Pronto(aviao) (o embarque pode abrir), sim.Tripulacao (Nome, Funcao, Trechos, Aviao; sim.Livre, sim.DescansoFalta),
+//               sim.EquipePatio, sim.ServicoPassos(s), sim.Veiculos(s), sim.MecanicoLivre, sim.CustoTripulante(f), sim.CustoPatio(),
+//               sim.CustoPatio(s, m), sim.TetoTripulacao. Ev.VooPartiu = portao fechou; Ev.Decolou = o aviao saiu (patio terminado).
 //   Gravar:     texto = sim.Save(versaoDoJogo, nowUnix): payload chave=valor dentro do SaveEnvelope (SHA-256 + schema). Grava filas e o
-//               relogio do quadro: reabrir retoma a onda do ponto gravado.
+//               relogio do quadro: reabrir retoma a onda do ponto gravado. Schema 2; o save da v0.1 (schema 1) migra no Load.
 //
 // Nomes acima sao estaveis (so crescem). Mudou a API: atualize este cabecalho e o docs/MAPA_CODIGO.md no mesmo PR.
 
@@ -28,8 +36,9 @@ namespace TA.Core
         public const int Hz = 30;
         /// <summary>Teto do dt de um quadro (s): uma travada longa nao vira um salto de minutos no relogio do quadro de partidas.</summary>
         public const float MaxFrame = 0.25f;
-        /// <summary>Versao do formato do save (SaveEnvelope). Sobe a cada mudanca de formato; save de schema maior e' recusado.</summary>
-        public const int Schema = 1;
+        /// <summary>Versao do formato do save (SaveEnvelope). Sobe a cada mudanca de formato; save de schema maior e' recusado; menor migra
+        /// no Load (2 = Fase C: avioes, tripulacao e patio; o 1 e' a v0.1).</summary>
+        public const int Schema = 2;
         public const int MaxFuncionarios = 3;
 
         /// <summary>Passos fixos ja simulados (o relogio do quadro; vai no save; nao anda com o jogo fechado).</summary>
@@ -76,6 +85,10 @@ namespace TA.Core
             for (int i = 0; i < Stations.Length; i++) Stations[i] = new Station { Tipo = (Estacao)i, Postos = Math.Max(1, T.PostosBase[i]) };
             Anuncios = new Anuncios(this);
             for (int i = 0; i < Math.Min(MaxFuncionarios, T.FuncionariosIniciais); i++) Staff.Add(new Funcionario { Id = i, Em = Lugar(), De = Lugar() });
+            Avioes = new[] { new Aviao { Id = 0 }, new Aviao { Id = 1 } };
+            EquipePatio = T.PatioIniciais;
+            for (int f = 0; f < T.TripPorVoo.Length; f++)
+                for (int i = 0; i < T.TripIniciais; i++) Tripulacao.Add(NovoTripulante((Funcao)f));
         }
 
         /// <summary>Anda o relogio. Events passa a ter as intencoes feitas desde o Tick anterior (toque, mover, comprar, cofre, anuncio) e o
@@ -105,16 +118,25 @@ namespace TA.Core
         {
             int w = (int)(Steps / OndaPassos), loc = PassoNaOnda;
             if (w != Onda) NovaOnda(w);
+            Sala();
+            Patio();
             foreach (Voo v in Voos)
             {
                 if (v.Partiu) continue;
                 while (v.Criados < v.Total && Chegada(v, v.Criados) <= loc) Entra(v, v.Criados++);
-                if (!v.Embarque && loc >= v.AbrePasso) { v.Embarque = true; Emit(Ev.EmbarqueAberto, v.Id); }
+                if (!v.Embarque && loc >= v.AbrePasso)
+                {
+                    // Fase C: o embarque espera o aviao liberado (patio, tripulacao e manutencao: Sim.Patio.cs)
+                    if (loc == v.AbrePasso) ContaAtrasoPatio(v);
+                    Aviao a = Avioes[v.Indice];
+                    if (a.VooId == v.Id && Pronto(a)) { v.Embarque = true; Emit(Ev.EmbarqueAberto, v.Id); }
+                }
             }
             foreach (Funcionario f in Staff)
                 if (f.Andando > 0 && --f.Andando == 0) Emit(Ev.Chegou, f.Id, (int)f.Em);
             foreach (Station s in Stations) Atende(s, loc);
             foreach (Voo v in Voos) if (!v.Partiu && loc >= v.FechaPasso) Fecha(v);
+            Decolagens();
             if (BoostLeft > 0) BoostLeft--;
             if (Steps % (Hz / 2) == 0) AtualizaEstados(true);
             if (Steps % (10 * Hz) == 0) foreach (Station s in Stations) Emit(Ev.Fila, (int)s.Tipo, s.Fila.Count, (int)s.Estado);
@@ -132,6 +154,7 @@ namespace TA.Core
                 Voos[f] = NovoVoo(w, f);
                 Emit(Ev.VooCriado, Voos[f].Id, Voos[f].Total, Voos[f].FechaPasso);
             }
+            PatioNaOnda(w);
         }
 
         Voo NovoVoo(int w, int f)
@@ -277,9 +300,11 @@ namespace TA.Core
         }
 
         /// <summary>Portao fecha na hora: quem nao embarcou perde o voo e sai. Custa so a receita dos assentos vazios (invariante da Origem
-        /// §50): nenhum Cash sai daqui.</summary>
+        /// §50): nenhum Cash sai daqui. Bonus de pontualidade = todos a bordo e o patio pronto (decola na hora). O aviao decola em
+        /// Sim.Decolagens quando o patio termina.</summary>
         void Fecha(Voo v)
         {
+            FechaAviao(v);
             foreach (Station s in Stations)
             {
                 s.Fila.RemoveAll(p => p.Onda == v.Onda && p.Voo == v.Indice);
@@ -288,7 +313,7 @@ namespace TA.Core
             v.Partiu = true;
             v.Criados = v.Total;
             TotalPerdidos += v.Perdidos;
-            if (v.Perdidos == 0 && v.Total > 0)
+            if (v.Perdidos == 0 && v.Total > 0 && NoHorario(v))
                 Emit(Ev.Bonus, v.Id, (int)Ganha((long)Math.Round(v.Receita * (double)T.Bonus)));
             Emit(Ev.VooPartiu, v.Id, v.Embarcados, v.Total);
             if (v.Perdidos > 0) Emit(Ev.VooPerdido, v.Id, v.Perdidos, v.Total);

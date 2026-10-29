@@ -13,6 +13,8 @@ namespace TA.Core
     ///   content=X    versao do jogo que gravou (diagnostico)
     ///   at=unix      writtenAt
     /// Copia do Forge Street (fs:Scripts/Core/SaveEnvelope.cs). O Sim.Load ignora chave desconhecida. Sem cabecalho = Legacy.
+    /// Migracao: schema menor que o do build sai Ok com Result.Schema = o de quem gravou, e o Sim.Load migra pelas chaves que faltam
+    /// (schema 1 -> 2: Sim.Migra1, os sistemas da Fase C no padrao). Cada schema novo traz o teste de migracao do anterior (GDD §14.2).
     /// Soma errada nunca vira estado inicial calado: Corrupt sai sem payload e quem chama decide (.bak, espelho, quarentena).
     /// </summary>
     public static class SaveEnvelope

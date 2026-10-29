@@ -8,11 +8,15 @@ namespace TA.Core
     /// </summary>
     public struct BotProfile
     {
-        public string Name; public float Decide; public bool Move;
+        /// <summary>Planeja = escala, checagem e hangar (CONTRATO_FASE_C §8); sem ele, tudo fica no padrao do nucleo.</summary>
+        public string Name; public float Decide; public bool Move, Planeja;
 
-        public static readonly BotProfile Bom = new BotProfile { Name = "Bom", Decide = 1f, Move = true };
-        public static readonly BotProfile Lento = new BotProfile { Name = "Lento", Decide = 2.5f, Move = true };
-        public static readonly BotProfile Parado = new BotProfile { Name = "Parado", Decide = 1f, Move = false };
+        public static readonly BotProfile Bom = new BotProfile { Name = "Bom", Decide = 1f, Move = true, Planeja = true };
+        public static readonly BotProfile Lento = new BotProfile { Name = "Lento", Decide = 2.5f, Move = true, Planeja = true };
+        public static readonly BotProfile Parado = new BotProfile { Name = "Parado", Decide = 1f, Move = false, Planeja = true };
+        /// <summary>Portao de design do GDD §5.13: o Bom que planeja contra o Bom que deixa tudo no automatico.</summary>
+        public static readonly BotProfile Planejador = new BotProfile { Name = "Planejador", Decide = 1f, Move = true, Planeja = true };
+        public static readonly BotProfile Automatico = new BotProfile { Name = "Automatico", Decide = 1f, Move = true, Planeja = false };
         public static readonly BotProfile[] All = { Bom, Lento, Parado };
     }
 
@@ -21,13 +25,15 @@ namespace TA.Core
     /// 1) se uma estacao esta critica e outra tem folga (normal), move o funcionario da estacao com mais folga para a critica, se la houver
     ///    posto livre para ele (mover para estacao sem posto livre nao ajuda: ele ficaria parado);
     /// 2) senao, toca a estacao sem funcionario que tem fila (a de menor folga);
-    /// 3) e compra a contratacao ou o upgrade mais barato que couber (upgrade da loja so com a loja aberta: loja fechada nao vende).
-    /// Nao e' IA de jogo: e' um jogador previsivel para medir o TA-1 e o TA-2 (BalanceTests, -autoplay).
+    /// 3) e compra a contratacao ou o upgrade mais barato que couber (upgrade da loja so com a loja aberta: loja fechada nao vende), e a
+    ///    proxima pessoa de patio depois que o patio atrasou um embarque (CONTRATO_FASE_C §8).
+    /// Com Planeja, tambem (Planeja): escala o tripulante mais descansado, checa o aviao quando cabe antes do embarque e manda o pendente
+    /// ao hangar no lugar da inspecao. Nao e' IA de jogo: e' um jogador previsivel para medir o TA-1, o TA-2 e o portao do §5.13.
     /// </summary>
     public sealed class Bot
     {
         public BotProfile P;
-        public int Moves, Taps, Buys;
+        public int Moves, Taps, Buys, Trocas, Checagens, Hangares;
         float _t;
 
         public Bot(BotProfile p) { P = p; }
@@ -47,6 +53,40 @@ namespace TA.Core
             _t = Math.Min(_t - P.Decide, P.Decide);   // le o estado das estacoes como a tela mostra (atualizado a cada 0,5 s)
             if (!(P.Move && Mover(s)) && Tocar(s)) Taps++;
             if (Comprar(s)) Buys++;
+            if (P.Planeja) Planeja(s);
+        }
+
+        /// <summary>
+        /// Tripulacao: em cada voo no patio antes do embarque, a bordo fica quem tem menos trechos (descansado = 0); no empate, quem acabou de
+        /// voltar (menos tempo na sala), para quem esta descansando terminar o descanso. Manutencao: pendente vai ao hangar (zera, em vez da
+        /// inspecao que tira so metade e segura o embarque); senao, checagem rapida se o desgaste passou de CheckTira e ela termina antes de o
+        /// embarque abrir.
+        /// </summary>
+        void Planeja(Sim s)
+        {
+            foreach (Aviao a in s.Avioes)
+            {
+                Voo v = s.VooDo(a);
+                if (!a.NoPatio || v == null || v.Embarque || a.FechouEm >= 0) continue;
+                if (a.Pendente) { if (s.Hangar(a.Id)) Hangares++; continue; }
+                if (a.Desgaste >= s.T.CheckTira && (v.AbrePasso - s.PassoNaOnda) * Sim.Step >= s.T.CheckSeg && s.Checagem(a.Id)) Checagens++;
+                foreach (Tripulante bordo in s.Tripulacao)
+                {
+                    if (bordo.Aviao != a.Id) continue;
+                    Tripulante melhor = bordo;
+                    foreach (Tripulante t in s.Tripulacao)
+                        if (t.Funcao == bordo.Funcao && s.Livre(t) && Antes(s, t, melhor)) melhor = t;
+                    if (melhor != bordo && s.Escala(v.Id, melhor.Id)) { Trocas++; break; }   // a lista mudou: o resto no proximo segundo
+                }
+            }
+        }
+
+        static int Efetivos(Sim s, Tripulante t) => t.Aviao < 0 && s.DescansoFalta(t) <= 0 ? 0 : t.Trechos;
+
+        static bool Antes(Sim s, Tripulante a, Tripulante b)
+        {
+            int ea = Efetivos(s, a), eb = Efetivos(s, b);
+            return ea != eb ? ea < eb : a.Sala < b.Sala;
         }
 
         bool Mover(Sim s)
@@ -75,7 +115,9 @@ namespace TA.Core
             return alvo != null && s.Tap(alvo.Tipo);
         }
 
-        static bool Comprar(Sim s)
+        int _patioVisto;
+
+        bool Comprar(Sim s)
         {
             long best = s.CustoContratar(); Estacao be = 0; Melhoria bm = 0; bool hire = best >= 0;
             foreach (Station st in s.Stations)
@@ -86,6 +128,12 @@ namespace TA.Core
                     long c = s.Custo(st.Tipo, m);
                     if (c >= 0 && (best < 0 || c < best)) { best = c; be = st.Tipo; bm = m; hire = false; }
                 }
+            }
+            if (s.AtrasosPatio > _patioVisto && s.CustoPatio() >= 0 && (best < 0 || s.CustoPatio() <= best))
+            {
+                if (!s.HirePatio()) return false;
+                _patioVisto = s.AtrasosPatio;
+                return true;
             }
             if (best < 0 || s.Cash < best) return false;
             return hire ? s.Hire() : s.Buy(be, bm);
@@ -98,6 +146,8 @@ namespace TA.Core
             /// <summary>Embarque medio por voo (embarcados/total, media dos voos), receita total (Cash ganho, sem gastos) e o s de jogo em que
             /// cada marco do terminal chegou (-1 = nao chegou).</summary>
             public double Embarque; public long Receita; public float[] MarcoEm; public int Moves, Taps, Voos;
+            /// <summary>Fase C: voos sem tripulacao na hora (aviso), inspecoes obrigatorias, idas ao hangar, checagens rapidas e trocas de escala.</summary>
+            public int SemTrip, Inspecoes, Hangares, Checagens, Trocas;
         }
 
         /// <summary>Joga `ondas` ondas inteiras com o perfil `p` e a semente `seed`, sem render. `reabre` = fecha e reabre o jogo (Save ->
@@ -120,6 +170,10 @@ namespace TA.Core
                         case Ev.Embarcou: case Ev.Venda: r.Receita += e.B; break;
                         case Ev.Bonus: r.Receita += e.B; break;
                         case Ev.Marco: if (e.A >= 1 && e.A <= 3 && r.MarcoEm[e.A - 1] < 0) r.MarcoEm[e.A - 1] = s.Time; break;
+                        case Ev.SemTripulacao: r.SemTrip++; break;
+                        case Ev.ChecagemIniciada: if (e.C == 1) r.Inspecoes++; else r.Checagens++; break;
+                        case Ev.HangarIniciado: r.Hangares++; break;
+                        case Ev.Escalado: if (e.C == 1) r.Trocas++; break;
                     }
             }
             r.Embarque = r.Voos > 0 ? soma / r.Voos : 0;
