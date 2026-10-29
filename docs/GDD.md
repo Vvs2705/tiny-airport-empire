@@ -1657,7 +1657,7 @@ As de D-01 a D-14 travam o início ou uma fase; as outras podem esperar.
 | D-17 | Autorização final de submissão/publicação em produção | — | envio |
 | D-18 | Rota de arte híbrida: mundo e veículos em malha 3D em tempo real, pessoas em sprite (§0.4, §10.2) | aprovar: é o que as referências fazem, e mantém a regra do estúdio para personagens. O K3 ampliado, medido no aparelho, confirma | View da v0.1, que já está sendo feita assim |
 | D-19 | Tripulação, pátio e manutenção com regra no lançamento (§5.11, §5.12) | sim, na Fase C, com o portão de design do §5.13 | Fase C |
-| D-20 | Lote 3 do Tripo: comissária e comissário | aprovar hoje: ≈ 160 créditos, e os créditos vencem hoje (D-14) | arte da tripulação |
+| D-20 | Lote 3 do Tripo: comissária e comissário | aprovar hoje: ≈ 160 créditos, e os créditos vencem hoje (D-14). **Aprovada pelo Vinicius em 2026-10-29: "Aprovo o Lote 3"** | arte da tripulação |
 
 ---
 
@@ -1795,6 +1795,7 @@ Testes: os invariantes do §5.11 e do §5.12 entram como testes negativos no con
 | 6 | §10.2, §23.2 | Lote 3 proposto (comissária e comissário) e decisões D-18 a D-20 | o restante do elenco já está no `docs/ASSETS.md` |
 | 7 | §17.2 | Fase C ganha tripulação, pátio, manutenção e mapa | — |
 | 8 | COMPETITIVO §g, TA-8 | benchmark dos prints e do trailer; novo diferencial | régua de qualidade e onde vencemos |
+| 9 | §23.2 (D-20) | Lote 3 aprovado pelo Vinicius (29/10/2026: "Aprovo o Lote 3"). Impacto: comissária e comissário gerados hoje pela sessão de arte, com registro em `docs/ASSETS.md` e `docs/PROVENIENCIA.md` | os créditos do Tripo vencem hoje |
 
 ---
 
