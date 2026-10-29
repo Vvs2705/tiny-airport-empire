@@ -1,3 +1,4 @@
+using System.Linq;
 using NUnit.Framework;
 using TA.Core;
 
@@ -82,6 +83,67 @@ namespace TA.Tests
             Assert.AreEqual(-1, s.Onda);
             s.Tick(Sim.Step);
             Assert.AreEqual((1, 0), (s.Onda, s.Voos[0].Embarcados));
+        }
+
+        /// <summary>Save real gravado pela v0.1 (schema 1, main de 2026-10-29, semente 7, onda 2 aos 90 s): voo 1 embarcando, 10 no portao
+        /// esperando o voo 2, uma funcionaria andando.</summary>
+        const string V01 = "sha256=fe9ea6d207aa239e57f9c156d01e4ff1422542e417be16f38d3399a94943e815\nschema=1\ncontent=0.1.0\nat=1700000000\n" +
+            "t=8100\ncash=42\nseed=7\nonda=1\nemb=34\nperd=0\nalbum=0\nbst=0\nema=1.0283608811182714\nsaved=1700000000\nclaim=0\nclaimcash=0\ndia=0\n" +
+            "est.0=2,0\nat.0=1512:70\nest.1=2,0\nat.1=1510:55;1511:115\nest.2=0,0\nest.3=1,0\n" +
+            "fila.3=1500;1501;1502;1503;1504;1505;1506;1507;1508;1509\nfunc.0=3,0,75\nvoo.0=14,14,112,1,0\nvoo.1=13,0,0,0,0\n";
+
+        [Test]
+        public void MigracaoDaV01_AbreComTudoEOVooDaFilaEmbarca()
+        {
+            Sim s = Sim.Load(V01);
+            Assert.IsFalse(s.SaveRefused, "schema 1 migra, nao e' recusado");
+            Assert.AreEqual((42L, 8100L, 1, 34L, 1, Estacao.Portao, 75), (s.Cash, s.Steps, s.Onda, s.TotalEmbarcados, s.Staff.Count, s.Staff[0].Em, s.Staff[0].Andando));
+            Assert.AreEqual((10, 1, 2, 14, 13), (s.St(Estacao.Portao).Fila.Count, s.St(Estacao.CheckIn).Atendendo.Count, s.St(Estacao.Seguranca).Atendendo.Count,
+                s.Voos[0].Embarcados, s.Voos[1].Criados));
+            foreach (Aviao a in s.Avioes)
+                Assert.AreEqual((true, true, 0, s.Voos[a.Id].Id), (a.NoPatio, a.PatioPronto, a.Desgaste, a.VooId), "aviao " + a.Id + ": no patio, pronto, no voo dele");
+            Assert.AreEqual((1, 1, 1, 1), (s.ABordo(0, Funcao.Piloto), s.ABordo(0, Funcao.Comissario), s.ABordo(1, Funcao.Piloto), s.ABordo(1, Funcao.Comissario)));
+            Assert.AreEqual(s.T.PatioIniciais, s.EquipePatio);
+            string a2 = s.Save("t", T);
+            StringAssert.Contains("\nschema=" + Sim.Schema + "\n", a2);
+            Assert.AreEqual(a2, Sim.Load(a2).Save("t", T), "depois de migrar, a ida e volta e' estavel");
+            var ev = RegrasTests.Coleta(s, 30f);   // aos 120 s o voo 2 (o dos 10 no portao) abre o embarque, como na v0.1
+            Assert.AreEqual(1, ev.Count(e => e.Tipo == Ev.EmbarqueAberto && e.A == 3));
+            Assert.Greater(ev.Count(e => e.Tipo == Ev.Embarcou && e.A / 500 % 2 == 1), 0);
+        }
+
+        /// <summary>Fechar e reabrir no meio de cada onda, com hangar, checagem, inspecao e tripulacao em jogo: 20 ondas iguais a sem fechar.</summary>
+        [Test]
+        public void RetomadaComFaseC_ContinuaIgual()
+        {
+            foreach (Tuning t in new[] { null, new Tuning { RegraTripulacao = true, DescansoSeg = 240f } })
+                foreach (BotProfile p in new[] { BotProfile.Planejador, BotProfile.Automatico })
+                {
+                    Bot.Resultado a = Bot.Medir(p, 3, 20, t), b = Bot.Medir(p, 3, 20, t, true);
+                    Assert.AreEqual((a.Receita, a.Embarque, a.Hangares, a.Inspecoes, a.Checagens, a.SemTrip), (b.Receita, b.Embarque, b.Hangares, b.Inspecoes, b.Checagens, b.SemTrip), p.Name);
+                    Assert.Greater(a.Hangares + a.Inspecoes, 0, "a manutencao entrou em jogo");
+                }
+        }
+
+        [Test]
+        public void LixoDaFaseC_ViraPadraoLimitado()
+        {
+            string payload = "t=900\nonda=0\nvoo.0=3,0,0,0,0\npatio=99\npatioatraso=-4\npv.0=9,9\npv.9=1,1\n" +
+                             "aviao.0=500,-7,1,99,999999,999999,1,1,-3,1\nsrv.0=99999:1,-5:1,x:1\naviao.1=-9,99999999,0,1,0,0,0,0,999999,0\n" +
+                             "trip.0=0,99,999999,0\ntrip.1=7,-3,-3,1\ntrip.2=0,1,1,0\ntrip.3=0,0,0,5\ntrip.4=0,0,0,-1\ntrip.5=0,0,0,-1\ntrip.6=0,0,0,-1\n";
+            Sim s = Sim.Load(SaveEnvelope.Wrap(payload, "x", 1));
+            Assert.IsFalse(s.SaveRefused);
+            Assert.AreEqual((s.T.PatioIniciais + s.T.PatioContratacao.Length, 0, s.T.PatioVelNiveis, s.T.PatioCapNiveis), (s.EquipePatio, s.AtrasosPatio, s.PatioVel[0], s.PatioCap[0]));
+            Aviao a0 = s.Avioes[0], a1 = s.Avioes[1];
+            Assert.AreEqual((100, true, 0, -1L), (a0.Desgaste, a0.NoPatio, a0.VooId, a0.FechouEm), "voo 99 nao e' desta onda: pega o voo 1 dela");
+            Assert.AreEqual(s.ServicoPassos(Servico.Desembarque), a0.Falta[0]);
+            Assert.AreEqual((0, 0), (a0.Falta[1], a0.Falta[2]));
+            Assert.AreEqual((0, s.T.HangarSeg * Sim.Hz, false, -1), (a1.Desgaste, (float)a1.Hangar, a1.NoPatio, a1.VooId));
+            Assert.AreEqual(s.T.TripIniciais + s.T.TripCusto[0].Length, s.Tripulacao.Count(x => x.Funcao == Funcao.Piloto), "pilotos no teto");
+            Assert.AreEqual((s.T.TrechosAteDescanso, (int)System.Math.Round(s.T.DescansoSeg * Sim.Hz), 0), (s.Tripulacao[0].Trechos, s.Tripulacao[0].Sala, s.Tripulacao[0].Aviao));
+            Assert.AreEqual((Funcao.Comissario, 0, 0, -1), (s.Tripulacao[1].Funcao, s.Tripulacao[1].Trechos, s.Tripulacao[1].Sala, s.Tripulacao[1].Aviao), "comissario a bordo do aviao no hangar: sala");
+            Assert.AreEqual((-1, -1), (s.Tripulacao[2].Aviao, s.Tripulacao[3].Aviao), "vaga cheia e aviao que nao existe: sala");
+            s.Tick(1f);   // e o jogo anda
         }
 
         [Test]

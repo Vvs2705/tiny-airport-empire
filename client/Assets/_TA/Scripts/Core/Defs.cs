@@ -34,6 +34,72 @@ namespace TA.Core
         Recompensa,         // A = anuncio, B = valor                                            -> reward_granted
         Fila,               // A = estacao, B = tamanho da fila, C = estado (a cada 10 s e na troca de estado) -> queue_length_sampled
         Bonus,              // A = voo, B = Cash do bonus de pontualidade
+        // Fase C (CONTRATO_FASE_C §5): tripulacao, patio e manutencao
+        TripulanteContratado, // A = tripulante, B = custo, C = funcao                           -> crew_hired
+        Escalado,           // A = tripulante, B = voo, C = 1 se manual (Escala)                 -> crew_assigned
+        SemTripulacao,      // A = voo, B = funcao que falta (1x por voo)                         -> crew_missing
+        Descanso,           // A = tripulante, B = s de descanso que faltam                       -> crew_rest_started
+        Pousou,             // A = aviao, B = voo que vai fazer (-1 = nenhum aberto)              -> aircraft_landed
+        ServicoFeito,       // A = aviao, B = servico                                             -> ground_service_done
+        TurnaroundFeito,    // A = aviao, B = voo, C = 1 se terminou depois do fechamento        -> turnaround_done
+        Decolou,            // A = aviao, B = voo, C = atraso (s) sobre o fechamento do portao   -> flight_takeoff
+        PatioContratado,    // A = pessoas de patio, B = custo                                    -> ground_staff_hired
+        PatioMelhorou,      // A = servico, B = melhoria, C = nivel novo                          -> ground_vehicle_upgraded
+        ManutencaoAviso,    // A = aviao, B = desgaste                                            -> maintenance_warning
+        ManutencaoPendente, // A = aviao, B = desgaste                                            -> maintenance_due
+        ChecagemIniciada,   // A = aviao, B = custo, C = 1 se inspecao obrigatoria                -> maintenance_check_started
+        ChecagemFeita,      // A = aviao, B = desgaste depois                                     -> maintenance_check_done
+        HangarIniciado,     // A = aviao, B = custo                                               -> hangar_started
+        HangarFeito,        // A = aviao                                                          -> hangar_done
+    }
+
+    /// <summary>Funcoes da tripulacao (GDD §5.11). Indice vai no save.</summary>
+    public enum Funcao { Piloto, Comissario }
+
+    /// <summary>Servicos do turnaround, na ordem (GDD §5.12). Indice vai no save.</summary>
+    public enum Servico { Desembarque, Limpeza, Combustivel, Bagagem }
+
+    /// <summary>Piloto ou comissario: fixo e nomeado pela ordem de contratacao dentro da funcao (TA-5: nada sorteado).</summary>
+    public sealed class Tripulante
+    {
+        public static readonly string[][] Nomes =
+        {
+            new[] { "Cmte. Helena", "Cmte. Otavio", "Cmte. Iara", "Cmte. Bruno", "Cmte. Lucia", "Cmte. Davi" },
+            new[] { "Marina", "Caio", "Rute", "Tiago", "Nina", "Joel" },
+        };
+        /// <summary>Id = indice em Sim.Tripulacao (save, diario e Escala); Indice = ordem dentro da funcao (o nome).</summary>
+        public int Id, Indice; public Funcao Funcao;
+        public string Nome => Nomes[(int)Funcao][Indice % Nomes[(int)Funcao].Length];
+        /// <summary>Trechos voados desde o ultimo descanso.</summary>
+        public int Trechos;
+        /// <summary>Passos seguidos na sala da tripulacao (0 a bordo). Tuning.DescansoSeg na sala = descansado.</summary>
+        public int Sala;
+        /// <summary>Aviao em que esta a bordo (-1 = na sala).</summary>
+        public int Aviao = -1;
+    }
+
+    /// <summary>Aviao da frota (CONTRATO_FASE_C §1): o aviao f faz o voo f de cada onda.</summary>
+    public sealed class Aviao
+    {
+        public int Id;
+        /// <summary>0..100 (CONTRATO_FASE_C §4).</summary>
+        public int Desgaste;
+        /// <summary>Passo absoluto em que encosta (ou encostou) no patio (-1 = ainda nao agendado: a 1a onda agenda).</summary>
+        public long Chega = -1;
+        public bool NoPatio;
+        /// <summary>Voo (Id) que este aviao vai fazer (-1 = nenhum) e o passo em que o portao dele fechou com gente a bordo (-1 = nao
+        /// fechou; >= 0 = falta so decolar).</summary>
+        public int VooId = -1; public long FechouEm = -1;
+        /// <summary>Passos que faltam em cada servico do turnaround (0 = feito) e quais estao sendo feitos agora.</summary>
+        public readonly int[] Falta = new int[4]; public readonly bool[] Fazendo = new bool[4];
+        /// <summary>Passos da checagem em andamento (0 = nenhuma), se e' a inspecao obrigatoria, e se ja houve checagem neste turnaround.</summary>
+        public int Check; public bool Inspecao, Checou;
+        /// <summary>Passos que faltam no hangar (0 = fora do hangar).</summary>
+        public int Hangar;
+        /// <summary>Ja avisou falta de tripulacao para o voo atual.</summary>
+        public bool AvisouTrip;
+        public bool Pendente => Desgaste >= 100;
+        public bool PatioPronto { get { foreach (int f in Falta) if (f > 0) return false; return true; } }
     }
 
     public struct Evento
@@ -136,6 +202,29 @@ namespace TA.Core
         public int PaxFixo;
 
         public int Pax(int onda) => PaxFixo > 0 ? PaxFixo : Math.Min(PaxMax, PaxInicial + PaxPorOnda * onda);
+
+        // ---- Fase C (CONTRATO_FASE_C §1-§4, hipoteses) ----
+        /// <summary>Portao de design do GDD §5.13: sistema que nao gerar decisao no bot fica so visual (false = nao segura embarque nem
+        /// decolagem; a View continua mostrando). Tudo false = a regra da v0.1. Tripulacao desligada: rendeu 1,02 sozinha (BALANCE.md D-C2).</summary>
+        public bool RegraTripulacao = false, RegraPatio = true, RegraManutencao = true;
+        /// <summary>Ciclo do aviao (1 por voo da onda): encosta PatioAntes s antes do fechamento; o trecho dura Trecho s.</summary>
+        public float PatioAntes = 100f, Trecho = 80f;
+        /// <summary>Tripulacao por voo (regional), por Funcao; no comeco, por funcao; teto por funcao no marco 0..3; precos pela ordem.</summary>
+        public int[] TripPorVoo = { 1, 1 };
+        public int TripIniciais = 3;
+        public int[] TripTeto = { 3, 4, 5, 6 };
+        public int[][] TripCusto = { new[] { 300, 450, 600 }, new[] { 150, 250, 350 } };
+        public int TrechosAteDescanso = 3; public float DescansoSeg = 180f;
+        /// <summary>s de cada servico no nivel 0, na ordem de Servico.</summary>
+        public float[] ServicoSeg = { 12f, 18f, 20f, 24f };
+        public int PatioIniciais = 1; public int[] PatioContratacao = { 40, 150 };
+        public int PatioVelNiveis = 3, PatioVelCusto = 30; public float PatioVelCresce = 1.6f;
+        public int PatioCapNiveis = 1, PatioCapCusto = 120;
+        public int DesgastePorTrecho = 15, DesgasteAviso = 80;
+        public float CheckSeg = 8f; public int CheckTira = 10, CheckCusto = 10;
+        /// <summary>A inspecao obrigatoria segura o aviao o turnaround inteiro (110 s &gt; os 100 s de patio): o voo dele nao embarca.</summary>
+        public float InspecaoSeg = 110f; public int InspecaoTira = 50;
+        public float HangarSeg = 180f; public int HangarCusto = 100;
     }
 
     /// <summary>Historias do TA-3 (GDD §5.9). A v0.1 tem 1. Id = indice (vai no album do save): so cresce no fim.</summary>
