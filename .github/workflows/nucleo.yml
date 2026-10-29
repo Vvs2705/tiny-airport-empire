@@ -1,0 +1,14 @@
+# Núcleo do Tiny Airport (TA.Core) e testes EditMode puros, sem Unity: o mesmo dotnet test do client/tools/verify.sh quick.
+name: nucleo
+on:
+  push:
+  pull_request:
+jobs:
+  coretests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - run: dotnet test client/tools/coretests -nologo
