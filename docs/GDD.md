@@ -1,7 +1,7 @@
 # LITTLE TERMINAL
 ## GDD Mestre de Produção, Tecnologia, Segurança e Publicação
 
-**Versão:** 1.1, revisão de 29/10/2026 sobre a 1.0 de 26/10/2026. O que mudou e por quê está no §26.
+**Versão:** 1.2 (padrão de mercado: tripulação, pátio, manutenção e mundo vivo), revisão de 29/10/2026 sobre a 1.1 e a 1.0 de 26/10/2026. O que mudou e por quê está no §26.
 **Projeto:** Tiny Airport Empire (repositório `Vvs2705/tiny-airport-empire`).
 **GDD de origem:** [`GDD_ORIGEM.md`](GDD_ORIGEM.md), que reúne o produto, a revisão competitiva de 09/10/2026 e as lições do Dungeon Courier de 16/10/2026. Neste documento ele aparece citado como "Origem §N".
 **Nome comercial recomendado:** Little Terminal, provisório até a busca de marca no INPI, USPTO e EUIPO e a busca exata nas duas lojas (Origem §52).
@@ -96,6 +96,7 @@ Mesmo com o código pronto, o envio Android só é possível depois de a Play Co
 | Testes | unidade + PlayMode | `coretests` (dotnet), bot `-autoplay`, EditMode, `verify.sh` | Mesmos casos, rodando no portão do estúdio (§16.0) |
 | Créditos do Tripo | "usar os créditos existentes" | só com aval explícito do Vinicius, por lote | **Aval por lote,** com saldo, prompt e SHA em `docs/PROVENIENCIA.md` (§10.2) |
 | Plano de datas | 26/10 a 29/10 | — | substituído por fases com portões (§17.3) |
+| Rota de arte (v1.2) | — | personagem e objeto pelo pipeline do DC, em sprite pré-renderizado (estúdio) | **Híbrida, a confirmar (D-18):** prédios, aviões e veículos entram como malha low-poly em tempo real, porque são corpos rígidos, sem skinning; é como fazem as referências do COMPETITIVO §g. Pessoas seguem em sprite pré-renderizado, desenhado num quad no mundo 3D, com o uniforme numa máscara separada (§10.2). Motivo: avião taxiando e veículo fazendo curva pediriam dezenas de direções em sprite |
 
 ---
 
@@ -248,6 +249,9 @@ Este é o conteúdo planejado para a versão de lançamento. Não é uma lista d
   8. Despacho/controle de pista.
 - 6 perfis de funcionários, com especializações claras.
 - Equipe limitada e reposicionável entre estações.
+- Tripulação contratada e escalada: pilotos e comissários (§5.11).
+- Operação de pátio visível em cada voo e manutenção das aeronaves, com desgaste, checagem no pátio e revisão no hangar (§5.12).
+- Mundo vivo no nível dos líderes do gênero: aviões pousando, taxiando e decolando, veículos de pátio, gente andando, terminal em corte e mapa que cresce por terrenos (§5.13; COMPETITIVO §g).
 - Quadro de partidas com horários e estados.
 - Fluxo de passageiros, filas, embarque, partida e perda de receita por voo perdido.
 - 4 incidentes operacionais com aviso prévio e solução compreensível.
@@ -277,13 +281,15 @@ O processo do estúdio exige um contrato da v0.1 antes do código. A v0.1 é o g
 | Aeroportos | Vale Verde | 3 |
 | Estações | check-in, segurança, portão, loja | 8 |
 | Quadro de partidas | 2 voos por onda | completo |
-| Equipe | 3 funcionários móveis | 6 perfis |
+| Equipe | 3 funcionários móveis | 6 perfis + tripulação (§5.11) |
+| Pátio e manutenção | avião no portão e 1–2 veículos andando, só visual, sem regra | turnaround e manutenção com regra (§5.12) |
+| Mundo | 3D em greybox (primitivas), câmera isométrica com pan e zoom, gente andando, uniforme do setor | §5.13 completo |
 | Moeda | Cash | Cash (+ Gems se D-05/D-07 aprovarem) |
 | Offline | 2 h, 2× opcional por anúncio | igual |
 | Rewarded | 2× offline, 2× receita por 5 min | igual (§7.2) |
 | Compras | nenhuma | se D-05 aprovar |
 | Conteúdo | tutorial passos 1–9, 1 história | completo |
-| Arte | greybox procedural; depois Lote 1 | Lotes 1 e 2 |
+| Arte | greybox; depois Lote 1 (rota híbrida, D-18) | Lotes 1 e 2 (+ Lote 3 se D-20) |
 | Portão de saída | TA-1: ≥ 85% de embarque com o bot bom e ≥ 60% com o lento; TA-2: mover rende ≥ 10%; K2 medido com gente (Origem §51) | §25 |
 
 Se o TA-2 não render ≥ 10% no bot, o diferencial é falso, e o design volta para revisão antes de qualquer arte.
@@ -492,6 +498,55 @@ Não usar sofrimento real de forma manipuladora para incentivar compras ou anún
 - Conclusão da campanha principal e desbloqueio de metas de maestria.
 
 Cada aeroporto tem mapa e paleta próprios, mas reutiliza módulos, materiais e animações para manter consistência e desempenho. Os três nomes também passam pela busca de marca do D-13.
+
+## 5.11. Tripulação: pilotos e comissários
+
+Um voo só decola com a tripulação a bordo. A tripulação é um segundo quadro de pessoas, separado da equipe do terminal (§5.5), e é ela que deixa o jogo mais perto de um aeroporto real. Todos os números são hipótese e saem do bot no contrato da Fase C.
+
+- **Contratação:** pilotos e comissários entram por Cash. São fixos e nomeados, com retrato, sem sorteio nem pacote pago (TA-5). O teto de cada um sobe com os marcos do terminal.
+- **Escala:** cada voo pede 1 piloto e de 1 a 4 comissários, conforme a aeronave (hipótese: regional 1+1, narrow 2+2, wide 2+4). Por padrão a escala é automática e pega a primeira tripulação livre. O jogador pode trocá-la no quadro de partidas, e a decisão é essa: quem descansa e quem voa no rush.
+- **Descanso:** depois de N trechos, o tripulante descansa M minutos de jogo na sala da tripulação. Se não houver ninguém livre, o voo atrasa, com aviso antecipado como no §5.4. Se o portão fechar, o voo perde só a sua receita.
+- **Na tela:** a tripulação sai da sala, atravessa o terminal com a mala de bordo e entra no avião pela ponte ou pela escada antes do embarque. No pushback, o piloto acena da cabine.
+- **Papéis técnicos não se trocam:** piloto não vira atendente nem o contrário, por causa da licença. O uniforme é o da função. A troca de uniforme pelo setor (§5.5) vale só para a equipe do terminal.
+- **Invariantes (testes negativos no núcleo):**
+  - falta de tripulação nunca custa mais que a receita do voo;
+  - offline nunca deixa voo sem tripulação nem perde voo;
+  - nenhum tripulante sai de sorteio.
+
+## 5.12. Pátio e manutenção
+
+Entre o pouso e a decolagem, o avião passa pelo atendimento de pátio (turnaround): desembarque, bagagem, limpeza e catering, combustível, embarque e pushback. Cada serviço tem veículo e equipe de pátio (colete refletivo). Em cima do avião aparecem o ícone do serviço que falta e um anel de progresso.
+
+- **Regra:** o voo decola quando os passageiros embarcaram **e** o pátio terminou. O pátio vira o segundo gargalo. Ele se resolve com equipe de pátio, veículos e upgrades (mais um caminhão de combustível, carrinho de bagagem mais rápido).
+- **Desgaste:** cada voo soma desgaste à aeronave. A partir de 80% aparece um aviso amarelo. Em 100% a manutenção fica pendente, e o avião não decola até a checagem.
+- **Duas saídas:**
+  - checagem rápida no pátio: o mecânico tira parte do desgaste em poucos segundos, durante o turnaround;
+  - revisão no hangar: zera o desgaste, mas tira o avião de uma ou duas ondas.
+
+  A decisão é quando mandar o avião ao hangar, junto com o quadro de partidas (TA-1).
+- **Justiça:**
+  - reparo e revisão custam só Cash e tempo, nunca Gems nem anúncio (§5.8);
+  - nenhum avião é destruído nem perdido;
+  - manutenção pendente atrasa e, no pior caso, perde só a receita daquele voo;
+  - o desgaste não anda com o jogo fechado.
+- **Falha de equipamento (§5.8):** passa a usar o mesmo mecânico, que sai da oficina e anda até a estação.
+
+## 5.13. Mundo vivo e mapa que cresce
+
+O padrão visual é o dos líderes do gênero (COMPETITIVO §g): tudo se mexe, e cada sistema aparece no mapa, não só num menu.
+
+- **Ciclo do avião visível:** aproximação → pouso → taxi → portão → turnaround (§5.12) → pushback → taxi → decolagem, em trajetos fixos (spline), sem física.
+- **Terminal em corte:** o teto some na área do terminal e mostra as filas entre fitas, os balcões, o raio-x, a loja e o portão, com gente andando, parando na fila e sendo atendida.
+- **Pessoas:**
+  - passageiros com a mala na cor do voo;
+  - equipe do terminal com o uniforme do setor (§5.5);
+  - tripulação e técnicos com o uniforme da função;
+  - anel de progresso em cima de quem trabalha e balão de humor no passageiro que espera demais.
+- **Mapa que cresce:** o aeroporto começa pequeno, cercado de terrenos bloqueados. Cada terreno liberado, por Cash ou por marco, abre espaço para estacionamento de aeronaves, hangar, posto de combustível, nova ala do terminal ou segunda pista. Cada upgrade muda o prédio na tela.
+- **Câmera:** ortográfica, em ângulo isométrico fixo, com pan e zoom por gesto. Tocar num prédio abre o painel dele.
+- **Desempenho (K3 ampliado):** p10 ≥ 30 FPS num Android de entrada, com 60 pessoas, 2 aviões em movimento e 6 veículos de pátio na tela.
+
+**Portão de design (a mesma régua do TA-2):** tripulação e manutenção só ganham regra no núcleo se o bot mostrar que elas geram decisão. O bot que escala e manda ao hangar na hora certa precisa render ≥ 1,10 × o bot que deixa tudo no automático, com as mesmas sementes. Se não render, o sistema fica só visual (o avião é atendido e a tripulação embarca, sem regra), e o design volta para revisão (TA-8).
 
 ---
 
@@ -840,6 +895,7 @@ Se houver criação de conta, oferecer processo de exclusão de conta dentro do 
 
 ## 10.1. Direção de arte
 
+- **Padrão de qualidade:** o nível visual e o movimento dos líderes do gênero (COMPETITIVO §g), com identidade própria. Não se copia layout, arte, nome nem UI de outro jogo.
 - Estilo: low-poly acolhedor, formas arredondadas, leitura imediata e cores por função.
 - Câmera: isométrica/ortográfica consistente.
 - Luz: uma direção principal consistente, sombras suaves e contraste suficiente para filas e estações.
@@ -850,7 +906,11 @@ Se houver criação de conta, oferecer processo de exclusão de conta dentro do 
 
 ## 10.2. Pipeline de assets
 
-O pipeline é o do estúdio (Origem, "Arte e animação"): Tripo → Auto Rig/Mixamo → Blender → `render_sprites.py` → sprites isométricos pré-renderizados, sem skinning no aparelho.
+**Rota híbrida (D-18, v1.2):**
+- **Corpos rígidos:** prédios, estações, aviões e veículos saem do Tripo, são decimados no Blender (low-poly, material simples, pivô no chão) e entram no Unity como malha em tempo real. Assim eles se movem em qualquer direção.
+- **Pessoas:** seguem o pipeline do estúdio (Origem, "Arte e animação"): Tripo → Auto Rig/Mixamo → Blender → `render_sprites.py` → sprites pré-renderizados no ângulo da câmera, sem skinning no aparelho. Cada sprite é desenhado num quad no mundo 3D, com o uniforme numa máscara separada, que o jogo tinge com a cor do setor.
+
+Os passos 5 a 7 abaixo valem para as pessoas.
 
 1. Auditar os assets atuais e a lista de lacunas antes de gerar qualquer coisa.
 2. Criar uma folha de estilo com 3–5 assets aprovados como referência.
@@ -874,6 +934,7 @@ Interface pintada (logo, ícones, retratos) sai do gerador de imagens grátis, s
 | 1 (v0.1, Origem) | passageiro, funcionário, avião regional, check-in, raio-x, portão, loja, terminal | ≈ 400 (teto ≈ 530) |
 | 2 (lançamento) | bagagem, alimentação, hangar de manutenção, torre de despacho (4 × 45); narrow-body e wide-body (2 × 45); terminais de Costa Azul e Aurora Global (2 × 45); rebocador, carrinho de bagagem e caminhão de combustível (3 × 45) | ≈ 495 |
 | 2, opcional | 2º corpo de funcionário (macacão do mecânico) | + 65 |
+| 3, proposta (D-20) | comissária e comissário (2 × 75, HD direto + rig; o piloto, o mecânico e a equipe de pátio já estão no `docs/ASSETS.md`) | ≈ 160 |
 
 As 8 variantes de aeronave, os 6 uniformes e as roupas dos passageiros saem por troca de cor no Blender, sem crédito.
 
@@ -900,7 +961,7 @@ As 8 variantes de aeronave, os 6 uniformes e as roupas dos passageiros saem por 
 - Atlas de sprites e compressão apropriada.
 - Evitar texturas gigantes sem necessidade.
 - Evitar sombras dinâmicas caras se sprites pré-renderizados entregarem a mesma leitura.
-- Não usar modelos 3D animados pesados em tempo real se sprites atenderem ao visual e à performance.
+- Malha em tempo real só para corpo rígido (prédio, avião, veículo), com batching e LOD simples. Pessoas em sprite, sem skinning no aparelho (§10.2).
 - Garantir legibilidade em dispositivos de tela pequena e densidade baixa.
 - Medir o PSS no aparelho com 60 passageiros; no DC, as folhas HD levaram o APK de 67,7 para 83 MiB.
 - Assets não utilizados só devem ser removidos após comprovar que não são referenciados; criar backup antes de limpeza em lote.
@@ -1313,6 +1374,8 @@ Bloqueia a submissão:
 
 - Três aeroportos.
 - Rotas, aeronaves e funcionários.
+- Tripulação, pátio e manutenção (§5.11, §5.12), com o portão de design do §5.13.
+- Mapa que cresce por terrenos (§5.13).
 - Campanha de 30 objetivos.
 - Histórias, conquistas e missões.
 - Passe de temporada completo.
@@ -1592,6 +1655,9 @@ As de D-01 a D-14 travam o início ou uma fase; as outras podem esperar.
 | D-15 | Bônus de recuperação de voo por anúncio | fora do lançamento (§7.2) | — |
 | D-16 | Publicação gradual ou imediata após aprovação | gradual (porcentagem pequena primeiro) | Fase E |
 | D-17 | Autorização final de submissão/publicação em produção | — | envio |
+| D-18 | Rota de arte híbrida: mundo e veículos em malha 3D em tempo real, pessoas em sprite (§0.4, §10.2) | aprovar: é o que as referências fazem, e mantém a regra do estúdio para personagens. O K3 ampliado, medido no aparelho, confirma | View da v0.1, que já está sendo feita assim |
+| D-19 | Tripulação, pátio e manutenção com regra no lançamento (§5.11, §5.12) | sim, na Fase C, com o portão de design do §5.13 | Fase C |
+| D-20 | Lote 3 do Tripo: comissária e comissário | aprovar hoje: ≈ 160 créditos, e os créditos vencem hoje (D-14) | arte da tripulação |
 
 ---
 
@@ -1712,6 +1778,23 @@ Nenhuma mudança exige teste agora: ainda não há código. Cada uma vira caso d
 | 28 | §23.2 | decisões numeradas D-01 a D-17, com recomendação | a v1.0 tinha uma lista sem recomendação nem ordem |
 | 29 | §21, §23.2, `CLAUDE.md` | D-01 aprovada (aval do Vinicius em 29/10/2026: "D-01 approved: open Phase A (v0.1 contract and skeleton copied from Forge + DC) in a new chat"). Fases A e B autorizadas; P-01 passa a `EM ANDAMENTO`. Impacto: começa o projeto Unity em `client/` e os contratos `docs/CONTRATO_V01.md` e `docs/CONTRATO_LANCAMENTO.md`. Testes: `client/tools/verify.sh full` verde no PR da Fase A | o §17.3 exigia D-01 para abrir a Fase A |
 | 30 | §23.2 (D-01, D-14), `CLAUDE.md` | O Vinicius mandou seguir o prompt mestre do estúdio (29/10/2026: "leia e pode seguir as orientações"). D-01 ampliada até "só falta publicar"; D-14 aprovada (Tripo hoje, os créditos acabam hoje). O `CLAUDE.md` importa o prompt. Impacto: arte antes do portão da Fase B (risco do §23.1: se o TA-2 falhar no bot, parte da arte pode sobrar). Testes: os do `CONTRATO_V01.md` §8 seguem valendo | o crédito do Tripo vence hoje |
+
+## v1.2 — 29/10/2026 (Claude; aprovação do Vinicius: **pendente**)
+
+Motivo: o Vinicius mandou 11 prints e um trailer de jogos do gênero, com a frase "nosso jogo tem que ter nível de qualidade, funcionalidade, mecanismos, quero algo que possa se aproximar de um aeroporto real. Manutenção. Contratações de funcionários, aeromoças, pilotos. Assim é um jogo mobile que precisa vender, e vencer o que tem no mercado, não apenas mais um". Antes disso, no mesmo dia, ele tinha pedido os personagens andando entre os setores e trocando de uniforme.
+
+Testes: os invariantes do §5.11 e do §5.12 entram como testes negativos no contrato da Fase C, junto com o portão de design do §5.13 (bot) e o K3 ampliado, medido no aparelho.
+
+| # | Onde | Mudança | Motivo |
+|---|---|---|---|
+| 1 | §4.1, §4.2 | tripulação, pátio, manutenção e mundo vivo entram no lançamento; a v0.1 ganha o mundo 3D em greybox, com o pátio só visual | pedido do Vinicius |
+| 2 | §5.11 | pilotos e comissários com escala, descanso, papéis que não se trocam e invariantes | "aeromoças, pilotos" |
+| 3 | §5.12 | turnaround visível como 2º gargalo; desgaste, checagem no pátio e revisão no hangar, só com Cash | "manutenção" |
+| 4 | §5.13 | ciclo do avião, terminal em corte, mapa por terrenos, câmera, K3 ampliado e portão de design | nível dos líderes (COMPETITIVO §g) |
+| 5 | §0.4, §10.1, §10.2, §10.4 | rota de arte híbrida (D-18); régua de qualidade sem cópia | avião e veículo em sprite pediriam dezenas de direções |
+| 6 | §10.2, §23.2 | Lote 3 proposto (comissária e comissário) e decisões D-18 a D-20 | o restante do elenco já está no `docs/ASSETS.md` |
+| 7 | §17.2 | Fase C ganha tripulação, pátio, manutenção e mapa | — |
+| 8 | COMPETITIVO §g, TA-8 | benchmark dos prints e do trailer; novo diferencial | régua de qualidade e onde vencemos |
 
 ---
 
