@@ -88,7 +88,41 @@ Papéis pedidos pelo Vinicius em 29/10 ("aeromoças, pilotos, manutenção, cont
 | 43 | `comissaria` (uniforme verde-petróleo, lenço coral) | personagem | 2 | 1 rodada de imagem + HD + rig | 8 + 55 + 20 = 83 |
 | 44 | `comissario` (uniforme verde-petróleo, gravata coral) | personagem | 2 | 1 rodada de imagem + HD + rig | 8 + 55 + 20 = 83 |
 
-Total: **166** créditos. Aval: "Aprovo o Lote 3" (Vinicius, 29/10, D-20, repassado pela sessão do GDD). Estado: **não gerado**; o classificador de permissões desta máquina bloqueou o gasto de créditos com aval repassado por outra sessão, e a geração espera o OK do Vinicius direto nesta sessão. Mala de bordo, se precisar, sai como item à parte.
+Total: **166** créditos. Aval: "Aprovo o Lote 3" (Vinicius, 29/10, D-20) e, depois, o aval geral do dia: "pode gerar todos e qualquer arte enquanto houver saldo" (Vinicius, 29/10). Gerado em HD (4K, 50 000 faces) com rig; a 1ª tentativa tinha sido barrada pelo classificador de permissões e foi refeita depois do aval geral. Mala de bordo, se precisar, sai como item à parte.
+
+### 2.3 Lote 4 — nível das referências do mercado (aval geral de 29/10)
+
+Pedido: chegar perto do nível dos líderes do gênero (GDD v1.2 §5.13, COMPETITIVO §g), sem copiar modelo, arte ou marca de ninguém. Uma peça por objeto: as variantes saem por cor no Blender (GDD §10). Todas em HD (4K, 50 000 faces); personagens com rig. Custo: 1 rodada de imagem (8) + HD (55), + rig (20) nos personagens.
+
+| # | Peça | Família | Para quê | Créditos |
+|---|---|---|---|---|
+| 45 | `executivo` (terno) | passageiro | variedade da fila | 83 |
+| 46 | `turista` (camisa florida, chapéu de palha) | passageiro | Costa Azul | 83 |
+| 47 | `mochileiro` (mochila é o item 27) | passageiro | variedade | 83 |
+| 48 | `mae` (faz par com a `crianca`) | passageiro | família na fila | 83 |
+| 49 | `faxineiro` (colete verde-limão) | funcionário | equipe de limpeza | 83 |
+| 50 | `carrinho_limpeza` | item | anda com o faxineiro | 63 |
+| 51 | `caminhao_catering` | veículo | serviço de bordo | 63 |
+| 52 | `posto_combustivel` (tanques) | prédio | pátio | 63 |
+| 53 | `terminal_carga` | prédio | rotas de carga | 63 |
+| 54 | `cone` | prop de mapa | pátio | 63 |
+| 55 | `cerca` (1 segmento) | prop de mapa | perímetro | 63 |
+| 56 | `arvore` | prop de mapa | Vale Verde | 63 |
+| 57 | `palmeira` | prop de mapa | Costa Azul | 63 |
+| 58 | `poste` | prop de mapa | pátio e estacionamento | 63 |
+| 59 | `placa_direcao` (setas sem texto) | prop de mapa | terminal | 63 |
+| 60 | `banco` | prop de mapa | área externa | 63 |
+| 61 | `carrinho_mao` (carrinho de bagagem do passageiro) | prop | saguão | 63 |
+| 62 | `ala_terminal` (módulo de expansão) | terminal | crescimento do aeroporto | 63 |
+| 63 | `sala_tripulacao` | prédio | tripulação | 63 |
+| 64 | `oficina_mecanico` | prédio | manutenção | 63 |
+| 65 | `caminhao_bombeiro` | veículo | incidentes | 63 |
+| 66 | `carro_follow_me` | veículo | táxi dos aviões | 63 |
+| 67 | `conteiner_bagagem` (ULD) | prop | bagagem e carga | 63 |
+| 68 | `biruta` | prop de mapa | frente fria (TA-4) | 63 |
+| 69 | `radar` | prop de mapa | torre e despacho | 63 |
+
+Total do Lote 4: 5 × 83 + 20 × 63 = **1 675**. A taxiway com marcação sai por tile/textura, sem modelo.
 
 ## 5. Marca e arte de instalação (pedido do Vinicius, 2026-10-29)
 

@@ -22,7 +22,14 @@
 | 12:22–12:29 | 42 modelos **HD** (textura 4K, 50 000 faces, "Generate 55"), canônicos | 9 957 | 2 310 | 42 × 55; mesmas imagens da 1ª versão, menos 7 peças com imagem nova (§2, imagem "v2") |
 | 12:31–13:05 | 12 Auto Rig humanoide Mixamo nos personagens HD | 9 717 | 240 | 12 × 20 |
 | 12:31–13:25 | 42 exports HD: personagens "Mixamo, 4K, Export Skeleton"; objetos "Blender, 4K" | 9 717 | 0 | a resolução do export veio em 4K sozinha (a do modelo) e foi conferida a cada peça |
-| 13:26 | **Dia fechado: 4 878 créditos** | **9 717** | 4 878 | 1 890 + 32 + 240 + 96 + 70 + 2 310 + 240 |
+| 13:26 | **Fim dos Lotes 1 e 2: 4 878 créditos** | **9 717** | 4 878 | 1 890 + 32 + 240 + 96 + 70 + 2 310 + 240 |
+| ~13:40 | Lote 3: 1ª tentativa de imagem barrada pelo classificador de permissões (aval repassado por outra sessão) | 9 717 | 0 | nada gerado |
+| ~14:15 | Aval geral do Vinicius para o saldo do dia ("pode gerar todos e qualquer arte enquanto houver saldo"). Chrome conferido na conta da V-STACK | 9 717 | 0 | — |
+| 14:16–14:18 | 27 rodadas de imagem: Lote 3 (2) e Lote 4 (25) | 9 501 | 216 | 27 × 8 |
+| 14:21–14:23 | 27 modelos HD (4K, 50 000 faces) dos Lotes 3 e 4 | 8 016 | 1 485 | 27 × 55 |
+| 14:24–14:35 | 7 Auto Rig humanoide Mixamo (comissária, comissário, executivo, turista, mochileiro, mãe, faxineiro) | 7 848 | 140 + 28 | 7 × 20 = 140. Os 28 a mais não foram explicados: a sessão caiu no meio do rig do faxineiro e o Chrome foi reaberto; o rig saiu uma vez só |
+| 14:24–15:25 | 27 exports HD (personagens "Mixamo, 4K, Export Skeleton"; objetos "Blender, 4K") | 7 848 | 0 | — |
+| 15:25 | **Fim dos Lotes 3 e 4: 1 869 créditos** | **7 848** | 1 869 | 216 + 1 485 + 168 |
 
 ## 2. Registro por peça (Tripo)
 
@@ -116,6 +123,40 @@ Ferramenta: imagem no gerador do Tripo (Nano Banana 2) → modelo H3.1 → Auto 
 | caixa_ferramentas | HD (4K, 50 000) | 12:29 | #2 | `5c5c102e-5144-413c-a1da-6cf25818e389` | 55 | 9957 | `caixa_ferramentas_hd/caixa_ferramentas_hd.zip` | 7.2 MiB | `5220ec9d97546b03e38e024aa8b1c3a48d04f57d26f5ce39710fcb75a50b2f76` | `f5256e8f17041348ec43cf7a0f72e9cf32a914be3c3d36f0688da3350e922ca8` |
 
 Conferência visual feita no visualizador do Tripo antes do rig: os 12 personagens em pose T, de mãos vazias, sem mala nem mochila. Os aviões saíram brancos, sem logotipo, sem texto e sem pintura de companhia (D-13). Peças da 1ª versão sem presença, refeitas na HD com imagem nova: `bastoes_sinalizacao` (2 cápsulas), `cadeiras_espera` (1 assento), `esteira_bagagem` (disco cinza liso), `portao_embarque` (cinza), `balcao_checkin`, `raio_x` e `terminal_aurora`.
+
+### 2.1 Lotes 3 e 4 (2026-10-29, à tarde)
+
+Só HD (4K, 50 000 faces). Mesma receita e mesmos sufixos de prompt do `ASSETS.md` §3; objetos com o sufixo "premium" da rodada HD. Os personagens saíram em pose T, de mãos vazias; a comissária e o comissário com uniforme verde-petróleo de cor chapada, para a máscara de uniforme. Licença `tripo_pago`, Privado.
+
+| Peça | Hora | Imagem | Task id | Créditos | Saldo depois | Arquivo (`arte/tripo/`) | Tamanho | SHA-256 do zip | SHA-256 do FBX |
+|---|---|---|---|---|---|---|---|---|---|
+| comissaria | 14:21 | #2 | `9807aecc-3a6f-4184-9b8d-ae2f8ef9d124` | 8 img + 55 + 20 rig | 9446 | `comissaria_hd/comissaria_hd.zip` | 8.3 MiB | `a39ac9587fcc3853d12531e4096cc4ed5a8cece504dd75521c3208e89a418215` | `953f847a3efd62750c5962def8fe792e26dc761c6cf1f316f753812451f8cfc7` |
+| comissario | 14:21 | #2 | `75d0c6ae-76d9-48d7-ad46-10c8abeeaf88` | 8 img + 55 + 20 rig | 9391 | `comissario_hd/comissario_hd.zip` | 8.5 MiB | `a58dba9b5e285bb2f0d83d19a8e0c664ee97b561cdeaed20c2efeda8417ccfad` | `c4ae76b2ad2294f3bc630d5da4e099796a16e3f9bd5624768be4c59855ad1e78` |
+| executivo | 14:21 | #3 | `2d83cc8b-973b-446b-9d27-512cd35f4388` | 8 img + 55 + 20 rig | 9336 | `executivo_hd/executivo_hd.zip` | 9.2 MiB | `e802623e4f515dc07c73247432f188e89cf52001baf0f9454ecf220dca23fe7a` | `b5b09e918885273af6b8e1d25e0a61b2ac4bef5cbe5beaa4a6afd07ddb596915` |
+| turista | 14:21 | #3 | `9aade010-0dd2-4b6c-9061-b694f7441bfd` | 8 img + 55 + 20 rig | 9281 | `turista_hd/turista_hd.zip` | 12.4 MiB | `b5036bdb2dadadf4afd400466c6e9724c4c2a45db137f3fcdd0453875b71c316` | `446cd610c3d46e001d074177a5333d3e2d5d3ee1628ef2e61747ef9bc4b20168` |
+| mochileiro | 14:21 | #3 | `3816d249-079f-48ea-9dc4-652a92dcd7d9` | 8 img + 55 + 20 rig | 9226 | `mochileiro_hd/mochileiro_hd.zip` | 9.6 MiB | `6db402ab1047b934e161781f2b960d458439b08bf88c61808b706b4b05e44eac` | `b87cf9d853905d9b128b8179b711800584069c60d372244670adfdc9924b61fa` |
+| mae | 14:21 | #1 | `80b06fb6-10cf-4c98-9364-9b094d62e5e8` | 8 img + 55 + 20 rig | 9171 | `mae_hd/mae_hd.zip` | 9.9 MiB | `901a439b76523f39f08b5b8600a72907033593d3035fa29340b9b66fda29f542` | `c96e0ca6ce9147b88da0a9360d9334616fc8d5e995007d7caedc45abbda2fb1a` |
+| faxineiro | 14:21 | #3 | `af9ae9c4-65df-4b65-8198-2ed7d1528127` | 8 img + 55 + 20 rig | 9116 | `faxineiro_hd/faxineiro_hd.zip` | 9.2 MiB | `4e65941634a67a7a1dffc8d4f187280300996b9b33144297256545ebbe31e75e` | `66a0df45f876a09d28c3da5299d8cdf64ee36f167c78deb1c96c2bd8ab8a010a` |
+| carrinho_limpeza | 14:21 | #2 | `bea688fb-9c71-49e7-b167-e71ed82428d5` | 8 img + 55 | 9061 | `carrinho_limpeza_hd/carrinho_limpeza_hd.zip` | 8.7 MiB | `d25ebaa809a894625d73274f2788525d814be1fff210255e66b92dd1cb48fe35` | `d0175058ec66701203903d4aab73626f98471a48c2913324c1d67f4828067cb4` |
+| caminhao_catering | 14:21 | #4 | `081502f7-190f-462a-aeda-3648fc62fc69` | 8 img + 55 | 9006 | `caminhao_catering_hd/caminhao_catering_hd.zip` | 8.3 MiB | `130b0a9594615e0e68d7e186ee0d7a1b8a95dfe6e2816aabde1a41bac1fb8a03` | `17eae8a48cb59d71973b29d61b343e4d7c16e9d796ad102ca38e6c1c300e6315` |
+| posto_combustivel | 14:21 | #4 | `02e2da90-be4b-4921-a206-d22020665c96` | 8 img + 55 | 8951 | `posto_combustivel_hd/posto_combustivel_hd.zip` | 9.0 MiB | `1d097b397e7e8914974106083e879603935729a96f22db0eef1f6272861d58af` | `1c0c6a8c61698a3e468932d0d2bae27f91a7f86c91b2d1046630f948fa106c9c` |
+| terminal_carga | 14:21 | #3 | `f9cda329-9220-4515-82f4-3bf44769348d` | 8 img + 55 | 8896 | `terminal_carga_hd/terminal_carga_hd.zip` | 12.8 MiB | `be8cabcc812189987f3a9addfe0d4f7cf7e10f6d944702739e351d48aa7e9f1c` | `c70dd123b304c854f87904c375a6f3906bea505a70b3a2526c0f0dc642058b86` |
+| cone | 14:21 | #2 | `0300731f-8788-4381-9817-cf78b626ffda` | 8 img + 55 | 8841 | `cone_hd/cone_hd.zip` | 6.0 MiB | `844ba82f4771597223e6580d9e55281b42f8257754aaec0acc9c723a23e3c911` | `011159d4631224774ea82650b840092ba82514a99cb03178251af395333a421d` |
+| cerca | 14:21 | #1 | `3bfd96e7-9ab2-40ce-8461-0aedbff8e68b` | 8 img + 55 | 8786 | `cerca_hd/cerca_hd.zip` | 11.5 MiB | `535ac25b9abab038ed8c9b0f4ccf90a203bd6668175d51863a87122668beedc3` | `623edbf4b101a63306bff89f8513fdc55dab2b23235ab78de9d8b9af4cbf74b6` |
+| arvore | 14:22 | #2 | `bc81e965-110f-407c-8c79-fe11c7cb0669` | 8 img + 55 | 8731 | `arvore_hd/arvore_hd.zip` | 10.4 MiB | `fcbca248c137db70003b259e9c8adb5279f979c293c95bf545129eda83cf8bb4` | `497d3bf43a100efcde21045e5b9fb89e6090bada620d5f36e5b037ad5ca6cb4c` |
+| palmeira | 14:22 | #2 | `f3de1d40-19e7-461e-b900-353c5e1b8012` | 8 img + 55 | 8676 | `palmeira_hd/palmeira_hd.zip` | 10.1 MiB | `ba48efd0c8fdd996f4de6b7300f25ff7110d16b8df70aa0bd7470bf3fa56895a` | `a36b900af1df8a6f59208a3950bedcc9ba86f5d53d4ca937728a3c515142a347` |
+| poste | 14:22 | #4 | `93cde14b-1a0f-43f3-935d-31b23110d486` | 8 img + 55 | 8621 | `poste_hd/poste_hd.zip` | 7.9 MiB | `9268c081dd7294f34be130cb45780b021c99d9b2b1fee1a98d78e5d057587e0e` | `8ec429e4063b3051ae815a988e9c867c438d3fa804b797b1512e7329d853a5a4` |
+| placa_direcao | 14:22 | #2 | `711e5b93-21f3-420e-9496-3b8f589b7690` | 8 img + 55 | 8566 | `placa_direcao_hd/placa_direcao_hd.zip` | 8.6 MiB | `cc894537e5a7f8881e0b8f22638627d1f1e8d27f20a388201149c9839c2b7599` | `ef74bcf886481c8d5c52d3084dff564c5a209658be288412c2f0019b1bcc1809` |
+| banco | 14:22 | #1 | `288b31fb-e610-4321-bd19-59bfabf8a641` | 8 img + 55 | 8511 | `banco_hd/banco_hd.zip` | 10.5 MiB | `705e34ab23c1203006fed750efba3092abbcf7eee58451df97916d01ae3eded9` | `8433b063ee75304af9922a782c96997936a65cb351c3fc07bd349817b596642b` |
+| carrinho_mao | 14:22 | #4 | `3142de88-08a3-4030-b680-436e5e8c2636` | 8 img + 55 | 8456 | `carrinho_mao_hd/carrinho_mao_hd.zip` | 11.5 MiB | `6d6a31ff93f03624c88d76fc4c18761b8d334b7ff9632882d877f91830e151a2` | `8258fad0f2fe792af482e77421a5ec341287393bc056392d850eaadff359813f` |
+| ala_terminal | 14:22 | #1 | `4e84958e-0c2e-4ba2-9a86-5ceca8f20215` | 8 img + 55 | 8401 | `ala_terminal_hd/ala_terminal_hd.zip` | 13.6 MiB | `d581de9618d9816c3ce1f8bc182687a92d3b4d018732197415249940ca6573bb` | `4665f6dfdae400afe23cb8c31c001ca95ecb1f3c78b0346ef0c9324aaeac55c6` |
+| sala_tripulacao | 14:22 | #1 | `331a814b-cd32-474b-96be-b3cdcce9c49a` | 8 img + 55 | 8346 | `sala_tripulacao_hd/sala_tripulacao_hd.zip` | 10.3 MiB | `1041975b722e37bacd738ee64e37ef6ec1556e374c7e8b24a4de1a09d24bd9ac` | `81e74e182fd0ea020c20fd4f6eef61073743f6b68d7d426ee0760b5a4b35923d` |
+| oficina_mecanico | 14:22 | #1 | `494ec8bf-2a5b-4d23-bc51-b29a4afde1ed` | 8 img + 55 | 8291 | `oficina_mecanico_hd/oficina_mecanico_hd.zip` | 10.8 MiB | `7e5f2c96c2c0dcd06b05961818e08b0c98726a65452209e33a1688babbb0182b` | `436b3c38a605a32c6313c5518924651ed34e6f8e901f57ae961fe74e39d8a69f` |
+| caminhao_bombeiro | 14:22 | #1 | `cf8eeeb1-edf1-4e73-a07a-90d5ce95363b` | 8 img + 55 | 8236 | `caminhao_bombeiro_hd/caminhao_bombeiro_hd.zip` | 11.9 MiB | `7512b5534432d2d4a338f89b529224f91b6af7e576e68ac99cf503eab5954ad5` | `a5ef8f528bb0f8eae4bce3a9a88d3eb1c27acaeb7619abb740ef55070115ce57` |
+| carro_follow_me | 14:22 | #2 | `2e552be9-0574-45da-8bc0-c160a27519c6` | 8 img + 55 | 8181 | `carro_follow_me_hd/carro_follow_me_hd.zip` | 9.4 MiB | `ca61c8d746c50ca881ccaabd125d3800d0c68a7df40c0cbf49a3bd94bba5c747` | `d05cb1cdbae6a37a79828fdc8a35d3c68429c8b2299a1e674daa548a7af22fbe` |
+| conteiner_bagagem | 14:22 | #2 | `84d1b884-f7db-443d-86a4-5d67c3df4598` | 8 img + 55 | 8126 | `conteiner_bagagem_hd/conteiner_bagagem_hd.zip` | 13.3 MiB | `71297d24b04946e1845eacce25094ed2132a07fb22baffbe2efefe31c5a36bb1` | `f9be4ab3654b18c50ea2dca67340ea40176e7c43d68a715b888e438dcf664420` |
+| biruta | 14:22 | #1 | `0286d656-8fc8-449d-b1a6-422df100ad01` | 8 img + 55 | 8071 | `biruta_hd/biruta_hd.zip` | 9.2 MiB | `17c308c896545f280a4ba6ba3f040334e859ba70d2e73c69f8f67d7d238b381c` | `e892b8fe9ef569e3ae4d45b9c4776c3bfb9faca614a0df53982a047a1f65be7a` |
+| radar | 14:23 | #3 | `e6652446-32cd-481a-a5dc-439524994c24` | 8 img + 55 | 8016 | `radar_hd/radar_hd.zip` | 10.3 MiB | `babb326730501f4e923c216242326f743889e160e1f5d1c2d0aef0071b15973a` | `2ba95b8aa86333f173a71dc796698b20e7221b52cd567588bcb9cbec8b481ea6` |
 
 ## 3. Marca e arte de instalação (imagem, sem modelo 3D)
 
