@@ -9,16 +9,17 @@
 **Como vai ser jogar:** começar fazendo tudo à mão e terminar comandando um império que funciona sozinho.
 
 ## Situação
-Fora desta rodada; o nome colide com outros apps (sugestão da revisão: "Little Terminal", falta checar marca). Ainda não há código: este repositório guarda o GDD e a estrutura do projeto, pronta para o desenvolvimento começar.
+Fora desta rodada; o nome colide com outros apps (sugestão da revisão: "Little Terminal", falta checar marca). Ainda não há código: este repositório guarda o GDD e a estrutura do projeto, pronta para o desenvolvimento começar. A auditoria de 2026-10-29 deu **NO-GO** para o prazo de 29/10 (GDD §0.3).
 
-- **GDD:** [`docs/GDD.md`](docs/GDD.md) (revisão competitiva de 2026-10-09 no topo).
+- **GDD mestre (Little Terminal, v1.1):** [`docs/GDD.md`](docs/GDD.md): produção, segurança e publicação; decisões pendentes no §23.2.
+- **GDD de origem:** [`docs/GDD_ORIGEM.md`](docs/GDD_ORIGEM.md) (produto, revisão competitiva de 2026-10-09 e lições do Dungeon Courier).
 - **Comparativo com jogos similares e diferenciais:** [`docs/COMPETITIVO.md`](docs/COMPETITIVO.md).
 
 ## Estrutura do repositório
 | Pasta | Para quê |
 |---|---|
 | `docs/` | GDD, comparativo e, depois, balance, validações e contratos de cada fase |
-| `client/` | projeto Unity 6 (6000.3.x), Android primeiro, retrato; código do jogo em `client/Assets/_TA/` |
+| `client/` | projeto Unity 6000.3.27f1 LTS, Android primeiro, retrato; código do jogo em `client/Assets/_TA/` |
 | `client/Assets/_TA/Scripts/Core/` | núcleo em C# puro (regras, simulação, save), testável fora do Unity |
 | `client/Assets/_TA/Scripts/View/` | MonoBehaviours, UI, câmera, entrada |
 | `client/Assets/_TA/Editor/` | setup do projeto e builds por linha de comando |
