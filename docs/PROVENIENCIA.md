@@ -34,6 +34,10 @@
 | 15:18–15:19 | 14 modelos HD do Lote 5 (níveis 2 das estações, 3 aeronaves, obra) | 7 022 | 770 | 14 × 55 |
 | 15:20–16:05 | 14 exports HD "Blender 4K" | 7 022 | 0 | — |
 | 16:05 | **Fim do Lote 5: 826 créditos** | **7 022** | 826 | 56 + 770 |
+| ~15:30 | Lote 6: 11 rodadas de imagem com 2 opções | 6 978 | 44 | 11 × 4 |
+| 15:34–15:35 | 11 modelos HD do Lote 6 (nível 3 das estações e nível 2 dos terminais) | 6 373 | 605 | 11 × 55 |
+| 15:40–16:10 | 4 exports HD do Lote 6; os outros 7 ficaram pendentes (o PC caiu para 0,2 GB de RAM livre e o Chrome travou no export). Export não cobra: dá para baixar depois, com o saldo vencido | 6 373 | 0 | — |
+| 16:25 | **Fim do Lote 6: 649 créditos. Total do dia: 8 222** | **6 373** | 649 | 4 878 + 1 869 + 826 + 649 |
 
 ## 2. Registro por peça (Tripo)
 
@@ -182,6 +186,24 @@ Só HD (4K, 50 000 faces), objetos em FBX "Blender 4K". Imagem escolhida entre 2
 | guindaste_obra | 15:19 | #2 de 2 | `78d6cc83-9c79-4d6b-aee2-ee1d79699fc1` | 4 img + 55 | 7132 | `guindaste_obra_hd/guindaste_obra_hd.zip` | 10.7 MiB | `0feec43ab98436924f649a719a2116cecda44ce557811301749e2dea6b4afe97` | `8821e52ba1629f0b99e6428f96d275f5a65723dcd8e34b89aba3b29e9ad350ee` |
 | barreira_obra | 15:19 | #2 de 2 | `5825b80a-8ad1-44c1-abd3-a85213ab98f3` | 4 img + 55 | 7077 | `barreira_obra_hd/barreira_obra_hd.zip` | 8.2 MiB | `6ae915f87e670d3ad38df80ba6408e35a6031b5b04f91ad7364fb228b188ed68` | `3883513887ac618f13bb836f87c86fc388ceb3cfbbcc9fae793a3a4abea20e2f` |
 | canteiro_obra | 15:19 | #1 de 2 | `b2ebdb92-d4ee-4f64-babd-260fde0db01f` | 4 img + 55 | 7022 | `canteiro_obra_hd/canteiro_obra_hd.zip` | 9.7 MiB | `c569b68a04eef1b01d817d810f11c7b5209cba066d460c52908d23cbda05b0e4` | `4485973f3f9059e7d10d7e80bb3ab6118dc5c0013c4e070725b3ff83c0115f54` |
+
+### 2.3 Lote 6 (2026-10-29, fim da tarde)
+
+Só HD (4K, 50 000 faces), objetos em FBX "Blender 4K". Imagem escolhida entre 2 opções. Licença `tripo_pago`, Privado. **7 exports pendentes**: os modelos estão pagos e guardados na conta; o task id do `hangar_manutencao_n3` não foi lido na geração e sai do painel de ativos no export.
+
+| Peça | Hora | Imagem | Task id | Créditos | Saldo depois | Arquivo (`arte/tripo/`) | Tamanho | SHA-256 do zip | SHA-256 do FBX |
+|---|---|---|---|---|---|---|---|---|---|
+| balcao_checkin_n3 | 15:34 | #1 de 2 | `6d83b097-9f74-47d3-a84f-37483fd7bd61` | 4 img + 55 | 6923 | `balcao_checkin_n3_hd/balcao_checkin_n3_hd.zip` | 11.1 MiB | `5a2bdc1e43bca6485517f78447dc2d5e94fb053f0947281f15f5cd8421e62e0e` | `20ef1bf1fcd4541e385633cbbd73372851921a54f53e79ccd62f0d6c14021ffe` |
+| raio_x_n3 | 15:34 | #2 de 2 | `ee87d05d-49fe-490d-8c1d-0711091c8cf7` | 4 img + 55 | 6868 | `raio_x_n3_hd/raio_x_n3_hd.zip` | 9.4 MiB | `cf06660ebb7b4a37c4bf2d0e835400fe96c17c96c07885263637704cfa8cf431` | `83f5584f0388f0398daccea5ba1f6b3fbb91e727e093bebe04c853a93dd09d71` |
+| esteira_bagagem_n3 | 15:34 | #2 de 2 | `e272641d-b872-4ccb-884d-80820c367537` | 4 img + 55 | 6813 | `esteira_bagagem_n3_hd/esteira_bagagem_n3_hd.zip` | 10.8 MiB | `79ddb68701d1e846048975b5be840d33966aaf2d307a2f0f104bf715d91a0ef9` | `fbbeb3f1ff2fbb6c70bc051333723df3fc45ef931e46d1b0aa6ea4f706714f64` |
+| portao_embarque_n3 | 15:34 | #1 de 2 | `de15e212-3495-48c2-a826-be96ca883fd9` | 4 img + 55 | 6758 | `portao_embarque_n3_hd/portao_embarque_n3_hd.zip` | 10.7 MiB | `66bcd05b3fca1f0847e8886cdcf2f5feba2b084c53273c21ace26802b5ce3f5d` | `f3859d1aad488ab287c86aac786fb7ae2ba4118a23c127a51320a1781299c11e` |
+| loja_n3 | 15:35 | #1 de 2 | `4b2ae957-e9b2-4b39-8b3a-e2562fb38fbc` | 4 img + 55 | 6703 | **export pendente** | — | — | — |
+| alimentacao_n3 | 15:35 | #1 de 2 | `c79b346f-b6d5-4c02-b296-ab80281261d1` | 4 img + 55 | 6648 | **export pendente** | — | — | — |
+| hangar_manutencao_n3 | 15:35 | #2 de 2 | ler no painel de ativos no export | 4 img + 55 | 6593 | **export pendente** | — | — | — |
+| torre_controle_n3 | 15:35 | #2 de 2 | `5ab297ca-b111-4ecf-9d02-59e828b52616` | 4 img + 55 | 6538 | **export pendente** | — | — | — |
+| terminal_vale_verde_n2 | 15:35 | #1 de 2 | `d8ae9ef4-5eb3-4d57-9e93-a1b4847accf3` | 4 img + 55 | 6483 | **export pendente** | — | — | — |
+| terminal_costa_azul_n2 | 15:35 | #2 de 2 | `a8963395-6f79-4fa9-9009-af39bdaf1bee` | 4 img + 55 | 6428 | **export pendente** | — | — | — |
+| terminal_aurora_n2 | 15:35 | #1 de 2 | `7af1f624-a33a-44c2-8813-a0eadb8bb229` | 4 img + 55 | 6373 | **export pendente** | — | — | — |
 
 ## 3. Marca e arte de instalação (imagem, sem modelo 3D)
 

@@ -147,6 +147,26 @@ O GDD §5.13 pede que "cada upgrade muda o prédio na tela" e que o mapa cresça
 
 Total do Lote 5: 14 × 59 = **826**.
 
+### 2.5 Lote 6 — nível máximo das estações e terminais crescidos (aval geral de 29/10)
+
+Completa a escada de upgrade visual do GDD §5.13: cada estação tem nível 1 (§1), nível 2 (§2.4) e agora o **nível 3**, o mais vistoso; os 3 terminais ganham o **nível 2** (mais andares e pontes de embarque). Desenhos próprios, não troca de cor. Rodadas de imagem com 2 opções (4 créditos).
+
+| # | Peça | Para quê | Créditos |
+|---|---|---|---|
+| 84 | `balcao_checkin_n3` (ilha com 6 balcões e autoatendimento) | check-in nível 3 | 4 + 55 |
+| 85 | `raio_x_n3` (3 scanners corporais e 2 esteiras) | segurança nível 3 | 4 + 55 |
+| 86 | `esteira_bagagem_n3` (2 carrosséis) | bagagem nível 3 | 4 + 55 |
+| 87 | `portao_embarque_n3` (sala premium com janela para o pátio) | portão nível 3 | 4 + 55 |
+| 88 | `loja_n3` (pavilhão de 2 andares) | loja nível 3 | 4 + 55 |
+| 89 | `alimentacao_n3` (praça com 3 quiosques) | alimentação nível 3 | 4 + 55 |
+| 90 | `hangar_manutencao_n3` (2 hangares e banco de teste) | manutenção nível 3 | 4 + 55 |
+| 91 | `torre_controle_n3` (torre alta com prédio de operações) | despacho nível 3 | 4 + 55 |
+| 92 | `terminal_vale_verde_n2` | Vale Verde crescido | 4 + 55 |
+| 93 | `terminal_costa_azul_n2` | Costa Azul crescido | 4 + 55 |
+| 94 | `terminal_aurora_n2` | Aurora Global crescido | 4 + 55 |
+
+Total do Lote 6: 11 × 59 = **649**. Gerado inteiro; 4 dos 11 já exportados, 7 exports pendentes (sem custo) por falta de RAM no PC naquela hora.
+
 ## 5. Marca e arte de instalação (pedido do Vinicius, 2026-10-29)
 
 Feitas no gerador de imagem do Tripo (Nano Banana 2, 1024 px) e ampliadas para 4K (10 créditos cada). Entram no git (interface, não modelo pago), em `client/Assets/_TA/Art/Marca/`.
