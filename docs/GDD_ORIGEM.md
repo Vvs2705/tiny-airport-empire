@@ -1,6 +1,8 @@
 # TINY AIRPORT EMPIRE
 ## Game Design Document — Versão de Produto
 
+> **GDD de origem (até 2026-10-29 era o `docs/GDD.md`).** A fonte de verdade agora é o GDD mestre [`GDD.md`](GDD.md) (Little Terminal, v1.1), que cita esta página como "Origem §N". Onde os dois divergem, vale o mestre; o que ele não cobre (tutorial, rota de arte, clipes, flags de teste) continua valendo daqui.
+
 > **Revisão 2026-10-09 (comparativo de mercado):** comparativo com 8 idle e tycoons de aeroporto (Airport Empire da HYPERCELL, Idle Airport Empire, Airport Inc., Idle Airport Tycoon, Idle Airplane Inc., Airport Simulator: Plane City, World of Airports, Airport City) e o My Perfect Hotel como referência de fluxo, em [`COMPETITIVO.md`](COMPETITIVO.md). O que mudou, sem renumerar nem apagar nada:
 > - **Status:** continua **NO-GO nesta rodada** (veredito de 2026-10-06). Este documento passa a dizer o que o tornaria mais que um reskin do Forge Street se o slot idle validar.
 > - **Nome:** "Tiny Airport Empire" não tem app com o nome exato, mas "Airport Empire" tem colisão forte (5+ apps, um com 5M+). Três alternativas checadas no novo **§52**; a recomendada é "Little Terminal".
