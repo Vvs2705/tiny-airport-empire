@@ -2,7 +2,9 @@
 
 Fonte da verdade: `GDD.md` §5.4 (perder voo custa só a receita dele), §5.8 (reparo só com Cash), §5.11 (tripulação), §5.12 (pátio e manutenção), §5.13 (portão de design), §14.2 (migração), §15.1 (eventos) e §17.2 (Fase C). Aval: D-19 (recomendação "sim, na Fase C, com o portão do §5.13") e o prompt mestre do estúdio.
 
-Este documento fixa **as regras, os números iniciais e o critério de pronto** da tripulação, do pátio e da manutenção no `TA.Core`. Todo número é **hipótese**: o bot mede e o `docs/BALANCE.md` registra o antes e o depois (§F). Mudou regra ou número? Atualize aqui e no `BALANCE.md` no mesmo commit. A tela (View) liga esses sistemas na próxima frente; aqui é só o núcleo, os testes e o bot.
+Este documento fixa **as regras, os números e o critério de pronto** da tripulação, do pátio e da manutenção no `TA.Core`. Todo número é **hipótese**: o bot mede e o `docs/BALANCE.md` §5 registra o antes e o depois.
+
+**Medido em 2026-10-29 (`BALANCE.md` §5):** o portão do §8 passou com 1,151. A manutenção mudou de número (D-C1: desgaste 15, checagem −10 por 10 Cash, inspeção de 110 s). A tripulação não gerou decisão sozinha (1,02) e ficou **só visual** (`Tuning.RegraTripulacao = false`, D-C2): as regras do §2 estão no núcleo e testadas com a chave ligada, mas a falta de tripulação não segura o embarque. O pátio começa com 1 pessoa (D-C3). Mudou regra ou número? Atualize aqui e no `BALANCE.md` no mesmo commit. A tela (View) liga esses sistemas na próxima frente; aqui é só o núcleo, os testes e o bot.
 
 ## 1. O ciclo do avião (a peça que liga os três sistemas)
 
@@ -28,16 +30,16 @@ Voo cujo embarque nunca abriu (sem tripulação, manutenção pendente ou avião
 | Troca manual | `sim.Escala(voo, tripulante)`: põe um tripulante livre no voo, no lugar do da mesma função (que volta para a sala). Só com o avião no pátio e antes de o embarque abrir |
 | Trecho | conta na decolagem; a tripulação volta com o avião |
 | Descanso | quem está na sala há `DescansoSeg` (180 s) está descansado (trechos voltam a 0). Depois de `TrechosAteDescanso` (3) trechos, o tripulante **só volta a voar** depois desse descanso |
-| Falta de tripulação | o embarque espera; o voo avisa (`crew_missing`) assim que a vaga não pode ser preenchida |
+| Falta de tripulação | com a regra ligada, o embarque espera; o voo avisa (`crew_missing`) assim que a vaga não pode ser preenchida. **Padrão: regra desligada (só visual), D-C2** |
 | Papéis | piloto não vira atendente e vice-versa; a tripulação não troca uniforme |
 
-A decisão do jogador é a escala: quem voa agora e quem fica na sala para descansar antes de bater o limite.
+A decisão do jogador seria a escala: quem voa agora e quem fica na sala para descansar antes de bater o limite. O bot mediu que a escala automática quase não erra com 3 + 3 para 2 voos por onda (1,02), então a regra volta quando a frota e os voos crescerem.
 
 ## 3. Pátio (§5.12)
 
 | Regra | Hipótese |
 |---|---|
-| Serviços do turnaround | desembarque 10 s, limpeza e catering 14 s, combustível 16 s, bagagem 18 s (`Tuning.ServicoSeg`) |
+| Serviços do turnaround | desembarque 12 s, limpeza e catering 18 s, combustível 20 s, bagagem 24 s (`Tuning.ServicoSeg`); com 1 pessoa, a bagagem do voo 1 espera o voo 2 e ele decola 4 s atrasado (D-C3) |
 | Ordem | limpeza e bagagem depois do desembarque; combustível a qualquer hora |
 | Antes do embarque | desembarque e limpeza |
 | Antes da decolagem | os quatro |
@@ -50,12 +52,12 @@ A decisão do jogador é a escala: quem voa agora e quem fica na sala para desca
 
 | Regra | Hipótese |
 |---|---|
-| Desgaste | +10 por trecho, de 0 a 100 |
+| Desgaste | +15 por trecho, de 0 a 100 (era 10: D-C1) |
 | Aviso | a partir de 80 (`maintenance_warning`) |
 | Pendente | em 100 (`maintenance_due`): o embarque não abre até a checagem |
 | Mecânico | 1, na oficina; faz uma checagem por vez |
-| Checagem rápida | `sim.Checagem(aviao)`: no pátio, antes de o embarque abrir, 1 por turnaround; 8 s, −20 de desgaste, 15 Cash |
-| Inspeção obrigatória | se o avião chega pendente, o mecânico a faz sozinho (padrão): 60 s, −40 de desgaste, sem Cash (custa tempo) |
+| Checagem rápida | `sim.Checagem(aviao)`: no pátio, antes de o embarque abrir, 1 por turnaround; 8 s, −10 de desgaste, 10 Cash (era −20 por 15: com ela empatando ou passando o desgaste, o hangar nunca seria usado) |
+| Inspeção obrigatória | se o avião chega pendente, o mecânico a faz sozinho (padrão): 110 s, −50 de desgaste, sem Cash (custa tempo). Os 110 s passam dos 100 s de pátio: o voo daquele avião não embarca (era 60 s: com o portão rápido, ficar pendente não custava nada, D-C1) |
 | Revisão no hangar | `sim.Hangar(aviao)`: no pátio, antes de o embarque abrir; 100 Cash; o avião sai por 180 s (uma onda) e volta com desgaste 0, limpo e abastecido. O voo dele daquela onda não embarca (custa só a receita dele) |
 | Justiça | reparo e revisão só com Cash e tempo, nunca com anúncio; nenhum avião é destruído nem perdido; desgaste não anda com o jogo fechado |
 
@@ -84,11 +86,11 @@ A decisão do jogador é a escala: quem voa agora e quem fica na sala para desca
 
 ## 8. Bot e portão de design (§5.13)
 
-- **Planejador:** o Bom de sempre que também escala (põe no voo o tripulante mais descansado e deixa na sala quem precisa descansar), faz a checagem rápida quando ela cabe antes do embarque e manda ao hangar na hora certa.
+- **Planejador:** o Bom de sempre que também escala (põe no voo o tripulante mais descansado e deixa na sala quem precisa descansar), faz a checagem rápida quando ela cabe antes do embarque e manda ao hangar na hora certa: o avião que pousa pendente vai ao hangar (zera) no lugar da inspeção (tira metade).
 - **Automático:** o mesmo Bom, mas deixa a escala, a checagem e o hangar no padrão.
-- Os dois compram igual: o que o Bom já comprava, mais a 2ª pessoa de pátio quando o pátio atrasou um embarque.
-- **Portão:** receita do Planejador ≥ 1,10 × a do Automático, com as mesmas sementes (200). Se não render, o `BALANCE.md` registra, os números se ajustam e, se ainda não der, o sistema que não gerou decisão fica só visual (regra desligada no `Tuning`), como manda o GDD.
-- **TA-1 e TA-2 não pioram:** a tabela do Bom, do Lento e do Parado de antes e de depois vai para o `BALANCE.md`.
+- Os dois compram igual: o que o Bom já comprava, mais a próxima pessoa de pátio quando o pátio atrasou um embarque ou uma decolagem.
+- **Portão:** receita do Planejador ≥ 1,10 × a do Automático, com as mesmas sementes (200 × 20 ondas: o ciclo da manutenção não cabe em 10). **Medido: 1,151** (só a manutenção 1,151; só a tripulação 1,020; as duas 1,180). Se não render, o `BALANCE.md` registra, os números se ajustam e, se ainda não der, o sistema que não gerou decisão fica só visual (regra desligada no `Tuning`), como manda o GDD.
+- **TA-1 e TA-2 não pioram:** a tabela do Bom, do Lento e do Parado de antes e de depois vai para o `BALANCE.md`. **Medido:** Bom 99,2 → 99,3%, Lento 73,6 → 74,5%, TA-2 1,259 → 1,248 (−0,9%, efeito do pátio na ordem das compras do Parado; explicado no `BALANCE.md` §5).
 
 ## 9. Critério de pronto
 
@@ -101,5 +103,7 @@ A decisão do jogador é a escala: quem voa agora e quem fica na sala para desca
 | 5 | Portão do §8 medido, com o antes e o depois do TA-1 e do TA-2 | `BalanceTests` e `BALANCE.md` |
 | 6 | `MAPA_CODIGO.md` e o cabeçalho do `Sim.cs` atualizados | o PR |
 | 7 | `client/tools/verify.sh full` verde | saída no PR |
+
+**Estado em 2026-10-29:** linhas 1 a 6 feitas neste PR; a 7 fica com a saída do `verify.sh full` no PR.
 
 **Fica para a próxima frente (View):** quadro da tripulação e troca no quadro de partidas, ícone do serviço e anel de progresso em cima do avião, veículos de pátio andando pelos serviços, mecânico saindo da oficina, hangar, aviso de 80% e os eventos novos no diário CSV.

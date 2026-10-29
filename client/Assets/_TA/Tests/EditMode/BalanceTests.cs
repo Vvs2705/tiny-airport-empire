@@ -106,9 +106,9 @@ namespace TA.Tests
             double ganho = pl.Receita / au.Receita;
             Imprime("Fase C, 200 sementes x 20 ondas", new[] { pl, au }, true);
             TestContext.Out.WriteLine(string.Format(CultureInfo.InvariantCulture, "ganho de planejar (Planejador/Automatico) = {0:0.000}", ganho));
-            foreach (string so in new[] { "tripulacao", "manutencao" })
+            foreach (string so in new[] { "tripulacao", "manutencao", "tripulacao e manutencao" })
             {
-                var t = new Tuning { RegraTripulacao = so == "tripulacao", RegraManutencao = so == "manutencao" };
+                var t = new Tuning { RegraTripulacao = so.StartsWith("tripulacao"), RegraManutencao = so.EndsWith("manutencao") };
                 double g = Rodar(BotProfile.Planejador, t, Sementes, OndasFaseC).Receita / Rodar(BotProfile.Automatico, t, Sementes, OndasFaseC).Receita;
                 TestContext.Out.WriteLine(string.Format(CultureInfo.InvariantCulture, "so {0} (com o patio): ganho {1:0.000}", so, g));
             }
@@ -128,7 +128,7 @@ namespace TA.Tests
             }
             TestContext.Out.WriteLine("| variante | emb. plan. | emb. auto. | receita plan. | receita auto. | ganho | sem trip. p/a | hangar p / insp. a |");
             foreach (int[] v in new[] { new[] { 3, 180 }, new[] { 2, 180 }, new[] { 3, 240 }, new[] { 2, 240 }, new[] { 2, 300 } })
-                Mede("trip N=" + v[0] + " M=" + v[1], new Tuning { RegraManutencao = false, TrechosAteDescanso = v[0], DescansoSeg = v[1] });
+                Mede("trip N=" + v[0] + " M=" + v[1], new Tuning { RegraTripulacao = true, RegraManutencao = false, TrechosAteDescanso = v[0], DescansoSeg = v[1] });
             foreach (int[] v in new[] { new[] { 10, 5, 15, 90 }, new[] { 10, 5, 15, 110 }, new[] { 10, 10, 10, 110 }, new[] { 15, 10, 10, 110 }, new[] { 12, 6, 10, 110 }, new[] { 20, 10, 10, 110 } })
                 Mede("manut W=" + v[0] + " Q=" + v[1] + " C=" + v[2] + " I=" + v[3], new Tuning { RegraTripulacao = false, DesgastePorTrecho = v[0], CheckTira = v[1], CheckCusto = v[2], InspecaoSeg = v[3] });
         }
