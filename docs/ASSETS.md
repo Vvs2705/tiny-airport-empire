@@ -124,6 +124,29 @@ Pedido: chegar perto do nível dos líderes do gênero (GDD v1.2 §5.13, COMPETI
 
 Total do Lote 4: 5 × 83 + 20 × 63 = **1 675**. A taxiway com marcação sai por tile/textura, sem modelo.
 
+### 2.4 Lote 5 — prédio que muda a cada nível e mapa que cresce (aval geral de 29/10)
+
+O GDD §5.13 pede que "cada upgrade muda o prédio na tela" e que o mapa cresça por terrenos (com heliponto e hangares nas referências, COMPETITIVO §g). As 8 estações ganham um **nível 2** com desenho próprio (mais balcões, mais máquinas, maior), não uma troca de cor. Mais 3 silhuetas de aeronave e as peças de obra dos terrenos bloqueados. Rodadas de imagem com 2 opções (4 créditos).
+
+| # | Peça | Para quê | Créditos |
+|---|---|---|---|
+| 70 | `balcao_checkin_n2` (4 balcões) | check-in nível 2 | 4 + 55 |
+| 71 | `raio_x_n2` (2 pórticos, 2 esteiras) | segurança nível 2 | 4 + 55 |
+| 72 | `esteira_bagagem_n2` (carrossel longo) | bagagem nível 2 | 4 + 55 |
+| 73 | `portao_embarque_n2` (sala com assentos) | portão nível 2 | 4 + 55 |
+| 74 | `loja_n2` (boutique com vitrine) | loja nível 2 | 4 + 55 |
+| 75 | `alimentacao_n2` (café com mesas) | alimentação nível 2 | 4 + 55 |
+| 76 | `hangar_manutencao_n2` (com ponte rolante) | manutenção nível 2 | 4 + 55 |
+| 77 | `torre_controle_n2` (torre alta com radar) | despacho nível 2 | 4 + 55 |
+| 78 | `helicoptero` | heliponto (Costa Azul e Aurora) | 4 + 55 |
+| 79 | `jato_executivo` | rota executiva, Aurora | 4 + 55 |
+| 80 | `hidroaviao` | rota turística, Costa Azul | 4 + 55 |
+| 81 | `guindaste_obra` | terreno em obra | 4 + 55 |
+| 82 | `barreira_obra` | terreno bloqueado | 4 + 55 |
+| 83 | `canteiro_obra` | terreno em obra | 4 + 55 |
+
+Total do Lote 5: 14 × 59 = **826**.
+
 ## 5. Marca e arte de instalação (pedido do Vinicius, 2026-10-29)
 
 Feitas no gerador de imagem do Tripo (Nano Banana 2, 1024 px) e ampliadas para 4K (10 créditos cada). Entram no git (interface, não modelo pago), em `client/Assets/_TA/Art/Marca/`.

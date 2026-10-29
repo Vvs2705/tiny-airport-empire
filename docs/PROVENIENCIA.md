@@ -30,6 +30,10 @@
 | 14:24–14:35 | 7 Auto Rig humanoide Mixamo (comissária, comissário, executivo, turista, mochileiro, mãe, faxineiro) | 7 848 | 140 + 28 | 7 × 20 = 140. Os 28 a mais não foram explicados: a sessão caiu no meio do rig do faxineiro e o Chrome foi reaberto; o rig saiu uma vez só |
 | 14:24–15:25 | 27 exports HD (personagens "Mixamo, 4K, Export Skeleton"; objetos "Blender, 4K") | 7 848 | 0 | — |
 | 15:25 | **Fim dos Lotes 3 e 4: 1 869 créditos** | **7 848** | 1 869 | 216 + 1 485 + 168 |
+| ~15:15 | Lote 5: 14 rodadas de imagem com 2 opções cada (a opção "Number of Images" estava em 2; outra sessão usa a mesma conta) | 7 792 | 56 | 14 × 4 |
+| 15:18–15:19 | 14 modelos HD do Lote 5 (níveis 2 das estações, 3 aeronaves, obra) | 7 022 | 770 | 14 × 55 |
+| 15:20–16:05 | 14 exports HD "Blender 4K" | 7 022 | 0 | — |
+| 16:05 | **Fim do Lote 5: 826 créditos** | **7 022** | 826 | 56 + 770 |
 
 ## 2. Registro por peça (Tripo)
 
@@ -157,6 +161,27 @@ Só HD (4K, 50 000 faces). Mesma receita e mesmos sufixos de prompt do `ASSETS.m
 | conteiner_bagagem | 14:22 | #2 | `84d1b884-f7db-443d-86a4-5d67c3df4598` | 8 img + 55 | 8126 | `conteiner_bagagem_hd/conteiner_bagagem_hd.zip` | 13.3 MiB | `71297d24b04946e1845eacce25094ed2132a07fb22baffbe2efefe31c5a36bb1` | `f9be4ab3654b18c50ea2dca67340ea40176e7c43d68a715b888e438dcf664420` |
 | biruta | 14:22 | #1 | `0286d656-8fc8-449d-b1a6-422df100ad01` | 8 img + 55 | 8071 | `biruta_hd/biruta_hd.zip` | 9.2 MiB | `17c308c896545f280a4ba6ba3f040334e859ba70d2e73c69f8f67d7d238b381c` | `e892b8fe9ef569e3ae4d45b9c4776c3bfb9faca614a0df53982a047a1f65be7a` |
 | radar | 14:23 | #3 | `e6652446-32cd-481a-a5dc-439524994c24` | 8 img + 55 | 8016 | `radar_hd/radar_hd.zip` | 10.3 MiB | `babb326730501f4e923c216242326f743889e160e1f5d1c2d0aef0071b15973a` | `2ba95b8aa86333f173a71dc796698b20e7221b52cd567588bcb9cbec8b481ea6` |
+
+### 2.2 Lote 5 (2026-10-29, fim da tarde)
+
+Só HD (4K, 50 000 faces), objetos em FBX "Blender 4K". Imagem escolhida entre 2 opções. Licença `tripo_pago`, Privado.
+
+| Peça | Hora | Imagem | Task id | Créditos | Saldo depois | Arquivo (`arte/tripo/`) | Tamanho | SHA-256 do zip | SHA-256 do FBX |
+|---|---|---|---|---|---|---|---|---|---|
+| balcao_checkin_n2 | 15:18 | #1 de 2 | `40508539-0b10-4163-acf8-b7ca36ac2402` | 4 img + 55 | 7737 | `balcao_checkin_n2_hd/balcao_checkin_n2_hd.zip` | 10.9 MiB | `2909befae91e98cf40941f2144979ae378795e1a955bbde1610f13e560ae7d67` | `9e90f625f32e95d199d612f2776ebbdab631f734cbb7cab264f3b23c53b183cf` |
+| raio_x_n2 | 15:18 | #1 de 2 | `829d6880-36fc-4258-93bb-562091d55e79` | 4 img + 55 | 7682 | `raio_x_n2_hd/raio_x_n2_hd.zip` | 12.3 MiB | `d006c8312249ceeed35aba84e1bd89b7a4e361807e2a19aeb5f3d64bc49fe6df` | `fefd67b1692a310f62fd2ca8f19af45c6c2f1c19badea9debc3fa2f68e31ecbb` |
+| esteira_bagagem_n2 | 15:18 | #1 de 2 | `ac6ae58f-f573-4884-bc3e-24c0ab4eb695` | 4 img + 55 | 7627 | `esteira_bagagem_n2_hd/esteira_bagagem_n2_hd.zip` | 13.0 MiB | `6160cc6c92af1705b13b26a80910247b5eb2b8c7b3f826ceafa832922eeac481` | `b8858aa1fd4054b54d91fc1a3742637833dc7b2f59c3ed9ef43c9aecfdff5ecc` |
+| portao_embarque_n2 | 15:18 | #2 de 2 | `6a23ad62-7c11-4466-8d91-2a3f49d5439d` | 4 img + 55 | 7572 | `portao_embarque_n2_hd/portao_embarque_n2_hd.zip` | 9.1 MiB | `db2c554f4603adfd29ccdbbb16b468666f024a4f1c0982635b453ad7365958ac` | `4760e289d4afa682184176b19fa4e0151b218212296fd91a6c1ba0ba7d4c9f06` |
+| loja_n2 | 15:18 | #2 de 2 | `537bfb29-d3a7-47db-b778-b907674c1074` | 4 img + 55 | 7517 | `loja_n2_hd/loja_n2_hd.zip` | 9.4 MiB | `37b3160cd76d2780e9793401ed029e5f1024c5356655fc0efa45df3d6f2a91ab` | `48054aec915ca36527ef33a7c0170a43228c3d392db6230c338a30cd56662869` |
+| alimentacao_n2 | 15:19 | #1 de 2 | `d3508372-dd38-41ca-bb54-7560a4e93501` | 4 img + 55 | 7462 | `alimentacao_n2_hd/alimentacao_n2_hd.zip` | 10.3 MiB | `c385be27c4af8a9b05cad28f596ea8a765797695813a7e5d53fdeb3955bdc3cc` | `94970af2a8c946811911b4d50bcef4123505527e7696bc87132d9bdca0488778` |
+| hangar_manutencao_n2 | 15:19 | #2 de 2 | `6c89bd01-19ae-4a36-9848-a3d8659e60a8` | 4 img + 55 | 7407 | `hangar_manutencao_n2_hd/hangar_manutencao_n2_hd.zip` | 14.6 MiB | `c9fa6e3c3136f77393b9598332546ebada0a8e4b722a71a943c54de8a745932b` | `8d2373e420049febbf1618c7142ae3e6928d052debf4dd9245bf0c865de39f33` |
+| torre_controle_n2 | 15:19 | #2 de 2 | `a33f5d4c-e558-4733-b71d-39c6a9eb576f` | 4 img + 55 | 7352 | `torre_controle_n2_hd/torre_controle_n2_hd.zip` | 11.7 MiB | `e5c4f32fafa57115139093bbfddb3110277b2c5bfbaa104ff7f7b7372af3d1d7` | `b456055a32d452a5db55453af41f32c805688623c05b176aa57310d225fad33e` |
+| helicoptero | 15:19 | #2 de 2 | `1536fde7-4eaf-4436-a97b-70e6eeaee94f` | 4 img + 55 | 7297 | `helicoptero_hd/helicoptero_hd.zip` | 8.8 MiB | `dcd85014821c94f9746131f192fed6a69f2b1a97d1715347f3ba72209083aeef` | `7c5c0426e1c3f07c891416e5a4f49d5396c00f41aea6860f358253036619a38f` |
+| jato_executivo | 15:19 | #1 de 2 | `851e2c5c-b7e9-4e09-894c-96d4c095d6fd` | 4 img + 55 | 7242 | `jato_executivo_hd/jato_executivo_hd.zip` | 8.6 MiB | `3a1ca6e9f2dc76d249065a1bc09ab4467ba1535ad53b491f879b40195f044c9b` | `4db1b981aeffcd430c4f16205a10b3819ebf52d55db3e2b97d054966a90c0682` |
+| hidroaviao | 15:19 | #1 de 2 | `4b55c279-a7dd-4072-a31d-beebbca43bca` | 4 img + 55 | 7187 | `hidroaviao_hd/hidroaviao_hd.zip` | 8.7 MiB | `489207d86db3ed51f921ee241dd67699eb31931c6205d15fb4a075c85b6959f7` | `7c37701ddf5cb72b9b178109f785263539f4a61cce6f75aab42365204378accc` |
+| guindaste_obra | 15:19 | #2 de 2 | `78d6cc83-9c79-4d6b-aee2-ee1d79699fc1` | 4 img + 55 | 7132 | `guindaste_obra_hd/guindaste_obra_hd.zip` | 10.7 MiB | `0feec43ab98436924f649a719a2116cecda44ce557811301749e2dea6b4afe97` | `8821e52ba1629f0b99e6428f96d275f5a65723dcd8e34b89aba3b29e9ad350ee` |
+| barreira_obra | 15:19 | #2 de 2 | `5825b80a-8ad1-44c1-abd3-a85213ab98f3` | 4 img + 55 | 7077 | `barreira_obra_hd/barreira_obra_hd.zip` | 8.2 MiB | `6ae915f87e670d3ad38df80ba6408e35a6031b5b04f91ad7364fb228b188ed68` | `3883513887ac618f13bb836f87c86fc388ceb3cfbbcc9fae793a3a4abea20e2f` |
+| canteiro_obra | 15:19 | #1 de 2 | `b2ebdb92-d4ee-4f64-babd-260fde0db01f` | 4 img + 55 | 7022 | `canteiro_obra_hd/canteiro_obra_hd.zip` | 9.7 MiB | `c569b68a04eef1b01d817d810f11c7b5209cba066d460c52908d23cbda05b0e4` | `4485973f3f9059e7d10d7e80bb3ab6118dc5c0013c4e070725b3ff83c0115f54` |
 
 ## 3. Marca e arte de instalação (imagem, sem modelo 3D)
 
