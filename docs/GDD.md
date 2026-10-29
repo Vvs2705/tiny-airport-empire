@@ -1575,7 +1575,7 @@ As de D-01 a D-14 travam o início ou uma fase; as outras podem esperar.
 
 | ID | Decisão | Recomendação | Trava |
 |---|---|---|---|
-| D-01 | Tirar o jogo do NO-GO da rodada e autorizar o projeto Unity neste repositório | autorizar só as Fases A e B; decidir o lançamento completo no portão da Fase B. **Aprovada pelo Vinicius em 2026-10-29: Fases A e B.** O lançamento completo se decide no portão da Fase B | P-01 e tudo depois |
+| D-01 | Tirar o jogo do NO-GO da rodada e autorizar o projeto Unity neste repositório | autorizar só as Fases A e B; decidir o lançamento completo no portão da Fase B. **Aprovada pelo Vinicius em 2026-10-29: Fases A e B.** Ampliada no mesmo dia pelo prompt mestre do estúdio (`~/.claude/estudio/PROMPT_MESTRE_NOVOS_JOGOS.md`): a missão é levar o jogo até "só falta publicar", sem parar no portão da Fase B | P-01 e tudo depois |
 | D-02 | Nova data-alvo no lugar de 29/10/2026 | definir depois do portão da Fase B, com a velocidade real; a Play Console não sai antes de ~25/11 | plano |
 | D-03 | Nome comercial final e appId (`br.com.vstack.<nome>`), irreversíveis depois de publicados | "Little Terminal", depois da busca no INPI, USPTO, EUIPO e nas duas lojas | Setup, LevelPlay, chave de upload, ícone, loja |
 | D-04 | Plataformas com conta e ambiente prontos para envio | Android no lançamento; iOS quando houver macOS e conta Apple | P-14 (IPA) |
@@ -1588,7 +1588,7 @@ As de D-01 a D-14 travam o início ou uma fase; as outras podem esperar.
 | D-11 | Analytics em produção | Unity Analytics (UGS) com os eventos do §15.1, sem dado pessoal, e o Data safety atualizado; crash pelo Android vitals | P-16, K2 em produção |
 | D-12 | E-mail de suporte e URL da política de privacidade | um endereço da V-STACK monitorado; política no GitHub Pages | P-11 |
 | D-13 | Nomes das companhias aéreas e dos aeroportos | renomear os que colidem (§0.4) antes da arte de marca | arte e textos |
-| D-14 | Aval dos lotes do Tripo | Lote 1 (≈ 400, teto 530) depois do portão da Fase B; Lote 2 (≈ 495) na Fase C | P-12 |
+| D-14 | Aval dos lotes do Tripo | Lote 1 (≈ 400, teto 530) depois do portão da Fase B; Lote 2 (≈ 495) na Fase C. **Aprovada em 2026-10-29 pelo prompt mestre do estúdio (§3): os créditos acabam hoje, então os Lotes 1 e 2 saem hoje, pela lista fechada do `docs/ASSETS.md`** | P-12 |
 | D-15 | Bônus de recuperação de voo por anúncio | fora do lançamento (§7.2) | — |
 | D-16 | Publicação gradual ou imediata após aprovação | gradual (porcentagem pequena primeiro) | Fase E |
 | D-17 | Autorização final de submissão/publicação em produção | — | envio |
@@ -1711,6 +1711,7 @@ Nenhuma mudança exige teste agora: ainda não há código. Cada uma vira caso d
 | 27 | §21 | estado `NÃO INICIADO` | separar "não existe" de "bloqueado por terceiro" |
 | 28 | §23.2 | decisões numeradas D-01 a D-17, com recomendação | a v1.0 tinha uma lista sem recomendação nem ordem |
 | 29 | §21, §23.2, `CLAUDE.md` | D-01 aprovada (aval do Vinicius em 29/10/2026: "D-01 approved: open Phase A (v0.1 contract and skeleton copied from Forge + DC) in a new chat"). Fases A e B autorizadas; P-01 passa a `EM ANDAMENTO`. Impacto: começa o projeto Unity em `client/` e os contratos `docs/CONTRATO_V01.md` e `docs/CONTRATO_LANCAMENTO.md`. Testes: `client/tools/verify.sh full` verde no PR da Fase A | o §17.3 exigia D-01 para abrir a Fase A |
+| 30 | §23.2 (D-01, D-14), `CLAUDE.md` | O Vinicius mandou seguir o prompt mestre do estúdio (29/10/2026: "leia e pode seguir as orientações"). D-01 ampliada até "só falta publicar"; D-14 aprovada (Tripo hoje, os créditos acabam hoje). O `CLAUDE.md` importa o prompt. Impacto: arte antes do portão da Fase B (risco do §23.1: se o TA-2 falhar no bot, parte da arte pode sobrar). Testes: os do `CONTRATO_V01.md` §8 seguem valendo | o crédito do Tripo vence hoje |
 
 ---
 
