@@ -138,3 +138,23 @@ O nome "Little Terminal" é provisório (D-03): se mudar, só a logo se refaz (1
 - **Imagens do Nano Banana 2 dentro do Tripo:** mesmos termos do Tripo para o conteúdo gerado na conta. Logo, emblema, ícone e splash entram no git como arte de interface do jogo (prompt mestre §3.8).
 - **Mixamo:** nenhum clipe baixado hoje. Os clipes que virão do disco seguem o registro de origem de cada jogo (prompt mestre §4.1).
 - **Marca registrada:** "Little Terminal" ainda não passou pela busca no INPI, USPTO, EUIPO e nas lojas (D-03). A logo não vai para a loja antes disso.
+
+## 5. Derivados para o jogo (troca do greybox, 2026-10-29)
+
+Nada aqui gasta crédito: tudo sai dos arquivos HD do §2 por script, no Blender 5.2, neste PC.
+
+### 5.1 Malhas decimadas (fora do git)
+
+`client/tools/malhas_ta.py` decima cada corpo rígido HD (teto de triângulos por peça), normaliza a medida de projeto, põe o pivô no chão e reduz a textura base. A saída fica em `client/Assets/_TA/ArtLocal/Resources/Malhas/`, pasta ignorada pelo git: é o modelo do Tripo, que a licença não deixa redistribuir (GDD §10.2, decisão A). O registro completo de cada peça (triângulos antes e depois, medidas, SHA-256 do FBX de origem, do FBX e do PNG gerados) está no `malhas.json` dessa pasta; a tabela abaixo é o resumo.
+
+### 5.2 Clipes de animação (fora do git, `arte/mixamo/ta_pax` e `ta_func`)
+
+| Clipe | Origem | SHA-256 | Licença |
+|---|---|---|---|
+| `Walk.fbx` | `Walking.fbx` do Forge Street (Mixamo, In Place), backup `3D Objects\ForgeStreet-BACKUP\arte-fonte\mixamo\` | `87c18ad47c01e126faf31921d316cf0714e7867c3ab29fbedc404ca79d528585` | Mixamo (Adobe): uso em jogo comercial permitido, sem redistribuir o arquivo |
+| `Idle.fbx` | `Idle.fbx` do Forge Street (Mixamo Breathing Idle; janela 199–289) | `befaa0fa9c5684a4e82dd229b04710588b1f32bc026704cc1856cae9c80f4220` | Mixamo (Adobe), idem |
+| `Atende.fbx` | `_blender/Grab.fbx` do Dungeon Courier (keyframe por script no `anim_blender.py`, entregar o cartão) | `0c431dbde330dba2aa06f8c3bc8a456316bea18f37c9003492379f3cf22684b5` | do estúdio (gerado por script) |
+
+### 5.3 Folhas das pessoas (no git)
+
+`client/tools/elenco_ta.py` faz o `.blend` leve de cada personagem (só a textura base, 1024 px, e o uniforme no material `TA_MASK`), fora do git, em `arte/tripo/_leve/`. O `client/tools/elenco_sprites.sh` renderiza com o `render_sprites.py` (preset TA: 45°/45°, 180 px/m, 4 diagonais com espelho) e grava em `client/Assets/_TA/Resources/Sprites/<ator>/`. A folha é render, não o modelo, e entra no git, como no Dungeon Courier.

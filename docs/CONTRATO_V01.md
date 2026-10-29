@@ -8,17 +8,18 @@ A v0.1 é o greybox que prova os diferenciais TA-1 (quadro de partidas) e TA-2 (
 
 ## 1. Escopo da v0.1
 
-**Entra (GDD §4.2):** aeroporto Vale Verde; 4 estações (check-in, segurança, loja, portão); quadro de partidas com 2 voos por onda; 3 funcionários móveis; 1 moeda (Cash); upgrades de velocidade e capacidade; terminal que cresce em 3 marcos; offline de 2 h com 2× opcional por anúncio; 2× receita por 5 min por anúncio; tutorial com os passos 1–9 da Origem; 1 passageiro com história (TA-3); save versionado com envelope; bot headless com perfis; diário CSV de playtest; arte greybox num **mundo 3D em tempo real com pessoas em billboard** (revisões de 2026-10-29, pedidos do Vinicius com as referências do mercado):
-  - câmera ortográfica isométrica fixa, com pan e zoom;
-  - terminal em corte, com primitivas do Unity no lugar dos futuros modelos do Tripo;
-  - pátio com o avião no portão e veículos rodando;
-  - passageiros que andam pela fila entre fitas, de porta em porta e pela ponte até o avião;
-  - funcionários que saem de um setor, andam até o outro e chegam vestindo o colete do setor novo (camada tingida);
+**Entra (GDD §4.2):** aeroporto Vale Verde; 4 estações (check-in, segurança, loja, portão); quadro de partidas com 2 voos por onda; 3 funcionários móveis; 1 moeda (Cash); upgrades de velocidade e capacidade; terminal que cresce em 3 marcos; offline de 2 h com 2× opcional por anúncio; 2× receita por 5 min por anúncio; tutorial com os passos 1–9 da Origem; 1 passageiro com história (TA-3); save versionado com envelope; bot headless com perfis; diário CSV de playtest; arte do Tripo num **mundo 3D em tempo real** (revisões de 2026-10-29, pedidos do Vinicius com as referências do mercado; GDD §5.13 e D-18):
+  - câmera ortográfica isométrica fixa (45°/45°), de perto nas salas, com pan e zoom;
+  - terminal em corte com os balcões, o raio-x, a loja e o portão em **malha do Tripo decimada** (nível 1 a 3 pela Velocidade), o prédio do terminal, a torre, o hangar e o cenário; sem a pasta `ArtLocal` (fora do git, GDD §10.2), as primitivas da v0.1;
+  - pátio com 2 aviões no ciclo pouso → taxi → estande → pushback → decolagem e 6 veículos em volta do avião (só visual);
+  - **pessoas em sprite pré-renderizado** (`render_sprites.py`, 4 diagonais com espelho): passageiros com a mala na cor do voo, pela fila entre fitas, de porta em porta e pela ponte até o avião; tripulação e técnicos no pátio com o uniforme da função;
+  - funcionários que saem de um setor, andam até o outro e chegam com o uniforme tingido na cor do setor novo (máscara na folha);
+  - placa pequena no chão de cada sala e selo de estado só em atenção ou crítico (os rótulos escuros saíram);
   - o HUD fica em faixas finas por cima.
 
   Manutenção, tripulação e veículos com regra ficam para o GDD v1.2.
 
-**Fica fora (volta pelo §4.1, nas Fases C a E):** outros aeroportos, rotas e aviões; estações 5–8 (bagagem, alimentação, manutenção, despacho); os 6 perfis de funcionário (na v0.1 os 3 são generalistas); incidentes (frente fria TA-4); campanha, missões e conquistas; temporada; IAP e Gems; SDK de anúncio real (o LevelPlay depende do nome e do appId, D-03: na v0.1 o anúncio é simulado); interstitial (nenhum); aceleração 2× do tempo; idiomas além do pt-BR (D-08); arte do Tripo (Lote 1 só depois do portão da Fase B, D-14).
+**Fica fora (volta pelo §4.1, nas Fases C a E):** outros aeroportos, rotas e aviões; estações 5–8 (bagagem, alimentação, manutenção, despacho); os 6 perfis de funcionário (na v0.1 os 3 são generalistas); incidentes (frente fria TA-4); campanha, missões e conquistas; temporada; IAP e Gems; SDK de anúncio real (o LevelPlay depende do nome e do appId, D-03: na v0.1 o anúncio é simulado); interstitial (nenhum); aceleração 2× do tempo; idiomas além do pt-BR (D-08); o mapa que cresce por terrenos (GDD §5.13: as peças de obra do Lote 5 esperam o sistema).
 
 **Nunca:** energia, item aleatório pago, anúncio obrigatório, perder voo com o jogo fechado.
 
@@ -87,7 +88,7 @@ O núcleo emite eventos por Tick (a lista limpa a cada Tick). A View usa os even
   - **Bom:** a cada 1,0 s de jogo, se uma estação está crítica e outra tem folga, move o funcionário da estação com mais folga; senão, toca a estação sem funcionário que tem fila; compra a contratação ou o upgrade mais barato que couber.
   - **Lento (×0,4):** a mesma política, decidindo a cada 2,5 s.
   - **Parado:** como o Bom, mas nunca move funcionário (a base do TA-2).
-- **Flags** (todas, menos `-autoplay`, só com `-testsession`, que não lê nem grava save nem diário e usa a semente 1): `-autoplay N` (N ondas sem render; imprime `AUTOPLAY OK|FAIL` com o embarque médio, o ganho de mover a equipe e o tempo até cada marco; sai 0/1), `-bot`, `-speed N`, `-shot arq -shotdelay s`, `-tela <nome>`, `-onda K`, `-passageiros N` (estresse com 60 na tela, para o K3), `-tutorial`, `-record pasta …`. `-lang`, `-dev-desbloqueia` e `-adtestsuite` entram quando houver idiomas, campanha e SDK de anúncio.
+- **Flags** (todas, menos `-autoplay`, só com `-testsession`, que não lê nem grava save nem diário e usa a semente 1): `-autoplay N` (N ondas sem render; imprime `AUTOPLAY OK|FAIL` com o embarque médio, o ganho de mover a equipe e o tempo até cada marco; sai 0/1), `-bot`, `-speed N`, `-shot arq -shotdelay s`, `-tela <nome>`, `-onda K`, `-passageiros N` (estresse com 60 na tela, para o K3), `-tutorial`, `-record pasta …`, `-vista perto|patio|geral` (enquadramento das fotos), `-perf s` (o K3: p10 e média do FPS no log). `-lang`, `-dev-desbloqueia` e `-adtestsuite` entram quando houver idiomas, campanha e SDK de anúncio.
 
 ## 8. Critério de pronto da v0.1 (portão da Fase B)
 

@@ -9,7 +9,7 @@ namespace TA
     /// para a camera, com o uniforme ou a mala numa mascara que o shader tinge pela cor do vertice (SpriteTinta).
     ///  - Passageiros (4 corpos) com a mala na cor do voo; andam pela fila, vao ao balcao, seguem pelas portas e embarcam pela ponte; quem
     ///    perde o voo sai pela porta. Na fila critica, os 3 da frente mostram o balao de irritacao.
-    ///  - Funcionarios (Ana, Beto, Caio): andam de sala em sala pelas portas no tempo da Tuning.Caminhada e, ao chegar, o uniforme assenta na
+    ///  - Funcionarios (Ana, Beto, Cida): andam de sala em sala pelas portas no tempo da Tuning.Caminhada e, ao chegar, o uniforme assenta na
     ///    cor do setor (0,35 s); atras do balcao, "atende" quando o posto dele tem passageiro.
     ///  - Patio: piloto, comissaria e comissario (Lote 3), despachante, bagageiro e mecanico com o uniforme da funcao, andando perto dos avioes (so visual).
     ///  - Pool: os bonecos de passageiro voltam para a pilha e trocam de folha ao renascer (nada se cria ou destroi no quadro quente).
@@ -17,7 +17,7 @@ namespace TA
     public sealed partial class Mundo
     {
         static readonly string[] PaxAtor = { "passageiro_a", "passageira_b", "passageiro_idoso", "passageira_b", "passageiro_a", "crianca" };
-        static readonly string[] FuncAtor = { "atendente", "seguranca", "vendedor" };   // Ana, Beto, Caio (Textos.Funcionario)
+        static readonly string[] FuncAtor = { "atendente", "seguranca", "vendedor" };   // Ana, Beto, Cida (Textos.Funcionario; a vendedora do Tripo e mulher: o Caio virou Cida em 29/10)
         const float PassoNatural = 1.1f;   // m/s em que o andar da folha nao patina (adulto de 1 m)
 
         sealed class Boneco
@@ -309,6 +309,7 @@ namespace TA
 
         void NovoAtor(string ator, float pausa, params Vector2[] pontos)
         {
+            if (SpriteSheet.Get(ator) == null && SpriteSheet.Get(PaxAtor[0]) != null) return;   // sem a folha dele: nao vira passageiro no patio
             var a = new Ator { B = NovoBoneco(ator), Pontos = pontos, Pausa = pausa, Espera = pausa * 0.5f };
             a.B.Pos = pontos[0];
             _patio.Add(a);

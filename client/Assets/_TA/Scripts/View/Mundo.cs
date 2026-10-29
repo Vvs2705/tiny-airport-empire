@@ -48,6 +48,7 @@ namespace TA
         /// <summary>Nivel de Velocidade a partir do qual o balcao troca pela malha `<malha>_n2` e `_n3` (Lotes 5 e 6): o upgrade muda o predio
         /// (GDD §5.13). Sem a malha daquele nivel, fica a do nivel abaixo.</summary>
         static readonly int[] NivelMalha = { 0, 2, 4 };
+        static readonly Color ReservaCor = new Color(1f, 0.93f, 0.78f);
         /// <summary>Placa no chao, do lado de fora da parede mais perto da camera (onde nao ha outra sala).</summary>
         static readonly Vector2[] PlacaEm = { new Vector2(2f, -0.5f), new Vector2(6f, -0.5f), new Vector2(3.5f, 6f), new Vector2(10f, 3.5f) };
 
@@ -279,8 +280,16 @@ namespace TA
                 if (t != null)
                 {
                     _mesa[e, i, 0] = t.gameObject;
+                    string ant = BalcaoMalha[e];
                     for (int n = 1; n < NivelMalha.Length; n++)
-                        _mesa[e, i, n] = Peca(BalcaoMalha[e] + "_n" + (n + 1), V3(b), Rumo(-s.N), BalcaoEscala[e])?.gameObject;
+                    {
+                        string nome = BalcaoMalha[e] + "_n" + (n + 1);
+                        Transform tn = Peca(nome, V3(b), Rumo(-s.N), BalcaoEscala[e]);
+                        if (tn != null) ant = nome;
+                        else if ((tn = Peca(ant, V3(b), Rumo(-s.N), BalcaoEscala[e] * (1f + 0.08f * n))) != null)   // reserva ate o export chegar
+                            foreach (Renderer r in tn.GetComponentsInChildren<Renderer>()) Cor(r, ReservaCor);   // (ASSETS §2.6): maior e dourado
+                        _mesa[e, i, n] = tn != null ? tn.gameObject : null;
+                    }
                 }
                 else
                 {

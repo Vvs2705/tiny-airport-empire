@@ -13,7 +13,7 @@ namespace TA
         static readonly CultureInfo Br = CultureInfo.GetCultureInfo("pt-BR");
 
         public static readonly string[] Estacao = { L("CHECK-IN"), L("SEGURANÇA"), L("LOJA"), L("PORTÃO") };
-        public static readonly string[] Funcionario = { L("Ana"), L("Beto"), L("Caio") };
+        public static readonly string[] Funcionario = { L("Ana"), L("Beto"), L("Cida") };
         public static readonly string[] Destino = { L("Campinas"), L("Recife"), L("Curitiba"), L("Salvador"), L("Belo Horizonte"), L("Porto Alegre"),
             L("Florianópolis"), L("Fortaleza"), L("Brasília"), L("Manaus") };
         public static readonly string[] Historia = { L("Dona Rosa vai ao casamento da neta") };
