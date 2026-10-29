@@ -60,9 +60,7 @@ namespace TA
             return qx * qx + qy * qy <= r * r;
         }
         /// <summary>Colete (uniforme da estacao, tingido pelo SpriteRenderer): retangulo arredondado com decote em V.</summary>
-        public static Sprite Colete() => Get("colete", (x, y) => RoundedIn(x, y) && !(y > 0.05f && Mathf.Abs(x) < (y - 0.05f) * 0.75f));
         /// <summary>Cabelo: meia cabeca de cima, com franja.</summary>
-        public static Sprite Cabelo() => Get("cabelo", (x, y) => x * x + y * y <= 0.96f && y > 0.05f - 0.25f * Mathf.Abs(x));
         public static Sprite Mala() => Get("mala", (x, y) => RoundedIn(x, (y + 0.2f) * 1.25f) || (Mathf.Abs(x) < 0.4f && y > 0.55f && y < 0.85f && Mathf.Abs(x) > 0.2f) || (Mathf.Abs(x) < 0.4f && y > 0.75f && y < 0.85f));
 
         /// <summary>Arco de progresso (anel cheio no sentido horario a partir do topo ate frac). ponytail: 24 degraus em cache.</summary>

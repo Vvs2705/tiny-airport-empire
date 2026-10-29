@@ -21,6 +21,10 @@ foto jogo_onda3_bot   -onda 3 -bot -speed 8 -shotdelay 12
 foto critico_onda4    -onda 4 -speed 6 -shotdelay 12
 foto estresse_60      -passageiros 60 -speed 10 -shotdelay 11
 foto estresse_60_bot  -passageiros 60 -bot -speed 6 -shotdelay 12
+foto perto_onda2      -onda 2 -bot -speed 6 -shotdelay 10 -vista perto
+foto patio_pouso      -speed 2 -shotdelay 7 -vista patio
+foto patio_turnaround -bot -speed 6 -shotdelay 12 -vista patio
+foto geral            -bot -speed 6 -shotdelay 14 -vista geral
 foto melhorias        -onda 3 -bot -speed 8 -shotdelay 10 -tela melhorias
 foto mover            -onda 2 -bot -speed 8 -shotdelay 10 -tela mover
 foto cofre            -shotdelay 2 -tela cofre
@@ -34,8 +38,12 @@ foto tutorial_bot -tutorial -bot -speed 10 -shotdelay 120
 grep -o "TOUR .*" "$OUT/tutorial_bot.log" | tr -d '\r' > "$OUT/tutorial_bot.txt"
 cat "$OUT/tutorial_bot.txt"
 
-# -record: a Ana sai do check-in, anda pelo corredor e chega na loja com o colete trocado; folha de contato e GIF para o PR
+# K3 (GDD §5.13): 60 passageiros, 2 avioes e 6 veiculos; p10 e media do FPS no log (PERF ...). No PC; o Android de entrada fica para o aparelho
+"$EXE" -testsession -screen-fullscreen 0 -screen-width 540 -screen-height 960 -logFile "$OUT/perf_60.log" -passageiros 60 -bot -speed 3 -vista patio -perf 20 > /dev/null 2>&1
+grep -o "PERF .*" "$OUT/perf_60.log" | tr -d '' | tee "$OUT/perf_60.txt" | grep -q PERF || { echo "FALHOU perf_60 (ver $OUT/perf_60.log)"; falhas=$((falhas + 1)); }
+
+# -record: o aviao pousa, taxia e para na ponte enquanto a Ana sai do check-in e chega na loja com o uniforme trocado; folha de contato e GIF
 rm -rf "$OUT/record_mover"
-"$EXE" -testsession -screen-fullscreen 0 -screen-width 540 -screen-height 960 -logFile "$OUT/record_mover.log" -demo -record "$OUT/record_mover" -recordseg 6 > /dev/null 2>&1
+"$EXE" -testsession -screen-fullscreen 0 -screen-width 540 -screen-height 960 -logFile "$OUT/record_mover.log" -demo -speed 2 -vista patio -record "$OUT/record_mover" -recordseg 13 > /dev/null 2>&1
 python "$ROOT/client/tools/montagem.py" "$OUT/record_mover" --saida "$OUT/mover" || falhas=$((falhas + 1))
 [ $falhas -eq 0 ] && echo "fotos: OK em $OUT" || { echo "fotos: $falhas falhas" >&2; exit 1; }

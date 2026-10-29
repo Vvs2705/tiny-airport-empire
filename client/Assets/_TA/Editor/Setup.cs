@@ -66,7 +66,8 @@ namespace TA.EditorTools
                 EditorSceneManager.SaveScene(EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single), Scene);
             }
             EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(Scene, true) };
-            IncluiShader("Legacy Shaders/Diffuse");   // as primitivas do Mundo (Mundo.Material): sem isto o build sai magenta
+            IncluiShader("Legacy Shaders/Diffuse");   // as primitivas e as malhas do Mundo (Mundo.Material): sem isto o build sai magenta
+            IncluiShader("TA/SpriteTinta");   // as folhas das pessoas (SpriteSheet.Material), com o uniforme tingido
             AssetDatabase.SaveAssets();
             Debug.Log("TA Setup: ok (" + AppId + " " + Version + " code " + VersionCode(Version) + ", retrato, Android ARM64 IL2CPP API 26+)");
         }
