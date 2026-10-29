@@ -17,13 +17,19 @@ T0=$SECONDS
 ok()   { echo "OK   $* [$((SECONDS - T0)) s]"; }
 fail() { echo "FALHOU: $*" >&2; exit 1; }
 
-quick() {
+nucleo() {
   local log rc
   mkdir -p "$OUT"
   log=$(dotnet test "$CLIENT/tools/coretests" -nologo 2>&1); rc=$?
   echo "$log" > "$OUT/coretests.log"
   [ $rc -eq 0 ] || { echo "$log" | grep -E "Failed |error " | head -20; fail "dotnet test do núcleo (ver $OUT/coretests.log)"; }
   ok "núcleo: $(echo "$log" | grep -m1 -oE 'Failed: +[0-9]+, Passed: +[0-9]+, Skipped: +[0-9]+, Total: +[0-9]+' | tr -s ' ')"
+}
+
+# a View usa o uGUI: a DLL vem de client/Library/ScriptAssemblies (num worktree novo, o full cria ao abrir o Unity no EditMode)
+viewcheck() {
+  local log rc
+  [ -f "$CLIENT/Library/ScriptAssemblies/UnityEngine.UI.dll" ] || fail "falta client/Library/ScriptAssemblies/UnityEngine.UI.dll: rode o full (abre o Unity) ou copie as DLLs de onde o projeto já abriu"
   log=$(dotnet build "$CLIENT/tools/viewcheck/view" -nologo -v q 2>&1); rc=$?
   echo "$log" > "$OUT/viewcheck.log"
   [ $rc -eq 0 ] || { echo "$log" | grep -E " error " | head -20; fail "viewcheck (ver $OUT/viewcheck.log)"; }
@@ -56,8 +62,13 @@ dirty() {
   [ -z "$s" ] || printf 'AVISO: o Unity mexeu em arquivos versionados:\n%s\n' "$s"
 }
 
+quick() {
+  nucleo
+  viewcheck
+}
+
 full() {
-  quick
+  nucleo
   guard
   rm -f "$OUT/editmode.xml"
   run_unity editmode.log -runTests -testPlatform EditMode -testResults "$OUT/editmode.xml"   # veredito no XML, não no código de saída
@@ -65,6 +76,7 @@ full() {
   n=$(echo "$run" | grep -oE '(total|passed|failed)="[0-9]+"' | paste -sd' ')
   [[ "$run" == *'result="Passed"'* ]] || fail "EditMode: $n (ver $OUT/editmode.xml)"
   ok "EditMode: $n"
+  viewcheck
   run_unity build_win.log -quit -executeMethod TA.EditorTools.Setup.BuildWindows; local rc=$? sum
   sum=$(grep -m1 -oE "BuildSummary\(StandaloneWindows64[^)]*\): .*" "$OUT/build_win.log")   # o Setup põe "dev 0.0.1-alpha" nos parênteses
   [ $rc -eq 0 ] && [[ "$sum" == *result=Succeeded* ]] || fail "BuildWindows (saída $rc, '${sum:-sem BuildSummary}', ver $OUT/build_win.log)"

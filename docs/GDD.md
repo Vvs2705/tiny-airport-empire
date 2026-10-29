@@ -370,7 +370,7 @@ Cada funcionário tem:
 - nível de melhoria;
 - feedback visual e ícone da especialidade.
 
-O jogador começa com 3 funcionários. Pode arrastar funcionários entre estações durante a onda. Ao mover alguém, a estação de origem perde capacidade temporariamente e a de destino ganha. O boneco anda até lá em 2–3 s.
+O jogador começa com 3 funcionários. Pode arrastar funcionários entre estações durante a onda. Ao mover alguém, a estação de origem perde capacidade temporariamente e a de destino ganha. O boneco anda até lá em 2–3 s, pelo corredor dos funcionários, e ao chegar **veste o uniforme da estação** (colete na cor do setor, troca visível de 0,2–0,4 s); a identidade dele fica no cabelo e no nome em cima, nunca na cor do corpo. Revisão 2026-10-29 (pedido do Vinicius: "ver eles saindo de um setor para o outro e mudando de uniforme conforme cada setor"). A arte do Tripo segue as mesmas camadas: corpo, colete tingido em tempo de execução, cabeça e cabelo.
 
 Os 6 perfis são fixos e nomeados, sem traço sorteado (TA-5). Saem por marco da campanha, nunca por sorteio nem só por compra. Proposta inicial, a validar no contrato:
 

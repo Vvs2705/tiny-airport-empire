@@ -1,28 +1,49 @@
 using System;
 using System.Collections;
 using System.Globalization;
+using System.IO;
+using System.Text;
 using TA.Core;
 using UnityEngine;
 
 namespace TA
 {
     /// <summary>
-    /// Fluxo do jogo, o unico MonoBehaviour (nasce sozinho na cena vazia por RuntimeInitializeOnLoadMethod), copiado da casca do
-    /// Dungeon Courier (dc:Scripts/View/Game.cs). Fase A: chama sim.Tick com o dt do quadro e mostra o relogio; save em disco, HUD,
-    /// toque e diario CSV chegam na Fase B (docs/CONTRATO_V01.md).
-    /// Flags (leitura de argumentos do DC; as outras do CONTRATO_V01 §7 entram com o sistema que usam):
+    /// Fluxo do jogo, o unico MonoBehaviour de fluxo (nasce sozinho na cena vazia por RuntimeInitializeOnLoadMethod; casca do
+    /// dc:Scripts/View/Game.cs). Chama sim.Tick com o dt do quadro (parado com tela modal ou explicacao do tutorial), transforma os eventos
+    /// do nucleo em diario CSV e avisos, grava o save (a cada 5 s de jogo, na pausa e ao sair, escrita atomica; nunca por cima de um save
+    /// recusado) e paga o cofre offline ao abrir e ao voltar da pausa. O relogio do quadro nunca anda com o jogo fechado.
+    /// Diario (CONTRATO_V01 §6): persistentDataPath/diario.csv, id anonimo da instalacao (GUID local), nada sai do aparelho sem o jogador
+    /// tocar em Exportar diario (Exportar.cs). Colunas: utc,instalacao,versao,sessao,t_sessao,t_jogo,evento,a,b,c,onda
+    /// (client/tools/diario_report.py le e calcula o K2 e o embarque medio).
+    /// Flags (CONTRATO_V01 §7; todas, menos -autoplay, so com -testsession, que nao le nem grava save nem diario e usa a semente 1):
     ///   -autoplay N   sem render: o bot joga N ondas (Bom, Lento, Parado; retomada no meio da onda), loga AUTOPLAY OK|FAIL e sai 0/1.
     ///                 Usar com -batchmode -nographics (client/tools/verify.sh full).
-    ///   -speed N      multiplica o dt (0,1..20).
-    ///   -shot f.png [-shotdelay s]   foto da tela depois de s segundos reais (padrao 1) e sai 0.
+    ///   -bot          o bot Bom joga na tela.        -speed N   multiplica o dt (0,1..20).
+    ///   -tela nome    jogo | melhorias | mover | cofre | anuncio | pausa | album | passoN (tutorial, passo N).
+    ///   -onda K       comeca na onda K (1 = a 1a).   -passageiros N   estresse: N passageiros por onda (60 = o K3).
+    ///   -tutorial     liga o tutorial no -testsession (sem gravar; com -bot o ENTENDI se aperta sozinho).
+    ///   -shot f.png [-shotdelay s]   espera s s reais (padrao 1), abre a -tela, fotografa e sai 0.
+    ///   -record pasta [-recordseg s]  grava s s (padrao 10) de quadros PNG a 30 qps na pasta e sai 0.
+    ///   -demo         contrata os 3 e, 1,5 s depois, manda a Ana do check-in para a loja (o -record da caminhada e da troca de uniforme).
     /// </summary>
     public sealed class Game : MonoBehaviour
     {
         static readonly CultureInfo Inv = CultureInfo.InvariantCulture;
+        const string Cabecalho = "utc,instalacao,versao,sessao,t_sessao,t_jogo,evento,a,b,c,onda";
 
         public Sim Sim { get; private set; }
+        /// <summary>s de jogo do ultimo quadro (0 com o relogio parado): o Mundo anda os bonecos no tempo do jogo.</summary>
+        public float DtJogo { get; private set; }
+        Hud _hud;
+        Bot _bot;
         float _speed = 1f;
-        bool _headless;
+        bool _headless, _test;
+        string _save, _diario, _instalacao, _sessao;
+        long _ultimoSave;
+        float _ultimoFlush;
+        readonly StringBuilder _buf = new StringBuilder();
+        string _ofertaLogada;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         static void Boot()
@@ -38,35 +59,218 @@ namespace TA
             _headless = Arg("-autoplay") != null;
             if (_headless) return;   // o Start roda o autoplay sem montar camera
 
-            _speed = Mathf.Clamp(ArgF("-speed", 1f), 0.1f, 20f);
-            Sim = new Sim();
+            _test = Arg("-testsession") != null;
+            if (_test) Application.runInBackground = true;   // fotos e gravacao nao param quando a janela perde o foco
+            _speed = _test ? Mathf.Clamp(ArgF("-speed", 1f), 0.1f, 20f) : 1f;
+            string dir = Application.persistentDataPath;
+            _save = Path.Combine(dir, "save.txt");
+            _diario = Path.Combine(dir, "diario.csv");
+            _instalacao = PlayerPrefs.GetString("ta_instalacao", "");
+            if (_instalacao.Length == 0) { _instalacao = Guid.NewGuid().ToString("N"); PlayerPrefs.SetString("ta_instalacao", _instalacao); PlayerPrefs.Save(); }
+            _sessao = Guid.NewGuid().ToString("N").Substring(0, 8);
+
+            int status;
+            if (_test)
+            {
+                var t = new Tuning();
+                if (int.TryParse(Arg("-passageiros"), NumberStyles.Integer, Inv, out int n) && n > 0) t.PaxFixo = Mathf.Max(1, n / 2);
+                Sim = new Sim(t, 1);
+                if (int.TryParse(Arg("-onda"), NumberStyles.Integer, Inv, out int k) && k > 1) Sim.IrParaOnda(k - 1);
+                if (Arg("-bot") != null) _bot = new Bot(BotProfile.Bom);
+                status = 0;
+            }
+            else
+            {
+                string texto = null;
+                try { if (File.Exists(_save)) texto = File.ReadAllText(_save); } catch (Exception e) { Debug.LogWarning("TA save: " + e.Message); }
+                Sim = Sim.Load(texto);
+                status = Sim.SaveRefused ? 2 : string.IsNullOrEmpty(texto) ? 0 : 1;
+            }
+            _ultimoSave = Sim.Steps;
+
             Camera cam = new GameObject("Camera", typeof(Camera)).GetComponent<Camera>();
             cam.orthographic = true;
             cam.clearFlags = CameraClearFlags.SolidColor;
-            cam.backgroundColor = new Color(0.08f, 0.12f, 0.2f);   // azul-marinho da interface (GDD_ORIGEM, "Interface e marca")
+            cam.backgroundColor = Art.Bg;
+            _hud = gameObject.AddComponent<Hud>();
+            _hud.Build(this);
+            _hud.TourGrava = !_test;
+            _hud.TourLigado = !_test || Arg("-tutorial") != null;
+            _hud.TourAuto = _bot != null;
+            Diario("session_start");
+            Diario("save_loaded", status);
+            if (!_test) Retorno();
         }
 
         void Start()
         {
             if (_headless) { Autoplay(); return; }
-            string shot = Arg("-shot");
-            if (!string.IsNullOrEmpty(shot)) StartCoroutine(Shot(shot));
+            if (!_test) return;
+            string shot = Arg("-shot"), rec = Arg("-record"), tela = Arg("-tela");
+            if (!string.IsNullOrEmpty(shot)) StartCoroutine(Shot(shot, tela));
+            else if (!string.IsNullOrEmpty(tela)) AbreTelaDev(tela);
+            if (!string.IsNullOrEmpty(rec)) StartCoroutine(Record(rec));
+            if (Arg("-demo") != null) StartCoroutine(Demo());
         }
 
         void Update()
         {
-            if (!_headless) Sim.Tick(Time.deltaTime * _speed);
-        }
-
-        // ponytail: HUD de texto do IMGUI so para o esqueleto mostrar que esta vivo; a HUD por codigo (Art.cs do DC) chega na Fase B
-        void OnGUI()
-        {
             if (_headless) return;
-            GUI.Label(new Rect(16, 16, Screen.width - 32, 60),
-                string.Format(Inv, "Tiny Airport (dev) - esqueleto da Fase A\ntempo de jogo {0:0.0} s   Cash {1}", Sim.Time, Sim.Cash));
+            float dt = Time.deltaTime * _speed;
+            bool para = _hud.Bloqueia;
+            if (!para) _bot?.Pensa(Sim, dt);
+            DtJogo = para ? 0f : dt;
+            Sim.Tick(DtJogo);
+            foreach (Evento e in Sim.Events) { Trata(e); _hud.M.Evento(e); }
+            string oferta = Sim.Anuncios.Oferta(Anuncio.Receita);
+            if (oferta != null && oferta != _ofertaLogada) { _ofertaLogada = oferta; Diario("rewarded_ad_offered", (int)Anuncio.Receita); }
+            if (Sim.Steps - _ultimoSave >= 5 * Sim.Hz) Grava();
+            if (Time.unscaledTime - _ultimoFlush > 5f) Flush();
         }
 
-        // ------------------------------------------------------------------ dev: autoplay, foto
+        void OnApplicationPause(bool pausado)
+        {
+            if (_headless || Sim == null) return;
+            if (pausado) { Grava(); Flush(); }
+            else Retorno();
+        }
+
+        void OnApplicationQuit()
+        {
+            if (_headless || Sim == null) return;
+            Grava();
+            Flush();
+        }
+
+        // ------------------------------------------------------------------ intencoes da tela (o Hud chama)
+
+        public void Tap(Estacao e) => Sim.Tap(e);
+        public bool Move(int f, Estacao e) => Sim.Move(f, e);
+        public void Buy(Estacao e, Melhoria m) => Sim.Buy(e, m);
+        public void Hire() => Sim.Hire();
+
+        /// <summary>Botao de rewarded: pede o id de transacao ao nucleo e abre o anuncio simulado. Nunca durante arrasto (o botao some no
+        /// tutorial e nas telas modais, Hud).</summary>
+        public void VerAnuncio(Anuncio a)
+        {
+            if (Anuncios.Veto(_hud.Arrastando, false, false) != null) return;
+            string tx = Sim.Anuncios.Oferta(a);
+            if (tx == null) return;
+            if (a == Anuncio.Cofre) Diario("rewarded_ad_offered", (int)a);
+            _hud.AbreAnuncio(a, tx);
+        }
+
+        /// <summary>O anuncio simulado chegou ao fim: so agora o nucleo paga (1x por id).</summary>
+        public void AnuncioConcluido(Anuncio a, string tx)
+        {
+            Diario("rewarded_ad_completed", (int)a);
+            Sim.Anuncios.Pagar(tx);
+            Grava();
+        }
+
+        public string ExportarDiario()
+        {
+            Diario("diary_export");
+            Flush();
+            switch (Exportar.Diario(_test ? null : _diario, Textos.ExportarDiario))
+            {
+                case Exportar.Status.Vazio: return Textos.DiarioVazio;
+                case Exportar.Status.Pasta: return Textos.DiarioPasta;
+                case Exportar.Status.Erro: return Textos.DiarioErro;
+                default: return "";
+            }
+        }
+
+        // ------------------------------------------------------------------ eventos do nucleo -> diario e avisos
+
+        void Trata(Evento e)
+        {
+            switch (e.Tipo)
+            {
+                case Ev.VooCriado: Diario("flight_spawned", e.A, e.B, e.C / Sim.Hz); break;
+                case Ev.EmbarqueAberto: Diario("flight_boarding_started", e.A); break;
+                case Ev.VooPartiu:
+                    Diario("flight_departed", e.A, e.B, e.C);
+                    Voo v = Sim.Voos[e.A % 2];
+                    if (v != null && v.Id == e.A) _hud.Toast(Textos.Partiu(v));
+                    break;
+                case Ev.VooPerdido: Diario("flight_missed", e.A, e.B, e.C); break;
+                case Ev.Fila: Diario("queue_length_sampled", e.A, e.B, e.C); break;
+                case Ev.Melhorou: Diario("station_upgraded", e.A, e.B, e.C); break;
+                case Ev.Movido: Diario("staff_moved", e.A, e.B, e.C); break;
+                case Ev.Contratado: Diario("staff_hired", e.A, e.B, e.C); break;
+                case Ev.Historia: Diario("story_delivered", e.A, e.B, e.C); _hud.Toast(Textos.HistoriaEntregue); break;
+                case Ev.Offline: Diario("offline_claim", e.A, e.B); break;
+                case Ev.Recompensa: Diario("reward_granted", e.A, e.B); break;
+                case Ev.Bonus: _hud.Toast(Textos.Bonus(e.B)); break;
+                case Ev.Marco: _hud.Toast(Textos.Marco(e.A + 1)); break;
+            }
+        }
+
+        /// <summary>Uma linha do diario (bufferizada; Flush a cada 5 s, na pausa e ao sair). -testsession nao escreve.</summary>
+        public void Diario(string evento, long a = 0, long b = 0, long c = 0)
+        {
+            if (Sim == null) return;
+            if (_test)
+            {
+                // -testsession nao grava diario; o tutorial vai para o log (prova dos passos jogaveis com -tutorial -bot)
+                if (evento.StartsWith("tour", StringComparison.Ordinal) || evento.StartsWith("tutorial", StringComparison.Ordinal))
+                    Debug.Log(string.Format(Inv, "TOUR {0} {1} {2} t={3:0.0}", evento, a, b, Sim.Time));
+                return;
+            }
+            _buf.Append(DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ", Inv)).Append(',').Append(_instalacao).Append(',').Append(Application.version)
+                .Append(',').Append(_sessao).Append(',').Append(Time.realtimeSinceStartup.ToString("0.0", Inv)).Append(',').Append(Sim.Time.ToString("0.0", Inv))
+                .Append(',').Append(evento).Append(',').Append(a.ToString(Inv)).Append(',').Append(b.ToString(Inv)).Append(',').Append(c.ToString(Inv))
+                .Append(',').Append(Math.Max(0, Sim.Onda) + 1).Append('\n');
+        }
+
+        void Flush()
+        {
+            _ultimoFlush = Time.unscaledTime;
+            if (_buf.Length == 0) return;
+            try
+            {
+                bool novo = !File.Exists(_diario) || new FileInfo(_diario).Length == 0;
+                File.AppendAllText(_diario, (novo ? Cabecalho + "\n" : "") + _buf);
+                _buf.Clear();
+            }
+            catch (Exception) { }   // ponytail: diario e best-effort; disco cheio nunca derruba o jogo
+        }
+
+        // ------------------------------------------------------------------ save e cofre
+
+        static long Agora => DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+
+        /// <summary>Grava o save (escrita atomica: .tmp e depois troca). Save recusado ou -testsession: nunca grava.</summary>
+        void Grava()
+        {
+            _ultimoSave = Sim.Steps;
+            if (_test || Sim.SaveRefused) return;
+            string texto = Sim.Save(Application.version, Agora);
+            if (texto == null) return;
+            if (Sim.ClockWentBack > 0) Diario("clock_back", Sim.ClockWentBack);
+            try
+            {
+                string tmp = _save + ".tmp";
+                File.WriteAllText(tmp, texto);
+                if (File.Exists(_save)) File.Replace(tmp, _save, null);
+                else File.Move(tmp, _save);
+            }
+            catch (Exception e) { Debug.LogWarning("TA save: " + e.Message); }
+        }
+
+        /// <summary>Ao abrir e ao voltar da pausa: anda o dia local e paga o cofre pelo tempo fora (id = o SavedAt). Nenhum voo andou.</summary>
+        void Retorno()
+        {
+            long agora = Agora;
+            Sim.Agora(agora, (long)TimeZoneInfo.Local.GetUtcOffset(DateTime.UtcNow).TotalSeconds);
+            if (Sim.SavedAt <= 0 || Sim.SaveRefused) return;
+            long fora = agora - Sim.SavedAt;
+            long cash = Sim.ApplyOffline(fora, Sim.SavedAt);
+            if (cash > 0 && fora >= 60) _hud.AbreCofre(cash, Math.Min(fora, Sim.T.OfflineCap));
+        }
+
+        // ------------------------------------------------------------------ dev: autoplay, foto, gravacao
 
         /// <summary>-autoplay N (portao do build, sem render): o Bot.Autoplay do nucleo (Bom, Lento e Parado com a semente 1, e o Bom fechando
         /// e reabrindo no meio de cada onda). Loga AUTOPLAY OK|FAIL com o embarque medio, o ganho de mover e os marcos; sai 0/1.</summary>
@@ -81,13 +285,51 @@ namespace TA
             Application.Quit(ok ? 0 : 1);
         }
 
-        IEnumerator Shot(string path)
+        void AbreTelaDev(string tela)
+        {
+            if (tela.StartsWith("passo", StringComparison.Ordinal) && int.TryParse(tela.Substring(5), out int p)) { _hud.MostraPasso(p); return; }
+            if (tela == "cofre")
+            {
+                Sim.RateEma = Math.Max(Sim.RateEma, 2.0);
+                long cash = Sim.ApplyOffline(5400, Sim.LastClaim + 1);
+                _hud.AbreCofre(cash, 5400);
+                return;
+            }
+            _hud.AbreTela(tela);
+        }
+
+        IEnumerator Shot(string path, string tela)
         {
             yield return new WaitForSecondsRealtime(ArgF("-shotdelay", 1f));
-            Debug.Log(string.Format(Inv, "SHOT {0} t={1:0.0} {2}x{3}", path, Sim.Time, Screen.width, Screen.height));
+            if (!string.IsNullOrEmpty(tela)) AbreTelaDev(tela);
+            yield return null;
+            yield return null;
+            yield return new WaitForEndOfFrame();
+            Debug.Log(string.Format(Inv, "SHOT {0} t={1:0.0} onda={2} {3}x{4}", path, Sim.Time, Sim.Onda + 1, Screen.width, Screen.height));
             ScreenCapture.CaptureScreenshot(path);
             yield return null;
             yield return null;
+            Application.Quit(0);
+        }
+
+        IEnumerator Demo()
+        {
+            Sim.Cash += 570;
+            while (Sim.Hire()) { }
+            yield return new WaitForSeconds(1.5f);
+            Sim.Move(0, Estacao.Loja);   // do check-in (azul) para a loja (verde): a troca de colete e a loja abrindo
+        }
+
+        IEnumerator Record(string pasta)
+        {
+            Directory.CreateDirectory(pasta);
+            Time.captureFramerate = 30;
+            int total = Mathf.RoundToInt(ArgF("-recordseg", 10f) * 30f);
+            for (int i = 0; i < total; i++)
+            {
+                yield return new WaitForEndOfFrame();
+                ScreenCapture.CaptureScreenshot(Path.Combine(pasta, "f_" + i.ToString("00000", Inv) + ".png"));
+            }
             Application.Quit(0);
         }
 

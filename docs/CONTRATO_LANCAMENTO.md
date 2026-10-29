@@ -14,17 +14,17 @@ Estados: **feito** (com evidência) · **parcial** · **falta** · **depende** (
 
 | §4.1 | Item | v0.1 | Estado | Onde fecha | Matriz §21 |
 |---|---|---|---|---|---|
-| — | Projeto Unity 6000.3.27f1 que abre e compila; portão `verify.sh full` | sim | **parcial**: esqueleto da Fase A (PR da Fase A) | Fase A | P-01 |
+| — | Projeto Unity 6000.3.27f1 que abre e compila; portão `verify.sh full` | sim | **feito**: `verify.sh full` verde (núcleo, EditMode, viewcheck, build Windows e `-autoplay 10`) nos PRs #5 e da View | Fase A | P-01 |
 | 1 | 3 aeroportos com identidade e desafios diferentes | Vale Verde | falta | B (Vale Verde), C (Costa Azul, Aurora Global) | P-05 |
 | 2 | 12 rotas desbloqueáveis (distância, frequência, receita, risco) | — | falta | C; nomes dependem de D-13 | P-06 |
 | 3 | 8 variantes visuais de aeronaves | — | depende | C; arte depende de D-14 (Lote 2) | P-06, P-12 |
 | 4 | 8 estações (check-in, segurança, bagagem, portão, loja, alimentação, manutenção, despacho) | 4 | falta | B (4), C (as outras 4) | P-02 |
 | 5 | 6 perfis de funcionários com especialização | 3 generalistas | falta | B (3), C (6 perfis, §5.5) | P-04 |
-| 6 | Equipe limitada e reposicionável entre estações (TA-2) | sim | **parcial**: núcleo e bot feitos, ganho de mover 1,259 (`BALANCE.md`); falta a View e o K2 com gente | B; portão: bot ≥ +10% e K2 com gente | P-04 |
-| 7 | Quadro de partidas com horários e estados (TA-1) | 2 voos por onda | **parcial**: núcleo e bot feitos, embarque 99,2% (Bom) e 73,6% (Lento); falta o quadro na tela | B; portão: bot ≥ 85% / ≥ 60% | P-03 |
-| 8 | Fluxo de passageiros, filas, embarque, partida e perda de receita por voo perdido | sim | **parcial**: núcleo com testes (`RegrasTests`, `ExploitTests`); falta a View | B | P-02 |
+| 6 | Equipe limitada e reposicionável entre estações (TA-2) | sim | **feito** na v0.1, menos o K2: bot com ganho de mover 1,259 (`BALANCE.md`); arrastar e "mover para" no mundo com bonecos que andam pelo corredor e vestem o uniforme do setor; K2 com gente **pendente (externo)** | B; portão: bot ≥ +10% e K2 com gente | P-04 |
+| 7 | Quadro de partidas com horários e estados (TA-1) | 2 voos por onda | **feito** na v0.1: quadro com horário, estado, a bordo e barra; bot 99,2% (Bom) e 73,6% (Lento) | B; portão: bot ≥ 85% / ≥ 60% | P-03 |
+| 8 | Fluxo de passageiros, filas, embarque, partida e perda de receita por voo perdido | sim | **feito** na v0.1: núcleo testado e bonecos andando pela fila, embarque pela ponte e saída de quem perdeu o voo | B | P-02 |
 | 9 | 4 incidentes com aviso prévio | — | falta | C | P-06 |
-| 10 | 20 micro-histórias de passageiros (TA-3) | 1 | **parcial**: 1 história no núcleo (álbum no save); falta o balão na tela | B (1), C (20) | P-06 |
+| 10 | 20 micro-histórias de passageiros (TA-3) | 1 | **parcial**: 1 história feita (coração no boneco e no quadro, álbum no save); as 20 na C | B (1), C (20) | P-06 |
 | 11 | Campanha principal: 30 objetivos, 10 por aeroporto | — | falta | C; `docs/CAMPANHA.md` | P-05 |
 | 12 | Missões diárias e semanais | — | falta | C (`Metas.cs` do Forge) | P-05 |
 | 13 | 20 conquistas permanentes | — | falta | C | P-05 |
@@ -32,11 +32,11 @@ Estados: **feito** (com evidência) · **parcial** · **falta** · **depende** (
 | 15 | Loja de compras digitais com catálogo fixo e preços da loja | — | depende | D; D-05, D-06 e Play Console (D-U-N-S, previsão 2026-11-25) | P-08 |
 | 16 | Anúncios recompensados opcionais | simulado | depende: regras dos 2 rewarded no núcleo (`Anuncios.cs`, testes de id de transação e teto diário); LevelPlay real depende de D-03 | B (regras e simulador no núcleo), D (LevelPlay real) | P-09 |
 | 17 | Sem interstitial forçado | sim | **feito** no núcleo: não existe código de interstitial; `Anuncios` só tem os 2 rewarded | B | P-09 |
-| 18 | Save local, migração de schema, restauração de compras, nuvem se configurada | save + envelope | **parcial**: save da v0.1 com filas e retomada no meio da onda (`SaveTests`); falta gravar em disco (View) | B (save e migração), D (restaurar compras), C/D (nuvem, se houver) | P-10 |
-| 19 | Progressão offline limitada a 2 h | sim | **parcial**: `ApplyOffline` com trava de 2 h, Δt ≤ 0 = 0, teto relativo e id de coleta (`ExploitTests`); falta a tela do cofre | B | P-10 |
-| 20 | Tutorial contextual (12 passos da Origem) | passos 1–9 | falta | B (1–9), C (10–12) | P-02 |
+| 18 | Save local, migração de schema, restauração de compras, nuvem se configurada | save + envelope | **parcial**: save em disco com escrita atômica, autosave de 5 s e na pausa, retomada no meio da onda, schema futuro recusado; falta a migração (nasce com o schema 2) e restaurar compras (D) | B (save e migração), D (restaurar compras), C/D (nuvem, se houver) | P-10 |
+| 19 | Progressão offline limitada a 2 h | sim | **feito**: `ApplyOffline` com as travas (`ExploitTests`) e a tela do cofre com o tempo e o cálculo, ao abrir e ao voltar da pausa | B | P-10 |
+| 20 | Tutorial contextual (12 passos da Origem) | passos 1–9 | **parcial**: passos 1–9 feitos (fotos de cada passo e rodada `-tutorial -bot`); 10–12 na C | B (1–9), C (10–12) | P-02 |
 | 21 | Configurações, áudio, acessibilidade básica, política de privacidade, suporte e exclusão de dados | — | depende | C (telas e áudio); política e suporte dependem de D-09, D-10 e D-12 | P-11 |
-| 22 | Telemetria de eventos, crash reporting e painel mínimo de saúde | diário CSV | falta (produção **depende** de D-11) | B (diário), D (SDK de D-11); crash pelo Android vitals | P-16 |
+| 22 | Telemetria de eventos, crash reporting e painel mínimo de saúde | diário CSV | **parcial**: diário CSV com os eventos do §15.1 e `diario_report.py` (K2 e embarque médio); produção **depende** de D-11 | B (diário), D (SDK de D-11); crash pelo Android vitals | P-16 |
 | 23 | Arte final, UI, ícone, screenshots e materiais de loja sem placeholder | greybox | depende | C e E; Tripo depende de D-14; logo e ícone dependem de D-03 | P-12, P-15 |
 | — | Build Android assinado (AAB) e iOS | — | depende | E; AAB depende de D-03 (a chave de upload leva o nome) e da Play Console; iOS depende de macOS e conta Apple (D-04) | P-14 |
 | — | Segurança e anti-fraude (§8), privacidade e LGPD (§9) | — | falta | D | P-17, P-11 |
