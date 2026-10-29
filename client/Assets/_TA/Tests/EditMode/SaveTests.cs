@@ -112,6 +112,51 @@ namespace TA.Tests
             Assert.Greater(ev.Count(e => e.Tipo == Ev.Embarcou && e.A / 500 % 2 == 1), 0);
         }
 
+        /// <summary>Save real gravado pelo codigo do schema 2 (main de 2026-10-29, PR #12: semente 7, bot Bom, 700 s = onda 4 aos 160 s): Ana e
+        /// Beto contratados, 2 pessoas de patio, um aviao em voo com desgaste 40, o outro no patio esperando o portao fechar, a 22 embarques do
+        /// marco 1.</summary>
+        const string V02 = "sha256=4d706be7ab4c1128d40dfe3ee993f47a6ddc221dbbdefe1282e12a0b63f768f7\nschema=2\ncontent=0.2.0\nat=1700000000\n" +
+            "t=21000\ncash=11\nseed=7\nonda=3\nemb=128\nperd=0\nalbum=1\nbst=0\nema=2.449953885136964\nsaved=1700000000\nclaim=0\nclaimcash=0\ndia=0\n" +
+            "est.0=4,0\nest.1=4,0\nest.2=0,0\nest.3=3,0\nfunc.0=0,0,0\nfunc.1=1,1,0\nvoo.0=22,22,176,1,1\nvoo.1=22,22,176,1,0\n" +
+            "aviao.0=40,22200,0,-1,-1,0,0,1,0,0\nsrv.0=0:0,0:0,0:0,0:0\naviao.1=15,18300,1,7,-1,0,0,1,0,0\nsrv.1=0:0,0:0,0:0,0:0\n" +
+            "trip.0=0,2,0,0\ntrip.1=0,0,5400,1\ntrip.2=0,2,2669,-1\ntrip.3=1,2,0,0\ntrip.4=1,0,5400,1\ntrip.5=1,2,2639,-1\npatio=2\npatioatraso=1\n";
+
+        /// <summary>CONTRATO_FASE_C2 §4: o save do schema 2 abre com os perfis pela ordem e da o mesmo jogo que jogar ate ali com o codigo novo,
+        /// tambem depois de passar o marco 1 (especializacao e estacoes novas entram igual).</summary>
+        [Test]
+        public void MigracaoDoSchema2_SaveReal_DaOMesmoJogoQueJogarComOCodigoNovo()
+        {
+            Sim m = Sim.Load(V02);
+            Assert.IsFalse(m.SaveRefused, "schema 2 migra, nao e' recusado");
+            Assert.AreEqual((11L, 21000L, 128L, 2, 2), (m.Cash, m.Steps, m.TotalEmbarcados, m.Staff.Count, m.EquipePatio));
+            CollectionAssert.AreEqual(new[] { Perfil.Atendente, Perfil.Seguranca }, m.Staff.Select(f => f.Perfil), "os generalistas viram perfis pela ordem");
+            Assert.AreEqual((40, false, 15, true, 7), (m.Avioes[0].Desgaste, m.Avioes[0].NoPatio, m.Avioes[1].Desgaste, m.Avioes[1].NoPatio, m.Avioes[1].VooId));
+
+            Sim n = Jogado(700f);   // o mesmo jogo, jogado do zero pelo codigo novo
+            string a = m.Save("0.3.0", T);
+            StringAssert.Contains("\nschema=" + Sim.Schema + "\n", a);
+            Assert.AreEqual(n.Save("0.3.0", T), a, "migrar = jogar ate ali com o codigo novo");
+            Assert.AreEqual(a, Sim.Load(a).Save("0.3.0", T), "ida e volta estavel no schema 3");
+
+            var b1 = new Bot(BotProfile.Bom); var b2 = new Bot(BotProfile.Bom);
+            for (int i = 0; i < 300 * Sim.Hz; i++) { b1.Step(m); b2.Step(n); }
+            Assert.GreaterOrEqual(m.Marco, 1, "passou do marco 1: perfis e estacoes novas em jogo");
+            Assert.AreEqual(n.Save("0.3.0", T + 1), m.Save("0.3.0", T + 1));
+        }
+
+        [Test]
+        public void LixoDaFaseC2_ViraPadraoLimitado()
+        {
+            string payload = "t=90\nemb=10\nest.6=3,1\nfunc.0=6,6,0,4\nfunc.1=0,0,0,4\nfunc.2=1,1,0,99\nfunc.3=0,0,0\nat.4=1:5\n";
+            Sim s = Sim.Load(SaveEnvelope.Wrap(payload, "x", 1));
+            Assert.IsFalse(s.SaveRefused);
+            Assert.AreEqual((0, 0), (s.St(Estacao.Manutencao).Vel, s.St(Estacao.Manutencao).Cap), "oficina ainda fechada: nivel do save nao vale");
+            Assert.AreEqual(1, s.Staff.Count, "perfil repetido encerra a lista");
+            Assert.AreEqual((Perfil.Mecanico, Estacao.Portao), (s.Staff[0].Perfil, s.Staff[0].Em), "estacao fechada cai nas 4 da v0.1");
+            Assert.AreEqual(0, s.St(Estacao.Bagagem).Pessoas);
+            s.Tick(1f);
+        }
+
         /// <summary>Fechar e reabrir no meio de cada onda, com hangar, checagem, inspecao e tripulacao em jogo: 20 ondas iguais a sem fechar.</summary>
         [Test]
         public void RetomadaComFaseC_ContinuaIgual()

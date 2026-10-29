@@ -8,15 +8,19 @@ namespace TA.Core
     /// </summary>
     public struct BotProfile
     {
-        /// <summary>Planeja = escala, checagem e hangar (CONTRATO_FASE_C §8); sem ele, tudo fica no padrao do nucleo.</summary>
-        public string Name; public float Decide; public bool Move, Planeja;
+        /// <summary>Planeja = escala, checagem e hangar (CONTRATO_FASE_C §8); Equipe = especialista em casa e gente na oficina quando um aviao
+        /// esta pendente (CONTRATO_FASE_C2 §5). Sem eles, tudo fica no padrao do nucleo.</summary>
+        public string Name; public float Decide; public bool Move, Planeja, Equipe;
 
-        public static readonly BotProfile Bom = new BotProfile { Name = "Bom", Decide = 1f, Move = true, Planeja = true };
-        public static readonly BotProfile Lento = new BotProfile { Name = "Lento", Decide = 2.5f, Move = true, Planeja = true };
+        public static readonly BotProfile Bom = new BotProfile { Name = "Bom", Decide = 1f, Move = true, Planeja = true, Equipe = true };
+        public static readonly BotProfile Lento = new BotProfile { Name = "Lento", Decide = 2.5f, Move = true, Planeja = true, Equipe = true };
         public static readonly BotProfile Parado = new BotProfile { Name = "Parado", Decide = 1f, Move = false, Planeja = true };
-        /// <summary>Portao de design do GDD §5.13: o Bom que planeja contra o Bom que deixa tudo no automatico.</summary>
-        public static readonly BotProfile Planejador = new BotProfile { Name = "Planejador", Decide = 1f, Move = true, Planeja = true };
-        public static readonly BotProfile Automatico = new BotProfile { Name = "Automatico", Decide = 1f, Move = true, Planeja = false };
+        /// <summary>Portao de design do GDD §5.13 (Fase C): o Bom que planeja contra o Bom que deixa tudo no automatico.</summary>
+        public static readonly BotProfile Planejador = new BotProfile { Name = "Planejador", Decide = 1f, Move = true, Planeja = true, Equipe = true };
+        public static readonly BotProfile Automatico = new BotProfile { Name = "Automatico", Decide = 1f, Move = true, Planeja = false, Equipe = true };
+        /// <summary>Portao da Fase C2: o mesmo Bom com e sem o planejamento da equipe (as 4 estacoes novas e os perfis).</summary>
+        public static readonly BotProfile EquipePlanejada = new BotProfile { Name = "EquipePlanejada", Decide = 1f, Move = true, Planeja = true, Equipe = true };
+        public static readonly BotProfile EquipeAutomatica = new BotProfile { Name = "EquipeAutomatica", Decide = 1f, Move = true, Planeja = true };
         public static readonly BotProfile[] All = { Bom, Lento, Parado };
     }
 
@@ -51,10 +55,51 @@ namespace TA.Core
             _t += dt;
             if (_t + 1e-4f < P.Decide) return;
             _t = Math.Min(_t - P.Decide, P.Decide);   // le o estado das estacoes como a tela mostra (atualizado a cada 0,5 s)
-            if (!(P.Move && Mover(s)) && Tocar(s)) Taps++;
+            bool moveu = P.Move && Mover(s);
+            if (!moveu && Tocar(s)) Taps++;
             if (Comprar(s)) Buys++;
             if (P.Planeja) Planeja(s);
+            if (!moveu && P.Move && P.Equipe) Equipe(s);
         }
+
+        /// <summary>
+        /// Fase C2: 1) avião pendente (no ar ou no patio) e ninguem na oficina: leva o mecanico (ou quem sobra numa estacao normal) para ela
+        /// chegar antes do pouso; 2) senao, quem esta fora da especialidade numa estacao normal volta para a estacao do perfil se la cabe
+        /// (os 3 da v0.1 so depois da especializacao; o mecanico so vai quando a oficina precisa). Uma mudanca por decisao.
+        /// </summary>
+        void Equipe(Sim s)
+        {
+            if (OficinaPrecisa(s) && s.Alocados(Estacao.Manutencao) == 0)
+            {
+                Funcionario quem = null;
+                foreach (Funcionario f in s.Staff)
+                {
+                    if (f.Andando > 0 || f.Em == Estacao.Manutencao || s.St(f.Em).Estado == Estado.Critico) continue;
+                    bool mec = f.Perfil == Perfil.Mecanico;
+                    if (quem == null || mec || quem.Perfil != Perfil.Mecanico && s.St(f.Em).Estado == Estado.Normal && s.St(f.Em).Folga > s.St(quem.Em).Folga) quem = f;
+                }
+                if (quem != null && s.Move(quem.Id, Estacao.Manutencao)) Moves++;
+                return;
+            }
+            foreach (Funcionario f in s.Staff)
+            {
+                Estacao casa = Funcionario.Casa(f.Perfil);
+                // Ana e Beto so voltam pela especializacao; o Caio vai a alimentacao (estacao nova) quando ela abre
+                if (f.Andando > 0 || f.Perfil == Perfil.Mecanico || !s.Especializa && (int)casa < 4) continue;
+                if (!s.Ativa(casa) || Funcionario.Especialidade(f.Perfil, f.Em) || s.St(f.Em).Estado != Estado.Normal || s.Alocados(casa) >= s.St(casa).Postos) continue;
+                if (f.Em == Estacao.Manutencao && OficinaPrecisa(s)) continue;
+                if (s.Move(f.Id, casa)) { Moves++; return; }
+            }
+        }
+
+        static bool OficinaPrecisa(Sim s)
+        {
+            if (!s.Ativa(Estacao.Manutencao)) return false;
+            foreach (Aviao a in s.Avioes) if (a.Pendente && a.Hangar == 0 && (!a.NoPatio || a.Check > 0)) return true;
+            return false;
+        }
+
+        static bool Fluxo(Estacao e) => e == Estacao.CheckIn || e == Estacao.Seguranca || e == Estacao.Portao;
 
         /// <summary>
         /// Tripulacao: em cada voo no patio antes do embarque, a bordo fica quem tem menos trechos (descansado = 0); no empate, quem acabou de
@@ -68,7 +113,8 @@ namespace TA.Core
             {
                 Voo v = s.VooDo(a);
                 if (!a.NoPatio || v == null || v.Embarque || a.FechouEm >= 0) continue;
-                if (a.Pendente) { if (s.Hangar(a.Id)) Hangares++; continue; }
+                // com gente na oficina a inspecao ja salva o voo (Fase C2): o hangar so quando o mecanico esta sozinho
+                if (a.Pendente) { if (!(s.Ativa(Estacao.Manutencao) && s.Forca(Estacao.Manutencao) > 0) && s.Hangar(a.Id)) Hangares++; continue; }
                 if (a.Desgaste >= s.T.CheckTira && (v.AbrePasso - s.PassoNaOnda) * Sim.Step >= s.T.CheckSeg && s.Checagem(a.Id)) Checagens++;
                 foreach (Tripulante bordo in s.Tripulacao)
                 {
@@ -92,15 +138,21 @@ namespace TA.Core
         bool Mover(Sim s)
         {
             Station alvo = null;
-            foreach (Station st in s.Stations)
-                if (st.Tipo != Estacao.Loja && st.Estado == Estado.Critico && s.Alocados(st.Tipo) < st.Postos && (alvo == null || st.Folga < alvo.Folga)) alvo = st;
+            foreach (Station st in s.Estacoes)
+                if (Fluxo(st.Tipo) && st.Estado == Estado.Critico && s.Alocados(st.Tipo) < st.Postos && (alvo == null || st.Folga < alvo.Folga)) alvo = st;
             if (alvo == null) return false;
-            Funcionario quem = null; double folga = 0;
+            // com Equipe: prefere o especialista da estacao critica e nao tira ninguem da oficina enquanto um aviao precisa dela
+            // e so tira alguem de uma estacao nova (a casa dele) se nao houver outro
+            Funcionario quem = null; double folga = 0; int quemNota = 0;
+            bool oficina = P.Equipe && OficinaPrecisa(s);
             foreach (Funcionario f in s.Staff)
             {
                 Station de = s.St(f.Em);
-                if (f.Andando > 0 || de == alvo || de.Estado != Estado.Normal) continue;
-                if (quem == null || de.Folga > folga) { quem = f; folga = de.Folga; }
+                if (f.Andando > 0 || de == alvo || de.Estado != Estado.Normal || oficina && f.Em == Estacao.Manutencao) continue;
+                bool esp = P.Equipe && s.Especializa && Funcionario.Especialidade(f.Perfil, alvo.Tipo);
+                bool fixo = P.Equipe && (int)f.Em >= 4 && f.Em == Funcionario.Casa(f.Perfil);
+                int nota = (fixo ? 0 : 2) + (esp ? 1 : 0);
+                if (quem == null || nota > quemNota || nota == quemNota && de.Folga > folga) { quem = f; folga = de.Folga; quemNota = nota; }
             }
             if (quem == null || !s.Move(quem.Id, alvo.Tipo)) return false;
             Moves++;
@@ -110,7 +162,7 @@ namespace TA.Core
         static bool Tocar(Sim s)
         {
             Station alvo = null;
-            foreach (Station st in s.Stations)
+            foreach (Station st in s.Estacoes)
                 if (s.PodeTocar(st.Tipo) && (alvo == null || st.Folga < alvo.Folga)) alvo = st;
             return alvo != null && s.Tap(alvo.Tipo);
         }
@@ -119,14 +171,20 @@ namespace TA.Core
 
         bool Comprar(Sim s)
         {
-            long best = s.CustoContratar(); Estacao be = 0; Melhoria bm = 0; bool hire = best >= 0;
-            foreach (Station st in s.Stations)
+            // hire: -2 = o proximo da v0.1 (Hire()), >= 0 = o perfil novo, -1 = upgrade
+            long best = s.CustoContratar(); Estacao be = 0; Melhoria bm = 0; int hire = best >= 0 ? -2 : -1;
+            for (int p = Sim.MaxFuncionarios; p < Sim.MaxEquipe; p++)
             {
-                if (st.Tipo == Estacao.Loja && s.Alocados(Estacao.Loja) == 0) continue;
+                long c = s.CustoContratar((Perfil)p);
+                if (c >= 0 && (best < 0 || c < best)) { best = c; hire = p; }
+            }
+            foreach (Station st in s.Estacoes)
+            {
+                if (!Fluxo(st.Tipo) && s.Alocados(st.Tipo) == 0) continue;   // estacao sem ninguem nao rende: nao melhora
                 foreach (Melhoria m in new[] { Melhoria.Velocidade, Melhoria.Capacidade })
                 {
                     long c = s.Custo(st.Tipo, m);
-                    if (c >= 0 && (best < 0 || c < best)) { best = c; be = st.Tipo; bm = m; hire = false; }
+                    if (c >= 0 && (best < 0 || c < best)) { best = c; be = st.Tipo; bm = m; hire = -1; }
                 }
             }
             if (s.AtrasosPatio > _patioVisto && s.CustoPatio() >= 0 && (best < 0 || s.CustoPatio() <= best))
@@ -136,7 +194,7 @@ namespace TA.Core
                 return true;
             }
             if (best < 0 || s.Cash < best) return false;
-            return hire ? s.Hire() : s.Buy(be, bm);
+            return hire == -2 ? s.Hire() : hire >= 0 ? s.Hire((Perfil)hire) : s.Buy(be, bm);
         }
 
         // ------------------------------------------------------------------ medicao (BalanceTests e -autoplay)

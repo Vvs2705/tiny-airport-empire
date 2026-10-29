@@ -124,7 +124,7 @@ namespace TA.Core
             foreach (Aviao a in Avioes)
                 if (a.NoPatio && a.Pendente && a.Check == 0 && a.FechouEm < 0 && MecanicoLivre)
                 {
-                    a.Check = Passos(T.InspecaoSeg); a.Inspecao = true; a.Checou = true;
+                    a.Check = PassosOficina(T.InspecaoSeg); a.Inspecao = true; a.Checou = true;
                     Emit(Ev.ChecagemIniciada, a.Id, 0, 1);
                 }
         }
@@ -232,7 +232,7 @@ namespace TA.Core
             Aviao a = AntesDoEmbarque(aviao);
             if (a == null || !T.RegraManutencao || a.Checou || a.Check > 0 || a.Pendente || a.Desgaste <= 0 || !MecanicoLivre || Cash < T.CheckCusto) return false;
             Cash -= T.CheckCusto;
-            a.Check = Passos(T.CheckSeg); a.Inspecao = false; a.Checou = true;
+            a.Check = PassosOficina(T.CheckSeg); a.Inspecao = false; a.Checou = true;
             Emit(Ev.ChecagemIniciada, a.Id, T.CheckCusto, 0);
             return true;
         }
