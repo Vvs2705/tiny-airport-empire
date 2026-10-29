@@ -2,6 +2,8 @@
 
 **Pedido do Vinicius:** "avalie todos os GDDs, faça comparativos com outros jogos similares, melhore o arquivo e proponha coisas que não têm em jogos similares e que ajudariam nosso time a ter algo na frente de competitividade".
 
+**Seções citadas (§N):** desde 2026-10-29 estão em [`GDD_ORIGEM.md`](GDD_ORIGEM.md); o GDD mestre é o [`GDD.md`](GDD.md).
+
 **Status do jogo:** **NO-GO nesta rodada** (veredito de 2026-10-06). Entra como reskin se o slot idle validar. Este documento diz o que o tornaria mais que isso.
 
 **Método.** Pesquisa web de 09/10/2026, só leitura pública: lojas, AppGoblin, publishers e reviews da App Store. As páginas de app da Play não abriram; a faixa oficial da Play só aparece onde a busca da loja ou um trecho indexado mostrou o valor. Instalações, MAU e receita vêm do **AppGoblin** ("AG"), que é estimativa de terceiros, e a receita só vem em faixas ("<US$10K" ou "US$10K+" por mês), com confiança baixa. A nota de um mesmo jogo muda entre capturas. Contexto: `00_PESQUISA/VEREDITO_VALIDACAO.md` e `00_PESQUISA/validacao/`.

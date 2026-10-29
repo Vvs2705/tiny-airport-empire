@@ -12,4 +12,4 @@ Se o arquivo acima não carregar (outro PC), o mínimo é: só este jogo; mudan�
 
 ## Situação
 - Estado: só GDD e estrutura do projeto; ainda não há código. Não comece o projeto Unity sem o Vinicius pedir neste grupo.
-- Comece por: `README.md`, `docs/GDD.md` (revisão competitiva de 2026-10-09 no topo) e `docs/COMPETITIVO.md`; o layout do futuro projeto está em `client/README.md`.
+- Comece por: `README.md`, `docs/GDD.md` (GDD mestre "Little Terminal": auditoria de 2026-10-29 no §0.3 e decisões pendentes no §23.2), `docs/GDD_ORIGEM.md` (produto, revisão competitiva e lições do DC) e `docs/COMPETITIVO.md`; o layout do futuro projeto está em `client/README.md`.
