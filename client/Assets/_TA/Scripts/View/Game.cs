@@ -11,14 +11,13 @@ namespace TA
     /// Dungeon Courier (dc:Scripts/View/Game.cs). Fase A: chama sim.Tick com o dt do quadro e mostra o relogio; save em disco, HUD,
     /// toque e diario CSV chegam na Fase B (docs/CONTRATO_V01.md).
     /// Flags (leitura de argumentos do DC; as outras do CONTRATO_V01 §7 entram com o sistema que usam):
-    ///   -autoplay N   sem render: simula N ondas de 180 s de jogo, confere o save em ida e volta, loga AUTOPLAY OK|FAIL e sai 0/1.
+    ///   -autoplay N   sem render: o bot joga N ondas (Bom, Lento, Parado; retomada no meio da onda), loga AUTOPLAY OK|FAIL e sai 0/1.
     ///                 Usar com -batchmode -nographics (client/tools/verify.sh full).
     ///   -speed N      multiplica o dt (0,1..20).
     ///   -shot f.png [-shotdelay s]   foto da tela depois de s segundos reais (padrao 1) e sai 0.
     /// </summary>
     public sealed class Game : MonoBehaviour
     {
-        const float Onda = 180f;   // s de jogo por onda (CONTRATO_V01 §4); o autoplay da Fase A so mede o relogio
         static readonly CultureInfo Inv = CultureInfo.InvariantCulture;
 
         public Sim Sim { get; private set; }
@@ -69,27 +68,16 @@ namespace TA
 
         // ------------------------------------------------------------------ dev: autoplay, foto
 
-        /// <summary>-autoplay N (smoke do build, sem render): N ondas de relogio em quadros de 1/60 s. OK = o relogio andou N x 180 s e o save
-        /// faz ida e volta pelo envelope sem perder nada.</summary>
+        /// <summary>-autoplay N (portao do build, sem render): o Bot.Autoplay do nucleo (Bom, Lento e Parado com a semente 1, e o Bom fechando
+        /// e reabrindo no meio de cada onda). Loga AUTOPLAY OK|FAIL com o embarque medio, o ganho de mover e os marcos; sai 0/1.</summary>
         void Autoplay()
         {
             int n = int.TryParse(Arg("-autoplay"), NumberStyles.Integer, Inv, out int v) && v > 0 ? v : 8;
-            var sim = new Sim();
-            bool ok = true;
-            try
-            {
-                for (int i = 0; i < n; i++)
-                {
-                    for (int q = 0; q < Onda * 60; q++) sim.Tick(1f / 60f);
-                    Debug.Log(string.Format(Inv, "AUTOPLAY #{0} tempo_jogo={1:0.0}s passos={2}", i + 1, sim.Time, sim.Steps));
-                }
-                Sim back = Sim.Load(sim.Save(Application.version, DateTimeOffset.UtcNow.ToUnixTimeSeconds()));
-                bool round = !back.SaveRefused && back.Steps == sim.Steps && back.Cash == sim.Cash;
-                if (!round) Debug.Log("AUTOPLAY save ida-e-volta diferente");
-                ok = round && Mathf.Abs(sim.Time - n * Onda) < 1f;
-            }
-            catch (Exception ex) { ok = false; Debug.LogError("AUTOPLAY excecao: " + ex); }
-            Debug.Log(string.Format(Inv, "AUTOPLAY {0} ondas={1} tempo_jogo={2:0}s passos={3} save=ida-e-volta", ok ? "OK" : "FAIL", n, sim.Time, sim.Steps));
+            bool ok;
+            string linha;
+            try { linha = Bot.Autoplay(n, out ok); }
+            catch (Exception ex) { ok = false; linha = "AUTOPLAY FAIL excecao"; Debug.LogError("AUTOPLAY excecao: " + ex); }
+            Debug.Log(linha);
             Application.Quit(ok ? 0 : 1);
         }
 

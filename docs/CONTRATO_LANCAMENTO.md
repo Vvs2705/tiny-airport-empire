@@ -8,7 +8,7 @@ Base: `GDD.md` §4.1 (conteúdo obrigatório), §17 (fases e portões), §21 (ma
 
 **Guardrails que não mudam:** 1 moeda (Cash) na v0.1, e Gems só com D-05 e D-07; offline com teto de 2 h no código; nada aleatório pago (ECA Digital, Lei 15.211/2025); nenhum interstitial; anúncio não personalizado, sem `AD_ID`; perder voo custa só a receita dele; criativos gravados do jogo real; nenhum dado pessoal no diário.
 
-## 1. Matriz §4.1 × feito (estado em 2026-10-29, Fase A)
+## 1. Matriz §4.1 × feito (estado em 2026-10-29, Fase B em andamento)
 
 Estados: **feito** (com evidência) · **parcial** · **falta** · **depende** (de decisão, conta ou recurso externo).
 
@@ -20,20 +20,20 @@ Estados: **feito** (com evidência) · **parcial** · **falta** · **depende** (
 | 3 | 8 variantes visuais de aeronaves | — | depende | C; arte depende de D-14 (Lote 2) | P-06, P-12 |
 | 4 | 8 estações (check-in, segurança, bagagem, portão, loja, alimentação, manutenção, despacho) | 4 | falta | B (4), C (as outras 4) | P-02 |
 | 5 | 6 perfis de funcionários com especialização | 3 generalistas | falta | B (3), C (6 perfis, §5.5) | P-04 |
-| 6 | Equipe limitada e reposicionável entre estações (TA-2) | sim | falta | B; portão: bot ≥ +10% e K2 com gente | P-04 |
-| 7 | Quadro de partidas com horários e estados (TA-1) | 2 voos por onda | falta | B; portão: bot ≥ 85% / ≥ 60% | P-03 |
-| 8 | Fluxo de passageiros, filas, embarque, partida e perda de receita por voo perdido | sim | falta | B | P-02 |
+| 6 | Equipe limitada e reposicionável entre estações (TA-2) | sim | **parcial**: núcleo e bot feitos, ganho de mover 1,259 (`BALANCE.md`); falta a View e o K2 com gente | B; portão: bot ≥ +10% e K2 com gente | P-04 |
+| 7 | Quadro de partidas com horários e estados (TA-1) | 2 voos por onda | **parcial**: núcleo e bot feitos, embarque 99,2% (Bom) e 73,6% (Lento); falta o quadro na tela | B; portão: bot ≥ 85% / ≥ 60% | P-03 |
+| 8 | Fluxo de passageiros, filas, embarque, partida e perda de receita por voo perdido | sim | **parcial**: núcleo com testes (`RegrasTests`, `ExploitTests`); falta a View | B | P-02 |
 | 9 | 4 incidentes com aviso prévio | — | falta | C | P-06 |
-| 10 | 20 micro-histórias de passageiros (TA-3) | 1 | falta | B (1), C (20) | P-06 |
+| 10 | 20 micro-histórias de passageiros (TA-3) | 1 | **parcial**: 1 história no núcleo (álbum no save); falta o balão na tela | B (1), C (20) | P-06 |
 | 11 | Campanha principal: 30 objetivos, 10 por aeroporto | — | falta | C; `docs/CAMPANHA.md` | P-05 |
 | 12 | Missões diárias e semanais | — | falta | C (`Metas.cs` do Forge) | P-05 |
 | 13 | 20 conquistas permanentes | — | falta | C | P-05 |
 | 14 | Passe de temporada: trilhas gratuita e premium, 30 níveis | — | falta (premium **depende** de D-05) | C (gratuita), D (premium) | P-07 |
 | 15 | Loja de compras digitais com catálogo fixo e preços da loja | — | depende | D; D-05, D-06 e Play Console (D-U-N-S, previsão 2026-11-25) | P-08 |
-| 16 | Anúncios recompensados opcionais | simulado | depende | B (regras e simulador no núcleo), D (LevelPlay real); o app no LevelPlay depende de D-03 | P-09 |
-| 17 | Sem interstitial forçado | sim | falta (vira teste) | B: nenhum código de interstitial; regra no `CONTRATO_V01.md` §1 | P-09 |
-| 18 | Save local, migração de schema, restauração de compras, nuvem se configurada | save + envelope | parcial: envelope e schema do Forge no esqueleto | B (save e migração), D (restaurar compras), C/D (nuvem, se houver) | P-10 |
-| 19 | Progressão offline limitada a 2 h | sim | falta | B (`ApplyOffline` do Forge, teste do teto) | P-10 |
+| 16 | Anúncios recompensados opcionais | simulado | depende: regras dos 2 rewarded no núcleo (`Anuncios.cs`, testes de id de transação e teto diário); LevelPlay real depende de D-03 | B (regras e simulador no núcleo), D (LevelPlay real) | P-09 |
+| 17 | Sem interstitial forçado | sim | **feito** no núcleo: não existe código de interstitial; `Anuncios` só tem os 2 rewarded | B | P-09 |
+| 18 | Save local, migração de schema, restauração de compras, nuvem se configurada | save + envelope | **parcial**: save da v0.1 com filas e retomada no meio da onda (`SaveTests`); falta gravar em disco (View) | B (save e migração), D (restaurar compras), C/D (nuvem, se houver) | P-10 |
+| 19 | Progressão offline limitada a 2 h | sim | **parcial**: `ApplyOffline` com trava de 2 h, Δt ≤ 0 = 0, teto relativo e id de coleta (`ExploitTests`); falta a tela do cofre | B | P-10 |
 | 20 | Tutorial contextual (12 passos da Origem) | passos 1–9 | falta | B (1–9), C (10–12) | P-02 |
 | 21 | Configurações, áudio, acessibilidade básica, política de privacidade, suporte e exclusão de dados | — | depende | C (telas e áudio); política e suporte dependem de D-09, D-10 e D-12 | P-11 |
 | 22 | Telemetria de eventos, crash reporting e painel mínimo de saúde | diário CSV | falta (produção **depende** de D-11) | B (diário), D (SDK de D-11); crash pelo Android vitals | P-16 |

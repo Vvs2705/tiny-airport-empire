@@ -37,15 +37,16 @@ A v0.1 é o greybox que prova os diferenciais TA-1 (quadro de partidas) e TA-2 (
 8. **Terminal em 3 marcos:** por passageiros embarcados acumulados. Cada marco aumenta a tarifa e o terminal cresce na tela.
 9. **Offline (§6.3):** o relógio do quadro não anda fora do jogo; nenhum voo se perde fechado. Ao voltar, o cofre paga a renda offline (regras no §4).
 
-**Conflito resolvido nesta proposta (validar com o Vinicius):** o GDD §5.5 diz "começa com 3 funcionários", e o passo 6 do tutorial da Origem diz "contrate a atendente do check-in". Proposta: o jogo começa com 0 e o toque manual; a 1ª contratação é guiada pelo tutorial e custa pouco; as outras duas saem por Cash na onda 2 ou 3. O teto da v0.1 é 3.
+**Conflito resolvido na Fase B (2026-10-29, `BALANCE.md` D-B3):** o GDD §5.5 diz "começa com 3 funcionários", e o passo 6 do tutorial da Origem diz "contrate a atendente do check-in". Decidido: o jogo começa com 0 e o toque manual; a 1ª contratação é guiada pelo tutorial e custa pouco; as outras duas saem por Cash. O teto da v0.1 é 3. O bot mediu o TA-2 igual nos dois começos (1,259 com 0, 1,254 com 3), e com 0 ele também mede o toque e a contratação do tutorial. Reversível: `Tuning.FuncionariosIniciais`.
 
 ## 4. Números iniciais (hipóteses)
 
 | Item | Valor inicial |
 |---|---|
 | Passo do núcleo | 1/30 s; dt por quadro limitado a 0,25 s |
-| Onda | 180 s de jogo: voo 1 fecha aos 120 s, voo 2 aos 170 s, a próxima onda começa 10 s depois |
-| Passageiros por voo | 10 na onda 1, +2 por onda, até 30 (assentos do avião regional) |
+| Onda | 180 s de jogo: voo 1 fecha aos 120 s, voo 2 aos 170 s, a próxima onda começa 10 s depois; o embarque abre 60 s antes do fechamento |
+| Passageiros por voo | 10 na onda 1, +4 por onda, até 36 (assentos do avião regional; era +2 e 30: `BALANCE.md` D-B2) |
+| Balcões (postos) da planta | check-in 2, segurança 2, loja 1, portão 1 (mais balcões que funcionários: `BALANCE.md` D-B1) |
 | Chegada | espalhada de 0 até (fechamento − 70 s), por sequência determinística |
 | Tempo de atendimento (nível 0, s por passageiro) | check-in 4,0 · segurança 5,0 · loja 3,0 · portão 1,5 |
 | Loja | 50% dos passageiros param, se ela estiver aberta e o voo deles fechar em mais de 40 s; cada compra rende 6 Cash |
@@ -53,8 +54,8 @@ A v0.1 é o greybox que prova os diferenciais TA-1 (quadro de partidas) e TA-2 (
 | Bônus de pontualidade | +25% da receita do voo com 100% a bordo |
 | Contratação | 1º funcionário 20 Cash (tutorial), 2º 150, 3º 400; teto 3 |
 | Caminhada ao mover | 2,5 s |
-| Upgrade Velocidade (por estação) | 5 níveis, −12% do tempo por nível; custo 40 × 1,6^nível, arredondado a 5 |
-| Upgrade Capacidade (por estação) | +1 posto por nível, 2 níveis (1 → 3 postos); custo 300 × 2,5^nível, arredondado a 5 |
+| Upgrade Velocidade (por estação) | 5 níveis, −12% do tempo por nível (× 0,88ⁿ); custo 40 × 1,6^nível, arredondado a 5 |
+| Upgrade Capacidade (por estação) | +1 posto por nível, 2 níveis (check-in e segurança 2 → 4, loja e portão 1 → 3); custo 300 × 2,5^nível, arredondado a 5 |
 | Marcos do terminal | 150, 600 e 1.500 passageiros embarcados |
 | Cofre offline | 25% da renda online medida (média móvel), **teto de 2 h como trava no código** (o Tuning só encurta), teto relativo de 2× o upgrade mais barato ainda travado, Δt ≤ 0 paga 0, cada coleta com id de transação (`ApplyOffline` do Forge) |
 | Rewarded 1 | 2× a coleta offline, 1 vez por retorno |
@@ -102,4 +103,4 @@ O K3 (p10 de FPS ≥ 30 com 60 passageiros num Android de entrada) é medido no 
 | Fase | Entrega | Estado |
 |---|---|---|
 | A | este contrato, `CONTRATO_LANCAMENTO.md`, projeto Unity 6000.3.27f1, esqueleto vazio (núcleo, Setup, flags `-autoplay`/`-testsession`/`-speed`/`-shot`) e `verify.sh full` verde | em andamento (PR da Fase A) |
-| B | os §3–§8 deste contrato | não iniciado |
+| B | os §3–§8 deste contrato | em andamento: núcleo, bot e testes (PR `feat/fase-b-nucleo`); View greybox a seguir |
