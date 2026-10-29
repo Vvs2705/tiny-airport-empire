@@ -8,7 +8,15 @@ A v0.1 é o greybox que prova os diferenciais TA-1 (quadro de partidas) e TA-2 (
 
 ## 1. Escopo da v0.1
 
-**Entra (GDD §4.2):** aeroporto Vale Verde; 4 estações (check-in, segurança, loja, portão); quadro de partidas com 2 voos por onda; 3 funcionários móveis; 1 moeda (Cash); upgrades de velocidade e capacidade; terminal que cresce em 3 marcos; offline de 2 h com 2× opcional por anúncio; 2× receita por 5 min por anúncio; tutorial com os passos 1–9 da Origem; 1 passageiro com história (TA-3); save versionado com envelope; bot headless com perfis; diário CSV de playtest; arte greybox procedural.
+**Entra (GDD §4.2):** aeroporto Vale Verde; 4 estações (check-in, segurança, loja, portão); quadro de partidas com 2 voos por onda; 3 funcionários móveis; 1 moeda (Cash); upgrades de velocidade e capacidade; terminal que cresce em 3 marcos; offline de 2 h com 2× opcional por anúncio; 2× receita por 5 min por anúncio; tutorial com os passos 1–9 da Origem; 1 passageiro com história (TA-3); save versionado com envelope; bot headless com perfis; diário CSV de playtest; arte greybox num **mundo 3D em tempo real com pessoas em billboard** (revisões de 2026-10-29, pedidos do Vinicius com as referências do mercado):
+  - câmera ortográfica isométrica fixa, com pan e zoom;
+  - terminal em corte, com primitivas do Unity no lugar dos futuros modelos do Tripo;
+  - pátio com o avião no portão e veículos rodando;
+  - passageiros que andam pela fila entre fitas, de porta em porta e pela ponte até o avião;
+  - funcionários que saem de um setor, andam até o outro e chegam vestindo o colete do setor novo (camada tingida);
+  - o HUD fica em faixas finas por cima.
+
+  Manutenção, tripulação e veículos com regra ficam para o GDD v1.2.
 
 **Fica fora (volta pelo §4.1, nas Fases C a E):** outros aeroportos, rotas e aviões; estações 5–8 (bagagem, alimentação, manutenção, despacho); os 6 perfis de funcionário (na v0.1 os 3 são generalistas); incidentes (frente fria TA-4); campanha, missões e conquistas; temporada; IAP e Gems; SDK de anúncio real (o LevelPlay depende do nome e do appId, D-03: na v0.1 o anúncio é simulado); interstitial (nenhum); aceleração 2× do tempo; idiomas além do pt-BR (D-08); arte do Tripo (Lote 1 só depois do portão da Fase B, D-14).
 
@@ -93,14 +101,16 @@ A v0.1 está pronta quando **todas** as linhas abaixo estiverem feitas, com evid
 | 4 | Invariantes como testes negativos nomeados: perder voo custa só a receita dele; offline nunca perde voo; nenhum funcionário sai de sorteio; toda concessão tem id de transação; Δt ≤ 0 paga 0; teto de 2 h | `ExploitTests` (cópia do Forge) |
 | 5 | Save: ida e volta, envelope corrompido, schema futuro recusado, retomada no meio da onda | `SaveTests` |
 | 6 | `client/tools/verify.sh full` verde, com `-autoplay 10` e 0 exceções | saída do `verify.sh` no PR |
-| 7 | Fotos 540×960 de cada tela, incluindo uma com 60 passageiros na tela, conferidas à mão | `client/Builds/validation_v01/` |
+| 7 | Fotos 540×960 de cada tela, incluindo uma com 60 passageiros andando na tela, conferidas à mão, e um `-record` de um funcionário mudando de setor (sai do balcão, anda pelo corredor, chega com o uniforme trocado) | `client/tools/fotos_v01.sh` → `client/Builds/validation_v01/`; montagem no PR |
 | 8 | Tutorial passos 1–9 jogáveis, puláveis e desligados no `-testsession` | foto de cada passo com `-tutorial -bot` |
 
 O K3 (p10 de FPS ≥ 30 com 60 passageiros num Android de entrada) é medido no aparelho, por último; ele não trava a v0.1, mas trava a arte do Lote 1.
+
+**Estado em 2026-10-29:** linhas 1, 2 e 4 a 8 feitas, com a evidência nos PRs #5 (núcleo) e da View. A linha 3 (K2) espera o playtest com pelo menos 5 pessoas: o diário e o `diario_report.py` já medem.
 
 ## 9. O que cada fase entrega
 
 | Fase | Entrega | Estado |
 |---|---|---|
 | A | este contrato, `CONTRATO_LANCAMENTO.md`, projeto Unity 6000.3.27f1, esqueleto vazio (núcleo, Setup, flags `-autoplay`/`-testsession`/`-speed`/`-shot`) e `verify.sh full` verde | em andamento (PR da Fase A) |
-| B | os §3–§8 deste contrato | em andamento: núcleo, bot e testes (PR `feat/fase-b-nucleo`); View greybox a seguir |
+| B | os §3–§8 deste contrato | **feito**, menos a linha 3 do §8 (K2 com gente: **pendente, externo**): núcleo, bot e testes no PR #5; View com o mundo de bonecos, quadro, tutorial, diário e fotos no PR da View (`feat/fase-b-view`) |

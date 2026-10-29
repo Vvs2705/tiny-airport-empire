@@ -66,8 +66,23 @@ namespace TA.EditorTools
                 EditorSceneManager.SaveScene(EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single), Scene);
             }
             EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(Scene, true) };
+            IncluiShader("Legacy Shaders/Diffuse");   // as primitivas do Mundo (Mundo.Material): sem isto o build sai magenta
             AssetDatabase.SaveAssets();
             Debug.Log("TA Setup: ok (" + AppId + " " + Version + " code " + VersionCode(Version) + ", retrato, Android ARM64 IL2CPP API 26+)");
+        }
+
+        /// <summary>Poe o shader em "Always Included Shaders": o Mundo cria o material em tempo de execucao, sem asset que o referencie.</summary>
+        static void IncluiShader(string nome)
+        {
+            Shader sh = Shader.Find(nome);
+            if (sh == null) { Debug.LogError("TA Setup: shader " + nome + " nao achado"); return; }
+            var gs = AssetDatabase.LoadAssetAtPath<UnityEngine.Rendering.GraphicsSettings>("ProjectSettings/GraphicsSettings.asset");
+            var so = new SerializedObject(gs);
+            SerializedProperty lista = so.FindProperty("m_AlwaysIncludedShaders");
+            for (int i = 0; i < lista.arraySize; i++) if (lista.GetArrayElementAtIndex(i).objectReferenceValue == sh) return;
+            lista.InsertArrayElementAtIndex(lista.arraySize);
+            lista.GetArrayElementAtIndex(lista.arraySize - 1).objectReferenceValue = sh;
+            so.ApplyModifiedProperties();
         }
 
         public static void BuildWindows() => Build(BuildTarget.StandaloneWindows64, "Builds/win/TinyAirport.exe");

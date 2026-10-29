@@ -2,7 +2,7 @@
 
 Uma página: cada arquivo, para que serve e as funções-chave. Atualize no PR que cria, move ou divide um arquivo (regra do estúdio). Arquivo que passar de ~600 linhas vira `partial` por assunto.
 
-Convenção de origem: `fs:` = Forge Street (`Vvs2705/forge-street`), `dc:` = Dungeon Courier (`Vvs2705/dungeon-courier`). Estado: Fase B, núcleo da v0.1 com bot e testes; View greybox a seguir (`docs/CONTRATO_V01.md` §9).
+Convenção de origem: `fs:` = Forge Street (`Vvs2705/forge-street`), `dc:` = Dungeon Courier (`Vvs2705/dungeon-courier`). Estado: Fase B, v0.1 jogável em greybox: núcleo com bot e testes, View com quadro, arrasto, tutorial e diário (`docs/CONTRATO_V01.md` §9).
 
 ## Núcleo — `client/Assets/_TA/Scripts/Core/` (`TA.Core`, C# puro, sem UnityEngine)
 
@@ -14,7 +14,7 @@ Convenção de origem: `fs:` = Forge Street (`Vvs2705/forge-street`), `dc:` = Du
 | `Sim.Offline.cs` | cofre offline e dia local | `ApplyOffline(dt, claimId)` (trava de 2 h, Δt ≤ 0 = 0, teto relativo, id de coleta), `Agora(nowUnix, fuso)`, `DiaLocal` | `ApplyOffline` de `fs:Scripts/Core/Sim.Consultas.cs`; dia de `fs:Scripts/Core/Metas.cs` |
 | `Anuncios.cs` | regras dos 2 rewarded (Cofre 2x; Receita 2x por 5 min, 3 por dia), sem SDK | `Pode`, `Previa`, `Oferta` (id de transação), `Pagar`, `Veto(arrasto, tutorial, pausa)` | `fs:Scripts/Core/Anuncios.cs`, enxuto |
 | `Defs.cs` | enums salvos (`Estacao`, `Melhoria`, `Estado`, `Ev`), `Pax`, `Station`, `Funcionario`, `Voo`, `Tuning` (os números do contrato §4) e `Historias` | `Tuning.Padrao`, `Tuning.OfflineTrava`, `Tuning.Pax(onda)` | `fs:Scripts/Core/Defs.cs` |
-| `Bot.cs` | bot headless com perfis Bom, Lento e Parado; medição e a linha do `-autoplay` | `Bot.Step`, `Bot.Medir(perfil, semente, ondas)`, `Bot.Autoplay(n, out ok)` | `fs:Scripts/Core/Bot.cs` (perfil como dado) |
+| `Bot.cs` | bot headless com perfis Bom, Lento e Parado; medição e a linha do `-autoplay` | `Bot.Step`, `Bot.Pensa(sim, dt)` (a View no `-bot`), `Bot.Medir(perfil, semente, ondas)`, `Bot.Autoplay(n, out ok)` | `fs:Scripts/Core/Bot.cs` (perfil como dado) |
 | `SaveEnvelope.cs` | cabeçalho do save: SHA-256, schema, versão do jogo e data | `Wrap`, `Unwrap` → `Missing`, `Ok`, `Legacy`, `Corrupt`, `NewerSchema` | cópia de `fs:Scripts/Core/SaveEnvelope.cs` |
 | `TA.Core.asmdef` | assembly do núcleo com `noEngineReferences` | — | `fs:FS.Core.asmdef` |
 
@@ -22,7 +22,23 @@ Convenção de origem: `fs:` = Forge Street (`Vvs2705/forge-street`), `dc:` = Du
 
 | Arquivo | Para quê | Funções-chave | Origem |
 |---|---|---|---|
-| `Game.cs` | o único MonoBehaviour: nasce sozinho na cena vazia, chama `sim.Tick`, lê as flags | `Boot`, `Arg`/`ArgF`; `-autoplay N` (`Bot.Autoplay`: Bom, Lento e Parado com a semente 1 e retomada no meio da onda; `AUTOPLAY OK\|FAIL` com embarque e ganho de mover, sai 0/1); `-speed N`; `-shot arq -shotdelay s` | leitura de flags de `dc:Scripts/View/Game.cs` |
+| `Game.cs` | o MonoBehaviour de fluxo: nasce sozinho na cena vazia, chama `sim.Tick` (parado com tela modal ou explicação do tutorial), grava o save (5 s, pausa, saída; escrita atômica; nunca por cima de save recusado), paga o cofre ao abrir e ao voltar, escreve o diário CSV e lê as flags do contrato §7 | `Boot`, `Arg`/`ArgF`; `-autoplay N` (`Bot.Autoplay`: Bom, Lento e Parado com a semente 1 e retomada no meio da onda; `AUTOPLAY OK\|FAIL` com embarque e ganho de mover, sai 0/1); com `-testsession`: `-bot`, `-speed N`, `-tela nome`, `-onda K`, `-passageiros N`, `-tutorial`, `-shot arq -shotdelay s`, `-record pasta`; `Diario(evento, a, b, c)`; `VerAnuncio`/`AnuncioConcluido` |
+| `Hud.cs` | HUD em uGUI por código (referência 1080×1920, área segura), em faixas finas por cima do mundo: barra de cima, quadro de partidas (voo, destino, hora de fechamento, estado, a bordo, barra do tempo, chip da mala na cor do voo), terminal, barra de baixo; camada de rótulos do mundo | `Build`, `Toast`, `Bloqueia`, `MundoAceita`, `M` (o Mundo) | `dc:Scripts/View/Hud.cs` |
+| `Mundo.cs` | o aeroporto em **3D em tempo real** (direção do Vinicius em 29/10):
+  - câmera ortográfica isométrica fixa (35°/45°), com pan e zoom por gesto;
+  - planta em escada para o retrato: entrada, check-in, segurança, loja, portão, ponte e avião;
+  - salas de 4×4 em corte, com paredes baixas, portas, fila indiana entre fitas e balcões;
+  - primitivas do Unity com cor por `MaterialPropertyBlock`: os modelos do Tripo entram como malha no lugar delas;
+  - pátio com o avião do voo embarcando (cauda na cor do voo), escada e 2 veículos rodando; o avião taxia na partida;
+  - pessoas em billboard (sprites em camadas virados para a câmera: corpo, colete tingido, cabeça, cabelo), com a mala na cor do voo;
+  - funcionário que anda de sala em sala pelas portas no tempo da `Tuning.Caminhada` e troca o colete ao chegar (0,35 s);
+  - toque na sala, arrasto do funcionário (alvo ≥ 48 dp, limiar em dp) e "mover para"
+  | `Atualiza(dt, regiao)`, `Evento`, `ZonaTela`, `FuncTela`, `Arrastando` | — |
+| `Hud.Telas.cs` | telas modais que seguram o relógio: melhorias (efeito escrito antes de comprar), mover para (alternativa ao arrasto), cofre offline, anúncio simulado (3 s, só então o `Pagar`), pausa, álbum | `AbreTela(nome)`, `AbreCofre`, `AbreAnuncio` | — |
+| `Tour.cs` | tutorial dos passos 1–9 da Origem (véu com buraco, contorno, seta, cartão da Lara, dedo arrastando no passo 7), um por vez, pulável, gravado no PlayerPrefs `ta_tour` | `MostraPasso(n)` (flag `-tela passoN`), `ReverTour`, `PulaTour` | `dc:Scripts/View/Tour.cs` |
+| `Art.cs` | arte procedural (formas com antialias em cache) e helpers de uGUI (`Node`, `Img`, `NewText`, `Panel`, `NewButton`, `Toque`), `Aperta`, `Dp` e `AreaSegura` | `Art.*`, `Dp.Px`, `AreaSegura.AncorarDentro` | `dc:Scripts/View/Art.cs`, `Dp.cs`, `AreaSegura.cs` |
+| `Textos.cs` | todo texto de tela em pt-BR numa tabela `L(pt)`, pronta para as colunas en/es/id da D-08 | `Textos.*` | `dc:Scripts/View/Textos.cs` |
+| `Exportar.cs` | exportar o diário só quando o jogador manda (Android: MediaStore/ACTION_SEND; Windows: abre a pasta) | `Exportar.Diario` | cópia de `dc:Scripts/View/Exportar.cs` | leitura de flags de `dc:Scripts/View/Game.cs` |
 | `TA.asmdef` | assembly da View (só referencia o `TA.Core`) | — | `dc:DC.asmdef` |
 
 ## Editor — `client/Assets/_TA/Editor/` (`TA.EditorTools`)
@@ -45,7 +61,7 @@ Convenção de origem: `fs:` = Forge Street (`Vvs2705/forge-street`), `dc:` = Du
 ## Cena e pacotes
 
 - `client/Assets/_TA/Scenes/Main.unity`: gerada pelo `Setup.Apply`, vazia.
-- `client/Packages/manifest.json`: `com.unity.test-framework` e os módulos de IMGUI, captura de tela e conversão de imagem. uGUI, Input System, IAP e LevelPlay entram com o sistema que os usa.
+- `client/Packages/manifest.json`: `com.unity.test-framework`, `com.unity.ugui` (a HUD) e os módulos de UI, IMGUI, captura de tela e conversão de imagem. A entrada é a do Input Manager antigo com o `StandaloneInputModule` do uGUI; Input System, IAP e LevelPlay entram com o sistema que os usa.
 
 ## Ferramentas — `client/tools/`
 
@@ -53,4 +69,7 @@ Convenção de origem: `fs:` = Forge Street (`Vvs2705/forge-street`), `dc:` = Du
 |---|---|---|
 | `verify.sh quick\|full` | o portão: núcleo, viewcheck, EditMode, build Windows e `-autoplay 10` com 0 exceções; logs em `client/Builds/verify/` | `dc:client/tools/verify.sh` |
 | `coretests/TACore.Tests.csproj` | `dotnet test`: núcleo e testes EditMode sem abrir o Unity | `dc:client/tools/coretests` |
-| `viewcheck/` (`unity_refs.props`, `core/`, `view/`) | `dotnet build`: compila a View contra as DLLs do Unity 6000.3.27f1, sem abrir o Unity | `dc:client/tools/viewcheck` |
+| `viewcheck/` (`unity_refs.props`, `core/`, `view/`) | `dotnet build`: compila a View contra as DLLs do Unity 6000.3.27f1 e a `UnityEngine.UI.dll` de `client/Library/ScriptAssemblies`, sem abrir o Unity | `dc:client/tools/viewcheck` |
+| `fotos_v01.sh` | fotos 540×960 de cada tela, do estresse com 60 passageiros (parados e andando) e de cada passo do tutorial, a rodada `-tutorial -bot` e o `-record` do funcionário mudando de setor; saída em `client/Builds/validation_v01/` | — |
+| `montagem.py` | folha de contato e GIF de um `-record` (Pillow) | — |
+| `diario_report.py` | relatório do playtest a partir dos diários CSV exportados: K2 (pessoas e episódios), embarque médio, uso de offline, anúncio, histórias e upgrades; `--autoteste` com diários sintéticos | `dc:client/tools/diario_report.py` |

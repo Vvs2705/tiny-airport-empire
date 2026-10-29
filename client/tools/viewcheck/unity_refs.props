@@ -1,7 +1,7 @@
 <Project>
   <!-- Verificacao rapida sem abrir o Unity (copia do viewcheck do Dungeon Courier): compila o Core das fontes e a View contra as DLLs
-       do Unity 6000.3.27f1. Fase A: a View so usa o UnityEngine, entao nao precisa de client/Library. Quando entrar o uGUI ou o Input
-       System, acrescente aqui as DLLs de client/Library/ScriptAssemblies (e a checagem delas no verify.sh), como no DC.
+       do Unity 6000.3.27f1. UnityEngine.UI (uGUI) vem de client/Library/ScriptAssemblies: abra o projeto no Unity 1 vez (o verify.sh full
+       abre) ou copie as DLLs de onde o projeto ja abriu. O Input System entra quando a View usar.
        Uso: dotnet build client/tools/viewcheck/view -nologo -v q   -->
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
@@ -14,6 +14,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="$(UnityManaged)\UnityEngine\*.dll" Exclude="$(UnityManaged)\UnityEngine\UnityEditor.*.dll" Private="false" />
+    <Reference Include="$(ProjClient)\Library\ScriptAssemblies\UnityEngine.UI.dll" Private="false" />
     <ProjectReference Include="$(MSBuildThisFileDirectory)core\TA.Core.csproj" />
   </ItemGroup>
 </Project>

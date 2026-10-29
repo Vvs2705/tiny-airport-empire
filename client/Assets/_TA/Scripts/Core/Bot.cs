@@ -35,14 +35,18 @@ namespace TA.Core
         /// <summary>Se for a hora, uma decisao; depois um passo fixo do jogo (Events = a decisao e o passo, lidos uma vez).</summary>
         public void Step(Sim s)
         {
-            _t += Sim.Step;
-            if (_t + 1e-4f >= P.Decide)
-            {
-                _t -= P.Decide;   // le o estado das estacoes como a tela mostra (atualizado a cada 0,5 s)
-                if (!(P.Move && Mover(s)) && Tocar(s)) Taps++;
-                if (Comprar(s)) Buys++;
-            }
+            Pensa(s, Sim.Step);
             s.Tick(Sim.Step);
+        }
+
+        /// <summary>Conta `dt` s de jogo e, a cada P.Decide, decide (mover ou tocar, e comprar). A View (-bot) chama antes do sim.Tick.</summary>
+        public void Pensa(Sim s, float dt)
+        {
+            _t += dt;
+            if (_t + 1e-4f < P.Decide) return;
+            _t = Math.Min(_t - P.Decide, P.Decide);   // le o estado das estacoes como a tela mostra (atualizado a cada 0,5 s)
+            if (!(P.Move && Mover(s)) && Tocar(s)) Taps++;
+            if (Comprar(s)) Buys++;
         }
 
         bool Mover(Sim s)
