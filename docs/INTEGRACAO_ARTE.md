@@ -4,7 +4,7 @@
 
 ## Regras de integração
 
-- **Onde está:** `arte/tripo/<peça>_hd/<peça>_hd.zip` (FBX + texturas 4K) no checkout principal, fora do git (o repositório é público e a licença do Tripo não permite redistribuir o modelo cru), com cópia em `C:\Users\VINICIUS\3D Objects\TinyAirport-BACKUP\arte\tripo\`. O que entra no git são os sprites e as malhas leves já decimadas, nunca o zip.
+- **Onde está:** `arte/tripo/<peça>_hd/<peça>_hd.zip` (FBX + texturas 4K) no checkout principal, fora do git (o repositório é público e modelo pago não vai para ele (decisão do estúdio)), com cópia em `C:\Users\VINICIUS\3D Objects\TinyAirport-BACKUP\arte\tripo\`. O que entra no git são os sprites e as malhas leves já decimadas, nunca o zip.
 - **Rota (GDD §10.2, D-18):** pessoas viram **sprites** (Blender → `render_sprites.py`; rig Mixamo, já feito, com `Export Skeleton`); prédios, aviões, veículos e props entram como **malha em tempo real**, decimada no Blender (low-poly, material simples, pivô no chão, 1 unidade = 1 m).
 - **Uniforme:** nos funcionários e na tripulação, o uniforme é uma cor lisa; no Blender vai para um material próprio e a View tinge a máscara por setor (§5.5).
 - **Aviões:** brancos e lisos, sem logotipo; a pintura é troca de cor no material. 12 modelos cobrem as 8 variantes do contrato (item 3).

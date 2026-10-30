@@ -66,8 +66,8 @@ O risco depende de receber resposta comprimida de um servidor hostil. Aqui, Git 
 |---|---|---|
 | Código e documentos | Todos os direitos reservados, repositório público para acompanhamento | `README.md` |
 | Unity Personal | Termos da Unity | limite de receita a conferir ao lançar |
-| Modelos do Tripo | Plano pago: uso comercial; "Privado" marcado | **PROVÁVEL**: a página oficial deu 403. Direitos depois do vencimento: **NÃO VERIFICADO** |
-| Marca (imagens do gerador do Tripo) | Mesmos termos, segundo o `PROVENIENCIA.md` | a confirmar junto |
+| Modelos do Tripo | Plano pago: uso comercial e todos os direitos, em geral (§5.2.2); "Privado" marcado | **VERIFICADO** no texto, em 2026-10-30. Direitos depois do vencimento: **PROVÁVEL** que continuem nossos (§10.5); o texto não trata do fim do plano |
+| Marca (imagens do gerador do Tripo) | Mesmos termos, como saídas do serviço (§5.2.2) | **PROVÁVEL**: o texto não separa imagem de modelo |
 | Malhas decimadas | Fora do git, por decisão registrada no GDD §10.2 | coerente com o repositório público |
 | Mixamo | Sem royalties em jogos; proibido distribuir arquivos brutos; sem treino de IA | **PROVÁVEL**; nenhum clipe baixado neste projeto até agora |
 | Fontes | `LegacyRuntime.ttf`, do Unity | trocar por OFL antes da loja |
@@ -83,7 +83,7 @@ O risco depende de receber resposta comprimida de um servidor hostil. Aqui, Git 
 
 ## Riscos em aberto
 
-1. Tripo: direitos depois de 2026-11-29 não confirmados.
+1. Tripo: o §3.2 cita "automated tools" na proibição de extrair conteúdo, e as filas de script de página dos lotes de arte podem cair nisso. O §10.5 permite apagar as saídas de uma conta encerrada. Leitura completa em `PROVENIENCIA.md` §4; cópia dos termos em `C:\Users\VINICIUS\3D Objects\TinyAirport-BACKUP\licencas\tripo_termos_2026-10-30.pdf` (SHA-256 `4c8d48317ebcb2ee19bb5fce6f359fea41936cfc7a1242ead0316282ee97e456`, versão de 2025-07-11).
 2. Arte paga com backup no mesmo disco.
 3. MCP do Blender sem versão fixa: cada abertura pode executar código novo do PyPI.
 4. `main` sem proteção.

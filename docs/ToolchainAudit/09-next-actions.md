@@ -20,7 +20,7 @@ Passo a passo em `05-installation-plan.md`.
 |---|---|---|---|
 | A | Fixar a versão do MCP do Blender, atualizar o addon e desligar a telemetria | addon no protocolo 9 de 15; registro mínimo ainda sai | 5 min |
 | B | Ruleset na `main` e Dependabot alerts | a `main` não tem proteção | 5 min |
-| D | **Ler os termos do Tripo logado, antes de 2026-11-29** | direitos depois do vencimento não confirmados; o prazo é real | 15 min |
+| D | ~~Ler os termos do Tripo logado~~ **feito em 2026-10-30** | resultado em `PROVENIENCIA.md` §4 | — |
 | E | Cópia da arte fora do PC | 5 GB de arte paga num só disco | 30 min |
 | C | Atualizar o Unity quando o patch sair | condição para o AAB da loja | quando a Unity publicar |
 | F | Decidir como medir em Android de entrada | o POCO F4 não representa a meta do K3 | decisão |

@@ -923,7 +923,7 @@ Os passos 5 a 7 abaixo valem para as pessoas.
 9. Registrar arquivo de origem, prompt/versão da geração, licença/termos aplicáveis e asset final em `docs/PROVENIENCIA.md`, com o SHA.
 10. Fazer revisão visual dentro da cena real, não apenas no preview isolado: fotos 540×960 de cada tela.
 
-Arte crua paga (zips do Tripo, FBX, `.blend` com modelo) fica fora do git, no checkout principal, com backup privado. A licença dos modelos não permite redistribuir, e o repositório é público.
+Arte crua paga (zips do Tripo, FBX, `.blend` com modelo) fica fora do git, no checkout principal, com backup privado. O repositório é público e modelo pago não vai para ele (decisão do estúdio).
 
 **Malha decimada (decisão A, Vinicius, 29/10):** também fica fora do git. Ela é gerada por `client/tools/malhas_ta.py` em `client/Assets/_TA/ArtLocal/Resources/Malhas/`, pasta ignorada; o build sai deste PC, e um clone sem a pasta mostra as primitivas da v0.1. Os sprites das pessoas são render, não o modelo, e entram no git (`client/Assets/_TA/Resources/Sprites/`). A alternativa B (repositório privado com as malhas no git) fica para quando o lançamento pedir CI com build.
 

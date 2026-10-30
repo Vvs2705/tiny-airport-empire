@@ -50,6 +50,8 @@ Quando https://unity.com/security/unity-brotli-decoder-vulnerability mostrar a v
 
 ### D. Tripo: ler os termos logado
 
+**Feito em 2026-10-30:** resultado em `docs/PROVENIENCIA.md` §4 e PDF no backup.
+
 **Por que depende de você:** as páginas deram 403 fora da conta. **Pergunta:** o que acontece com os direitos dos modelos depois que o plano vence em 2026-11-29? Salve o PDF dos termos no backup com a data, antes do vencimento.
 
 ### E. Cópia da arte fora do PC
