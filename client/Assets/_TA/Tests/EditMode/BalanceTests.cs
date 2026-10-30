@@ -29,9 +29,12 @@ namespace TA.Tests
             var l = new Linha { P = p, Marco = new double[3] };
             var emb = new double[sementes];
             var marcos = new int[3];
+            // ponytail: cada semente tem o seu Sim e o Tuning so e' lido: rodam em paralelo (o job do CI tem teto de 20 min) e somam na ordem de sempre
+            var rs = new Bot.Resultado[sementes];
+            System.Threading.Tasks.Parallel.For(0, sementes, i => rs[i] = Bot.Medir(p, i + 1, ondas, t));
             for (int seed = 1; seed <= sementes; seed++)
             {
-                Bot.Resultado r = Bot.Medir(p, seed, ondas, t);
+                Bot.Resultado r = rs[seed - 1];
                 emb[seed - 1] = r.Embarque;
                 double k = 1.0 / sementes;
                 l.Embarque += r.Embarque * k; l.Receita += r.Receita * k; l.Moves += r.Moves * k; l.Taps += r.Taps * k;
