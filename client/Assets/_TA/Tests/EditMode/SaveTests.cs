@@ -135,14 +135,19 @@ namespace TA.Tests
             Sim n = Jogado(700f);   // o mesmo jogo, jogado do zero pelo codigo novo
             string a = m.Save("0.3.0", T);
             StringAssert.Contains("\nschema=" + Sim.Schema + "\n", a);
-            Assert.AreEqual(n.Save("0.3.0", T), a, "migrar = jogar ate ali com o codigo novo");
+            Assert.AreEqual(SemEma(n.Save("0.3.0", T)), SemEma(a), "migrar = jogar ate ali com o codigo novo");
             Assert.AreEqual(a, Sim.Load(a).Save("0.3.0", T), "ida e volta estavel no schema 3");
 
             var b1 = new Bot(BotProfile.Bom); var b2 = new Bot(BotProfile.Bom);
             for (int i = 0; i < 300 * Sim.Hz; i++) { b1.Step(m); b2.Step(n); }
             Assert.GreaterOrEqual(m.Marco, 1, "passou do marco 1: perfis e estacoes novas em jogo");
-            Assert.AreEqual(n.Save("0.3.0", T + 1), m.Save("0.3.0", T + 1));
+            Assert.AreEqual(SemEma(n.Save("0.3.0", T + 1)), SemEma(m.Save("0.3.0", T + 1)));
         }
+
+        /// <summary>O save sem o hash e sem a media da renda: o V02 foi gravado no .NET e o Mono do Unity difere no ultimo digito do double. Em
+        /// jogo o save e' lido pelo mesmo runtime que gravou (IdaEVolta cobre o ema).</summary>
+        static string SemEma(string save) =>
+            string.Join("\n", save.Split('\n').Where(l => !l.StartsWith("ema=") && !l.StartsWith("sha256=")));
 
         [Test]
         public void LixoDaFaseC2_ViraPadraoLimitado()

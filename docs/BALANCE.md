@@ -222,6 +222,8 @@ Depois (padrão do `Tuning`: bagagem e alimentação abrem no marco 1, oficina e
 
 Ganho de mover = **1,408** (era 1,248). **TA-1 e TA-2 passam.** O Parado fica no mesmo embarque, porque nunca leva ninguém às estações novas; a Dani, que cai na loja pelo 1º posto vazio, é o que ele ganha.
 
+`-autoplay 10` no build (semente 1): `embarque_bom=99.4% embarque_lento=73.7% embarque_parado=92.0% ganho_mover=1.438 receita_bom=6999 moves_bom=5 marcos_bom=13.7min,-,- retomada=igual`.
+
 ### Portão da Fase C, de novo (200 sementes × 20 ondas)
 
 | perfil | embarque médio | receita | inspeções | hangar | checagens | trocas de escala |
