@@ -6,7 +6,7 @@
 - **Saldo lido no site** antes e depois de cada geração (o painel mostra o saldo no topo; o script do dia leu o número antes e depois de cada clique em "Generate").
 - **Aval:** D-14 aprovada em 2026-10-29 (GDD §23.2): os créditos do Tripo acabam hoje, então a lista fechada do `ASSETS.md` sai hoje, sem aval peça por peça. No mesmo dia o Vinicius pediu arte com mais presença, logo e arte de instalação (`ASSETS.md` §2.1 e §5).
 - **Hash:** `sha256sum` no arquivo baixado (zip) e no FBX extraído.
-- **Arquivos crus fora do git:** `arte/tripo/<peça>/` e `arte/marca/` no checkout principal (`09_TINY_AIRPORT_EMPIRE/`, ignorados pelo `.gitignore`), com cópia dos zips e dos originais da marca em `C:\Users\VINICIUS\3D Objects\TinyAirport-BACKUP\arte\`. A licença do Tripo não permite redistribuir o modelo cru, e o repositório é público.
+- **Arquivos crus fora do git:** `arte/tripo/<peça>/` e `arte/marca/` no checkout principal (`09_TINY_AIRPORT_EMPIRE/`, ignorados pelo `.gitignore`), com cópia dos zips e dos originais da marca em `C:\Users\VINICIUS\3D Objects\TinyAirport-BACKUP\arte\`. O repositório é público e modelo pago não vai para ele (decisão do estúdio; ver §4).
 
 ## 1. Livro-razão de créditos (Tripo, conta da V-STACK)
 
@@ -505,7 +505,13 @@ Gerado por `client/tools/audio_gen.py` (Python 3.14.4, numpy 2.4.6, scipy 1.18.1
 
 ## 4. Licenças e termos
 
-- **Tripo:** modelos e imagens gerados na conta paga da V-STACK, com "Privado" marcado antes de gerar. Só o plano pago permite uso comercial; o gratuito é "Non-Commercial Use". Termos: https://www.tripo3d.ai/terms (reler a versão vigente antes do lançamento). O modelo cru não pode ser redistribuído: por isso zips, FBX e `.blend` ficam fora do repositório público.
+- **Tripo:** modelos e imagens gerados na conta paga da V-STACK, com "Privado" marcado antes de gerar. Só o plano pago permite uso comercial; o gratuito é "Non-Commercial Use". Termos: https://www.tripo3d.ai/terms (reler a versão vigente antes do lançamento). Zips, FBX e `.blend` ficam fora do repositório público por decisão do estúdio.
+- **Termos do Tripo lidos logado em 2026-10-30** (versão de 2025-07-11; PDF e SHA-256 em `docs/ToolchainAudit/08-license-security-and-privacy.md`). É leitura do texto, não parecer jurídico.
+  - **Conta paga (§5.2.2):** o usuário pago tem, em geral, todos os direitos sobre entradas e saídas, inclusive distribuir e ganhar dinheiro, e dá à empresa uma licença para usar e exibir o necessário à prestação do serviço. A empresa diz que não usa entradas e saídas para treinar IA.
+  - **Conta gratuita (§5.2.1):** a Tripo fica com os direitos do que o usuário gratuito gera. Nada do jogo pode sair de plano gratuito.
+  - **Depois do vencimento:** o texto não trata do fim do plano pago. O §10.5 diz que as cláusulas de propriedade sobrevivem ao encerramento, então a leitura provável é que as peças geradas com plano pago continuam nossas.
+  - **Conta encerrada (§10.5):** arquivos e saídas da conta podem ser apagados, sem responsabilidade da empresa. A cópia local é a única garantia.
+  - **Automação (§3.2):** proíbe extrair dados ou conteúdo do serviço sem autorização, citando raspagem e "automated tools". As filas de script de página usadas nos Lotes 3 a 10 são risco a considerar: geramos e baixamos peças próprias, mas o texto não abre exceção.
 - **Imagens do Nano Banana 2 dentro do Tripo:** mesmos termos do Tripo para o conteúdo gerado na conta. Logo, emblema, ícone e splash entram no git como arte de interface do jogo (prompt mestre §3.8).
 - **Mixamo:** nenhum clipe baixado hoje. Os clipes que virão do disco seguem o registro de origem de cada jogo (prompt mestre §4.1).
 - **Marca registrada:** "Little Terminal" ainda não passou pela busca no INPI, USPTO, EUIPO e nas lojas (D-03). A logo não vai para a loja antes disso.

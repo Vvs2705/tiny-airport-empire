@@ -923,7 +923,7 @@ Os passos 5 a 7 abaixo valem para as pessoas.
 9. Registrar arquivo de origem, prompt/versão da geração, licença/termos aplicáveis e asset final em `docs/PROVENIENCIA.md`, com o SHA.
 10. Fazer revisão visual dentro da cena real, não apenas no preview isolado: fotos 540×960 de cada tela.
 
-Arte crua paga (zips do Tripo, FBX, `.blend` com modelo) fica fora do git, no checkout principal, com backup privado. A licença dos modelos não permite redistribuir, e o repositório é público.
+Arte crua paga (zips do Tripo, FBX, `.blend` com modelo) fica fora do git, no checkout principal, com backup privado. O repositório é público e modelo pago não vai para ele (decisão do estúdio).
 
 Interface pintada (logo, ícones, retratos) sai do gerador de imagens grátis, sobre fundo liso e recortada por script.
 

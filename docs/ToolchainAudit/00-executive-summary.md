@@ -31,7 +31,6 @@ O maior gargalo não é de ferramenta: **236 peças de arte geradas, 0 na `main`
 | Bloqueio | Quem resolve |
 |---|---|
 | Patch do Unity para as falhas do Brotli (CVSS 9,2) e da eMudhra está "Pending" para 6000.3. O jogo não usa Brotli e nada foi publicado, mas **o AAB da loja precisa sair de um Editor corrigido** | Unity, depois aval para atualizar |
-| Direitos dos modelos do Tripo após o vencimento do plano, 2026-11-29: não confirmados, páginas com 403 | Vinicius, logado, **antes do vencimento** |
 | Medição em aparelho | "pode testar" e um Android de entrada |
 | Git, Node e .NET deste PC abaixo das versões corrigidas do Brotli, falha que a CISA lista como explorada | Vinicius: é instalação global |
 
