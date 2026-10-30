@@ -256,9 +256,10 @@ namespace TA
             if (_vista == "perto") { _alvo += new Vector3(-1.5f, 0f, -1.2f); _tam *= 0.55f; }
             else if (_vista == "patio") { _alvo = new Vector3(10.5f, 0f, 10.5f); _tam = 9.5f; }
             else if (_vista == "geral") { _alvo = new Vector3(11f, 0f, 11f); _tam = 15f; }
+            else if (_vista == "hangar") { _alvo = new Vector3(29f, 0f, 16f); _tam = 11f; }
         }
 
-        /// <summary>Game (-vista, so no -testsession): enquadramento das fotos e do -record (perto = zoom nas salas; patio = salas, estandes
+        /// <summary>Game (-vista, so no -testsession): enquadramento das fotos e do -record (perto = zoom nas salas; hangar = o caminho ate ele; patio = salas, estandes
         /// e a ponta da pista; geral = tudo).</summary>
         public void Vista(string v) { _vista = v; _enquadrado = false; }
 

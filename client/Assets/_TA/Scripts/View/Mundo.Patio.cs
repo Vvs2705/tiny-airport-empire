@@ -30,10 +30,11 @@ namespace TA
         static readonly string[] AviaoMalha = { "aviao_regional", "aviao_narrow" };
         /// <summary>s do pouso ate parar no estande e da saida do hangar ate o estande (medidos com -diag): a tela comeca esse tempo antes do nucleo.</summary>
         static readonly float[] PousoSeg = { 24f, 19f };
-        const float VoltaHangarSeg = 18f;
-        /// <summary>Hangar com a porta para a taxiway (norte): o aviao entra de nariz e sai de re.</summary>
-        static readonly Vector3 HangarEm = new Vector3(30.5f, 0f, 12.6f);
-        const float HangarYaw = 90f, HangarEscala = 1.2f, HangarZ = 13.6f;
+        const float VoltaHangarSeg = 20f;
+        /// <summary>Hangar no fim da taxiway, com a porta para oeste (a vista da camera): o aviao entra reto, de nariz; sai de re, com a cauda
+        /// na ligacao leste da pista, e segue de frente: nenhum giro no lugar.</summary>
+        static readonly Vector3 HangarEm = new Vector3(36.4f, 0f, TaxiZ);
+        const float HangarYaw = 90f, HangarEscala = 1.1f, LigacaoX = 26f;
         /// <summary>Rebocador: vaga (de frente para oeste, na beira do patio) e o ponto em que a barra encosta no nariz do aviao da ponte.</summary>
         static readonly Vector3 ReboqueVaga = new Vector3(14.6f, 0f, 8.5f), ReboqueNariz = new Vector3(11.4f, 0f, 9.4f);
         enum Reboque { Vago, Indo, Pronto, Preso, Voltando }
@@ -102,10 +103,9 @@ namespace TA
         void Patio3D()
         {
             Chao("Patio", new Vector3(15.5f, -0.06f, 13.05f), new Vector2(19.5f, 9.7f), Asfalto);
-            Chao("Taxiway", new Vector3(12f, -0.055f, TaxiZ), new Vector2(42f, 2.6f), Asfalto);
+            Chao("Taxiway", new Vector3(14f, -0.055f, TaxiZ), new Vector2(46f, 2.6f), Asfalto);
             Chao("Pista", new Vector3(10f, -0.05f, PistaZ), new Vector2(46f, 3.8f), Art.Hex(0x4A4F5B));
             foreach (float x in new[] { -6f, 26f }) Chao("Ligacao", new Vector3(x, -0.055f, (TaxiZ + PistaZ) * 0.5f), new Vector2(2.6f, PistaZ - TaxiZ), Asfalto);
-            Chao("LigacaoHangar", new Vector3(HangarEm.x, -0.055f, 17.6f), new Vector2(3.4f, 2.8f), Asfalto);
             Chao("PatioOnibus", new Vector3(27.2f, -0.058f, 9.4f), new Vector2(4.4f, 1.8f), Asfalto);
             for (int i = 0; i < 14; i++) Chao("FaixaPista", new Vector3(-12f + i * 3.2f, -0.04f, PistaZ), new Vector2(1.6f, 0.14f), Art.Hex(0xF4F1E8));
             for (int i = 0; i < 6; i++)
@@ -113,7 +113,7 @@ namespace TA
                 Chao("Cabeceira", new Vector3(-12.2f, -0.04f, PistaZ - 1.25f + i * 0.5f), new Vector2(1.4f, 0.22f), Art.Hex(0xF4F1E8));
                 Chao("Cabeceira", new Vector3(32.2f, -0.04f, PistaZ - 1.25f + i * 0.5f), new Vector2(1.4f, 0.22f), Art.Hex(0xF4F1E8));
             }
-            for (int i = 0; i < 18; i++) Chao("FaixaTaxi", new Vector3(-7f + i * 2f, -0.045f, TaxiZ), new Vector2(1f, 0.1f), Art.Hex(0xF2C14E));
+            for (int i = 0; i < 20; i++) Chao("FaixaTaxi", new Vector3(-7f + i * 2f, -0.045f, TaxiZ), new Vector2(1f, 0.1f), Art.Hex(0xF2C14E));
             for (int g = 0; g < 2; g++)   // linha de entrada do estande (amarela)
                 Chao("LinhaEstande", new Vector3(EstandeX[g], -0.045f, (NarizZ + TaxiZ) * 0.5f + 0.4f), new Vector2(0.1f, TaxiZ - NarizZ - 1.4f), Art.Hex(0xF2C14E));
 
@@ -351,24 +351,24 @@ namespace TA
             a.Trechos.Enqueue(sobe);
         }
 
-        /// <summary>Do estande ao hangar: recua com o nariz para leste, taxia pela taxiway e entra de nariz pela porta norte.</summary>
+        /// <summary>Do estande ao hangar: recua com o nariz para leste e segue reto pela taxiway ate dentro da porta.</summary>
         void ParaHangar(Aviao a)
         {
             float x = EstandeX[a.Id];
             a.Trechos.Enqueue(Recuo(x, ZEstande(a), a.Id == 0, -1f));
-            Trecho taxi = Caminho(RaioAviao, 2.6f, V(x - 3f, TaxiZ), V(HangarEm.x, TaxiZ), V(HangarEm.x, HangarZ));
+            Trecho taxi = Caminho(RaioAviao, 2.6f, V(x - 3f, TaxiZ), V(HangarEm.x, TaxiZ));
             taxi.A = 0.4f; taxi.F = 0.6f; taxi.Para = true;
             a.Trechos.Enqueue(taxi);
         }
 
-        /// <summary>Do hangar ao estande: sai de re com o nariz para oeste, taxia e entra de nariz.</summary>
+        /// <summary>Do hangar ao estande: sai de re ate a cauda entrar na ligacao, desce de frente e taxia para oeste ate o estande.</summary>
         void DoHangar(Aviao a)
         {
             float x = EstandeX[a.Id];
-            Trecho re = Caminho(3f, 1.2f, V(HangarEm.x, HangarZ), V(HangarEm.x, TaxiZ), V(HangarEm.x + 3f, TaxiZ));
+            Trecho re = Caminho(3f, 1.2f, V(HangarEm.x, TaxiZ), V(LigacaoX, TaxiZ), V(LigacaoX, TaxiZ + 3.4f));
             re.Re = re.Para = true; re.A = 0.3f; re.F = 0.4f;
             a.Trechos.Enqueue(re);
-            Trecho taxi = Caminho(RaioAviao, 2.6f, V(HangarEm.x + 3f, TaxiZ), V(x, TaxiZ), V(x, ZEstande(a)));
+            Trecho taxi = Caminho(RaioAviao, 2.6f, V(LigacaoX, TaxiZ + 3.4f), V(LigacaoX, TaxiZ), V(x, TaxiZ), V(x, ZEstande(a)));
             taxi.A = 0.4f; taxi.F = 0.6f; taxi.Para = true;
             a.Trechos.Enqueue(taxi);
         }
@@ -394,7 +394,7 @@ namespace TA
             {
                 case Fase.Fora:
                     if (c.NoPatio) { NoEstande(a); a.Fase = Fase.NoPatio; }
-                    else if (c.Hangar > 0) { a.T.SetPositionAndRotation(V(HangarEm.x, HangarZ), Quaternion.identity); a.Fase = Fase.Hangar; }
+                    else if (c.Hangar > 0) { a.T.SetPositionAndRotation(HangarEm, Quaternion.Euler(0f, 90f, 0f)); a.Fase = Fase.Hangar; }
                     else if (c.Chega >= 0 && (c.Chega - s.Steps) * Sim.Step <= PousoSeg[a.Id]) { Pousa(a); a.Fase = Fase.Chegando; a.S = 0f; }
                     break;
                 case Fase.Hangar:

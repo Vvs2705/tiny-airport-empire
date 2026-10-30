@@ -131,7 +131,7 @@ namespace TA
             foreach (Vector2 v in new[] { new Vector2(7.3f, 14.6f), new Vector2(25f, 17.4f) }) Peca("cone", V3(v), 0f);
             Peca("conteiner_bagagem", new Vector3(7f, 0f, 16.6f), 0f);
             Peca("conteiner_bagagem", new Vector3(8.3f, 0f, 16.6f), 0f);
-            Peca("biruta", new Vector3(31f, 0f, 19.8f), 0f);
+            Peca("biruta", new Vector3(31f, 0f, 17f), 0f);
             Peca("radar", new Vector3(29.2f, 0f, 4.4f), 0f);
             Patio3D();
         }
