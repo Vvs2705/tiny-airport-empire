@@ -20,7 +20,7 @@ namespace TA.Core
                 double min = double.PositiveInfinity;
                 int risco = -1;
                 int servidores = Math.Max(1, Math.Min(s.Postos, Presentes(s.Tipo)));
-                double t = TempoSeg(s.Tipo);
+                double t = TempoSeg(s.Tipo) * (Falhou(s.Tipo) ? T.FalhaFator : 1);
                 foreach (Pax p in s.Atendendo)
                 {
                     Voo v = VooDe(p);
