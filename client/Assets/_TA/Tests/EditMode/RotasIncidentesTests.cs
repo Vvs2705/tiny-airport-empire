@@ -53,6 +53,16 @@ namespace TA.Tests
             Assert.IsTrue(r.Where(x => x.Tipo == TipoRota.Longa).All(x => x.Cada == 2 && x.Extra >= new Tuning().Onda));
         }
 
+        /// <summary>O save e o diario guardam estes enums pelo indice: so crescem no fim (como o EnumsTests faz com os das fases anteriores).</summary>
+        [Test]
+        public void EnumsDaFaseC3_SoCrescemNoFim()
+        {
+            CollectionAssert.AreEqual(new[] { "FrenteFria", "Falha", "Pico", "Conexao" }, System.Enum.GetNames(typeof(TipoIncidente)));
+            string[] ev = System.Enum.GetNames(typeof(Ev));
+            CollectionAssert.AreEqual(new[] { "RotaAberta", "RotaProgramada", "Viagem", "AeroportoChegada", "IncidenteAviso", "IncidenteInicio", "IncidenteFim", "Adiantado", "ReparoIniciado", "Reparado", "Priorizado" },
+                ev.Skip(System.Array.IndexOf(ev, "EstacaoAberta") + 1).Take(11).ToArray());
+        }
+
         [Test]
         public void Rota_AbrePeloMarcoEPrecoFixo_EProgramaValeNaProximaOnda()
         {
