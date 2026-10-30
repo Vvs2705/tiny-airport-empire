@@ -252,6 +252,7 @@ namespace TA.Tests
         public void Bonus_VooCheio_Mais25PorCento()
         {
             Sim s = ComEquipe(3);
+            s.EquipePatio = 2;   // com 1 pessoa de patio o voo 1 decola atrasado (FaseCTests.Patio_UmaPessoa_AtrasaADecolagem_SemBonus)
             var ev = Coleta(s, 120f + Sim.Step);
             Evento p = ev.Single(e => e.Tipo == Ev.VooPartiu);
             Assert.AreEqual(p.C, p.B, "voo 1 cheio");

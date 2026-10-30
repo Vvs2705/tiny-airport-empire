@@ -78,3 +78,87 @@ Longo prazo (200 sementes × 20 ondas, 60 min de jogo): Bom 99,6%, Lento 74,9%, 
 - K2 (≥ 60% agem na estação crítica em até 60 s) só sai do diário CSV de playtest (`client/tools/diario_report.py`).
 - O bot toca uma estação por segundo; uma pessoa toca mais rápido no começo e cansa depois. Se o playtest mostrar a onda 1 pesada demais com 0 funcionários, baixe `PaxInicial` ou o preço da 1ª contratação antes de mexer no TA-2.
 - No Forge, a pessoa foi 1,7–3,7× mais lenta que o bot: os minutos dos marcos acima são o limite inferior.
+
+## 5. Fase C: tripulação, pátio e manutenção (2026-10-29, `CONTRATO_FASE_C.md`)
+
+**Como medir:** `dotnet test client/tools/coretests --filter "FullyQualifiedName~BalanceTests"` (todos `[Explicit]`, ~6 min). `Antes_RegrasDaV01` roda as mesmas sementes com as regras novas desligadas (`Tuning.Regra* = false`); `Portao_TA1_TA2` roda com elas ligadas; `Portao_FaseC_PlanejadorContraAutomatico` é o portão do GDD §5.13; `Varredura_FaseC` é a tabela da D-C1.
+
+**Portão do §5.13:** a receita do Planejador (o Bom que escala o tripulante mais descansado, faz a checagem rápida quando ela cabe antes do embarque e manda o avião pendente ao hangar) ≥ 1,10 × a do Automático (o mesmo Bom, com tudo no padrão do núcleo), nas mesmas 200 sementes. **20 ondas (1 h de jogo), não 10:** com 15 de desgaste por trecho, o avião só fica pendente na 7ª volta; em 10 ondas a manutenção quase não aparece.
+
+### D-C1. Varredura (100 sementes × 20 ondas; cada sistema sozinho, com o pátio ligado)
+
+| variante | emb. planejador | emb. automático | receita planejador | receita automático | ganho | sem tripulação p/a | hangar p / inspeção a |
+|---|---|---|---|---|---|---|---|
+| tripulação N=3 trechos, descanso 180 s (contrato) | 99.7% | 97.2% | 16569 | 16248 | 1,020 | 0/2 | — |
+| tripulação N=2, 180 s | 99.7% | 96.8% | 16569 | 16081 | 1,030 | 5/7 | — |
+| tripulação N=3, 240 s | 97.3% | 97.2% | 16248 | 16248 | 1,000 | 6/7 | — |
+| tripulação N=2, 240 s | 96.9% | 96.9% | 16083 | 16193 | 0,993 | 31/31 | — |
+| tripulação N=2, 300 s | 74.2% | 77.0% | 11341 | 11928 | 0,951 | 18/19 | — |
+| manutenção W=10/trecho, checagem −5 por 15, inspeção 90 s (contrato) | 94.7% | 95.5% | 15489 | 15537 | 0,997 | — | 2/4 |
+| W=10, −5 por 15, inspeção 110 s | 94.7% | 89.7% | 15489 | 14409 | 1,075 | — | 2/4 |
+| W=10, −10 por 10, inspeção 110 s | 99.7% | 89.7% | 16569 | 14409 | 1,150 | — | 0/4 |
+| **W=15, −10 por 10, inspeção 110 s (escolhida)** | **94.7%** | **84.8%** | **15489** | **13451** | **1,151** | — | **2/6** |
+| W=12, −6 por 10, inspeção 110 s | 94.7% | 89.7% | 15489 | 14409 | 1,075 | — | 2/4 |
+| W=20, −10 por 10, inspeção 110 s | 88.6% | 79.7% | 14239 | 12429 | 1,146 | — | 4/8 |
+
+**Diagnóstico da manutenção:** com a inspeção de 90 s, o avião pendente ainda embarca nos 10 s que sobram, e o portão com upgrades embarca 30 pessoas nesse tempo: deixar chegar a 100% não custava nada (0,997). A inspeção passou a **segurar o avião o turnaround inteiro (110 s > os 100 s de pátio)**: pendente perde o voo dele (só a receita dele) e sai com metade do desgaste. Com W=15 e a checagem tirando 10, a checagem em todo turnaround só atrasa o desgaste (+5 por trecho), então o hangar ainda é preciso: o Planejador manda o pendente ao hangar (zera) no lugar da inspeção (tira 50), e o Automático volta a ficar pendente a cada 4 trechos. É a decisão do GDD: prevenir no pátio e escolher a hora do hangar. W=10 com −10 dá o mesmo ganho, mas a checagem empata com o desgaste e o hangar nunca é usado.
+
+### D-C2. A tripulação fica só visual (portão do §5.13, por sistema)
+
+A escala automática do contrato ("o 1º livre na ordem do quadro") se corrige sozinha: na 1ª vez que os dois primeiros descansam juntos, um voo fica sem piloto, e depois disso as folgas já ficam desencontradas. Em 20 ondas o Automático perde 1 voo por partida, e escalar bem rende **1,02**. Descanso mais longo (240–300 s) não cria decisão: a tripulação de 3 + 3 deixa de dar conta, e o Planejador e o Automático perdem os mesmos voos. Com as duas regras ligadas o ganho seria 1,180, mas quase todo da manutenção. Pela regra do GDD ("o sistema que não gerar decisão fica só visual"), **`Tuning.RegraTripulacao = false`**: a escala, os trechos, o descanso, a contratação e os eventos continuam no núcleo (a tela mostra), mas a falta de tripulação não segura o embarque. Volta a ter regra, com uma linha, quando a frota crescer (narrow 2+2, mais voos por onda): é a escassez que cria a decisão. Revisão de design: TA-8.
+
+### D-C3. O pátio começa com 1 pessoa
+
+Com 1 pessoa, a bagagem do voo 1 espera o desembarque e a limpeza do voo 2: o voo 1 decola 4 s atrasado na 1ª onda e perde o bônus de pontualidade. O jogador (e o bot) contrata a 2ª pessoa por 40 Cash, e o pátio deixa de atrasar no Vale Verde regional. O pátio pesa de novo com aviões maiores e com os upgrades de veículo. O pátio não entra no portão do §5.13 (o GDD fala só da tripulação e da manutenção).
+
+### Antes e depois do TA-1 e do TA-2 (200 sementes × 10 ondas)
+
+Antes (regras da Fase C desligadas, `Antes_RegrasDaV01`, igual à §3):
+
+| perfil | embarque médio | p10 | receita | movimentos | toques | marco 1 | marco 2 | marco 3 |
+|---|---|---|---|---|---|---|---|---|
+| Bom | 99.2% | 98.8% | 5978 | 4.0 | 772 | 13.6 min | - | - |
+| Lento | 73.6% | 70.3% | 3523 | 39.3 | 576 | 14.5 min | - | - |
+| Parado | 92.0% | 91.7% | 4748 | 0.0 | 433 | 13.8 min | - | - |
+
+Ganho de mover = 1,259.
+
+Depois (padrão do `Tuning`: pátio e manutenção com regra, tripulação visual; os três perfis planejam):
+
+| perfil | embarque médio | p10 | receita | movimentos | toques | marco 1 | marco 2 | marco 3 |
+|---|---|---|---|---|---|---|---|---|
+| Bom | 99.3% | 99.0% | 5969 | 4.7 | 809 | 13.7 min | - | - |
+| Lento | 74.5% | 71.6% | 3581 | 32.5 | 578 | 15.8 min | - | - |
+| Parado | 92.2% | 92.0% | 4783 | 0.0 | 473 | 13.7 min | - | - |
+
+Ganho de mover = **1,248**. O TA-1 não piorou (Bom 99,2 → 99,3; Lento 73,6 → 74,5). O TA-2 caiu 0,011 (−0,9%) e continua com folga sobre o 1,10. A causa é o pátio, não a equipe: só com o pátio ligado o ganho é 1,248, e só com a manutenção é 1,260. A 2ª pessoa de pátio (40 Cash) e o bônus perdido na 1ª onda mudam a ordem das compras do Parado, que ganha 35 Cash em 10 ondas; o Bom perde 9. Começar com 2 pessoas de pátio devolve o 1,260, mas o Lento cai para 72,0%: as duas saídas mexem ±2 pontos por causa da ordem das compras, e a escolhida mantém o pátio como decisão no começo do jogo.
+
+### Portão do §5.13 (200 sementes × 20 ondas, padrão do `Tuning`)
+
+| perfil | embarque médio | receita | voos sem tripulação | inspeções | hangar | checagens | trocas de escala |
+|---|---|---|---|---|---|---|---|
+| Planejador | 94.7% | 15488 | 0.0 | 2.0 | 2.0 | 32.7 | 48.0 |
+| Automático | 84.8% | 13451 | 0.0 | 6.0 | 0.0 | 0.0 | 0.0 |
+
+Ganho de planejar = **1,151: passa.** Por sistema: só a tripulação 1,020 (fica visual, D-C2); só a manutenção 1,151; as duas com regra 1,180. As 2 inspeções do Planejador são as que o mecânico começa sozinho no pouso e que o hangar substitui no segundo seguinte.
+
+### Prova de mutação (`python client/tools/mutacao.py`)
+
+Cada trava sai do código, o `dotnet test` roda e algum teste tem de cair (mutante que não compila conta como vivo). Resultado em 2026-10-29: **9 de 9 mortos**.
+
+| trava retirada | testes que caíram |
+|---|---|
+| manutenção pendente segura o embarque | `Invariante_ManutencaoPendente_CustaSoAReceitaDoVoo`, `Manutencao_Desgaste_AvisoEm80_PendenteEm100_InspecaoAutomatica` |
+| falta de tripulação segura o embarque (com a regra ligada) | `Invariante_FaltaDeTripulacao_CustaSoAReceitaDoVoo`, `Tripulacao_SemNinguemLivre_EmbarqueEspera_AvisaUmaVez` |
+| checagem só com Cash | `Invariante_Reparo_SoCashETempo_NuncaAnuncio`, `Manutencao_ChecagemRapida_...` |
+| hangar só com Cash | `Invariante_Reparo_SoCashETempo_NuncaAnuncio`, `Manutencao_Hangar_...` |
+| offline não gasta desgaste | `Invariante_Offline_NaoGastaDesgasteTrechoNemDescanso_NemPerdeVoo` |
+| nenhum tripulante sai de sorteio | `Invariante_NenhumTripulanteSaiDeSorteio`, `Tripulacao_Contratacao_...` |
+| perder voo não cobra Cash | 5, entre eles `Invariante_PerderVoo_CashSoCaiNaCompra` e os dois da Fase C |
+| descanso obrigatório depois de N trechos | 4, entre eles `Exploit_FecharEAbrir_NaoRenovaAChecagemNemZeraODescanso` |
+| anúncio nunca repara | `Invariante_Reparo_SoCashETempo_NuncaAnuncio` |
+
+### Para medir com gente
+
+- Se o aviso de 80% não fizer ninguém mandar o avião ao hangar antes de ficar pendente, o aviso precisa ser maior na tela, não a regra mais fraca.
+- A tripulação visual é o primeiro candidato a voltar com regra quando a Costa Azul trouxer mais voos: medir de novo com `RegraTripulacao = true` antes de ligar.

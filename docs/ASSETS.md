@@ -88,7 +88,102 @@ Papéis pedidos pelo Vinicius em 29/10 ("aeromoças, pilotos, manutenção, cont
 | 43 | `comissaria` (uniforme verde-petróleo, lenço coral) | personagem | 2 | 1 rodada de imagem + HD + rig | 8 + 55 + 20 = 83 |
 | 44 | `comissario` (uniforme verde-petróleo, gravata coral) | personagem | 2 | 1 rodada de imagem + HD + rig | 8 + 55 + 20 = 83 |
 
-Total: **166** créditos. Aval: "Aprovo o Lote 3" (Vinicius, 29/10, D-20, repassado pela sessão do GDD). Estado: **não gerado**; o classificador de permissões desta máquina bloqueou o gasto de créditos com aval repassado por outra sessão, e a geração espera o OK do Vinicius direto nesta sessão. Mala de bordo, se precisar, sai como item à parte.
+Total: **166** créditos. Aval: "Aprovo o Lote 3" (Vinicius, 29/10, D-20) e, depois, o aval geral do dia: "pode gerar todos e qualquer arte enquanto houver saldo" (Vinicius, 29/10). Gerado em HD (4K, 50 000 faces) com rig; a 1ª tentativa tinha sido barrada pelo classificador de permissões e foi refeita depois do aval geral. Mala de bordo, se precisar, sai como item à parte.
+
+### 2.3 Lote 4 — nível das referências do mercado (aval geral de 29/10)
+
+Pedido: chegar perto do nível dos líderes do gênero (GDD v1.2 §5.13, COMPETITIVO §g), sem copiar modelo, arte ou marca de ninguém. Uma peça por objeto: as variantes saem por cor no Blender (GDD §10). Todas em HD (4K, 50 000 faces); personagens com rig. Custo: 1 rodada de imagem (8) + HD (55), + rig (20) nos personagens.
+
+| # | Peça | Família | Para quê | Créditos |
+|---|---|---|---|---|
+| 45 | `executivo` (terno) | passageiro | variedade da fila | 83 |
+| 46 | `turista` (camisa florida, chapéu de palha) | passageiro | Costa Azul | 83 |
+| 47 | `mochileiro` (mochila é o item 27) | passageiro | variedade | 83 |
+| 48 | `mae` (faz par com a `crianca`) | passageiro | família na fila | 83 |
+| 49 | `faxineiro` (colete verde-limão) | funcionário | equipe de limpeza | 83 |
+| 50 | `carrinho_limpeza` | item | anda com o faxineiro | 63 |
+| 51 | `caminhao_catering` | veículo | serviço de bordo | 63 |
+| 52 | `posto_combustivel` (tanques) | prédio | pátio | 63 |
+| 53 | `terminal_carga` | prédio | rotas de carga | 63 |
+| 54 | `cone` | prop de mapa | pátio | 63 |
+| 55 | `cerca` (1 segmento) | prop de mapa | perímetro | 63 |
+| 56 | `arvore` | prop de mapa | Vale Verde | 63 |
+| 57 | `palmeira` | prop de mapa | Costa Azul | 63 |
+| 58 | `poste` | prop de mapa | pátio e estacionamento | 63 |
+| 59 | `placa_direcao` (setas sem texto) | prop de mapa | terminal | 63 |
+| 60 | `banco` | prop de mapa | área externa | 63 |
+| 61 | `carrinho_mao` (carrinho de bagagem do passageiro) | prop | saguão | 63 |
+| 62 | `ala_terminal` (módulo de expansão) | terminal | crescimento do aeroporto | 63 |
+| 63 | `sala_tripulacao` | prédio | tripulação | 63 |
+| 64 | `oficina_mecanico` | prédio | manutenção | 63 |
+| 65 | `caminhao_bombeiro` | veículo | incidentes | 63 |
+| 66 | `carro_follow_me` | veículo | táxi dos aviões | 63 |
+| 67 | `conteiner_bagagem` (ULD) | prop | bagagem e carga | 63 |
+| 68 | `biruta` | prop de mapa | frente fria (TA-4) | 63 |
+| 69 | `radar` | prop de mapa | torre e despacho | 63 |
+
+Total do Lote 4: 5 × 83 + 20 × 63 = **1 675**. A taxiway com marcação sai por tile/textura, sem modelo.
+
+### 2.4 Lote 5 — prédio que muda a cada nível e mapa que cresce (aval geral de 29/10)
+
+O GDD §5.13 pede que "cada upgrade muda o prédio na tela" e que o mapa cresça por terrenos (com heliponto e hangares nas referências, COMPETITIVO §g). As 8 estações ganham um **nível 2** com desenho próprio (mais balcões, mais máquinas, maior), não uma troca de cor. Mais 3 silhuetas de aeronave e as peças de obra dos terrenos bloqueados. Rodadas de imagem com 2 opções (4 créditos).
+
+| # | Peça | Para quê | Créditos |
+|---|---|---|---|
+| 70 | `balcao_checkin_n2` (4 balcões) | check-in nível 2 | 4 + 55 |
+| 71 | `raio_x_n2` (2 pórticos, 2 esteiras) | segurança nível 2 | 4 + 55 |
+| 72 | `esteira_bagagem_n2` (carrossel longo) | bagagem nível 2 | 4 + 55 |
+| 73 | `portao_embarque_n2` (sala com assentos) | portão nível 2 | 4 + 55 |
+| 74 | `loja_n2` (boutique com vitrine) | loja nível 2 | 4 + 55 |
+| 75 | `alimentacao_n2` (café com mesas) | alimentação nível 2 | 4 + 55 |
+| 76 | `hangar_manutencao_n2` (com ponte rolante) | manutenção nível 2 | 4 + 55 |
+| 77 | `torre_controle_n2` (torre alta com radar) | despacho nível 2 | 4 + 55 |
+| 78 | `helicoptero` | heliponto (Costa Azul e Aurora) | 4 + 55 |
+| 79 | `jato_executivo` | rota executiva, Aurora | 4 + 55 |
+| 80 | `hidroaviao` | rota turística, Costa Azul | 4 + 55 |
+| 81 | `guindaste_obra` | terreno em obra | 4 + 55 |
+| 82 | `barreira_obra` | terreno bloqueado | 4 + 55 |
+| 83 | `canteiro_obra` | terreno em obra | 4 + 55 |
+
+Total do Lote 5: 14 × 59 = **826**.
+
+### 2.5 Lote 6 — nível máximo das estações e terminais crescidos (aval geral de 29/10)
+
+Completa a escada de upgrade visual do GDD §5.13: cada estação tem nível 1 (§1), nível 2 (§2.4) e agora o **nível 3**, o mais vistoso; os 3 terminais ganham o **nível 2** (mais andares e pontes de embarque). Desenhos próprios, não troca de cor. Rodadas de imagem com 2 opções (4 créditos).
+
+| # | Peça | Para quê | Créditos |
+|---|---|---|---|
+| 84 | `balcao_checkin_n3` (ilha com 6 balcões e autoatendimento) | check-in nível 3 | 4 + 55 |
+| 85 | `raio_x_n3` (3 scanners corporais e 2 esteiras) | segurança nível 3 | 4 + 55 |
+| 86 | `esteira_bagagem_n3` (2 carrosséis) | bagagem nível 3 | 4 + 55 |
+| 87 | `portao_embarque_n3` (sala premium com janela para o pátio) | portão nível 3 | 4 + 55 |
+| 88 | `loja_n3` (pavilhão de 2 andares) | loja nível 3 | 4 + 55 |
+| 89 | `alimentacao_n3` (praça com 3 quiosques) | alimentação nível 3 | 4 + 55 |
+| 90 | `hangar_manutencao_n3` (2 hangares e banco de teste) | manutenção nível 3 | 4 + 55 |
+| 91 | `torre_controle_n3` (torre alta com prédio de operações) | despacho nível 3 | 4 + 55 |
+| 92 | `terminal_vale_verde_n2` | Vale Verde crescido | 4 + 55 |
+| 93 | `terminal_costa_azul_n2` | Costa Azul crescido | 4 + 55 |
+| 94 | `terminal_aurora_n2` | Aurora Global crescido | 4 + 55 |
+
+Total do Lote 6: 11 × 59 = **649**. Gerado inteiro; 5 dos 11 exportados (os 4 primeiros e o `terminal_aurora_n2`), **6 exports pendentes e bloqueados** (resolvido em 30/10: as 6 foram regeradas na conta nova, `PROVENIENCIA.md` §2.4): faltou RAM no PC naquela hora e, quando o PC liberou, o plano Max já tinha vencido (~17:10) e o plano gratuito não exporta (`PROVENIENCIA.md` §1).
+
+### 2.6 Lote 7 — gerado e exportado em 2026-10-30 na conta nova
+
+Em 29/10 o plano Max venceu (~17:10) com 6 318 créditos sem uso e o lote não saiu. Em 30/10 o Vinicius criou a conta nova (25 200 créditos, Max até 29/11) e autorizou "todas as imagens e todos os materiais" (`PROVENIENCIA.md` §1). As 6 peças presas da conta antiga saíram de novo como **grupo A** (6 × 55 = 330), e o Lote 7 saiu inteiro, na ordem abaixo, com os 82 zips guardados em `arte/tripo/` (§2.4 da proveniência). Todas em HD (4K, 50 000 faces, Privado); imagem com 2 opções, **0 crédito** nesta conta; personagem com rig (+20). Sem texto nem marca de terceiros; uniforme em cor lisa para a máscara.
+
+| Grupo | Peças | Créditos |
+|---|---|---|
+| 1. Nível 3 dos terminais (3) | `terminal_vale_verde_n3`, `terminal_costa_azul_n3`, `terminal_aurora_n3` | 3 × 59 = 177 |
+| 2. Aeronaves (3) | `aviao_jato_regional` (cauda em T), `aviao_bimotor_helice`, `aviao_wide_quad` (jumbo de 4 motores). As 8 variantes do contrato (item 3) **já estão cobertas** pelas 8 aeronaves geradas (regional, narrow, wide, turístico, cargo, helicóptero, jato executivo, hidroavião); estas 3 são silhuetas extras, brancas, para pintar por cor | 3 × 59 = 177 |
+| 3. Personagens (16) | `cozinheira`, `cozinheiro`, `garcom` (alimentação); `agente_portao`, `agente_portao_f` (portão); `pilota`, `mecanica`, `seguranca_f`, `bagageira`, `despachante_f`, `atendente_m`, `vendedora` (variantes femininas e masculinas dos 6 perfis); `adolescente`, `passageira_executiva`, `surfista`, `passageira_turista` (passageiros) | 16 × 79 = 1 264 |
+| 4. Identidade dos aeroportos (17) | Costa Azul: `farol_costeiro`, `doca_hidroaviao`, `quiosque_praia`, `torre_controle_costa`, `hangar_costa`, `veleiro`, `guarda_sol_espreguicadeiras`, `resort_hotel`. Aurora Global: `torre_controle_aurora`, `hotel_aeroporto`, `garagem_estacionamento`, `monotrilho`, `escultura_dourada`, `lounge_vip`, `terminal_satelite`, `hangar_aurora`, `skyline_torres` | 17 × 59 = 1 003 |
+| 5. Incidentes (5) | `ambulancia`, `viatura_seguranca`, `varredora_pista`, `caminhao_degelo` (frente fria, TA-4), `trator_remocao` | 5 × 59 = 295 |
+| 6. Interior (14) | `portico_detector`, `prateleiras_loja`, `mesas_alimentacao`, `totem_autoatendimento`, `escada_rolante`, `esteira_rolante`, `maquina_venda`, `balcao_informacoes`, `bandeja_seguranca`, `lixeira_terminal`, `catraca_embarque`, `vitrine_loja`, `vitrine_cafe`, `carrinho_cafe`. Balcão de check-in, raio-x, esteira de bagagem e cadeiras de portão já existem (§1, §2.4, §2.5) e não se repetem | 14 × 59 = 826 |
+| 7. O que couber (18) | `hidrante`, `container_lixo`, `arbusto`, `canteiro_flores`, `luz_pista`, `gerador_solo`, `esteira_carga`, `van_translado`, `taxi`, `onibus_cidade`, `ponto_onibus`, `guarita_cancela`, `heliponto`, `tanque_agua`, `turbina_eolica`, `painel_solar`, `carro_passageiro`, `caminhonete_pista` | 18 × 59 = 1 062 |
+
+Total do Lote 7: 76 peças = 60 objetos × 55 + 16 personagens × (55 + 20) = **4 500** créditos (a estimativa de 4 804 contava 4 por imagem; nesta conta a imagem não cobra).
+
+**Auditoria de 30/10** (`docs/ASSETS.md` §1 a §2.5 contra `arte/tripo/`): as 94 peças dos Lotes 1 a 6 têm o zip HD no disco; nenhuma precisou ser regerada. As 8 variantes de aeronave do contrato (item 3) já estavam cobertas desde o Lote 5.
 
 ## 5. Marca e arte de instalação (pedido do Vinicius, 2026-10-29)
 
