@@ -25,8 +25,13 @@ using System.Collections.Generic;
 //   Fase C2:    sim.Estacoes[0..7] (as 8; sim.Stations continua com as 4 da v0.1), sim.Desbloqueada(e) (abre pelo marco: Ev.EstacaoAberta),
 //               sim.Rende(e) (o especialista presente), Funcionario.Perfil, sim.Contratado(p), sim.CustoContratar(p) e sim.Hire(p) (Dani, Edu
 //               e Fatima; sim.Hire() continua contratando os 3 da v0.1), Pax.Total (anel de progresso), Sim.MaxEquipe (6).
+//   Fase C3:    tabelas sim.T.Rotas e sim.T.Aeroportos (Id estavel, Nome de trabalho). sim.AeroportoAtual, sim.CustoViagem(a), sim.Viajar(a) (vale
+//               na proxima onda); sim.RotaAberta(r), sim.CustoRota(r), sim.AbreRota(r), sim.Prog[vaga], sim.Programa(vaga, r) (vale na proxima
+//               onda); Voo.Rota, Voo.Total = 0 = sem voo (o aviao esta fora na rota longa); sim.TrechoSeg(r). Incidentes: sim.Inc (null ate o
+//               aviso: Tipo, Vaga, Estacao, Inicio, Fim, Resolvido), sim.PistaFechada, sim.Falhou(e), sim.Reparo; saidas sim.Adianta(),
+//               sim.Repara() e sim.Prioriza(); Voo.Grupo (grupo extra, ja somado no Total), Ev.Incidente*, Ev.Rota*, Ev.Viagem, Ev.AeroportoChegada.
 //   Gravar:     texto = sim.Save(versaoDoJogo, nowUnix): payload chave=valor dentro do SaveEnvelope (SHA-256 + schema). Grava filas e o
-//               relogio do quadro: reabrir retoma a onda do ponto gravado. Schema 3; os saves da v0.1 (1) e da Fase C (2) migram no Load.
+//               relogio do quadro: reabrir retoma a onda do ponto gravado. Schema 4; os saves dos schemas 1, 2 e 3 migram no Load.
 //
 // Nomes acima sao estaveis (so crescem). Mudou a API: atualize este cabecalho e o docs/MAPA_CODIGO.md no mesmo PR.
 
@@ -40,8 +45,9 @@ namespace TA.Core
         /// <summary>Teto do dt de um quadro (s): uma travada longa nao vira um salto de minutos no relogio do quadro de partidas.</summary>
         public const float MaxFrame = 0.25f;
         /// <summary>Versao do formato do save (SaveEnvelope). Sobe a cada mudanca de formato; save de schema maior e' recusado; menor migra
-        /// no Load (3 = Fase C2: 8 estacoes e o perfil de cada funcionario; 2 = Fase C: avioes, tripulacao e patio; o 1 e' a v0.1).</summary>
-        public const int Schema = 3;
+        /// no Load (4 = Fase C3: aeroportos, rotas e incidentes; 3 = Fase C2: 8 estacoes e o perfil de cada funcionario; 2 = Fase C: avioes,
+        /// tripulacao e patio; o 1 e' a v0.1).</summary>
+        public const int Schema = 4;
         /// <summary>A equipe da v0.1 (Hire()): Ana, Beto e Caio. MaxEquipe = os 6 perfis, com Dani, Edu e Fatima (Hire(perfil)).</summary>
         public const int MaxFuncionarios = 3, MaxEquipe = 6;
 
@@ -92,7 +98,8 @@ namespace TA.Core
             Array.Copy(Estacoes, Stations, Stations.Length);
             Anuncios = new Anuncios(this);
             for (int i = 0; i < Math.Min(MaxFuncionarios, T.FuncionariosIniciais); i++) Staff.Add(new Funcionario { Id = i, Perfil = (Perfil)i, Em = Lugar(), De = Lugar() });
-            Avioes = new[] { new Aviao { Id = 0 }, new Aviao { Id = 1 } };
+            Avioes = new[] { new Aviao { Id = 0 }, new Aviao { Id = 1, Rota = 1 } };
+            Chega(Math.Max(0, Math.Min(T.Aeroportos.Length - 1, T.AeroportoInicial)));
             EquipePatio = T.PatioIniciais;
             for (int f = 0; f < T.TripPorVoo.Length; f++)
                 for (int i = 0; i < T.TripIniciais; i++) Tripulacao.Add(NovoTripulante((Funcao)f));
@@ -125,6 +132,7 @@ namespace TA.Core
         {
             int w = (int)(Steps / OndaPassos), loc = PassoNaOnda;
             if (w != Onda) NovaOnda(w);
+            PassoIncidente();
             Sala();
             Patio();
             foreach (Voo v in Voos)
@@ -156,30 +164,36 @@ namespace TA.Core
         {
             foreach (Voo v in Voos) if (v != null && !v.Partiu) Fecha(v);   // so com save adulterado: a onda anterior sempre fecha antes
             Onda = w;
-            for (int f = 0; f < 2; f++)
+            if (ProximoAeroporto >= 0)
             {
-                Voos[f] = NovoVoo(w, f);
-                Emit(Ev.VooCriado, Voos[f].Id, Voos[f].Total, Voos[f].FechaPasso);
+                Chega(ProximoAeroporto);
+                UltimoIncidente = w;
+                Emit(Ev.AeroportoChegada, AeroportoAtual);
             }
+            for (int f = 0; f < 2; f++) Voos[f] = NovoVoo(w, f, Prog[f]);
+            SorteiaIncidente(w);
+            foreach (Voo v in Voos) Emit(Ev.VooCriado, v.Id, v.Total, v.FechaPasso);
             PatioNaOnda(w);
         }
 
-        Voo NovoVoo(int w, int f)
+        Voo NovoVoo(int w, int f, int rota)
         {
             int fecha = (int)Math.Round(T.Fecha[f] * Hz);
             return new Voo
             {
-                Id = w * 2 + f, Onda = w, Indice = f, Total = T.Pax(w), FechaPasso = fecha,
+                Id = w * 2 + f, Onda = w, Indice = f, Rota = rota, Total = w < Avioes[f].VoltaOnda ? 0 : PaxDaRota(w, rota), FechaPasso = fecha,
                 AbrePasso = Math.Max(0, fecha - (int)Math.Round(T.AbreEmbarqueAntes * Hz)),
             };
         }
 
         /// <summary>Passo (na onda) em que chega o i-esimo passageiro do voo: estratificado de 0 ate fechamento - ChegadaFolga, com jitter da
-        /// semente. Funcao pura (nada a gravar): retomar no meio da onda refaz as mesmas chegadas.</summary>
+        /// semente; o Pico da rota tira o inicio da janela. O grupo extra de incidente vem depois, 2 por s. Funcao pura (nada a gravar):
+        /// retomar no meio da onda refaz as mesmas chegadas.</summary>
         public int Chegada(Voo v, int i)
         {
-            double span = Math.Max(0.0, T.Fecha[v.Indice] - T.ChegadaFolga) * Hz;
-            return (int)(span * (i + U(v.Onda, v.Indice, i, 0)) / v.Total);
+            if (i >= v.Base) return v.GrupoChega + (i - v.Base) * Hz / 2;
+            double span = Math.Max(0.0, T.Fecha[v.Indice] - T.ChegadaFolga) * Hz, ini = span * Efeito(v).Pico;
+            return (int)(ini + (span - ini) * (i + U(v.Onda, v.Indice, i, 0)) / v.Base);
         }
 
         public static int PaxId(int onda, int voo, int i) => onda * 1000 + voo * 500 + i;
@@ -202,7 +216,8 @@ namespace TA.Core
             return (int)((x - Math.Floor(x)) * 2);
         }
 
-        void Entra(Voo v, int i) => St(Estacao.CheckIn).Fila.Add(NovoPax(PaxId(v.Onda, v.Indice, i)));
+        /// <summary>Quem vem de conexao ja fez check-in na origem: entra na seguranca.</summary>
+        void Entra(Voo v, int i) => St((i >= v.Base ? v.GrupoConexao : Efeito(v).Tipo == TipoRota.Conexao) ? Estacao.Seguranca : Estacao.CheckIn).Fila.Add(NovoPax(PaxId(v.Onda, v.Indice, i)));
 
         public Voo VooDe(Pax p) => Voos[p.Voo] != null && Voos[p.Voo].Onda == p.Onda ? Voos[p.Voo] : null;
 
@@ -237,10 +252,11 @@ namespace TA.Core
         void Atende(Station s, int loc)
         {
             if (s.Tipo == Estacao.Manutencao || s.Tipo == Estacao.Despacho) return;   // sem fila de passageiros
+            bool lento = Falhou(s.Tipo) && Steps % T.FalhaFator != 0;   // falha de equipamento: o atendimento anda 1 passo em cada FalhaFator
             for (int i = 0; i < s.Atendendo.Count; i++)
             {
                 Pax p = s.Atendendo[i];
-                if (--p.Resto > 0) continue;
+                if (lento || --p.Resto > 0) continue;
                 s.Atendendo.RemoveAt(i--);
                 Avanca(s, p, loc);
             }
@@ -258,17 +274,23 @@ namespace TA.Core
         /// <summary>Comeca o atendimento do 1o da fila (no portao, o 1o cujo voo ja abriu o embarque). false = ninguem para atender.</summary>
         bool Inicia(Station s)
         {
-            for (int i = 0; i < s.Fila.Count; i++)
-            {
-                Pax p = s.Fila[i];
-                if (s.Tipo == Estacao.Portao && !(VooDe(p)?.Embarque ?? false)) continue;
-                s.Fila.RemoveAt(i);
-                p.Resto = p.Total = TempoPassos(s.Tipo);
-                s.Atendendo.Add(p);
-                return true;
-            }
+            // com grupo priorizado (atraso de conexao), uma 1a passada so por ele
+            for (int passada = Voos[0]?.Prioridade == true || Voos[1]?.Prioridade == true ? 0 : 1; passada < 2; passada++)
+                for (int i = 0; i < s.Fila.Count; i++)
+                {
+                    Pax p = s.Fila[i];
+                    Voo v = VooDe(p);
+                    if (s.Tipo == Estacao.Portao && !PodeEmbarcar(v) || passada == 0 && !(v != null && v.Prioridade && p.Indice >= v.Base)) continue;
+                    s.Fila.RemoveAt(i);
+                    p.Resto = p.Total = TempoPassos(s.Tipo);
+                    s.Atendendo.Add(p);
+                    return true;
+                }
             return false;
         }
+
+        /// <summary>O portao atende este voo: embarque aberto e, com a pista fechada, so quem adiantou (frente fria).</summary>
+        bool PodeEmbarcar(Voo v) => v != null && v.Embarque && (!PistaFechada || v.Adiantado);
 
         void Avanca(Station s, Pax p, int loc)
         {
@@ -284,19 +306,19 @@ namespace TA.Core
                     St(Para(p.Loja, Estacao.Loja, v, loc) ? Estacao.Loja : Para(p.Fome, Estacao.Alimentacao, v, loc) ? Estacao.Alimentacao : Estacao.Portao).Fila.Add(p);
                     break;
                 case Estacao.Loja:
-                    Emit(Ev.Venda, p.Id, (int)Ganha((long)Math.Round(T.LojaVenda * (double)Rende(Estacao.Loja))));
+                    Emit(Ev.Venda, p.Id, (int)Ganha((long)Math.Round(T.LojaVenda * (double)Rende(Estacao.Loja) * Gasto(v))));
                     St(Para(p.Fome, Estacao.Alimentacao, v, loc) ? Estacao.Alimentacao : Estacao.Portao).Fila.Add(p);
                     break;
                 case Estacao.Alimentacao:
-                    Emit(Ev.Venda, p.Id, (int)Ganha((long)Math.Round(T.ComidaVenda * (double)Rende(Estacao.Alimentacao))));
+                    Emit(Ev.Venda, p.Id, (int)Ganha((long)Math.Round(T.ComidaVenda * (double)Rende(Estacao.Alimentacao) * Gasto(v))));
                     St(Estacao.Portao).Fila.Add(p);
                     break;
                 case Estacao.Portao:
                     if (v == null || v.Embarcados >= v.Total) break;   // so com save adulterado
-                    int marco = Marco;
+                    int marco = Marco, tarifa = TarifaDe(v, p);
                     v.Embarcados++;
-                    v.Receita += Tarifa;
-                    Emit(Ev.Embarcou, p.Id, (int)Ganha(Tarifa));
+                    v.Receita += tarifa;
+                    Emit(Ev.Embarcou, p.Id, (int)Ganha(tarifa));
                     TotalEmbarcados++;
                     if (Marco > marco)
                     {
@@ -338,7 +360,7 @@ namespace TA.Core
             v.Criados = v.Total;
             TotalPerdidos += v.Perdidos;
             // Fase C2: o despacho com gente aumenta o bonus de quem sai na hora (CONTRATO_FASE_C2 §2)
-            double bonus = T.Bonus + (Ativa(Estacao.Despacho) ? T.DespachoBonus * Forca(Estacao.Despacho) : 0);
+            double bonus = T.Bonus + (Ativa(Estacao.Despacho) ? T.DespachoBonus * Forca(Estacao.Despacho) : 0) + Efeito(v).Bonus;
             if (v.Perdidos == 0 && v.Total > 0 && NoHorario(v))
                 Emit(Ev.Bonus, v.Id, (int)Ganha((long)Math.Round(v.Receita * bonus)));
             Emit(Ev.VooPartiu, v.Id, v.Embarcados, v.Total);
@@ -366,7 +388,7 @@ namespace TA.Core
             if (!Tocavel(e)) return false;
             Station s = St(e);
             if (Presentes(e) > 0 || s.Atendendo.Count >= s.Postos) return false;
-            foreach (Pax p in s.Fila) if (e != Estacao.Portao || (VooDe(p)?.Embarque ?? false)) return true;
+            foreach (Pax p in s.Fila) if (e != Estacao.Portao || PodeEmbarcar(VooDe(p))) return true;
             return false;
         }
 

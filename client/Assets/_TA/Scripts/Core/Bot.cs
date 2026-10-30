@@ -9,12 +9,13 @@ namespace TA.Core
     public struct BotProfile
     {
         /// <summary>Planeja = escala, checagem e hangar (CONTRATO_FASE_C §8); Equipe = especialista em casa e gente na oficina quando um aviao
-        /// esta pendente (CONTRATO_FASE_C2 §5). Sem eles, tudo fica no padrao do nucleo.</summary>
-        public string Name; public float Decide; public bool Move, Planeja, Equipe;
+        /// esta pendente (CONTRATO_FASE_C2 §5). Sem eles, tudo fica no padrao do nucleo. Rotas = abre e programa rotas; Viaja = vai ao proximo
+        /// aeroporto; Incidentes = reage ao aviso (CONTRATO_FASE_C3 §7).</summary>
+        public string Name; public float Decide; public bool Move, Planeja, Equipe, Rotas, Viaja, Incidentes;
 
-        public static readonly BotProfile Bom = new BotProfile { Name = "Bom", Decide = 1f, Move = true, Planeja = true, Equipe = true };
-        public static readonly BotProfile Lento = new BotProfile { Name = "Lento", Decide = 2.5f, Move = true, Planeja = true, Equipe = true };
-        public static readonly BotProfile Parado = new BotProfile { Name = "Parado", Decide = 1f, Move = false, Planeja = true };
+        public static readonly BotProfile Bom = new BotProfile { Name = "Bom", Decide = 1f, Move = true, Planeja = true, Equipe = true, Rotas = true, Viaja = true, Incidentes = true };
+        public static readonly BotProfile Lento = new BotProfile { Name = "Lento", Decide = 2.5f, Move = true, Planeja = true, Equipe = true, Rotas = true, Viaja = true, Incidentes = true };
+        public static readonly BotProfile Parado = new BotProfile { Name = "Parado", Decide = 1f, Move = false, Planeja = true, Rotas = true, Viaja = true, Incidentes = true };
         /// <summary>Portao de design do GDD §5.13 (Fase C): o Bom que planeja contra o Bom que deixa tudo no automatico.</summary>
         public static readonly BotProfile Planejador = new BotProfile { Name = "Planejador", Decide = 1f, Move = true, Planeja = true, Equipe = true };
         public static readonly BotProfile Automatico = new BotProfile { Name = "Automatico", Decide = 1f, Move = true, Planeja = false, Equipe = true };
@@ -37,7 +38,7 @@ namespace TA.Core
     public sealed class Bot
     {
         public BotProfile P;
-        public int Moves, Taps, Buys, Trocas, Checagens, Hangares;
+        public int Moves, Taps, Buys, Trocas, Checagens, Hangares, Reacoes;
         float _t;
 
         public Bot(BotProfile p) { P = p; }
@@ -60,7 +61,50 @@ namespace TA.Core
             if (Comprar(s)) Buys++;
             if (P.Planeja) Planeja(s);
             if (!moveu && P.Move && P.Equipe) Equipe(s);
+            if (P.Rotas) Programa(s);
+            if (P.Incidentes) Reage(s);
         }
+
+        readonly int[] _vooVisto = { -1, -1 };
+        double _embarque = 1;
+
+        /// <summary>Fase C3: depois de cada voo, a vaga sobe para a rota aberta de receita maior se ele saiu cheio (>= Sobe) e desce se perdeu
+        /// gente demais (&lt; Desce). Assim a rota acompanha o que a equipe da conta.</summary>
+        void Programa(Sim s)
+        {
+            const double Sobe = 0.95, Desce = 0.85;
+            for (int f = 0; f < 2; f++)
+            {
+                Voo v = s.Voos[f];
+                if (v == null || !v.Partiu || v.Total == 0 || v.Id == _vooVisto[f]) continue;
+                _vooVisto[f] = v.Id;
+                _embarque = v.Embarcados / (double)v.Total;
+                float atual = s.T.Rotas[s.Prog[f]].Receita;
+                int alvo = -1;
+                for (int r = 0; r < s.T.Rotas.Length; r++)
+                {
+                    float x = s.T.Rotas[r].Receita;
+                    if (!s.RotaAberta(r) || s.T.Rotas[r].Aeroporto != s.AeroportoAtual) continue;
+                    if (_embarque >= Sobe && x > atual && (alvo < 0 || x < s.T.Rotas[alvo].Receita)) alvo = r;
+                    if (_embarque < Desce && x < atual && (alvo < 0 || x > s.T.Rotas[alvo].Receita)) alvo = r;
+                }
+                if (alvo >= 0) s.Programa(f, alvo);
+            }
+        }
+
+        /// <summary>Fase C3: a saida de cada incidente assim que o aviso aparece. No pico, leva gente ao check-in antes do grupo chegar.</summary>
+        void Reage(Sim s)
+        {
+            Incidente i = s.Inc;
+            if (i == null) return;
+            if (i.Tipo == TipoIncidente.FrenteFria && s.Adianta() || i.Tipo == TipoIncidente.Falha && s.Repara() || i.Tipo == TipoIncidente.Conexao && s.Prioriza()) { Reacoes++; return; }
+            if (i.Tipo != TipoIncidente.Pico || i.Inicio == _picoVisto || !P.Move || s.Alocados(Estacao.CheckIn) >= s.St(Estacao.CheckIn).Postos) return;
+            _picoVisto = i.Inicio;   // uma pessoa por pico: a Equipe a leva de volta depois dele
+            foreach (Funcionario f in s.Staff)
+                if (f.Andando == 0 && !Fluxo(f.Em) && s.St(f.Em).Estado == Estado.Normal && s.Move(f.Id, Estacao.CheckIn)) { Moves++; Reacoes++; return; }
+        }
+
+        long _picoVisto = -1;
 
         /// <summary>
         /// Fase C2: 1) aviao pendente (no ar ou no patio) e ninguem na oficina: leva o mecanico (ou quem sobra numa estacao normal) para ela
@@ -69,6 +113,7 @@ namespace TA.Core
         /// </summary>
         void Equipe(Sim s)
         {
+            if (s.Inc?.Tipo == TipoIncidente.Pico) return;   // quem foi reforcar o check-in fica ate o pico passar
             if (OficinaPrecisa(s) && s.Alocados(Estacao.Manutencao) == 0)
             {
                 Funcionario quem = null;
@@ -193,9 +238,22 @@ namespace TA.Core
                 _patioVisto = s.AtrasosPatio;
                 return true;
             }
+            // Fase C3: a rota do aeroporto atual e a viagem entram na conta do mais barato (hire = -3 rota, -4 viagem)
+            int rota = -1;
+            if (P.Rotas)
+                for (int r = 0; r < s.T.Rotas.Length; r++)
+                {
+                    long c = s.T.Rotas[r].Aeroporto == s.AeroportoAtual ? s.CustoRota(r) : -1;
+                    if (c >= 0 && (best < 0 || c < best)) { best = c; rota = r; hire = -3; }
+                }
+            long v = s.CustoViagem(s.AeroportoAtual + 1);
+            if (P.Viaja && _embarque >= ViajaCom && v >= 0 && (best < 0 || v < best)) { best = v; hire = -4; }
             if (best < 0 || s.Cash < best) return false;
-            return hire == -2 ? s.Hire() : hire >= 0 ? s.Hire((Perfil)hire) : s.Buy(be, bm);
+            return hire == -2 ? s.Hire() : hire == -3 ? s.AbreRota(rota) : hire == -4 ? s.Viajar(s.AeroportoAtual + 1) : hire >= 0 ? s.Hire((Perfil)hire) : s.Buy(be, bm);
         }
+
+        /// <summary>So viaja quem esta dando conta: embarque do ultimo voo.</summary>
+        const double ViajaCom = 0.9;
 
         // ------------------------------------------------------------------ medicao (BalanceTests e -autoplay)
 
@@ -203,9 +261,11 @@ namespace TA.Core
         {
             /// <summary>Embarque medio por voo (embarcados/total, media dos voos), receita total (Cash ganho, sem gastos) e o s de jogo em que
             /// cada marco do terminal chegou (-1 = nao chegou).</summary>
-            public double Embarque; public long Receita; public float[] MarcoEm; public int Moves, Taps, Voos;
+            public double Embarque; public long Receita; public float[] MarcoEm; public int Moves, Taps, Voos, SemVoo;
             /// <summary>Fase C: voos sem tripulacao na hora (aviso), inspecoes obrigatorias, idas ao hangar, checagens rapidas e trocas de escala.</summary>
             public int SemTrip, Inspecoes, Hangares, Checagens, Trocas;
+            /// <summary>Fase C3: incidentes, reacoes do bot, viagens e onda em que chegou a cada aeroporto (-1 = nao chegou).</summary>
+            public int Incidentes, Reacoes, Viagens; public int[] ChegouEm;
         }
 
         /// <summary>Joga `ondas` ondas inteiras com o perfil `p` e a semente `seed`, sem render. `reabre` = fecha e reabre o jogo (Save ->
@@ -214,7 +274,7 @@ namespace TA.Core
         {
             var s = new Sim(t, seed);
             var bot = new Bot(p);
-            var r = new Resultado { MarcoEm = new[] { -1f, -1f, -1f } };
+            var r = new Resultado { MarcoEm = new[] { -1f, -1f, -1f }, ChegouEm = new[] { 0, -1, -1 } };
             double soma = 0;
             long passos = (long)ondas * s.OndaPassos;
             while (s.Steps < passos)
@@ -224,7 +284,7 @@ namespace TA.Core
                 foreach (Evento e in s.Events)
                     switch (e.Tipo)
                     {
-                        case Ev.VooPartiu: if (e.C > 0) { soma += e.B / (double)e.C; r.Voos++; } break;
+                        case Ev.VooPartiu: if (e.C > 0) { soma += e.B / (double)e.C; r.Voos++; } else r.SemVoo++; break;
                         case Ev.Embarcou: case Ev.Venda: r.Receita += e.B; break;
                         case Ev.Bonus: r.Receita += e.B; break;
                         case Ev.Marco: if (e.A >= 1 && e.A <= 3 && r.MarcoEm[e.A - 1] < 0) r.MarcoEm[e.A - 1] = s.Time; break;
@@ -232,10 +292,12 @@ namespace TA.Core
                         case Ev.ChecagemIniciada: if (e.C == 1) r.Inspecoes++; else r.Checagens++; break;
                         case Ev.HangarIniciado: r.Hangares++; break;
                         case Ev.Escalado: if (e.C == 1) r.Trocas++; break;
+                        case Ev.IncidenteInicio: r.Incidentes++; break;
+                        case Ev.AeroportoChegada: r.Viagens++; if (r.ChegouEm[e.A] < 0) r.ChegouEm[e.A] = s.Onda; break;
                     }
             }
             r.Embarque = r.Voos > 0 ? soma / r.Voos : 0;
-            r.Moves = bot.Moves; r.Taps = bot.Taps;
+            r.Moves = bot.Moves; r.Taps = bot.Taps; r.Reacoes = bot.Reacoes;
             return r;
         }
 
@@ -249,7 +311,7 @@ namespace TA.Core
             Resultado bom = Medir(BotProfile.Bom, 1, ondas), lento = Medir(BotProfile.Lento, 1, ondas), parado = Medir(BotProfile.Parado, 1, ondas);
             Resultado re = Medir(BotProfile.Bom, 1, ondas, null, true);
             bool igual = re.Receita == bom.Receita && re.Embarque == bom.Embarque && re.Voos == bom.Voos;
-            ok = igual && bom.Voos == 2 * ondas && bom.Embarque > 0;
+            ok = igual && bom.Voos + bom.SemVoo == 2 * ondas && bom.Embarque > 0;
             var ci = System.Globalization.CultureInfo.InvariantCulture;
             string M(float x) => x < 0 ? "-" : (x / 60f).ToString("0.0", ci) + "min";
             return string.Format(ci, "AUTOPLAY {0} ondas={1} embarque_bom={2:0.0}% embarque_lento={3:0.0}% embarque_parado={4:0.0}% ganho_mover={5:0.000} " +

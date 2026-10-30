@@ -57,6 +57,18 @@ namespace TA.Core
         HangarFeito,        // A = aviao                                                          -> hangar_done
         // Fase C2 (CONTRATO_FASE_C2): estacoes novas pelo marco
         EstacaoAberta,      // A = estacao                                                        -> station_unlocked
+        // Fase C3 (CONTRATO_FASE_C3): rotas, aeroportos e incidentes
+        RotaAberta,         // A = rota, B = custo                                                -> route_unlocked
+        RotaProgramada,     // A = vaga, B = rota (vale na proxima onda)                          -> route_scheduled
+        Viagem,             // A = aeroporto, B = custo (chega na proxima onda)                   -> airport_trip
+        AeroportoChegada,   // A = aeroporto                                                      -> airport_arrived
+        IncidenteAviso,     // A = TipoIncidente, B = vaga, C = s ate comecar                     -> incident_warning
+        IncidenteInicio,    // A = TipoIncidente, B = vaga, C = estacao (falha)                   -> incident_started
+        IncidenteFim,       // A = TipoIncidente, B = 1 se resolvido                              -> incident_ended
+        Adiantado,          // A = voo (frente fria: embarque adiantado)                          -> incident_boarding_advanced
+        ReparoIniciado,     // A = estacao, B = custo (0 = mecanico na estacao)                   -> incident_repair_started
+        Reparado,           // A = estacao                                                        -> incident_repaired
+        Priorizado,         // A = voo (grupo de conexao passa a frente)                          -> incident_group_prioritized
     }
 
     /// <summary>Funcoes da tripulacao (GDD §5.11). Indice vai no save.</summary>
@@ -104,6 +116,8 @@ namespace TA.Core
         public int Hangar;
         /// <summary>Ja avisou falta de tripulacao para o voo atual.</summary>
         public bool AvisouTrip;
+        /// <summary>Rota do voo que pegou e a onda em que volta a ter voo (rota longa: fica fora da onda seguinte).</summary>
+        public int Rota, VoltaOnda;
         public bool Pendente => Desgaste >= 100;
         public bool PatioPronto { get { foreach (int f in Falta) if (f > 0) return false; return true; } }
     }
@@ -183,6 +197,13 @@ namespace TA.Core
         public long Receita;
         public bool Embarque, Partiu;
         public int Perdidos => Partiu ? Total - Embarcados : 0;
+        /// <summary>Indice em Tuning.Rotas (Fase C3). Total = 0: o aviao da vaga esta fora na rota longa, nao ha voo nesta onda.</summary>
+        public int Rota;
+        /// <summary>Grupo extra de incidente, ja somado no Total: os ultimos Grupo passageiros, a partir do passo GrupoChega. GrupoConexao =
+        /// entra na seguranca e paga Tuning.ConexaoTarifa x; Prioridade = o jogador priorizou (fura a fila). Adiantado = embarca com a pista
+        /// fechada (frente fria).</summary>
+        public int Grupo, GrupoChega; public bool GrupoConexao, Prioridade, Adiantado;
+        public int Base => Total - Grupo;
     }
 
     /// <summary>
@@ -269,6 +290,25 @@ namespace TA.Core
         /// <summary>A inspecao obrigatoria segura o aviao o turnaround inteiro (110 s &gt; os 100 s de patio): o voo dele nao embarca.</summary>
         public float InspecaoSeg = 110f; public int InspecaoTira = 50;
         public float HangarSeg = 180f; public int HangarCusto = 100;
+
+        // ---- Fase C3 (CONTRATO_FASE_C3, hipoteses) ----
+        /// <summary>Portao de design do GDD §5.13 por sistema (false = so visual: o nome muda, os numeros nao).</summary>
+        public bool RegraRotas = true, RegraAeroportos = true, RegraIncidentes = true;
+        /// <summary>As tabelas (Rotas.cs). Aeroporto do jogo novo: 0 = Vale Verde; os testes comecam em outro.</summary>
+        public Rota[] Rotas = Tabelas.Rotas;
+        public Aeroporto[] Aeroportos = Tabelas.Aeroportos;
+        public int AeroportoInicial;
+        /// <summary>Medicao do TA-6: as 2 vagas comecam nesta rota (-1 = as iniciais do aeroporto).</summary>
+        public int RotaFixa = -1;
+        /// <summary>Chance de incidente por ponto de risco das rotas da onda, teto da chance, ondas sem incidente depois de um e s de aviso.</summary>
+        public float RiscoChance = 0.1f, IncidenteTeto = 0.8f, AvisoSeg = 30f; public int IncidenteFolga = 1;
+        /// <summary>Frente fria: a pista fecha FrenteAntes s antes do portao, por FrenteSeg s (TA-4). 48 s: depois do pouso da vaga 2 e da
+        /// decolagem da vaga 1, para atingir so o voo sorteado.</summary>
+        public float FrenteAntes = 48f, FrenteSeg = 60f;
+        /// <summary>Falha de equipamento: FalhaFator x mais devagar por FalhaSeg s; reparo de ReparoCusto Cash em ReparoSeg s.</summary>
+        public int FalhaFator = 5, ReparoCusto = 30; public float FalhaSeg = 60f, ReparoSeg = 6f;
+        /// <summary>Grupos extras, em fracao dos passageiros da onda. Atraso de conexao: ConexaoAntes s antes do portao, tarifa ConexaoTarifa x.</summary>
+        public float PicoExtra = 0.35f, ConexaoExtra = 0.25f, ConexaoAntes = 30f; public int ConexaoTarifa = 3;
     }
 
     /// <summary>Historias do TA-3 (GDD §5.9). A v0.1 tem 1. Id = indice (vai no album do save): so cresce no fim.</summary>

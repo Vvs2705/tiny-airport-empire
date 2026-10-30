@@ -44,6 +44,7 @@ namespace TA.Core
                       .Append(',').Append(v.Embarque ? 1 : 0).Append(',').Append(v.Partiu ? 1 : 0).Append('\n');
             Anuncios.Save(sb);
             SalvaFaseC(sb);
+            SalvaFaseC3(sb);
             return SaveEnvelope.Wrap(sb.ToString(), content, nowUnix);
         }
 
@@ -65,6 +66,71 @@ namespace TA.Core
             for (int s = 0; s < 4; s++) if (PatioVel[s] != 0 || PatioCap[s] != 0) sb.Append("pv.").Append(s).Append('=').Append(PatioVel[s]).Append(',').Append(PatioCap[s]).Append('\n');
         }
 
+        /// <summary>Schema 4 (CONTRATO_FASE_C3 §6): aeroportos, rotas abertas e programadas, a rota e o grupo de cada voo da onda, a volta de
+        /// cada aviao e o incidente em andamento.</summary>
+        void SalvaFaseC3(StringBuilder sb)
+        {
+            sb.Append("aero=").Append(AeroportoAtual).Append(',').Append(AeroportosPagos).Append(',').Append(ProximoAeroporto).Append('\n');
+            Kv(sb, "rotas", RotasAbertas);
+            sb.Append("prog=").Append(Prog[0]).Append(',').Append(Prog[1]).Append('\n');
+            foreach (Voo v in Voos)
+                if (v != null)
+                    sb.Append("vr.").Append(v.Indice).Append('=').Append(v.Rota).Append(',').Append(v.Total).Append(',').Append(v.Grupo).Append(',').Append(v.GrupoChega)
+                      .Append(',').Append(v.GrupoConexao ? 1 : 0).Append(',').Append(v.Prioridade ? 1 : 0).Append(',').Append(v.AbrePasso).Append(',').Append(v.Adiantado ? 1 : 0).Append('\n');
+            // o padrao fica de fora: rota igual a da vaga da v0.1 e sem onda inteira fora
+            foreach (Aviao a in Avioes)
+                if (a.Rota != a.Id || a.VoltaOnda > Onda + 1) sb.Append("av.").Append(a.Id).Append('=').Append(a.Rota).Append(',').Append(a.VoltaOnda).Append('\n');
+            // o estado que a tela e o bot leem: sem isto, reabrir com fila cheia daria uma decisao diferente
+            foreach (Station st in Estacoes)
+                if (st.Estado != Estado.Normal || !double.IsInfinity(st.Folga))
+                    sb.Append("stt.").Append((int)st.Tipo).Append('=').Append((int)st.Estado).Append(',').Append(st.VooEmRisco).Append(',').Append(st.Folga.ToString("R", Ci)).Append('\n');
+            if (_inc != null)
+                sb.Append("inc=").Append((int)_inc.Tipo).Append(',').Append(_inc.Vaga).Append(',').Append((int)_inc.Estacao).Append(',').Append(_inc.Aviso.ToString(Ci))
+                  .Append(',').Append(_inc.Inicio.ToString(Ci)).Append(',').Append(_inc.Fim.ToString(Ci)).Append(',').Append(_inc.Resolvido ? 1 : 0).Append('\n');
+            Kv(sb, "reparo", Reparo); Kv(sb, "incw", UltimoIncidente);
+        }
+
+        /// <summary>Le o schema 4 antes da onda (a falha pesa no teto do atendimento), com tudo limitado. O schema 3 nao tem estas chaves: fica
+        /// o jogo novo, Vale Verde com as rotas iniciais e nenhum incidente.</summary>
+        void CarregaFaseC3(Dictionary<string, string> kv)
+        {
+            int[] a = Ints(kv, "aero");
+            int n = T.Aeroportos.Length;
+            if (a.Length >= 3)
+            {
+                for (int i = 0; i < n; i++) if ((a[1] >> i & 1) != 0 && Marco >= T.Aeroportos[i].Marco) AeroportosPagos |= 1 << i;
+                if (a[0] >= 0 && a[0] < n && Pago(a[0])) Chega(a[0]);
+                ProximoAeroporto = a[2] >= 0 && a[2] < n && a[2] != AeroportoAtual && Pago(a[2]) ? a[2] : -1;
+            }
+            long abertas = Get(kv, "rotas", 0);
+            for (int r = 0; r < T.Rotas.Length; r++)
+                if ((abertas >> r & 1) != 0 && Pago(T.Rotas[r].Aeroporto) && Marco >= T.Rotas[r].Marco) RotasAbertas |= 1 << r;
+            int[] prog = Ints(kv, "prog");
+            for (int f = 0; f < Math.Min(prog.Length, Prog.Length); f++)
+                if (RotaAberta(prog[f]) && T.Rotas[prog[f]].Aeroporto == AeroportoAtual) Prog[f] = prog[f];
+            foreach (Aviao av in Avioes)
+            {
+                int[] x = Ints(kv, "av." + av.Id);
+                if (x.Length < 2) continue;
+                av.Rota = x[0] >= 0 && x[0] < T.Rotas.Length ? x[0] : 0;
+                av.VoltaOnda = Math.Max(0, Math.Min(Onda + 2, x[1]));
+            }
+            foreach (Station st in Estacoes)
+            {
+                string[] e = kv.TryGetValue("stt." + (int)st.Tipo, out string x) ? x.Split(',') : new string[0];
+                if (e.Length < 3 || !double.TryParse(e[2], NumberStyles.Float, Ci, out double folga) || double.IsNaN(folga)) continue;
+                st.Estado = (Estado)Math.Max(0, Math.Min(2, L(e[0], 0)));
+                st.VooEmRisco = (int)Math.Max(-1, Math.Min(int.MaxValue, L(e[1], -1)));
+                st.Folga = folga;
+            }
+            long[] c = Longs(kv, "inc");
+            // incidente coerente com o relogio; lixo = nenhum
+            if (c.Length >= 7 && c[0] >= 0 && c[0] < 4 && c[3] <= c[4] && c[4] <= c[5] && c[5] >= Steps && c[5] <= Steps + 2L * OndaPassos)
+                _inc = new Incidente { Tipo = (TipoIncidente)c[0], Vaga = c[1] == 1 ? 1 : 0, Estacao = Est((int)c[2]), Aviso = c[3], Inicio = c[4], Fim = c[5], Resolvido = c[6] != 0 };
+            Reparo = _inc != null ? (int)Math.Max(0, Math.Min(Passos(T.ReparoSeg), Get(kv, "reparo", 0))) : 0;
+            UltimoIncidente = (int)Math.Max(-99, Math.Min(Onda, Get(kv, "incw", -99)));
+        }
+
         /// <summary>Le o schema 2, com tudo limitado (lixo vira o padrao). Schema 1 (a v0.1) nao tem estas chaves: Migra1 poe o padrao.</summary>
         void CarregaFaseC(Dictionary<string, string> kv, int schema)
         {
@@ -84,7 +150,7 @@ namespace TA.Core
                 a.Desgaste = (int)Math.Max(0, Math.Min(100, n[0]));
                 a.Hangar = (int)Math.Max(0, Math.Min(Passos(T.HangarSeg), n[8]));
                 a.NoPatio = n[2] != 0 && a.Hangar == 0;
-                a.Chega = Math.Max(-1, Math.Min(Steps + Passos(T.Trecho), n[1]));   // volta de trecho no maximo um trecho a frente
+                a.Chega = Math.Max(-1, Math.Min(Steps + Passos(TrechoSeg(a.Rota)), n[1]));   // volta de trecho no maximo um trecho a frente
                 a.VooId = (int)Math.Max(-1, Math.Min(int.MaxValue, n[3]));
                 a.FechouEm = a.NoPatio && a.VooId >= 0 ? Math.Max(-1, Math.Min(Steps, n[4])) : -1;
                 // voo valido: o desta onda (fechado so se ja partiu) ou, esperando decolar, o da onda anterior
@@ -193,7 +259,10 @@ namespace TA.Core
                 s.Staff.Add(new Funcionario { Id = i, Perfil = p, Em = em, De = de, Andando = Math.Max(0, Math.Min((int)Math.Round(s.T.Caminhada * Hz), f[2])) });
             }
             int onda = (int)Get(kv, "onda", -1);
-            if (onda >= 0 && onda == (int)(s.Steps / s.OndaPassos)) s.CarregaOnda(onda, kv);   // onda que nao bate com o relogio: comeca a dele
+            bool bate = onda >= 0 && onda == (int)(s.Steps / s.OndaPassos);   // onda que nao bate com o relogio: comeca a dele
+            if (bate) s.Onda = onda;
+            s.CarregaFaseC3(kv);
+            if (bate) s.CarregaOnda(onda, kv);
             foreach (KeyValuePair<string, string> p in kv)
                 if (p.Key.StartsWith("ad.", StringComparison.Ordinal)) s.Anuncios.Load(p.Key.Substring(3), p.Value);
             s.CarregaFaseC(kv, r.Schema);
@@ -205,7 +274,18 @@ namespace TA.Core
             Onda = onda;
             for (int f = 0; f < 2; f++)
             {
-                Voo v = Voos[f] = NovoVoo(onda, f);
+                Voo v = Voos[f] = NovoVoo(onda, f, Prog[f]);
+                int[] x = Ints(kv, "vr." + f);
+                if (x.Length >= 8)
+                {
+                    v.Rota = x[0] >= 0 && x[0] < T.Rotas.Length ? x[0] : Prog[f];
+                    v.Grupo = Math.Max(0, Math.Min(T.Pax(onda), x[2]));
+                    v.Total = Math.Max(v.Grupo, Math.Min(499, x[1]));
+                    v.GrupoChega = Math.Max(0, Math.Min(OndaPassos, x[3]));
+                    v.GrupoConexao = x[4] != 0; v.Prioridade = x[5] != 0;
+                    v.AbrePasso = Math.Max(0, Math.Min(v.AbrePasso, x[6]));
+                    v.Adiantado = x[7] != 0;
+                }
                 int[] n = Ints(kv, "voo." + f);
                 if (n.Length < 5) continue;
                 v.Criados = Math.Max(0, Math.Min(v.Total, n[0]));
