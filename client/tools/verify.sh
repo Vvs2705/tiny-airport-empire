@@ -1,10 +1,11 @@
 #!/bin/bash
 # Portão do Tiny Airport num comando só (cópia do verify.sh do Dungeon Courier, mesmo nome e uso do Forge Street). Git Bash no Windows.
-# uso: client/tools/verify.sh quick | full
-#   quick  núcleo (dotnet test) + viewcheck da View, sem abrir o Unity
-#   full   quick + Unity batchmode: EditMode, Setup.BuildWindows e o .exe com -autoplay 10
+# uso: client/tools/verify.sh quick | full | android
+#   quick  checa_repo + núcleo (dotnet test) + viewcheck da View, sem abrir o Unity
+#   full   núcleo + Unity batchmode: EditMode, viewcheck, Setup.BuildWindows, o .exe com -autoplay 10 e checa_repo
+#   android  núcleo + Setup.BuildAndroidDev + checa_apk (targetSdk, ABI, AD_ID, 16 KB); pelo drive subst (caminho com espaço quebra o Gradle)
 # Imprime só OK ou o erro; os logs desta rodada ficam em client/Builds/verify/. As fotos 540×960 continuam sendo conferidas à mão.
-# Regra do PC (7,7 GB): um processo pesado por vez; aborta se o Unity estiver aberto neste projeto ou se o emulador estiver ligado.
+# Regra do PC (7,7 GB): um processo pesado por vez; aborta se o Unity estiver aberto neste projeto ou com emulador, Blender ou Docker ligados.
 # Caminho longo (worktree): se o Unity falhar por MAX_PATH, rode por um drive subst (ex.: subst R: <raiz do repo>; R:/client/tools/verify.sh full).
 # Variável opcional: UNITY_EXE.
 set -uo pipefail
@@ -17,6 +18,15 @@ T0=$SECONDS
 ok()   { echo "OK   $* [$((SECONDS - T0)) s]"; }
 fail() { echo "FALHOU: $*" >&2; exit 1; }
 
+repo() {
+  local log rc
+  mkdir -p "$OUT"
+  log=$(python "$CLIENT/tools/checa_repo.py" 2>&1); rc=$?
+  echo "$log" > "$OUT/checa_repo.log"
+  [ $rc -eq 0 ] || { echo "$log" | grep -v '^AVISO' | head -20; fail "checa_repo (ver $OUT/checa_repo.log)"; }
+  ok "repo: $(echo "$log" | tail -1)"
+}
+
 nucleo() {
   local log rc
   mkdir -p "$OUT"
@@ -26,11 +36,19 @@ nucleo() {
   ok "núcleo: $(echo "$log" | grep -m1 -oE 'Failed: +[0-9]+, Passed: +[0-9]+, Skipped: +[0-9]+, Total: +[0-9]+' | tr -s ' ')"
 }
 
-# a View usa o uGUI: a DLL vem de client/Library/ScriptAssemblies (num worktree novo, o full cria ao abrir o Unity no EditMode)
+# a View usa o uGUI: a DLL vem de client/Library/ScriptAssemblies; num worktree novo, de outro worktree deste repo que já abriu no Unity
+ugui_dll() {
+  local w d="client/Library/ScriptAssemblies/UnityEngine.UI.dll"
+  { echo "$ROOT"; git -C "$ROOT" worktree list --porcelain | sed -n 's/^worktree //p'; } | while read -r w; do
+    [ -f "$w/$d" ] && { echo "$w/$d"; break; }
+  done
+}
+
 viewcheck() {
-  local log rc
-  [ -f "$CLIENT/Library/ScriptAssemblies/UnityEngine.UI.dll" ] || fail "falta client/Library/ScriptAssemblies/UnityEngine.UI.dll: rode o full (abre o Unity) ou copie as DLLs de onde o projeto já abriu"
-  log=$(dotnet build "$CLIENT/tools/viewcheck/view" -nologo -v q 2>&1); rc=$?
+  local log rc dll
+  dll=$(ugui_dll)
+  [ -n "$dll" ] || fail "nenhum worktree tem client/Library/ScriptAssemblies/UnityEngine.UI.dll: rode o full (abre o Unity) uma vez"
+  log=$(dotnet build "$CLIENT/tools/viewcheck/view" -nologo -v q "-p:UguiDll=$dll" 2>&1); rc=$?
   echo "$log" > "$OUT/viewcheck.log"
   [ $rc -eq 0 ] || { echo "$log" | grep -E " error " | head -20; fail "viewcheck (ver $OUT/viewcheck.log)"; }
   ok "viewcheck: $(echo "$log" | grep -oE '[0-9]+ (Warning|Error)\(s\)' | paste -sd, | tr -s ' ')"
@@ -44,7 +62,7 @@ guard() {
   me=$(echo "$CLIENT" | tr 'A-Z' 'a-z')
   echo "$cl" | grep -qF "$me" && fail "o Unity está aberto neste projeto ($CLIENT): feche o Editor antes"
   [ -n "$(echo "$cl" | tr -d '[:space:]')" ] && echo "AVISO: há outro Unity.exe aberto (PC de 7,7 GB)"
-  tasklist 2>/dev/null | grep -qiE '^(qemu-system|emulator)' && fail "o emulador está ligado: feche-o antes (nunca Unity e emulador juntos)"
+  tasklist 2>/dev/null | grep -qiE '^(qemu-system|emulator|blender|Docker Desktop)' && fail "emulador, Blender ou Docker ligado: feche antes (um processo pesado por vez)"
   mkdir -p "$OUT"
 }
 
@@ -63,6 +81,7 @@ dirty() {
 }
 
 quick() {
+  repo
   nucleo
   viewcheck
 }
@@ -87,11 +106,24 @@ full() {
   grep -q "Exception" "$OUT/autoplay.log" && fail "exceção no autoplay (ver $OUT/autoplay.log)"
   ok "autoplay: $a"
   dirty
+  repo
+}
+
+android() {
+  nucleo
+  guard
+  run_unity build_android.log -buildTarget Android -quit -executeMethod TA.EditorTools.Setup.BuildAndroidDev; local rc=$? sum log
+  sum=$(grep -m1 -oE "BuildSummary\(Android[^)]*\): .*" "$OUT/build_android.log")
+  [ $rc -eq 0 ] && [[ "$sum" == *result=Succeeded* ]] || fail "BuildAndroidDev (saída $rc, '${sum:-sem BuildSummary}', ver $OUT/build_android.log)"
+  ok "BuildAndroid: $sum"
+  log=$(python "$CLIENT/tools/checa_apk.py" "$CLIENT/Builds/android/TinyAirport-dev.apk" 2>&1) || { echo "$log"; fail "checa_apk"; }
+  ok "apk: $log"
 }
 
 case "${1:-}" in
   quick) quick ;;
   full) full ;;
-  *) sed -n '3,5p' "$0"; exit 2 ;;
+  android) android ;;
+  *) sed -n '3,6p' "$0"; exit 2 ;;
 esac
 echo "verify $1: OK em $((SECONDS - T0)) s"

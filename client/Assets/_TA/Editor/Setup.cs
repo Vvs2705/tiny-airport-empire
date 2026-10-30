@@ -51,7 +51,8 @@ namespace TA.EditorTools
             PlayerSettings.SetScriptingBackend(NamedBuildTarget.Android, ScriptingImplementation.IL2CPP);
             PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;      // a Play exige 64 bits
             PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel26; // ponytail: hipotese ate fixar o aparelho minimo
-            PlayerSettings.Android.targetSdkVersion = AndroidSdkVersions.AndroidApiLevelAuto;
+            // 36 fixo: a Play exige 36 desde 31/08/2026 e o Unity 6.3 promete 35 e 36; o Auto segue o SDK instalado, que ja traz o android-37.0
+            PlayerSettings.Android.targetSdkVersion = (AndroidSdkVersions)36;
             PlayerSettings.Android.predictiveBackSupport = true; // API 36
 
             // Windows: janela retrato 540x960 (dev) para jogar e fotografar no PC.
