@@ -23,7 +23,7 @@ Medido em 2026-10-30 neste PC, com o Chrome do Tripo aberto e entre 1 e 2 GB de 
 | Viewcheck | 0 avisos, 0 erros |
 | Selftests | `checa_repo` 21 quebras, `checa_apk` 6, `auditar_arte` 8 cenários |
 | Prova vermelha do `EnumsTests` | trocar `Loja` e `Portao` derruba o teste; `Defs.cs` restaurado; a Fase C2 só cresce no fim e não quebra |
-| Mutação | 9 de 9 (medido em 2026-10-29; não reexecutado) |
+| Mutação (`mutacao.py`) | **9 de 9 mutantes mortos**, em 25 s, sobre o estado final |
 
 A cobertura foi medida sem instalar nada: o `Microsoft.CodeCoverage` já vem com o `Microsoft.NET.Test.Sdk`.
 

@@ -91,7 +91,7 @@ Lilita One e Nunito do DC, mais uma mono OFL para o quadro de partidas (GDD §10
 | Firebase Test Lab | **Depreciado**: desliga em 2027-09-30 (V) |
 | Aseprite | US$ 19,99, acima do teto, e o jogo não é pixel art (V) |
 | PixelLab | Preço N; não é pixel art |
-| Cascadeur | Indie a US$ 19/mês, acima do teto (V); D-18 usa sprites |
+| Cascadeur | Indie a US$ 19/mês ou US$ 96/ano (V); dentro do teto só no anual, mas sem uso aqui: a D-18 anima por Mixamo e entrega sprites |
 | FMOD, Wwise | Áudio do Unity basta; preços N |
 | Claude-Code-Game-Studios | 49 agentes, 74 skills e 15 hooks, com `.claude/settings.json` próprio e `update-check.sh` com rede não documentada (V). Colide com os hooks e o CLAUDE.md atuais |
 | wshobson/agents | 202 agentes, nenhum de jogo (V). Mais contexto, nenhum ganho |
