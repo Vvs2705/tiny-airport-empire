@@ -2,7 +2,7 @@
 
 - **Branch padrão:** `main` sempre compila e passa nos testes. Trabalho novo em `feat/<assunto>`, `fix/<assunto>`, `docs/<assunto>` ou `art/<assunto>` e entra por **Pull Request**.
 - **Commits:** em português, no imperativo, com prefixo de escopo: `feat(ta-core): …`, `fix(ta-view): …`, `art(ta): …`, `docs: …`, `test: …`, `chore: …`. Um assunto por commit.
-- **Portão para o PR entrar (quando houver código):**
+- **Portão para o PR entrar (quando houver código):** `client/tools/verify.sh quick` no dia a dia e `full` antes do PR; o `checa_repo.py` confere `.meta`, guardrails, segredos e o `MAPA_CODIGO.md`, e o CI repete.
   1. testes do núcleo verdes (`dotnet test client/tools/coretests`);
   2. a View compila sem o Unity (`dotnet build client/tools/viewcheck/view`, 0 erros);
   3. Unity EditMode verde e build Windows/Android quando o PR mexe em jogo;

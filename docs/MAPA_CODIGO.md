@@ -48,7 +48,7 @@ Convenção de origem: `fs:` = Forge Street (`Vvs2705/forge-street`), `dc:` = Du
 
 | Arquivo | Para quê | Funções-chave | Origem |
 |---|---|---|---|
-| `Setup.cs` | settings, cena gerada e builds por script, idempotente | `Apply` (appId e nome **provisórios** de dev, D-03; retrato; Android ARM64 IL2CPP API 26+; janela 540×960), `BuildWindows` → `Builds/win/TinyAirport.exe`, `BuildAndroidDev`, `VersionCode`; `SemIdDePublicidade` tira o `AD_ID` do manifesto Android | cópia de `dc:Editor/Setup.cs`, sem release, AAB, chave de upload e ícones |
+| `Setup.cs` | settings, cena gerada e builds por script, idempotente | `Apply` (appId e nome **provisórios** de dev, D-03; retrato; Android ARM64 IL2CPP API 26+, targetSdk 36 fixo; janela 540×960), `BuildWindows` → `Builds/win/TinyAirport.exe`, `BuildAndroidDev`, `VersionCode`; `SemIdDePublicidade` tira o `AD_ID` do manifesto Android | cópia de `dc:Editor/Setup.cs`, sem release, AAB, chave de upload e ícones |
 | `SpriteImport.cs` | import das folhas (`Resources/Sprites`) e da arte de interface (`Resources/UI`): DXT5 no PC, ASTC no Android | `OnPreprocessTexture` | cópia de `dc:Editor/SpriteImport.cs` |
 
 ## Testes — `client/Assets/_TA/Tests/EditMode/` (`TA.Tests`)
@@ -61,6 +61,7 @@ Convenção de origem: `fs:` = Forge Street (`Vvs2705/forge-street`), `dc:` = Du
 | `EstacoesPerfisTests.cs` | Fase C2: desbloqueio pelo marco (antes do marco 1 é a v0.1), os 6 perfis na ordem, o especialista, bagagem, alimentação, oficina, despacho e as chaves de só visual |
 | `SaveTests.cs` | ida e volta estável, retomada no meio da onda igual (também com a Fase C, 20 ondas), migração dos saves reais da v0.1 e do schema 2 (migrar = jogar até ali com o código novo), lixo vira padrão limitado (também da Fase C), onda que não bate com o relógio, schema futuro; a linha do `-autoplay` |
 | `ExploitTests.cs` | invariantes da Origem §50, da Fase C e da Fase C2 como testes negativos nomeados (perder voo, falta de tripulação, manutenção pendente, offline, sorteio, reparo só com Cash e tempo, id de transação) e os ataques de relógio, teto de 2 h, teto relativo, anúncio e fechar e abrir |
+| `EnumsTests.cs` | os enums salvos só crescem no fim: trocar a ordem, renomear ou tirar um item cai aqui |
 | `BalanceTests.cs` | `[Explicit]`: portão TA-1/TA-2 com 200 sementes × 10 ondas, o "antes" com as regras da v0.1, o portão da Fase C (Planejador × Automático, 200 × 20 ondas), o portão da Fase C2 por sistema, o "antes" da C2 e a varredura, com as tabelas do `docs/BALANCE.md` |
 
 ## Cena e pacotes
@@ -72,7 +73,11 @@ Convenção de origem: `fs:` = Forge Street (`Vvs2705/forge-street`), `dc:` = Du
 
 | Arquivo | Para quê | Origem |
 |---|---|---|
-| `verify.sh quick\|full` | o portão: núcleo, viewcheck, EditMode, build Windows e `-autoplay 10` com 0 exceções; logs em `client/Builds/verify/` | `dc:client/tools/verify.sh` |
+| `verify.sh quick\|full\|android` | o portão: `checa_repo`, núcleo, viewcheck, EditMode, build Windows e `-autoplay 10` com 0 exceções; logs em `client/Builds/verify/`; o `quick` roda em worktree novo com a `UnityEngine.UI.dll` de outro worktree | `dc:client/tools/verify.sh` |
+| `checa_repo.py` | portão estático (stdlib): `.meta` e GUID, núcleo sem Unity, módulos do `manifest.json`, guardrails, arquivos proibidos, segredos e este mapa; `--selftest` quebra um repo de mentira de cada jeito | `--selftest` de `fs:client/tools/conteudo_check.py` |
+| `auditar_arte.py` | arte fora do git (stdlib): `ASSETS.md` × zips HD × `PROVENIENCIA.md` × backup; `--sha` confere os hashes; `--selftest`. Só lê | — |
+| `checa_apk.py` | o APK contra a Play (stdlib + `aapt2` e `zipalign` do Unity): targetSdk ≥ 36, só arm64-v8a, sem `AD_ID`, `.so` e zip alinhados a 16 KB; `--selftest` | — |
+| `marca.py` | versões de marca que entram no git a partir dos originais 4K (numpy e Pillow) | — |
 | `coretests/TACore.Tests.csproj` | `dotnet test`: núcleo e testes EditMode sem abrir o Unity | `dc:client/tools/coretests` |
 | `viewcheck/` (`unity_refs.props`, `core/`, `view/`) | `dotnet build`: compila a View contra as DLLs do Unity 6000.3.27f1 e a `UnityEngine.UI.dll` de `client/Library/ScriptAssemblies`, sem abrir o Unity | `dc:client/tools/viewcheck` |
 | `fotos_v01.sh` | fotos 540×960 de cada tela, do estresse com 60 passageiros (parados e andando) e de cada passo do tutorial, a rodada `-tutorial -bot` e o `-record` do funcionário mudando de setor; saída em `client/Builds/validation_v01/` | — |

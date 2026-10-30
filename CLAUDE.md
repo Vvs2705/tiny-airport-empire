@@ -12,8 +12,9 @@ Se os arquivos acima não carregarem (outro PC), o mínimo é: só este jogo; mu
 
 ## Deste jogo
 - Código do jogo em `client/Assets/_TA/` (núcleo em C# puro em `Scripts/Core`, testável fora do Unity). Unity **6000.3.27f1**.
-- Portão: `client/tools/verify.sh quick|full` (`full` antes de todo PR de jogo); mapa dos arquivos em `docs/MAPA_CODIGO.md`.
+- Portão: `client/tools/verify.sh quick|full|android` (`full` antes de todo PR de jogo); mapa dos arquivos em `docs/MAPA_CODIGO.md`.
+- Ao fechar um lote de arte: skill `lote-de-arte`. Ferramentas avaliadas e rejeitadas: `docs/ToolchainAudit/04-tool-recommendations.md` (consulte antes de propor instalar algo).
 
 ## Situação
-- Estado: **projeto Unity autorizado** (D-01 aprovada em 2026-10-29 e ampliada pelo prompt mestre até "só falta publicar"; D-14 aprovada: Tripo no mesmo dia). Fase A: esqueleto vazio copiado do Forge Street e do Dungeon Courier, com o portão verde. Nome e appId (D-03) seguem pendentes: o `Setup.cs` usa um appId provisório só de desenvolvimento.
+- Estado: **projeto Unity autorizado** (D-01 aprovada em 2026-10-29 e ampliada pelo prompt mestre até "só falta publicar"; D-14 aprovada: Tripo no mesmo dia). Fase B feita, menos o K2 com gente; Fase C com o núcleo na `main`; arte do Tripo gerada e a integração pausada em `feat/view-tripo`. Nome e appId (D-03) seguem pendentes: o `Setup.cs` usa um appId provisório só de desenvolvimento.
 - Comece por: `README.md`, `docs/CONTRATO_V01.md` (o que a v0.1 entrega), `docs/CONTRATO_LANCAMENTO.md` (GDD × feito), `docs/GDD.md` (GDD mestre "Little Terminal": auditoria no §0.3, fases no §17 e decisões pendentes no §23.2), `docs/GDD_ORIGEM.md` (produto, revisão competitiva e lições do DC) e `docs/COMPETITIVO.md`.

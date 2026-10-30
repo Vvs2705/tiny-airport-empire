@@ -1,14 +1,20 @@
-# Núcleo do Tiny Airport (TA.Core) e testes EditMode puros, sem Unity: o mesmo dotnet test do client/tools/verify.sh quick.
+# Núcleo do Tiny Airport (TA.Core) e testes EditMode puros, sem Unity: o mesmo dotnet test do client/tools/verify.sh quick, mais o checa_repo.
 name: nucleo
 on:
   push:
   pull_request:
+permissions:
+  contents: read
 jobs:
   coretests:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
+      - run: python3 client/tools/checa_repo.py --selftest
+      - run: python3 client/tools/checa_repo.py
+      - run: python3 client/tools/auditar_arte.py --selftest
       - run: dotnet test client/tools/coretests -nologo
