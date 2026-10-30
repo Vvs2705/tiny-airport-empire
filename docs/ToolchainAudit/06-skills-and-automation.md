@@ -8,7 +8,7 @@ Todos em Python stdlib, com `--selftest` que quebra uma entrada de cada jeito e 
 
 | Script | Necessidade confirmada | O que cobre | Selftest |
 |---|---|---|---|
-| `client/tools/checa_repo.py` | `Art/Marca` entrou sem `.meta`; o prompt mestre pede busca por segredo antes de cada PR; a regra do `MAPA_CODIGO.md` era só de boa vontade; o `viewcheck` não enxerga módulos fora do manifesto | `.meta` e GUID, núcleo sem Unity, módulos, guardrails, arquivos proibidos, segredos, mapa | 21 quebras |
+| `client/tools/checa_repo.py` | `Art/Marca` entrou sem `.meta`; o prompt mestre pede busca por segredo antes de cada PR; a regra do `MAPA_CODIGO.md` era só de boa vontade; o `viewcheck` não enxerga módulos fora do manifesto | `.meta` e GUID, núcleo sem Unity, módulos, guardrails, arquivos proibidos, segredos, mapa | 23 quebras |
 | `client/tools/auditar_arte.py` | conferência à mão em todo lote do Tripo (10 lotes até agora) | lista × zip × registro × backup, com SHA-256 | 8 cenários |
 | `client/tools/checa_apk.py` | GDD §3: "reconferidos no dia do envio"; o projeto nunca teve APK | targetSdk, ABI, `AD_ID`, 16 KB em `.so` e zip | 6 quebras + leitura de ELF |
 

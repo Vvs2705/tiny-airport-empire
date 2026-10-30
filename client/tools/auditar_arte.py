@@ -27,11 +27,10 @@ FIM_DA_LISTA = (
 
 
 def pecas_da_lista(assets_md):
-    lista = set()
-    for linha in assets_md.split(FIM_DA_LISTA)[0].splitlines():
-        if linha.startswith("|"):
-            lista.update(re.findall(r"`([a-z][a-z0-9_]+)`", linha))
-    return lista
+    # ponytail: todo token em crase antes do §5 conta como peca; um token solto vira "sem zip" na hora, e dai se corrige o texto
+    return set(
+        re.findall(r"`([a-z][a-z0-9_]+)`", assets_md.split(FIM_DA_LISTA)[0])
+    )  # tabela ou prosa: os lotes 9 e 10 listam em texto
 
 
 def registros(prov_md):
@@ -59,8 +58,8 @@ def checa_zip(caminho, profundo):
             nomes = [n.lower() for n in z.namelist()]
             if profundo and z.testzip():
                 return "conteudo corrompido"
-    except (zipfile.BadZipFile, OSError) as e:
-        return str(e)
+    except Exception as e:  # zlib.error, cifrado, metodo desconhecido: um zip ruim nao pode derrubar o relatorio das outras pecas
+        return f"{type(e).__name__}: {e}"
     if not any(n.endswith(".fbx") for n in nomes):
         return "sem FBX"
     if not any(
@@ -161,6 +160,10 @@ def selftest():
         prov = f"| loja | `loja_hd/loja_hd.zip` | `{h}` | `{'0' * 64}` |\n| torre | `torre_hd/torre_hd.zip` | `{h}` |\n"
         r = audita(assets, prov, arte, backup, sha=True)
         assert not any(r["falta"].values()) and r["lista"] == 2 and r["zips"] == 2, r
+        assert pecas_da_lista("2 pecas: `loja`, `torre`.\n## 5. Marca\n`logo_app`") == {
+            "loja",
+            "torre",
+        }
 
         r = audita(assets + "", prov.replace(h, "1" * 64, 1), arte, backup, sha=True)
         assert r["falta"]["sha"] == ["loja: disco difere do PROVENIENCIA"], r
@@ -183,7 +186,15 @@ def selftest():
         assert audita(assets, prov, arte, backup)["falta"]["zip quebrado"] == [
             "torre: sem textura base"
         ]
-        with open(os.path.join(arte, "torre_hd", "torre_hd.zip"), "wb") as f:
+        ruim = os.path.join(arte, "torre_hd", "torre_hd.zip")
+        with zipfile.ZipFile(ruim, "w", zipfile.ZIP_DEFLATED) as z:
+            z.writestr("m.fbx", os.urandom(1) * 200000)
+            z.writestr("a_basecolor.png", "x")
+        with open(ruim, "r+b") as f:  # corrompe o miolo e deixa o diretorio central intacto
+            f.seek(40)
+            f.write(b"\xff" * 40)
+        assert checa_zip(ruim, True) is not None and checa_zip(ruim, False) is None
+        with open(ruim, "wb") as f:
             f.write(b"nao e zip")
         assert audita(assets, prov, arte, backup)["falta"]["zip quebrado"][
             0

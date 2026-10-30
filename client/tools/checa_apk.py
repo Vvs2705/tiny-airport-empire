@@ -104,7 +104,8 @@ def main():
     badging = subprocess.run(
         [os.path.join(BUILD_TOOLS, "aapt2.exe"), "dump", "badging", apk],
         capture_output=True,
-        text=True,
+        encoding="utf-8",
+        errors="replace",
         check=True,
     ).stdout
     with zipfile.ZipFile(apk) as z:

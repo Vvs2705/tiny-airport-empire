@@ -24,6 +24,7 @@ jobs:
         run: |
           set -o pipefail
           dotnet test client/tools/coretests -nologo --filter "FullyQualifiedName~BalanceTests.Portao" --logger "console;verbosity=normal" | tee portoes.log
+          grep -q 'Passed!' portoes.log   # filtro que nao casa teste nenhum sai 0: sem isto o job ficaria verde sem portao
       - name: Tabela no resumo
         if: always()
         run: grep -E '^\s*(\||ganho|so )' portoes.log | sed 's/^ *//' >> "$GITHUB_STEP_SUMMARY" || true

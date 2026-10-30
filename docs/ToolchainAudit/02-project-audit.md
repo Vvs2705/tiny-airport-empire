@@ -51,8 +51,8 @@ O funil é o maior gargalo do produto. Os números abaixo são contagens reais d
 
 | Etapa | Peças |
 |---|---|
-| Zips HD gerados e exportados | 230 |
-| Registradas com SHA no `PROVENIENCIA.md` | 182 registros (170 peças na lista) |
+| Zips HD gerados e exportados | 236 |
+| Registradas com SHA no `PROVENIENCIA.md` | todas: 248 registros, 236 peças na lista |
 | Malhas decimadas para o Unity (`ArtLocal`, fora do git) | 32, só no branch `feat/view-tripo` |
 | Na `main` | **0 malhas**; o jogo ainda é greybox |
 

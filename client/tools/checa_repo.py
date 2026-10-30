@@ -53,7 +53,7 @@ TRAVAS_GITIGNORE = [
 SEGREDOS = {
     "token do GitHub": rb"\b(ghp|gho|ghs|ghu)_[0-9A-Za-z]{36}\b|\bgithub_pat_[0-9A-Za-z_]{40,}",
     "chave da Anthropic": rb"\bsk-ant-[0-9A-Za-z_-]{20,}",
-    "chave do Google": rb"\bAIza[0-9A-Za-z_-]{35}\b",
+    "chave do Google": rb"\bAIza[0-9A-Za-z_-]{35}(?![0-9A-Za-z_-])",
     "chave da AWS": rb"\bAKIA[0-9A-Z]{16}\b",
     "chave privada": rb"-----BEGIN [A-Z ]*PRIVATE KEY-----",
     "JWT": rb"\beyJ[0-9A-Za-z_-]{20,}\.eyJ[0-9A-Za-z_-]{20,}\.[0-9A-Za-z_-]{10,}",
@@ -61,7 +61,7 @@ SEGREDOS = {
 
 
 def texto(dados):
-    return dados.decode("utf-8", "replace")
+    return dados.decode("utf-8-sig", "replace")  # o Visual Studio grava com BOM
 
 
 def sem_comentario(cs):
@@ -187,7 +187,7 @@ def checa_mapa(repo):
     for p in sorted(repo):
         codigo = p.endswith(".cs") and p.startswith("client/Assets/_TA/")
         ferramenta = p.startswith("client/tools/") and p.endswith((".py", ".sh"))
-        if (codigo or ferramenta) and os.path.basename(p) not in mapa:
+        if (codigo or ferramenta) and not re.search(r"(?<![\w.])" + re.escape(os.path.basename(p)), mapa):
             erros.append(f"mapa: {p} nao esta no {MAPA}")
     return erros
 
@@ -322,6 +322,8 @@ def selftest():
         ),
         ("segredos: JWT", lambda r: r.update({"docs/nota.md": falso["jwt"]})),
         ("mapa: ", lambda r: r.update({"client/tools/novo.py": b"x"})),
+        ("mapa: ", lambda r: r.update({MAPA: b"AirportSim.cs Setup.cs verify.sh"})),  # Sim.cs nao pode passar por AirportSim.cs
+        ("segredos: chave do Google", lambda r: r.update({"docs/nota.md": falso["goo"][:-1] + b"- "})),
     ]
     for esperado, quebra in casos:
         r = dict(base)
@@ -335,6 +337,9 @@ def selftest():
     r = dict(base)
     r["docs/nota.md"] = falso["gh"]
     assert all(texto(falso["gh"]) not in e for e in checa(r))
+    r = dict(base)
+    r[MANIFESTO] = b"\xef\xbb\xbf" + r[MANIFESTO]  # BOM nao derruba o json
+    assert checa(r) == [], checa(r)
     print(f"selftest OK: {len(casos)} quebras pegas")
 
 

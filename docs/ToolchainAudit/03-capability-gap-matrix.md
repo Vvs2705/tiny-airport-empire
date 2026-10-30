@@ -31,7 +31,7 @@ Estado em 2026-10-30, depois das integrações desta auditoria. Estados: DISPON�
 
 | Capacidade | Estado | Evidência | Impacto | Candidata | Custo/licença | Compatibilidade | Risco | Ação | Sucesso |
 |---|---|---|---|---|---|---|---|---|---|
-| Geração 3D | DISPONÍVEL | 230 zips, ≈ 16 600 créditos | crítico | Tripo Max | já pago | Chrome | direitos após vencer: NÃO VERIFICADO | manter | ler os termos |
+| Geração 3D | DISPONÍVEL | 236 zips, ≈ 16 600 créditos | crítico | Tripo Max | já pago | Chrome | direitos após vencer: NÃO VERIFICADO | manter | ler os termos |
 | Auditoria de lote | DISPONÍVEL (novo) | era feita à mão a cada lote | alto | `auditar_arte.py` | grátis, stdlib | — | baixo | **feito** | `--sha` sai 0 |
 | Decimação e sprites | PARCIAL | 32 malhas e 11 atores só no branch | crítico | `malhas_ta.py`, `render_sprites.py` | grátis | Blender 5.2.1 | RAM | mesclar `feat/view-tripo` | malhas na `main` |
 | Automação do Blender | DISPONÍVEL | MCP ao vivo; addon no protocolo 9 de 15 | médio | atualizar e fixar | grátis, MIT | Blender 5.2.1 | telemetria mínima | **pendente do Vinicius** | versão fixa |

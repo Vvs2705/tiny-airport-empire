@@ -76,8 +76,8 @@ Levantado em 2026-10-30 no PC `DESKTOP-4VDN6JG`, com comandos só de leitura. R�
 
 | Item | Valor |
 |---|---|
-| `arte/tripo/` | 244 entradas, 230 zips HD, 9,25 GB (242 zips, 242 FBX, 1 210 imagens) |
-| Backup | `3D Objects\TinyAirport-BACKUP`, 5,0 GB, com todos os zips. **Está no mesmo disco C:** |
+| `arte/tripo/` | 250 entradas, 236 zips HD, 9,48 GB (248 zips e 248 FBX, somando as versões antigas) |
+| Backup | `3D Objects\TinyAirport-BACKUP`, 4,9 GB, com todos os zips. **Está no mesmo disco C:** |
 | Segredos de assinatura | `%USERPROFILE%\.tinyairport\` não existe. Normal nesta fase: ainda não há chave de upload |
 
 ## Worktrees

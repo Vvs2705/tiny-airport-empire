@@ -6,13 +6,13 @@ Auditoria de ferramentas do Tiny Airport Empire ("Little Terminal"), 2026-10-30,
 
 **O projeto não precisa de ferramenta nova agora.** A base é boa: núcleo com 99,3% de cobertura, 70 testes, bot de balanceamento e portão em um comando. Os gargalos reais se resolveram com scripts em stdlib e com o que já estava instalado. **Nada foi baixado, instalado ou pago.**
 
-O maior gargalo não é de ferramenta: **230 peças de arte geradas, 0 na `main`**. O trabalho está em `feat/view-tripo`, pausado.
+O maior gargalo não é de ferramenta: **236 peças de arte geradas, 0 na `main`**. O trabalho está em `feat/view-tripo`, pausado.
 
 ## Maiores gargalos
 
 | # | Gargalo | Evidência | Situação |
 |---|---|---|---|
-| 1 | Arte não chega ao jogo | 230 zips, 32 malhas num branch, 0 na `main` | depende de retomar a frente |
+| 1 | Arte não chega ao jogo | 236 zips, 32 malhas num branch, 0 na `main` | depende de retomar a frente |
 | 2 | Requisitos da Play nunca medidos | nenhum APK no projeto; targetSdk em `Auto` | **resolvido**: APK conferido, targetSdk 36 fixo |
 | 3 | Portões que dependiam de lembrar | bot só à mão; enums sem trava; `.meta` faltando | **resolvido**: CI, `EnumsTests`, `checa_repo.py` |
 | 4 | Portão quebrado em worktree novo | `verify.sh quick` saía 1 em toda sessão nova | **resolvido** |

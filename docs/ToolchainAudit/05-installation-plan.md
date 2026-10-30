@@ -54,7 +54,7 @@ Quando https://unity.com/security/unity-brotli-decoder-vulnerability mostrar a v
 
 ### E. Cópia da arte fora do PC
 
-**Por que depende de você:** enviar arte paga a um serviço externo exige aval. **Escolha:** drive privado da V-STACK ou HD externo. **Tamanho:** 5,0 GB (só os zips). O backup atual está no mesmo disco C:.
+**Por que depende de você:** enviar arte paga a um serviço externo exige aval. **Escolha:** drive privado da V-STACK ou HD externo. **Tamanho:** 4,9 GB (só os zips). O backup atual está no mesmo disco C:.
 
 ## Não instalar
 

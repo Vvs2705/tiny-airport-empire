@@ -21,7 +21,7 @@ Medido em 2026-10-30 neste PC, com o Chrome do Tripo aberto e entre 1 e 2 GB de 
 | Cobertura do núcleo | **99,3%** das linhas (1 037 de 1 044); 95,6% de linhas e 93,2% de ramos no total, incluindo os testes |
 | EditMode no Unity | total 74, aprovados 70, falhas 0; os 4 restantes são `[Explicit]` |
 | Viewcheck | 0 avisos, 0 erros |
-| Selftests | `checa_repo` 21 quebras, `checa_apk` 6, `auditar_arte` 8 cenários |
+| Selftests | `checa_repo` 23 quebras, `checa_apk` 6, `auditar_arte` 8 cenários |
 | Prova vermelha do `EnumsTests` | trocar `Loja` e `Portao` derruba o teste; `Defs.cs` restaurado; a Fase C2 só cresce no fim e não quebra |
 | Mutação (`mutacao.py`) | **9 de 9 mutantes mortos**, em 25 s, sobre o estado final |
 
@@ -70,17 +70,17 @@ O APK não foi instalado em aparelho. Não medi o que o `Auto` daria: fixei em 3
 
 ## Arte
 
-`auditar_arte.py --sha`, 20 s para os dois conjuntos de zips:
+`auditar_arte.py --sha`, cerca de 20 s para os dois conjuntos de zips, já com os Lotes 8 a 10 na `main`:
 
 | Medida | Valor |
 |---|---|
-| Peças na lista | 170 |
-| Zips HD em disco | 230 |
-| Registros com SHA | 182 |
-| Sem zip / zip quebrado / sem cópia / SHA divergente | **0 / 0 / 0 / 0** |
-| Sem registro | **60**, todos fora da lista |
+| Peças na lista | 236 |
+| Zips HD em disco | 236 |
+| Registros com SHA | 248 |
+| Sem zip / zip quebrado / sem registro / sem cópia / SHA divergente | **0 / 0 / 0 / 0 / 0** |
+| Fora da lista | 0 |
 
-Os 60 são compatíveis com os lotes posteriores ao 7, ainda em andamento, cujos documentos a sessão do Tripo vai escrever. É uma inferência pelos nomes, não uma conferência item a item.
+Na primeira rodada, a ferramenta acusou 60 zips sem registro. Eram os Lotes 8 a 10, cujos documentos entraram na `main` pelo PR #17 durante esta auditoria; com eles, o número foi a 0. A primeira rodada também mostrou uma limitação do parser, que só lia tabelas: os Lotes 9 e 10 listam as peças em prosa. Foi corrigido, com caso no selftest.
 
 ## Análise estática
 
