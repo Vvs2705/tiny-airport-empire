@@ -4,7 +4,16 @@ namespace TA.Core
     public enum TipoRota { Curta, Turistica, Conexao, Longa }
 
     /// <summary>Os 4 incidentes do GDD §5.8. Indice vai no save.</summary>
-    public enum TipoIncidente { FrenteFria, Falha, Pico, Conexao }
+    public enum TipoIncidente { FrenteFria, Falha, Pico, Conexao, Temporal, Vento, Neblina, Neve }
+
+    /// <summary>As estacoes do ano (GDD §5.14), na ordem do ciclo. Nao vai no save: sai do relogio.</summary>
+    public enum Epoca { Verao, Outono, Inverno, Primavera }
+
+    /// <summary>As 3 falhas de aviao do GDD §5.14. Indice nao vai no save (o sorteio e' puro).</summary>
+    public enum TipoFalha { Nenhuma, Pane, Rejeicao, Retorno }
+
+    /// <summary>O que o jogador pode fazer diante de um perigo (GDD §5.8): a tela lista por Sim.Opcoes. Segurar = esperar passar.</summary>
+    public enum Opcao { Segurar, Adiantar, Atrasar, Reparar, Priorizar, Reforcar, Hangar }
 
     /// <summary>
     /// Uma linha da tabela de rotas (CONTRATO_FASE_C3 §3). O indice em Tuning.Rotas vai no save: so cresce no fim. Id e' estavel; Nome e' de
@@ -41,7 +50,19 @@ namespace TA.Core
         public int Marco, Custo;
         /// <summary>Chance de incidente por onda, fator de desgaste por trecho e peso de cada TipoIncidente.</summary>
         public float Incidentes, Desgaste = 1f; public int[] Pesos;
+        /// <summary>Fator de passageiros por Epoca e chance de clima por onda: [Epoca][indice em Tuning.Climas]. Null = sem clima.</summary>
+        public float[] Demanda = { 1f, 1f, 1f, 1f }; public float[][] Clima;
         public Aeroporto Copia() => (Aeroporto)MemberwiseClone();
+    }
+
+    /// <summary>Uma linha da tabela de clima (CONTRATO_FASE_C4 §3): comeca Antes s antes do portao da vaga e dura Seg s.</summary>
+    public sealed class Clima
+    {
+        public TipoIncidente Tipo;
+        public float Antes, Seg;
+        /// <summary>Espera = s que cada pouso e decolagem espera; Degelo = s de degelo antes de decolar.</summary>
+        public float Espera, Degelo;
+        public bool FechaPista, ParaPatio;
     }
 
     /// <summary>Incidente em andamento (no maximo 1). Passos absolutos: Aviso &lt;= agora &lt; Fim. A semente decide; nada pago mexe nele.</summary>
@@ -60,9 +81,28 @@ namespace TA.Core
     {
         public static readonly Aeroporto[] Aeroportos =
         {
-            new Aeroporto { Id = "vv", Nome = "Vale Verde", Pesos = new[] { 1, 1, 1, 0 } },
-            new Aeroporto { Id = "ca", Nome = "Costa Azul", Marco = 2, Custo = 1200, Incidentes = 0.4f, Desgaste = 1.5f, Pesos = new[] { 4, 3, 2, 1 } },
-            new Aeroporto { Id = "ag", Nome = "Aurora Global", Marco = 3, Custo = 3000, Incidentes = 0.5f, Pesos = new[] { 4, 3, 1, 2 } },
+            new Aeroporto { Id = "vv", Nome = "Vale Verde", Pesos = new[] { 1, 1, 1, 0 }, Clima = new[]
+            {
+                new[] { 0f, 0.3f, 0f, 0f, 0f }, new[] { 0.1f, 0f, 0f, 0.15f, 0f }, new[] { 0.15f, 0f, 0f, 0.15f, 0f }, new[] { 0f, 0.15f, 0f, 0f, 0f },
+            } },
+            new Aeroporto { Id = "ca", Nome = "Costa Azul", Marco = 2, Custo = 1200, Incidentes = 0.4f, Desgaste = 1.5f, Pesos = new[] { 4, 3, 2, 1 }, Demanda = new[] { 1.3f, 0.9f, 0.8f, 1f }, Clima = new[]
+            {
+                new[] { 0f, 0.15f, 0.2f, 0f, 0f }, new[] { 0f, 0f, 0.25f, 0f, 0f }, new[] { 0.15f, 0f, 0.25f, 0f, 0f }, new[] { 0f, 0f, 0.15f, 0f, 0f },
+            } },
+            new Aeroporto { Id = "ag", Nome = "Aurora Global", Marco = 3, Custo = 3000, Incidentes = 0.5f, Pesos = new[] { 4, 3, 1, 2 }, Demanda = new[] { 1f, 1f, 1.2f, 0.8f }, Clima = new[]
+            {
+                new[] { 0f, 0.2f, 0f, 0f, 0f }, new[] { 0.1f, 0f, 0f, 0.2f, 0f }, new[] { 0f, 0f, 0f, 0.1f, 0.35f }, new[] { 0.15f, 0f, 0f, 0.1f, 0f },
+            } },
+        };
+
+        /// <summary>A ordem e' a das colunas de Aeroporto.Clima. A frente fria e' a do TA-4: aviso de 30 s e pista fechada por 60 s.</summary>
+        public static readonly Clima[] Climas =
+        {
+            new Clima { Tipo = TipoIncidente.FrenteFria, Antes = 48f, Seg = 60f, FechaPista = true },
+            new Clima { Tipo = TipoIncidente.Temporal, Antes = 48f, Seg = 40f, FechaPista = true, ParaPatio = true },
+            new Clima { Tipo = TipoIncidente.Vento, Antes = 60f, Seg = 90f, Espera = 25f },
+            new Clima { Tipo = TipoIncidente.Neblina, Antes = 60f, Seg = 90f, Espera = 35f },
+            new Clima { Tipo = TipoIncidente.Neve, Antes = 60f, Seg = 90f, Degelo = 25f },
         };
 
         public static readonly Rota[] Rotas =

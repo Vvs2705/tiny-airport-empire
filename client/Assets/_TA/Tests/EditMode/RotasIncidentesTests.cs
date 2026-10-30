@@ -57,7 +57,7 @@ namespace TA.Tests
         [Test]
         public void EnumsDaFaseC3_SoCrescemNoFim()
         {
-            CollectionAssert.AreEqual(new[] { "FrenteFria", "Falha", "Pico", "Conexao" }, System.Enum.GetNames(typeof(TipoIncidente)));
+            CollectionAssert.AreEqual(new[] { "FrenteFria", "Falha", "Pico", "Conexao", "Temporal", "Vento", "Neblina", "Neve" }, System.Enum.GetNames(typeof(TipoIncidente)).Take(8).ToArray());
             string[] ev = System.Enum.GetNames(typeof(Ev));
             CollectionAssert.AreEqual(new[] { "RotaAberta", "RotaProgramada", "Viagem", "AeroportoChegada", "IncidenteAviso", "IncidenteInicio", "IncidenteFim", "Adiantado", "ReparoIniciado", "Reparado", "Priorizado" },
                 ev.Skip(System.Array.IndexOf(ev, "EstacaoAberta") + 1).Take(11).ToArray());
@@ -66,7 +66,7 @@ namespace TA.Tests
         [Test]
         public void Rota_AbrePeloMarcoEPrecoFixo_EProgramaValeNaProximaOnda()
         {
-            var s = new Sim { Cash = 5000 };
+            var s = new Sim(BalanceTests.SemFaseC4(), 1) { Cash = 5000 };
             Assert.AreEqual((true, true, false), (s.RotaAberta(0), s.RotaAberta(1), s.RotaAberta(Curitiba)));
             Assert.AreEqual(-1, s.CustoRota(Curitiba), "antes do marco 1");
             Assert.IsFalse(s.AbreRota(Curitiba));
