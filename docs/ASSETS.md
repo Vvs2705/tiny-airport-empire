@@ -165,11 +165,11 @@ Completa a escada de upgrade visual do GDD §5.13: cada estação tem nível 1 (
 | 93 | `terminal_costa_azul_n2` | Costa Azul crescido | 4 + 55 |
 | 94 | `terminal_aurora_n2` | Aurora Global crescido | 4 + 55 |
 
-Total do Lote 6: 11 × 59 = **649**. Gerado inteiro; 5 dos 11 exportados (os 4 primeiros e o `terminal_aurora_n2`), **6 exports pendentes e bloqueados**: faltou RAM no PC naquela hora e, quando o PC liberou, o plano Max já tinha vencido (~17:10) e o plano gratuito não exporta (`PROVENIENCIA.md` §1).
+Total do Lote 6: 11 × 59 = **649**. Gerado inteiro; 5 dos 11 exportados (os 4 primeiros e o `terminal_aurora_n2`), **6 exports pendentes e bloqueados** (resolvido em 30/10: as 6 foram regeradas na conta nova, `PROVENIENCIA.md` §2.4): faltou RAM no PC naquela hora e, quando o PC liberou, o plano Max já tinha vencido (~17:10) e o plano gratuito não exporta (`PROVENIENCIA.md` §1).
 
-### 2.6 Lote 7 — planejado, **não gerado** (os créditos venceram antes)
+### 2.6 Lote 7 — gerado e exportado em 2026-10-30 na conta nova
 
-Pedido do dia: usar o resto do saldo (6 318 às 16:55). O plano Max venceu às ~17:10, com o saldo inteiro sem uso, e o Lote 7 não saiu. A lista abaixo fica pronta para o próximo saldo (crédito novo volta a pedir aval por lote). Todas em HD (4K, 50 000 faces); imagem com 2 opções (4); personagem com rig (+20). Sem texto nem marca de terceiros; uniforme em cor lisa para a máscara.
+Em 29/10 o plano Max venceu (~17:10) com 6 318 créditos sem uso e o lote não saiu. Em 30/10 o Vinicius criou a conta nova (25 200 créditos, Max até 29/11) e autorizou "todas as imagens e todos os materiais" (`PROVENIENCIA.md` §1). As 6 peças presas da conta antiga saíram de novo como **grupo A** (6 × 55 = 330), e o Lote 7 saiu inteiro, na ordem abaixo, com os 82 zips guardados em `arte/tripo/` (§2.4 da proveniência). Todas em HD (4K, 50 000 faces, Privado); imagem com 2 opções, **0 crédito** nesta conta; personagem com rig (+20). Sem texto nem marca de terceiros; uniforme em cor lisa para a máscara.
 
 | Grupo | Peças | Créditos |
 |---|---|---|
@@ -181,7 +181,9 @@ Pedido do dia: usar o resto do saldo (6 318 às 16:55). O plano Max venceu às ~
 | 6. Interior (14) | `portico_detector`, `prateleiras_loja`, `mesas_alimentacao`, `totem_autoatendimento`, `escada_rolante`, `esteira_rolante`, `maquina_venda`, `balcao_informacoes`, `bandeja_seguranca`, `lixeira_terminal`, `catraca_embarque`, `vitrine_loja`, `vitrine_cafe`, `carrinho_cafe`. Balcão de check-in, raio-x, esteira de bagagem e cadeiras de portão já existem (§1, §2.4, §2.5) e não se repetem | 14 × 59 = 826 |
 | 7. O que couber (18) | `hidrante`, `container_lixo`, `arbusto`, `canteiro_flores`, `luz_pista`, `gerador_solo`, `esteira_carga`, `van_translado`, `taxi`, `onibus_cidade`, `ponto_onibus`, `guarita_cancela`, `heliponto`, `tanque_agua`, `turbina_eolica`, `painel_solar`, `carro_passageiro`, `caminhonete_pista` | 18 × 59 = 1 062 |
 
-Total do Lote 7: 76 peças, **4 804** créditos (sobraria ≈ 1 500 do saldo de 6 318 para refazer o que saísse sem presença).
+Total do Lote 7: 76 peças = 60 objetos × 55 + 16 personagens × (55 + 20) = **4 500** créditos (a estimativa de 4 804 contava 4 por imagem; nesta conta a imagem não cobra).
+
+**Auditoria de 30/10** (`docs/ASSETS.md` §1 a §2.5 contra `arte/tripo/`): as 94 peças dos Lotes 1 a 6 têm o zip HD no disco; nenhuma precisou ser regerada. As 8 variantes de aeronave do contrato (item 3) já estavam cobertas desde o Lote 5.
 
 ## 5. Marca e arte de instalação (pedido do Vinicius, 2026-10-29)
 

@@ -4,6 +4,7 @@ Formato: [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/); versões e
 
 ## [Unreleased]
 ### Adicionado
+- Tripo, 2026-10-30, conta nova (25 200 créditos): as 6 peças presas do Lote 6 regeradas e o Lote 7 inteiro gerado e exportado (76 peças: terminais n3, 3 aeronaves, 16 personagens com rig, Costa Azul, Aurora, incidentes, interior e extras). Arte crua em `arte/tripo/` fora do git; proveniência em `docs/PROVENIENCIA.md` §2.4 e lista em `docs/ASSETS.md` §2.6.
 - Tripo, 2026-10-29, fim do dia: o plano Max venceu às ~17:10 com 6 318 créditos sem uso. O Lote 7 (76 peças, 4 804 créditos) ficou só planejado em `docs/ASSETS.md` §2.6. Do Lote 6, 5 de 11 exports estão guardados e 6 estão bloqueados pelo plano gratuito (`docs/PROVENIENCIA.md` §1 e §2.3).
 - GDD v1.2 (2026-10-29), com o padrão de mercado:
   - tripulação de pilotos e comissários (§5.11);
