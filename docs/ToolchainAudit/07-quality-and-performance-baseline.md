@@ -33,7 +33,7 @@ A cobertura foi medida sem instalar nada: o `Microsoft.CodeCoverage` já vem com
 dotnet test client/tools/coretests --collect:"Code Coverage;Format=cobertura"
 ```
 
-O `verify.sh full` não foi repetido nos últimos commits: outra sessão estava com o Blender aberto, e a trava nova recusou nas duas tentativas. Desde o último `full` verde, nada mudou em `client/Assets`, `client/Packages` nem `client/ProjectSettings`.
+**Depois da Fase C2:** a `main` recebeu o PR #18 durante a auditoria. Os números desta página são de antes desse merge, salvo onde dito. Sobre o estado novo, `verify.sh quick` passou com **84 testes** e o `EnumsTests` foi ampliado para as 8 estações, os 6 perfis e `EstacaoAberta`. O resultado do `verify.sh full` sobre esse estado está na descrição do PR #16.
 
 ## Portões do bot
 

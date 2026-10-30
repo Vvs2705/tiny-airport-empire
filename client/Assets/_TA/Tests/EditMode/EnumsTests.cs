@@ -17,7 +17,8 @@ namespace TA.Tests
         [Test]
         public void EnumsSalvos_SoCrescemNoFim()
         {
-            SoCresceNoFim<Estacao>("CheckIn", "Seguranca", "Loja", "Portao");
+            SoCresceNoFim<Estacao>("CheckIn", "Seguranca", "Loja", "Portao", "Bagagem", "Alimentacao", "Manutencao", "Despacho");
+            SoCresceNoFim<Perfil>("Atendente", "Seguranca", "Vendedor", "Bagageiro", "Mecanico", "Despachante");
             SoCresceNoFim<Melhoria>("Velocidade", "Capacidade");
             SoCresceNoFim<Estado>("Normal", "Atencao", "Critico");
             SoCresceNoFim<Funcao>("Piloto", "Comissario");
@@ -25,7 +26,7 @@ namespace TA.Tests
             SoCresceNoFim<Ev>("VooCriado", "EmbarqueAberto", "VooPartiu", "VooPerdido", "Embarcou", "Venda", "Toque", "Movido", "Chegou", "Contratado", "Melhorou", "Marco",
                 "Historia", "Offline", "Recompensa", "Fila", "Bonus", "TripulanteContratado", "Escalado", "SemTripulacao", "Descanso", "Pousou", "ServicoFeito",
                 "TurnaroundFeito", "Decolou", "PatioContratado", "PatioMelhorou", "ManutencaoAviso", "ManutencaoPendente", "ChecagemIniciada", "ChecagemFeita", "HangarIniciado",
-                "HangarFeito");
+                "HangarFeito", "EstacaoAberta");
         }
     }
 }

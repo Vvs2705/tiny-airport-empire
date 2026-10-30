@@ -4,7 +4,7 @@ Auditoria de ferramentas do Tiny Airport Empire ("Little Terminal"), 2026-10-30,
 
 ## Conclusão
 
-**O projeto não precisa de ferramenta nova agora.** A base é boa: núcleo com 99,3% de cobertura, 70 testes, bot de balanceamento e portão em um comando. Os gargalos reais se resolveram com scripts em stdlib e com o que já estava instalado. **Nada foi baixado, instalado ou pago.**
+**O projeto não precisa de ferramenta nova agora.** A base é boa: núcleo com 99,3% de cobertura, 84 testes, bot de balanceamento e portão em um comando. Os gargalos reais se resolveram com scripts em stdlib e com o que já estava instalado. **Nada foi baixado, instalado ou pago.**
 
 O maior gargalo não é de ferramenta: **236 peças de arte geradas, 0 na `main`**. O trabalho está em `feat/view-tripo`, pausado.
 
@@ -21,7 +21,7 @@ O maior gargalo não é de ferramenta: **236 peças de arte geradas, 0 na `main`
 ## Prioridades
 
 1. Mesclar `feat/view-tripo`.
-2. Fechar a Fase C2.
+2. Telas da Fase C e da C2: o núcleo já está na `main`.
 3. Áudio por reuso do DC, com o teste do motor de avião.
 4. Fonte OFL.
 5. Medir K3 no aparelho.

@@ -38,7 +38,7 @@ Núcleo em C# puro separado da View, com passo fixo e RNG com semente. É uma ar
 | Equipe limitada e reposicionável | feito; K2 com gente pendente |
 | Pátio, turnaround, manutenção, hangar | núcleo feito, sem tela |
 | Tripulação | núcleo feito, regra desligada (só visual) pelo portão §5.13 |
-| 8 estações e 6 perfis | em `claude/fase-c-estacoes-perfis-ada843`, sem PR |
+| 8 estações e 6 perfis | núcleo mesclado no PR #18 durante esta auditoria; sem tela |
 | Offline com teto de 2 h, cofre | feito, com ataques de relógio testados |
 | Tutorial | passos 1 a 9 de 12 |
 | Save e migração | feito |
@@ -71,7 +71,7 @@ Validação do §7 do documento de auditoria:
 
 | Camada | Estado | Evidência |
 |---|---|---|
-| Núcleo no `dotnet test` | 70 testes verdes | relatório 07 |
+| Núcleo no `dotnet test` | 84 testes verdes, já com a Fase C2 | relatório 07 |
 | Cobertura do núcleo | **99,3% das linhas** | relatório 07 |
 | EditMode no Unity | 70 de 74, com 4 `[Explicit]` fora | relatório 07 |
 | Mutação | 9 de 9 travas (`mutacao.py`, medido na Fase C) | `fase-c-nucleo.md` |

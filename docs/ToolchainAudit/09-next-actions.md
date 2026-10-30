@@ -7,7 +7,7 @@ Em ordem de impacto. As frentes de jogo ficam acima das de ferramenta: nenhuma f
 | # | Ação | Depende de | Pronto quando |
 |---|---|---|---|
 | 1 | **Mesclar `feat/view-tripo`** (`docs/CONTINUAR_ARTE.md`): é o maior gargalo; 236 peças geradas e 0 na `main` | retomar a frente; RAM livre para Blender e Unity | malhas e sprites na `main`, `verify.sh full` verde, fotos conferidas |
-| 2 | **Fechar a Fase C2** (8 estações e 6 perfis), hoje em branch | item 1 não bloqueia; é independente | PR mesclado e `balanco.yml` verde no PR |
+| 2 | **Telas da Fase C e da C2** (pátio, tripulação, manutenção, 8 estações e 6 perfis): o núcleo já está na `main` | item 1 | telas conferidas em foto |
 | 3 | **Frente de áudio**: copiar `audio_gen.py` e `Audio.cs` do DC, adicionar `com.unity.modules.audio`, testar cedo o motor de avião (GDD §12) | nenhuma | efeitos e música no jogo, registro no `PROVENIENCIA.md` |
 | 4 | **Fonte final** OFL, com a licença junto | nenhuma | sem `LegacyRuntime.ttf` |
 | 5 | **Medir K3 no aparelho**: copiar `medir_aparelho.sh` do Forge, com `-perf` | itens 1 e 2; "pode testar" do Vinicius | p10 ≥ 30 FPS medido, ou plano de corte |
