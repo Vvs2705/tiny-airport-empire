@@ -165,7 +165,48 @@ Completa a escada de upgrade visual do GDD §5.13: cada estação tem nível 1 (
 | 93 | `terminal_costa_azul_n2` | Costa Azul crescido | 4 + 55 |
 | 94 | `terminal_aurora_n2` | Aurora Global crescido | 4 + 55 |
 
-Total do Lote 6: 11 × 59 = **649**. Gerado inteiro; 4 dos 11 já exportados, 7 exports pendentes (sem custo) por falta de RAM no PC naquela hora.
+Total do Lote 6: 11 × 59 = **649**. Gerado inteiro; 5 dos 11 exportados (os 4 primeiros e o `terminal_aurora_n2`), **6 exports pendentes e bloqueados** (resolvido em 30/10: as 6 foram regeradas na conta nova, `PROVENIENCIA.md` §2.4): faltou RAM no PC naquela hora e, quando o PC liberou, o plano Max já tinha vencido (~17:10) e o plano gratuito não exporta (`PROVENIENCIA.md` §1).
+
+### 2.6 Lote 7 — gerado e exportado em 2026-10-30 na conta nova
+
+Em 29/10 o plano Max venceu (~17:10) com 6 318 créditos sem uso e o lote não saiu. Em 30/10 o Vinicius criou a conta nova (25 200 créditos, Max até 29/11) e autorizou "todas as imagens e todos os materiais" (`PROVENIENCIA.md` §1). As 6 peças presas da conta antiga saíram de novo como **grupo A** (6 × 55 = 330), e o Lote 7 saiu inteiro, na ordem abaixo, com os 82 zips guardados em `arte/tripo/` (§2.4 da proveniência). Todas em HD (4K, 50 000 faces, Privado); imagem com 2 opções, **0 crédito** nesta conta; personagem com rig (+20). Sem texto nem marca de terceiros; uniforme em cor lisa para a máscara.
+
+| Grupo | Peças | Créditos |
+|---|---|---|
+| 1. Nível 3 dos terminais (3) | `terminal_vale_verde_n3`, `terminal_costa_azul_n3`, `terminal_aurora_n3` | 3 × 59 = 177 |
+| 2. Aeronaves (3) | `aviao_jato_regional` (cauda em T), `aviao_bimotor_helice`, `aviao_wide_quad` (jumbo de 4 motores). As 8 variantes do contrato (item 3) **já estão cobertas** pelas 8 aeronaves geradas (regional, narrow, wide, turístico, cargo, helicóptero, jato executivo, hidroavião); estas 3 são silhuetas extras, brancas, para pintar por cor | 3 × 59 = 177 |
+| 3. Personagens (16) | `cozinheira`, `cozinheiro`, `garcom` (alimentação); `agente_portao`, `agente_portao_f` (portão); `pilota`, `mecanica`, `seguranca_f`, `bagageira`, `despachante_f`, `atendente_m`, `vendedora` (variantes femininas e masculinas dos 6 perfis); `adolescente`, `passageira_executiva`, `surfista`, `passageira_turista` (passageiros) | 16 × 79 = 1 264 |
+| 4. Identidade dos aeroportos (17) | Costa Azul: `farol_costeiro`, `doca_hidroaviao`, `quiosque_praia`, `torre_controle_costa`, `hangar_costa`, `veleiro`, `guarda_sol_espreguicadeiras`, `resort_hotel`. Aurora Global: `torre_controle_aurora`, `hotel_aeroporto`, `garagem_estacionamento`, `monotrilho`, `escultura_dourada`, `lounge_vip`, `terminal_satelite`, `hangar_aurora`, `skyline_torres` | 17 × 59 = 1 003 |
+| 5. Incidentes (5) | `ambulancia`, `viatura_seguranca`, `varredora_pista`, `caminhao_degelo` (frente fria, TA-4), `trator_remocao` | 5 × 59 = 295 |
+| 6. Interior (14) | `portico_detector`, `prateleiras_loja`, `mesas_alimentacao`, `totem_autoatendimento`, `escada_rolante`, `esteira_rolante`, `maquina_venda`, `balcao_informacoes`, `bandeja_seguranca`, `lixeira_terminal`, `catraca_embarque`, `vitrine_loja`, `vitrine_cafe`, `carrinho_cafe`. Balcão de check-in, raio-x, esteira de bagagem e cadeiras de portão já existem (§1, §2.4, §2.5) e não se repetem | 14 × 59 = 826 |
+| 7. O que couber (18) | `hidrante`, `container_lixo`, `arbusto`, `canteiro_flores`, `luz_pista`, `gerador_solo`, `esteira_carga`, `van_translado`, `taxi`, `onibus_cidade`, `ponto_onibus`, `guarita_cancela`, `heliponto`, `tanque_agua`, `turbina_eolica`, `painel_solar`, `carro_passageiro`, `caminhonete_pista` | 18 × 59 = 1 062 |
+
+Total do Lote 7: 76 peças = 60 objetos × 55 + 16 personagens × (55 + 20) = **4 500** créditos (a estimativa de 4 804 contava 4 por imagem; nesta conta a imagem não cobra).
+
+**Auditoria de 30/10** (`docs/ASSETS.md` §1 a §2.5 contra `arte/tripo/`): as 94 peças dos Lotes 1 a 6 têm o zip HD no disco; nenhuma precisou ser regerada. As 8 variantes de aeronave do contrato (item 3) já estavam cobertas desde o Lote 5.
+
+### 2.7 Lote 8 — variedade útil ao jogo (30/10, aval do Vinicius: "todas as imagens, e todos os materiais")
+
+Pedido da sessão coordenadora: depois do Lote 7, gerar o que falta para o lançamento e a variedade útil, sem repetir peça e sem gastar crédito em peça que não entra no jogo. 44 peças (38 objetos × 55 + 6 personagens × 75 = **2 540** créditos), cada uma ligada a uma linha do GDD:
+
+| Grupo | Peças | Para quê |
+|---|---|---|
+| A. Vale Verde rural (8) | `celeiro`, `silo_graos`, `moinho_vento`, `trator_agricola`, `fardos_feno`, `casa_fazenda`, `estufa_vidro`, `espantalho` | identidade do aeroporto regional (GDD §5.10) |
+| B. Pátio e carga (10) | `caminhao_agua_potavel`, `caminhao_lavatorio`, `empilhadeira`, `carreta_dolly`, `paletes_carga`, `caixotes_carga`, `calcos_roda`, `luzes_aproximacao`, `placa_taxiway`, `barreira_jato` | pátio visível em cada voo (§5.12), rotas de carga |
+| C. Interior extra (8) | `sofa_lounge`, `mesa_lounge`, `bar_lounge`, `balanca_bagagem`, `caixa_registradora`, `bebedouro`, `cadeira_rodas`, `carrinho_bebe` | lounge da Aurora, check-in, loja, assistência e família |
+| D. Terreno e mapa (8) | `colina_gramada`, `rochas_grandes`, `lago_pequeno`, `duna_praia`, `ilha_pequena`, `fonte_praca`, `arco_entrada`, `caminho_pedra` | mapa que cresce, bordas e praça (§5.13) |
+| E. Personagens (6) | `passageira_idosa`, `pai_familia`, `menino`, `menina`, `atleta`, `gerente_terminal` | variedade da fila e chefe de terminal |
+| F. Economia (4) | `cofre_dinheiro`, `pilha_moedas`, `bau_recompensa`, `caixa_presente` | tela do cofre (offline) e recompensas |
+
+### 2.8 Lote 9 — passageiros de variedade (30/10)
+
+8 personagens com rig (8 × 75 = **600** créditos): `passageiro_hoodie`, `passageira_casaco`, `passageiro_robusto`, `passageira_cacheada`, `estudante`, `passageiro_idoso_b`, `passageira_capa_chuva`, `passageiro_careca`. Variam corpo, cabelo, idade e roupa, para a fila não repetir silhueta.
+
+### 2.9 Lote 10 — incidentes, eventos e fila (30/10)
+
+14 peças (13 objetos × 55 + 1 personagem × 75 = **790** créditos), ligadas ao GDD §5.8 (falha de equipamento, frente fria), ao §6.5 (eventos Air Show e Holiday) e à fila no rush: `placa_fora_de_servico`, `cavalete_manutencao`, `placa_piso_molhado`, `escada_manutencao`, `limpa_neve`, `aviao_acrobatico`, `arquibancada`, `balao_ar_quente`, `bandeirolas`, `tenda_evento`, `arvore_natal`, `boneco_neve`, `cordao_fila`, `garconete`.
+
+Total dos Lotes 8 a 10: **3 930** créditos. Saldo no fim do dia: **16 440** (Max até 29/11). O que cada peça é para a integração está em `docs/INTEGRACAO_ARTE.md`.
 
 ## 5. Marca e arte de instalação (pedido do Vinicius, 2026-10-29)
 

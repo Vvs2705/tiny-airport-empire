@@ -38,6 +38,24 @@
 | 15:34–15:35 | 11 modelos HD do Lote 6 (nível 3 das estações e nível 2 dos terminais) | 6 373 | 605 | 11 × 55 |
 | 15:40–16:10 | 4 exports HD do Lote 6; os outros 7 ficaram pendentes (o PC caiu para 0,2 GB de RAM livre e o Chrome travou no export). Export não cobra: dá para baixar depois, com o saldo vencido | 6 373 | 0 | — |
 | 16:25 | **Fim do Lote 6: 649 créditos. Total do dia: 8 222** | **6 373** | 649 | 4 878 + 1 869 + 826 + 649 |
+| 16:33 | 1 modelo HD de imagem única fora da lista do `ASSETS.md`: o 3D do emblema (`emblema_tripo_v1`), da sessão da logo | 6 318 | 55 | Lido no histórico de uso da conta, linha `-55` às 16:33:52. Total do dia: **8 277** |
+| 16:55 | Painel de plano ainda mostrava **Max, "Expirar 2026-10-29"** (sem hora) e 6 318 créditos | 6 318 | 0 | Sessão do Lote 7 lê o saldo e prepara a lista (`ASSETS.md` §2.6) |
+| 16:58 | 1 export FBX "Blender, 4K" (`terminal_aurora_n2`) | 6 318 | 0 | zip de 13,2 MiB guardado (§2.3) |
+| ~17:03 | **A conta deslogou no Chrome** ("Registrar/Entrar", ativos vazios) | — | — | Parado, como manda a regra; o Vinicius entrou de novo às ~17:10 |
+| ~17:10 | **Plano Max venceu: plano Gratuito, saldo 0.** 6 318 créditos perdidos | **0** | 6 318 (vencidos) | O Lote 7 (76 peças, ≈ 4 800 créditos) **não foi gerado**. A conta guarda os modelos, mas o **export no plano gratuito pede assinatura** (tela de upgrade: Starter R$ 10/mês, Pro R$ 44/mês); nada foi assinado nem comprado. Também aparece "limite de armazenamento atingido" (333 de 10) |
+| 2026-10-30 ~08:35 | **Conta nova** ("vinicius", plano Max até 2026-11-29; +25 000 e +200 em 29/10, 17:10 e 17:24; os 200 vencem em 2026-11-01). Aval do Vinicius em 30/10: "eu quero que vc produza todas as imagens, e todos os materias, sem falta, esta autorizado o uso, sem problema" | **25 200** | 0 | A conta de 29/10 caiu (~17:10). Receita conferida no painel: H3.1, Ultra, textura 4K, PBR, remover iluminação, triângulos, 50 000 faces, 8K desligado, Gerar em Partes desligado, **Privado** (o painel abria em "Sharing Only" e 8K ligado, "Generate 65"; corrigido para "Generate 55"). Imagens: Nano Banana, 1:1, 2 por rodada, **0 crédito** (o saldo não mexeu em 82 rodadas) |
+| 08:40–08:42 | Grupo A: as 6 peças presas na conta antiga, regeradas (§2.4) | 24 870 | 330 | 6 × 55 |
+| 08:45–08:46 | 22 modelos HD do Lote 7: 3 terminais n3, 3 aeronaves, 16 personagens | 23 660 | 1 210 | 22 × 55 |
+| 08:53–08:57 | 54 modelos HD do Lote 7 (Costa Azul, Aurora, incidentes, interior, extras) | 20 690 | 2 970 | 54 × 55 |
+| 08:59–09:46 | 16 Auto Rig humanoide Mixamo nos personagens do Lote 7 | 20 370 | 320 | 16 × 20 |
+| 08:40–10:10 | Exports HD do grupo A e do Lote 7 (82 peças; personagens "Mixamo, 4K, Export Skeleton"; objetos "Blender, 4K"), em 2 abas do Chrome; uma aba travou por falta de RAM e a fila foi refeita numa aba nova | 20 370 | 0 | export não cobra |
+| 09:49–09:52 | 44 modelos HD do Lote 8 (Vale Verde rural, pátio e carga, interior extra, terreno, 6 personagens, cofre e recompensas) | 17 950 | 2 420 | 44 × 55 |
+| 09:53–10:00 | 6 Auto Rig humanoide Mixamo nos personagens do Lote 8 | 17 830 | 120 | 6 × 20 |
+| 10:16 | 8 modelos HD do Lote 9 (passageiros de variedade) | 17 390 | 440 | 8 × 55 |
+| 10:20 | 14 modelos HD do Lote 10 (incidentes de equipamento, frente fria, Air Show, Holiday, fila e a garçonete) | 16 620 | 770 | 14 × 55 |
+| 10:19–10:32 | 9 Auto Rig (8 do Lote 9 e a garçonete; o rig do `passageiro_hoodie` foi refeito porque a 1ª tentativa começou com o modelo ainda gerando e não cobrou) | 16 440 | 180 | 9 × 20 |
+| 09:54–11:11 | Exports HD dos Lotes 8 a 10 (66 peças), em 2 abas do Chrome; as abas travaram duas vezes por falta de RAM e o grupo de abas caiu no fim, então a última fila (6 objetos) foi refeita numa aba nova | 16 440 | 0 | export não cobra |
+| 11:11 | **Fim do dia 30/10: 8 760 créditos gastos** (4 830 do grupo A e Lote 7 + 3 930 dos Lotes 8 a 10); **saldo 16 440**, Max até 2026-11-29 | **16 440** | 8 760 | 25 200 − 8 760 |
 
 ## 2. Registro por peça (Tripo)
 
@@ -189,7 +207,7 @@ Só HD (4K, 50 000 faces), objetos em FBX "Blender 4K". Imagem escolhida entre 2
 
 ### 2.3 Lote 6 (2026-10-29, fim da tarde)
 
-Só HD (4K, 50 000 faces), objetos em FBX "Blender 4K". Imagem escolhida entre 2 opções. Licença `tripo_pago`, Privado. **7 exports pendentes**: os modelos estão pagos e guardados na conta; o task id do `hangar_manutencao_n3` não foi lido na geração e sai do painel de ativos no export.
+Só HD (4K, 50 000 faces), objetos em FBX "Blender 4K". Imagem escolhida entre 2 opções. Licença `tripo_pago`, Privado. **6 exports pendentes e bloqueados** (resolvido em 30/10: as 6 peças foram regeradas na conta nova, §2.4): os modelos estavam pagos e guardados na conta antiga, mas o plano venceu às ~17:10 (§1) e o plano gratuito não exporta (pede assinatura). Só o `terminal_aurora_n2` saiu a tempo, às 16:58. O task id do `hangar_manutencao_n3` não foi lido na geração e sai do painel de ativos (6º cartão da grade, ordem do mais novo para o mais antigo) quando houver export.
 
 | Peça | Hora | Imagem | Task id | Créditos | Saldo depois | Arquivo (`arte/tripo/`) | Tamanho | SHA-256 do zip | SHA-256 do FBX |
 |---|---|---|---|---|---|---|---|---|---|
@@ -197,13 +215,249 @@ Só HD (4K, 50 000 faces), objetos em FBX "Blender 4K". Imagem escolhida entre 2
 | raio_x_n3 | 15:34 | #2 de 2 | `ee87d05d-49fe-490d-8c1d-0711091c8cf7` | 4 img + 55 | 6868 | `raio_x_n3_hd/raio_x_n3_hd.zip` | 9.4 MiB | `cf06660ebb7b4a37c4bf2d0e835400fe96c17c96c07885263637704cfa8cf431` | `83f5584f0388f0398daccea5ba1f6b3fbb91e727e093bebe04c853a93dd09d71` |
 | esteira_bagagem_n3 | 15:34 | #2 de 2 | `e272641d-b872-4ccb-884d-80820c367537` | 4 img + 55 | 6813 | `esteira_bagagem_n3_hd/esteira_bagagem_n3_hd.zip` | 10.8 MiB | `79ddb68701d1e846048975b5be840d33966aaf2d307a2f0f104bf715d91a0ef9` | `fbbeb3f1ff2fbb6c70bc051333723df3fc45ef931e46d1b0aa6ea4f706714f64` |
 | portao_embarque_n3 | 15:34 | #1 de 2 | `de15e212-3495-48c2-a826-be96ca883fd9` | 4 img + 55 | 6758 | `portao_embarque_n3_hd/portao_embarque_n3_hd.zip` | 10.7 MiB | `66bcd05b3fca1f0847e8886cdcf2f5feba2b084c53273c21ace26802b5ce3f5d` | `f3859d1aad488ab287c86aac786fb7ae2ba4118a23c127a51320a1781299c11e` |
-| loja_n3 | 15:35 | #1 de 2 | `4b2ae957-e9b2-4b39-8b3a-e2562fb38fbc` | 4 img + 55 | 6703 | **export pendente** | — | — | — |
-| alimentacao_n3 | 15:35 | #1 de 2 | `c79b346f-b6d5-4c02-b296-ab80281261d1` | 4 img + 55 | 6648 | **export pendente** | — | — | — |
-| hangar_manutencao_n3 | 15:35 | #2 de 2 | ler no painel de ativos no export | 4 img + 55 | 6593 | **export pendente** | — | — | — |
-| torre_controle_n3 | 15:35 | #2 de 2 | `5ab297ca-b111-4ecf-9d02-59e828b52616` | 4 img + 55 | 6538 | **export pendente** | — | — | — |
-| terminal_vale_verde_n2 | 15:35 | #1 de 2 | `d8ae9ef4-5eb3-4d57-9e93-a1b4847accf3` | 4 img + 55 | 6483 | **export pendente** | — | — | — |
-| terminal_costa_azul_n2 | 15:35 | #2 de 2 | `a8963395-6f79-4fa9-9009-af39bdaf1bee` | 4 img + 55 | 6428 | **export pendente** | — | — | — |
-| terminal_aurora_n2 | 15:35 | #1 de 2 | `7af1f624-a33a-44c2-8813-a0eadb8bb229` | 4 img + 55 | 6373 | **export pendente** | — | — | — |
+| loja_n3 | 15:35 | #1 de 2 | `4b2ae957-e9b2-4b39-8b3a-e2562fb38fbc` | 4 img + 55 | 6703 | **regerado na conta nova (§2.4)** | — | — | — |
+| alimentacao_n3 | 15:35 | #1 de 2 | `c79b346f-b6d5-4c02-b296-ab80281261d1` | 4 img + 55 | 6648 | **regerado na conta nova (§2.4)** | — | — | — |
+| hangar_manutencao_n3 | 15:35 | #2 de 2 | ler no painel de ativos no export | 4 img + 55 | 6593 | **regerado na conta nova (§2.4)** | — | — | — |
+| torre_controle_n3 | 15:35 | #2 de 2 | `5ab297ca-b111-4ecf-9d02-59e828b52616` | 4 img + 55 | 6538 | **regerado na conta nova (§2.4)** | — | — | — |
+| terminal_vale_verde_n2 | 15:35 | #1 de 2 | `d8ae9ef4-5eb3-4d57-9e93-a1b4847accf3` | 4 img + 55 | 6483 | **regerado na conta nova (§2.4)** | — | — | — |
+| terminal_costa_azul_n2 | 15:35 | #2 de 2 | `a8963395-6f79-4fa9-9009-af39bdaf1bee` | 4 img + 55 | 6428 | **regerado na conta nova (§2.4)** | — | — | — |
+| terminal_aurora_n2 | 15:35 | #1 de 2 | `7af1f624-a33a-44c2-8813-a0eadb8bb229` | 4 img + 55 | 6373 | `terminal_aurora_n2_hd/terminal_aurora_n2_hd.zip` (export 16:58) | 13.2 MiB | `5d8466cf313e45ac81f2e54760ba8ca844f4ac6f80b5bbfe52ffa2a39249935d` | `75baf5ed866496195717af4c3ec1adc2313ee05d4abc05b9b96ad8c9ce710686` |
+
+### 2.4 Conta nova, 2026-10-30: grupo A e Lote 7
+
+Só HD (4K, 50 000 faces, "Generate 55", **Privado**), objetos em FBX "Blender 4K", personagens com Auto Rig Mixamo (+20) em FBX "Mixamo 4K, Export Skeleton". Imagem escolhida entre 2 opções (as 2 ficam no histórico de imagens da conta). Licença `tripo_pago`. Conta "vinicius", plano Max (§1). "Saldo depois" é o de depois do modelo; os 16 rigs (+20 cada) saíram depois de todas as gerações (§1). Os nomes seguem o `ASSETS.md` §2.6.
+
+**Grupo A: as 6 peças presas na conta antiga** (imagem e 3D refeitos; os modelos da conta antiga nunca foram baixados):
+
+| Peça | Hora | Imagem | Task id | Créditos | Saldo depois | Arquivo (`arte/tripo/`) | Tamanho | SHA-256 do zip | SHA-256 do FBX |
+|---|---|---|---|---|---|---|---|---|---|
+| loja_n3 | 08:40 | #1 de 2 | `c6c24873-ffbe-4377-8700-929e8cab2815` | 55 | 25145 | `loja_n3_hd/loja_n3_hd.zip` | 9.9 MiB | `44fc05a064535254e80baa1c555fd3c301b851190f2a7041efb84f540cbf3f68` | `0e6431cfa832424705c7334a82d8eb0c8694c3da7448ecbe1289be0c7a452eaa` |
+| alimentacao_n3 | 08:41 | #2 de 2 | `029c4ded-6063-47bb-86ae-3e40002bc9a0` | 55 | 25090 | `alimentacao_n3_hd/alimentacao_n3_hd.zip` | 13.0 MiB | `a4592e05d343a1e169a7d943a027fecc9c05d1c1880bd8db0a5754321fdf9e09` | `eb57ded0e4ff7446cf45aa037e7c7f8c63763d5fe02d547dc2dad982a74dd604` |
+| hangar_manutencao_n3 | 08:41 | #1 de 2 | `4476f9e9-f1e5-4bc2-aad2-1f74c32b0da3` | 55 | 25035 | `hangar_manutencao_n3_hd/hangar_manutencao_n3_hd.zip` | 11.0 MiB | `631487f470daad51da72f062eb789e2a311bab59b3bc0e6be6710c64703a730e` | `064352a524617ac6b0ec7fe1e21d8ebcf61ef9e11de6651c9e4bc642646e9e22` |
+| torre_controle_n3 | 08:42 | #1 de 2 | `09f69435-59d8-4bb4-80b3-5c6d36812322` | 55 | 24980 | `torre_controle_n3_hd/torre_controle_n3_hd.zip` | 8.5 MiB | `66bd874b2c474b872ab2db385ea60e99ac00de3227062a42ff9c82a55405b3f1` | `004b2ce7a5cb7d5a3d9216c2fff8d6376b4746cf2c7da3b49d7db261abf8fdd9` |
+| terminal_vale_verde_n2 | 08:42 | #1 de 2 | `b9b0f3ab-6a64-4d1b-ab94-95e8e41958d1` | 55 | 24925 | `terminal_vale_verde_n2_hd/terminal_vale_verde_n2_hd.zip` | 10.9 MiB | `16f68e69a99909c1db1089259bcb0fc6dfae471dfc800cf7b5f7a7671140a675` | `ebfd54fe36a8ec51f197c825abd3b5b5d15c8b2915af814e2831ff73f7c0fbac` |
+| terminal_costa_azul_n2 | 08:42 | #2 de 2 | `aceaa088-b8eb-4c86-8d2e-5e72e446d8db` | 55 | 24870 | `terminal_costa_azul_n2_hd/terminal_costa_azul_n2_hd.zip` | 12.6 MiB | `e5bb3a381b95cfeaa22b58d51bde203874a388469a8525dc1f9ad2c459e5fa82` | `63f5294780e7c25b5540052bb6e101039b5e4d00c96f9b7af0b17846116c9f51` |
+
+**Lote 7, grupo 1: terminais nível 3**
+
+| Peça | Hora | Imagem | Task id | Créditos | Saldo depois | Arquivo (`arte/tripo/`) | Tamanho | SHA-256 do zip | SHA-256 do FBX |
+|---|---|---|---|---|---|---|---|---|---|
+| terminal_vale_verde_n3 | 08:45 | #2 de 2 | `6423d174-b3f0-49a7-9042-a0dd75a081e2` | 55 | 24815 | `terminal_vale_verde_n3_hd/terminal_vale_verde_n3_hd.zip` | 12.7 MiB | `d57540822eec6f5ff4ee418763188d76394342ad9634e68710a012cfa352e7cc` | `b6f2a483245e323d1d0f34f05e1322c91c46f01d389284c95a94cdf4f9db62a6` |
+| terminal_costa_azul_n3 | 08:45 | #2 de 2 | `145497c7-302c-467a-9bba-e7ebf31a0da7` | 55 | 24760 | `terminal_costa_azul_n3_hd/terminal_costa_azul_n3_hd.zip` | 11.1 MiB | `925436e7ed79e5664c91054aec0e101702375209988d398902befac61a550bbf` | `a31c4ddfb13b9d6506a590e7ef19ff0548fba50943de02df14c38dff9eb971da` |
+| terminal_aurora_n3 | 08:45 | #2 de 2 | `b6b507ee-4b2d-43d5-8f29-608203712985` | 55 | 24705 | `terminal_aurora_n3_hd/terminal_aurora_n3_hd.zip` | 12.5 MiB | `1bf82b50d2589f2afafa9ac0678f09d05b2013fb69e3440f4fc3b37f34ee1ab2` | `ea8d9f5fd70f4c83537ab96c62f59f97518939b434aacb7ab18cd9d7e226f019` |
+
+**Lote 7, grupo 2: aeronaves extras** (brancas, para pintar por cor)
+
+| Peça | Hora | Imagem | Task id | Créditos | Saldo depois | Arquivo (`arte/tripo/`) | Tamanho | SHA-256 do zip | SHA-256 do FBX |
+|---|---|---|---|---|---|---|---|---|---|
+| aviao_jato_regional | 08:45 | #1 de 2 | `8bff4027-2724-4fa9-8146-3e52e8496378` | 55 | 24650 | `aviao_jato_regional_hd/aviao_jato_regional_hd.zip` | 8.3 MiB | `825cd098eb7dbc18c6f2963592df01c52301551ae285ddd86ff759bda57190cf` | `cbd6b778c0dcc298597a1a18b325075fd3013bdb598cd6d88f3f4b5205cdf0a8` |
+| aviao_bimotor_helice | 08:45 | #1 de 2 | `1607cfad-6122-4b53-b158-b939b1431ee0` | 55 | 24595 | `aviao_bimotor_helice_hd/aviao_bimotor_helice_hd.zip` | 8.2 MiB | `488601fa66b84a24b9a60a5064048482017d1cc4128f2aca4e483c14498887e1` | `95f6feff101be223fd0360c0c975d6d4095a752b14d0fcd532f1211fc3b0a237` |
+| aviao_wide_quad | 08:45 | #1 de 2 | `87c39cec-2eaa-4a23-9b9b-ee6590cdd206` | 55 | 24540 | `aviao_wide_quad_hd/aviao_wide_quad_hd.zip` | 8.7 MiB | `51965203236f7edcb1bdb00bcd9406875167558d5a5e33567fa25c710ee02992` | `7f79dcd3241695770c24536b0e618a759b917a3a9cd619f48c4aff570b380b99` |
+
+**Lote 7, grupo 3: personagens** (T-pose, mãos vazias, uniforme em cor lisa para a máscara)
+
+| Peça | Hora | Imagem | Task id | Créditos | Saldo depois | Arquivo (`arte/tripo/`) | Tamanho | SHA-256 do zip | SHA-256 do FBX |
+|---|---|---|---|---|---|---|---|---|---|
+| cozinheira | 08:45 | #2 de 2 | `4e045de5-46e7-4439-bff6-45516376a845` | 55 + 20 rig | 24485 | `cozinheira_hd/cozinheira_hd.zip` | 57.8 MiB | `411f6b27e2c34598cf2ed18d288343850c1b298ee6de0a8195450659d03f2be3` | `61298fc1eef1bbac3dda4dac5183843cd112b6672616c8963086b2d91007c480` |
+| garcom | 08:45 | #1 de 2 | `4b29a943-229d-4627-8935-2e1ac2bc48a1` | 55 + 20 rig | 24430 | `garcom_hd/garcom_hd.zip` | 59.4 MiB | `f8745943f77929c4cd77a45f1302afbe618879e98131a62247874036740c2e75` | `85180a6c920b9efa105b9f5cac923e4cebb70ad376f4d10dae40e34a6e15eade` |
+| agente_portao | 08:45 | #1 de 2 | `41696193-febf-40ba-8721-5f3722867b9e` | 55 + 20 rig | 24375 | `agente_portao_hd/agente_portao_hd.zip` | 56.7 MiB | `be6b990364f49ce63546d5f5f8975f052fdbbd175d9bd2c40dc8c382ff8a9683` | `e6cc91c2efb5a19bc55975e59ab979a5b855f2de44383994f841dbc9a0ce62f5` |
+| agente_portao_f | 08:45 | #2 de 2 | `cd22fa73-c3e3-480b-b926-66cb6cccefa3` | 55 + 20 rig | 24320 | `agente_portao_f_hd/agente_portao_f_hd.zip` | 55.7 MiB | `b0116b2892a8d5fcb70fc557c8a85a4487c3de3bf749e4cce3e5ea3758739ce3` | `b625aefc764d2603dabcf0b85fb4915bd55758984636b106145a550f9c652f23` |
+| pilota | 08:45 | #2 de 2 | `44f2a360-8467-4a4a-82d2-d057c304e715` | 55 + 20 rig | 24265 | `pilota_hd/pilota_hd.zip` | 9.4 MiB | `96e853d8bea00f5c81fadd89db91c77fcb669ee7a60e2cdf727a3a325aa56c40` | `53737ba35127719732742b55c79c1ab8232c34d7874e52f1b2ab6e996451262f` |
+| mecanica | 08:45 | #2 de 2 | `c7b050b3-289f-4b32-841d-0f81c7a3ee09` | 55 + 20 rig | 24210 | `mecanica_hd/mecanica_hd.zip` | 8.2 MiB | `f6c098a24355ea4eb6d396a3d163d128b33341bbed9e07dacfb0e401eb0db5de` | `572a7a0d971dc9b420bddf85eefbdb3759eb85424f23dd5889102f6eb7303af0` |
+| seguranca_f | 08:45 | #1 de 2 | `2f0605c7-f0f1-4c41-b48b-4a020a16d24d` | 55 + 20 rig | 24155 | `seguranca_f_hd/seguranca_f_hd.zip` | 8.9 MiB | `fae94fe60bfe6f63b9c30e59e857e2f5279f1bddc2999a02316be5b82ffe4f14` | `5f84f756e26ca2343caf21b5a818f4a695d06de7d7dd61c932c26813ef6f3299` |
+| bagageira | 08:45 | #1 de 2 | `e624742c-ba2b-4bce-a720-8e6ead8ec278` | 55 + 20 rig | 24100 | `bagageira_hd/bagageira_hd.zip` | 8.6 MiB | `41256233481a93803c39a9e7bef89b23ea5cfc1c3582f6f6f6d834d8f9135a93` | `8c6589fb81b742ea9626e4ae958ea1e9d3d7a20de10a93fe10bc9b221425b4bf` |
+| despachante_f | 08:46 | #1 de 2 | `93b615bf-f326-4dbc-8f59-1e8fcfe76022` | 55 + 20 rig | 24045 | `despachante_f_hd/despachante_f_hd.zip` | 61.0 MiB | `9dd5fd135aae3461989c92bb2378339117ac9609d6923c21d1ffc82039602469` | `e7e2bb6d3d37856e33e393c6b337aeb1b2ae3bf4fcb47b5c1746c8e0a4bab912` |
+| atendente_m | 08:46 | #1 de 2 | `57e0241d-7321-4664-93f9-a3f0d3869d24` | 55 + 20 rig | 23990 | `atendente_m_hd/atendente_m_hd.zip` | 60.8 MiB | `0b65f87a438d79de7e158ed47748cfa2f541fcf69021046dabdf8eeb82daebad` | `ed963c7ae7ed647ef67cdf53ecab1360493bdedd6038e625a1dc9b780d067fac` |
+| vendedora | 08:46 | #1 de 2 | `4d442888-9007-405a-ae1b-58482fedfafa` | 55 + 20 rig | 23935 | `vendedora_hd/vendedora_hd.zip` | 66.7 MiB | `38dd5fc0f180d884160fc409fbef63f84e8d740807e20dff6f044f440d12bd37` | `3017b1b731293e05a7dfaadbaf1943aef528cf74f0c3be615c63d8ae897e4cca` |
+| cozinheiro | 08:46 | #1 de 2 | `eee26f57-6d59-4e96-8b48-f9b6300aa490` | 55 + 20 rig | 23880 | `cozinheiro_hd/cozinheiro_hd.zip` | 56.2 MiB | `d780249837252cac484fcd4d28f408d7f084a15b0ffbea27eaea7b815ca0371e` | `b50cc945c1cb34438dc2f639b80bb9138984d4ec5c5af871c2b669a2107439d5` |
+| adolescente | 08:46 | #1 de 2 | `1800f171-9893-4026-82b0-1e08a40fc2fb` | 55 + 20 rig | 23825 | `adolescente_hd/adolescente_hd.zip` | 70.1 MiB | `8c596314da3c8aa06d7239f37d3090c85d72d038bf6eaf746a85100fe5dd6980` | `f84bc69ee3e0068eea3dd645791203a7e2585e1442b6cefb1d99f58e46b32160` |
+| passageira_executiva | 08:46 | #2 de 2 | `369cead6-c9f7-49a8-a510-5fcfa25c4017` | 55 + 20 rig | 23770 | `passageira_executiva_hd/passageira_executiva_hd.zip` | 59.5 MiB | `4c9d2576cedf5935f4a367903f3577e94c912083f559b000b5cf87f1c89e46c6` | `e204433b8790643dd2aeeb1fa2576e5a4008d90cd4beb9e00379baf34fdc3737` |
+| surfista | 08:46 | #1 de 2 | `7b2595e8-f44f-4eb0-9ea8-93ae3295eaa8` | 55 + 20 rig | 23715 | `surfista_hd/surfista_hd.zip` | 74.9 MiB | `1bf982b43d163917efe38e638c999b9ec655e60f3cf1a7eda9cd0cc4cb08953e` | `7e859d55c174bd4efa69673f2c644db562d223a876b340c6ad174abc11af4e36` |
+| passageira_turista | 08:46 | #1 de 2 | `99fe025d-c046-4ccb-a451-1a3edd696e18` | 55 + 20 rig | 23660 | `passageira_turista_hd/passageira_turista_hd.zip` | 75.5 MiB | `9b152ec1fa316e73b8f6b5994a58b4d89c116215621d756e20d58285f9f65a60` | `d9496cb448d5441f95bb6ce134712f54eadc9017a29f875a0c1eebdf9074c083` |
+
+**Lote 7, grupo 4: identidade da Costa Azul** (8) **e da Aurora Global** (9)
+
+| Peça | Hora | Imagem | Task id | Créditos | Saldo depois | Arquivo (`arte/tripo/`) | Tamanho | SHA-256 do zip | SHA-256 do FBX |
+|---|---|---|---|---|---|---|---|---|---|
+| farol_costeiro | 08:53 | #2 de 2 | `696cc964-06c7-49f8-86a8-63fa7353f379` | 55 | 23605 | `farol_costeiro_hd/farol_costeiro_hd.zip` | 9.8 MiB | `54c79b62217bbad50e08a659be82608652f81b756662cf609f1d446f98f3c727` | `20a90447151af0dff3051a6e45c3113c3d38f139f65746a45ac3f5d7a8bd8c6a` |
+| doca_hidroaviao | 08:53 | #2 de 2 | `26f46a0a-9f76-40dc-bd28-8b85021daedb` | 55 | 23550 | `doca_hidroaviao_hd/doca_hidroaviao_hd.zip` | 11.4 MiB | `b4395c1153b5bad5db83f9717d1272da64798940521ac06832bb601982dbd481` | `5af7aed980c44aef8ad2cc4bf3d2569ba164f80a3fe655be426e72258a797812` |
+| quiosque_praia | 08:53 | #2 de 2 | `5a8cf3e0-de64-4162-842d-88aced1afa2c` | 55 | 23495 | `quiosque_praia_hd/quiosque_praia_hd.zip` | 9.5 MiB | `283b98a8f7516df51ff710d06ff07ddd98ed0ceff3fd2f935df73968eb855f29` | `ee225e267b171aba5848ef479b66b453b7315b0b592455326bd3ea9d4d2e7950` |
+| torre_controle_costa | 08:53 | #1 de 2 | `620ddca8-f799-4224-9509-b73accd6575d` | 55 | 23440 | `torre_controle_costa_hd/torre_controle_costa_hd.zip` | 63.5 MiB | `d724fba8cd6de20d4e445850ecfc952698a8619d4f98d56e7d247f87cb13e3f1` | `f9618883b1198de8a0e311eb2eedf488d03f9136f56d65ce3f730e348bd9ba99` |
+| hangar_costa | 08:53 | #1 de 2 | `3eb1c74a-49bd-45af-917d-2ed9abda504f` | 55 | 23385 | `hangar_costa_hd/hangar_costa_hd.zip` | 9.8 MiB | `de11060d4b90673c4f3c62a99b3ef69d7551ac8c0f455453f639923f72288b13` | `da4b03c0b5b41cbccc3fd73b7e525104bd75e94de676688a60b7c3cab3c1e011` |
+| veleiro | 08:53 | #1 de 2 | `ba22244a-54d0-491c-8140-36746bb11b69` | 55 | 23330 | `veleiro_hd/veleiro_hd.zip` | 8.8 MiB | `8cbe2577a871a23a298db9808fd9765e852a12234185a931148b630cc7d9ca77` | `cd6235e7d6e161eea261e82447a71bef9aceabcee814da26e0d85f0c18c9e20b` |
+| guarda_sol_espreguicadeiras | 08:53 | #1 de 2 | `313ae3f1-bd46-4a6e-a85f-a46b4873b343` | 55 | 23275 | `guarda_sol_espreguicadeiras_hd/guarda_sol_espreguicadeiras_hd.zip` | 8.7 MiB | `b0e85aa32a419423362e784bf1f99bca5ece170205af79db1e976e54f099939d` | `f66bc6f7a22b438cf6f614c9c491d8f32c8e9ee868137a1de7b13dbc8fd43e7f` |
+| resort_hotel | 08:53 | #1 de 2 | `851e6984-8511-4f86-8e0e-fe765d94017e` | 55 | 23220 | `resort_hotel_hd/resort_hotel_hd.zip` | 11.4 MiB | `23db0740d1e4718c00e678d0910498bb91a00b7f30782a17e99524e7d495bd7e` | `65be81937d68004157ca1c3575ae439de1e773801584468cf3e118b6d3c80980` |
+| torre_controle_aurora | 08:54 | #1 de 2 | `a27c6b98-87a3-4252-8b33-3d7673a550f4` | 55 | 23165 | `torre_controle_aurora_hd/torre_controle_aurora_hd.zip` | 9.2 MiB | `763a968356791ec62dd56337b78e06071de3277a023ed4910d38f41d1bfe961c` | `fdc1b3a093af1257982d7dc97b187eda31462e3a71f9a15b94d3c197720d4af0` |
+| hotel_aeroporto | 08:54 | #1 de 2 | `00a99639-82ca-4887-9214-4c6d166fcb71` | 55 | 23110 | `hotel_aeroporto_hd/hotel_aeroporto_hd.zip` | 9.4 MiB | `868e381e7020609de7b1016753b715db423fdd46e012bb04411ac6164ee9fc46` | `8a19d1a4b64dd93a82863c75124bcf2119227ae8803a4778324f59daa3b77ea2` |
+| garagem_estacionamento | 08:54 | #2 de 2 | `97c915a7-88aa-4b40-83a6-9c5f3d4bde66` | 55 | 23055 | `garagem_estacionamento_hd/garagem_estacionamento_hd.zip` | 11.8 MiB | `96c25d978b34d144b511eb8b8deacfc7425ee9b41e349de7a9b59ad3d7b7d076` | `a140f215ce73e16d329c483dc73069bb4e6b1e794ecf4e69d30acd9797e8678b` |
+| monotrilho | 08:54 | #1 de 2 | `32af8d09-3607-4524-a037-853ac66c030c` | 55 | 23000 | `monotrilho_hd/monotrilho_hd.zip` | 11.1 MiB | `16667b9aa216d6d8c30444c7adbf69941bc500fe0f08946e1603f500363d48eb` | `d0775d15aa13f8aeb325d183581a828518d4ed71b5a2d8c9afc8a3adf060098c` |
+| escultura_dourada | 08:54 | #2 de 2 | `e83b8c89-c2eb-4c2c-b87e-385a0f0dd25e` | 55 | 22945 | `escultura_dourada_hd/escultura_dourada_hd.zip` | 9.4 MiB | `887a906b8e0a47fb16d8d15b44835ce75e16599c13e9c8250104cc4253423a8a` | `bbd5c5f114582c4b2e84014d9189d1b874e761e2ff20160efcc434cf41df9f6d` |
+| lounge_vip | 08:54 | #2 de 2 | `26c27348-5c28-4cff-abac-df11262be3b3` | 55 | 22890 | `lounge_vip_hd/lounge_vip_hd.zip` | 9.6 MiB | `9967c46f965524f90fba127f1ab10e9dbd55b841138d717a7737bf659efc65ee` | `bee64f2d92f84719433cc868f36ec0bd6cf911971fad74a8e28db9a95b932c30` |
+| terminal_satelite | 08:54 | #1 de 2 | `c7d7046c-2e63-445c-bbd8-6902b891e818` | 55 | 22835 | `terminal_satelite_hd/terminal_satelite_hd.zip` | 11.6 MiB | `2996bc6bc91ed8c81baab03679b6b37044946d461731fc5761b14e72ff497e2d` | `89acb744826e58fdce21e59b798542fb578ff366507bbba6191ef1b02f7bbd10` |
+| hangar_aurora | 08:54 | #1 de 2 | `2d31e359-5747-4df0-a911-718eb9e91630` | 55 | 22780 | `hangar_aurora_hd/hangar_aurora_hd.zip` | 10.3 MiB | `fbb2d2e1d1f33e2f344a656ef25d2f9958b1d4ce1ec1904385bb7b0ab4888810` | `45ce593b5c5681f0695c48c274ce608a76dfc7aee02b5faa60013802083c3c66` |
+| skyline_torres | 08:54 | #2 de 2 | `6960d70f-a64c-46fd-a21e-922831530442` | 55 | 22725 | `skyline_torres_hd/skyline_torres_hd.zip` | 11.5 MiB | `05bc4992d07d25cfb7e184906012e53bd8c707f917decc73e69a72c6245db1c8` | `520a6574d0e8db07e1a0b41cb0b12710fbcf39dc3175afb8b3679f47c99f1339` |
+
+**Lote 7, grupo 5: incidentes**
+
+| Peça | Hora | Imagem | Task id | Créditos | Saldo depois | Arquivo (`arte/tripo/`) | Tamanho | SHA-256 do zip | SHA-256 do FBX |
+|---|---|---|---|---|---|---|---|---|---|
+| ambulancia | 08:54 | #1 de 2 | `2c97d42c-d6fa-4333-9055-ad4b2f1010fa` | 55 | 22670 | `ambulancia_hd/ambulancia_hd.zip` | 9.9 MiB | `70f1a1238c7a0c87e06abc53c6b711d71232d759b4bd3ad248495a02ecf60d09` | `7dbab1b7681b5db3711db64ecad0af52b05fbf7beafe86d3f871bd9c3f254237` |
+| viatura_seguranca | 08:54 | #1 de 2 | `4d1fdd7f-e137-4710-9551-b12fd89d8843` | 55 | 22615 | `viatura_seguranca_hd/viatura_seguranca_hd.zip` | 8.8 MiB | `2f206b00d07356b6cd1c74727fbe4bf69d3a67707cf6aa411ab35b221d10632e` | `6361960abc6781b6b8e0dccf7262ebf372a431330b1381a3b4eaa4080865c54a` |
+| varredora_pista | 08:54 | #1 de 2 | `f7e6f6af-28d5-4a23-b75e-0c8001dd7377` | 55 | 22560 | `varredora_pista_hd/varredora_pista_hd.zip` | 9.7 MiB | `7593f8227a0ce95587c816031278b71ca4efe5c0747315c62fc45798dd35d6eb` | `354bc0431343a82b44d8efeb3479d3c701d797544a1e50cb7d8041b9ec1a3050` |
+| caminhao_degelo | 08:54 | #1 de 2 | `5a9825c2-3d70-4f05-844f-e5a1fa54f6b4` | 55 | 22505 | `caminhao_degelo_hd/caminhao_degelo_hd.zip` | 8.9 MiB | `85bedf526b4c653951d07b020d587389ae0a6fccebd8bde85ecb4a168d76f188` | `db2a1eb82a806033e0c172279a51d41165768138cf3a63526364cc1d05d4bde2` |
+| trator_remocao | 08:55 | #1 de 2 | `5448d111-01a5-4960-acb7-96c3eff8fd7e` | 55 | 22450 | `trator_remocao_hd/trator_remocao_hd.zip` | 11.0 MiB | `611302700f1a365255b39d13c6c7abf8c5cdb570bd2cd67f07b2add5ab2adf2c` | `658411f97a0b4175f583fe720d0eebe36d60b5b598087e80b03370b3d51ab8f5` |
+
+**Lote 7, grupo 6: interior**
+
+| Peça | Hora | Imagem | Task id | Créditos | Saldo depois | Arquivo (`arte/tripo/`) | Tamanho | SHA-256 do zip | SHA-256 do FBX |
+|---|---|---|---|---|---|---|---|---|---|
+| portico_detector | 08:55 | #1 de 2 | `7528db3b-af26-4172-b5e5-55222e2112bf` | 55 | 22395 | `portico_detector_hd/portico_detector_hd.zip` | 10.7 MiB | `fb1db848d7f5c272107b0b98129125004976ef8a3b1192694efb53929d231910` | `4d8ba84a96f523b45d1fb0669b6344b559790928f1967ddaca8232bb29b22cb2` |
+| prateleiras_loja | 08:55 | #1 de 2 | `14db5b29-4ebb-468c-9a49-d76cfd2a38e0` | 55 | 22340 | `prateleiras_loja_hd/prateleiras_loja_hd.zip` | 10.2 MiB | `26fe186517c97c61eb054a0e331915a9407f3e65a0ac5cfdb2860f9fed5098fc` | `60125621fbd18f9585ad48cd60c16f16b91716beb92dee9ea85d5ffb9be93ca9` |
+| mesas_alimentacao | 08:55 | #2 de 2 | `0cb20d5b-7594-4787-8628-f651a6b76943` | 55 | 22285 | `mesas_alimentacao_hd/mesas_alimentacao_hd.zip` | 9.2 MiB | `fd4c45dfd206f8aed06cb81ea6064256f47087f6d4ffc4251432cd0265c930c6` | `4bbde03a460ae60cdb120d7095f94f641f73573f208664bb98dcc8fcb65a0654` |
+| totem_autoatendimento | 08:55 | #1 de 2 | `2c85e805-6265-470b-9fc5-0029d45540f4` | 55 | 22230 | `totem_autoatendimento_hd/totem_autoatendimento_hd.zip` | 9.0 MiB | `33fe75d9f528da9d24e9de66f30b53c877af7b4d99ae01a9d16fb529fe8e1ca8` | `ba997013ba6f1508009562231b59043fb12d57f2554d64b603dbb0ca842e7150` |
+| escada_rolante | 08:55 | #1 de 2 | `788a867b-b160-41d7-9de4-73ab3a208e2c` | 55 | 22175 | `escada_rolante_hd/escada_rolante_hd.zip` | 10.6 MiB | `4bdc4b561b4d78635a29d37122344f42760b1c2a49ebf817bbf2eaef6030f349` | `ef0bb3549d7b6a21bb72e7a1010fb018169999d1f2c6ed2256fd6946907c2e01` |
+| esteira_rolante | 08:55 | #1 de 2 | `14f28e4e-f2e7-4be0-a9a1-a4e57b03eed9` | 55 | 22120 | `esteira_rolante_hd/esteira_rolante_hd.zip` | 10.1 MiB | `751cb08f892f854bf486ea02b974d982b74eb68288c5f8864a5f107e9179e645` | `09602d5b5e516ae8405ee7d2382cfedb474fecea7aa831b0d86bc4620b5362a9` |
+| maquina_venda | 08:55 | #2 de 2 | `483f590f-f7ab-445e-80cd-f40c47473ae4` | 55 | 22065 | `maquina_venda_hd/maquina_venda_hd.zip` | 10.1 MiB | `aec0393c00d5ed08ffceafbfcc9463953b486f01774ff90759dd1e9ac25a66a7` | `701dad199f2b56bc56edbe754ee501841bfd95d025a51b672803a1aa1433aef4` |
+| balcao_informacoes | 08:55 | #1 de 2 | `388c5be0-0925-40f9-920b-b4ae0a4f4e21` | 55 | 22010 | `balcao_informacoes_hd/balcao_informacoes_hd.zip` | 7.8 MiB | `22ad169f0f4bc8e59ed0f18724ec5d7f8d8792a1108dcaa49e04ea7043d562c3` | `6817acfa8e11f5d4a214fd54ac3231094fb121008d6791e22c36a927a3808a24` |
+| bandeja_seguranca | 08:55 | #1 de 2 | `1aa5b90c-cf23-464e-a0c4-1b0cf2ac5b94` | 55 | 21955 | `bandeja_seguranca_hd/bandeja_seguranca_hd.zip` | 8.6 MiB | `14beb194e344b7a5e660214e6a21613d078eec072f64828cab807c7c449e674d` | `99fc216a95d8b6e444ce7fb39bf547a45eb4fd41417f8164bb87da4cb42a972f` |
+| lixeira_terminal | 08:55 | #1 de 2 | `4fadf337-2f8f-4f90-9af9-7ce00e28ea72` | 55 | 21900 | `lixeira_terminal_hd/lixeira_terminal_hd.zip` | 8.8 MiB | `772ebbc3386b72f5ecbdeb4ba8ae7706df6d02fd5dd9174794bd729b2c9e3538` | `202529d66a0406d90fc7b698cd8427feebaf3e2ea3d4b6cf05074567085ed371` |
+| catraca_embarque | 08:55 | #1 de 2 | `3a3f3001-03e8-4490-9619-e02da32152a4` | 55 | 21845 | `catraca_embarque_hd/catraca_embarque_hd.zip` | 8.5 MiB | `24566175f80e899b65328b6dd4082b79397cf539198d8bfa892af46c32305d0b` | `f1e5b3163fc5488a576c85256a1dfb06424832460c9e06e207ebced005252ac1` |
+| vitrine_loja | 08:55 | #1 de 2 | `d94b1708-393c-4eb7-849d-d2b76b2ffc90` | 55 | 21790 | `vitrine_loja_hd/vitrine_loja_hd.zip` | 9.1 MiB | `ca9b56dce35db1fa77355ac0a9c9767e14932f53743d86bc2594d313db1c9829` | `82934cfb33ea7b530d8952c7db2f68aa799f1c286c99dcbaf8bdddbe3b9f9de7` |
+| vitrine_cafe | 08:56 | #1 de 2 | `28901cee-4a62-4710-9cfa-416ff0684325` | 55 | 21735 | `vitrine_cafe_hd/vitrine_cafe_hd.zip` | 9.2 MiB | `635343b1fafd4456aedf36f6a772ee87f9166a2c7d7ecf94e1bfc0a6aedd43db` | `40a19931abc8f044a018f38f0a32504247548a30366fd4e1549eda243eb462aa` |
+| carrinho_cafe | 08:56 | #1 de 2 | `179d4c30-3961-4e36-b592-276a668870d3` | 55 | 21680 | `carrinho_cafe_hd/carrinho_cafe_hd.zip` | 11.2 MiB | `62457af0c4262bceb5ac7822f3b1b5508ad811b50cb7ef091e1487177acb92dc` | `db56fccdac3d0b4b8cd990f18a46046a712b5609d8e113fa639d6ef5ada035db` |
+
+**Lote 7, grupo 7: o que couber**
+
+| Peça | Hora | Imagem | Task id | Créditos | Saldo depois | Arquivo (`arte/tripo/`) | Tamanho | SHA-256 do zip | SHA-256 do FBX |
+|---|---|---|---|---|---|---|---|---|---|
+| hidrante | 08:56 | #1 de 2 | `c2b7a371-2b16-4fda-b74c-0da6992d4dd6` | 55 | 21625 | `hidrante_hd/hidrante_hd.zip` | 9.0 MiB | `28a6e0f4f494daf913df23c305f183254a5905930406897b77f584bc8fe02e0c` | `b49d3c235be73a212e60a21195c106a9cf94d43183918ac1347d8b085f60d812` |
+| container_lixo | 08:56 | #1 de 2 | `d1b6bdc2-2e3c-42ce-a82c-e1501e50f184` | 55 | 21570 | `container_lixo_hd/container_lixo_hd.zip` | 10.5 MiB | `9b86bc557ecf806ac9e1d4662cb1df4d9196e5324a36d319e137e032ccdaea9a` | `3599744cbcb07b57e1306bfd5bc815bbb3ef49ec3e1d4aa3774681335b8a9a01` |
+| arbusto | 08:56 | #2 de 2 | `04c1b32d-2c2b-4612-964a-489aaad539df` | 55 | 21515 | `arbusto_hd/arbusto_hd.zip` | 9.1 MiB | `c1ca013977ce5f02b023e87f8f9a5b436027d143b65799417385c728bf6de0a1` | `7d1992fe06d95ec3ee7d51ad9726f4d525172b355013fdce5d6aace6180b4df9` |
+| canteiro_flores | 08:56 | #2 de 2 | `6e535b1d-1bdd-4687-bdf1-5ae552edd1b1` | 55 | 21460 | `canteiro_flores_hd/canteiro_flores_hd.zip` | 10.1 MiB | `35265568613920941a9e4b1ca4b994a8745be995587e6a012163877a3e317a52` | `56ea64834c9bf8b601804c875b676a36a394a64a247788ac77d2f73cb653af13` |
+| luz_pista | 08:56 | #2 de 2 | `35bd106e-3f3f-4216-a346-df91f810d8a4` | 55 | 21405 | `luz_pista_hd/luz_pista_hd.zip` | 8.2 MiB | `3b3f472e9e88c6482c09a359819febe83f285d4d99935c8e93f157241162bc33` | `c2374e62825adf07efbbc621605327e9f7034a48c595d95007703361c39123de` |
+| gerador_solo | 08:56 | #1 de 2 | `7563131d-5c40-4075-9fde-2849399196ee` | 55 | 21350 | `gerador_solo_hd/gerador_solo_hd.zip` | 10.0 MiB | `e662a5ba0e7bf46fab546d774503e5cfb8c03b88fa86a2226d513cbc1709975d` | `699b700131ed04f03b1ca83b3ac55c7d1a506a96ae1d23a409b854e8190a973f` |
+| esteira_carga | 08:56 | #2 de 2 | `6aa5a983-3f53-46a0-a37b-df34f89d5ba0` | 55 | 21295 | `esteira_carga_hd/esteira_carga_hd.zip` | 9.1 MiB | `cc59f277f0bfaac4c1fe31d4c5c63f2435910b005ef204291d6d3e860e5b4b9c` | `0e50d699b7de59e7201eee2527360678fc70b86c9c0ae526a00f9904e1ad841d` |
+| van_translado | 08:56 | #2 de 2 | `73830a76-a5ca-4b00-82d6-9c3aae924722` | 55 | 21240 | `van_translado_hd/van_translado_hd.zip` | 9.9 MiB | `13421697d162c09e05ace9fe3eec69f5f856bcf87b86468c0467210b4fca720c` | `4e7bc5e23951ff8ab5c8837f08e955006e31bb45f7e6f704e99d1a2e3768777b` |
+| taxi | 08:56 | #1 de 2 | `d2470e3a-32f2-45e3-8fdf-ce31c413ee26` | 55 | 21185 | `taxi_hd/taxi_hd.zip` | 8.9 MiB | `5e68e849740bafce8124e31e44fcf5e8da0e67f2fc5b745def16ca40410eec5e` | `b015852c7bd0348491252b0f3f33338cf7bc0b58a7b285a4f0d3c190c45f0ac2` |
+| onibus_cidade | 08:56 | #2 de 2 | `eb23e0bb-21d4-448e-b466-b3f7c00e89a2` | 55 | 21130 | `onibus_cidade_hd/onibus_cidade_hd.zip` | 10.4 MiB | `3ea26c7079e4d0d587ee62977e6baeefaaa831c9f913e8bb7fe3edf1bb883d9f` | `0f314455d37cea978d3c7a7d2a1aa68cd467bef61b15f9668e38e2c2550a79ea` |
+| ponto_onibus | 08:56 | #1 de 2 | `f336f856-8376-445d-8238-4a76915b8858` | 55 | 21075 | `ponto_onibus_hd/ponto_onibus_hd.zip` | 8.5 MiB | `9874158529c363344071f880158e8910bf7e4b9209467e1fa8690ab2bcfc8db7` | `c846c371720022c27996e78dff341f7d5cb640e7bd6057b0da4a784b0d80df8d` |
+| guarita_cancela | 08:57 | #2 de 2 | `fa577f9d-3aea-44f4-8886-e20d5cc25bc4` | 55 | 21020 | `guarita_cancela_hd/guarita_cancela_hd.zip` | 9.5 MiB | `3a2d9424a792342e3cd4b916d34dc935a28d34cce9f7ce2946606387e1528f30` | `d4cc6781f6e47fb6836524d509e0a9a5f8aa52620e0ef4d50b44a2a075d968ad` |
+| heliponto | 08:57 | #1 de 2 | `3961ac60-d6d1-4c79-b94e-17ed6215c4bf` | 55 | 20965 | `heliponto_hd/heliponto_hd.zip` | 7.4 MiB | `503b31967af30e506f92b8f28833ea8e37d15167a6d2cff09b018ddd860fbfec` | `3fa5cd254504eb490a4f7b006e15f014c488724d049698f660e4b709582ad1e6` |
+| tanque_agua | 08:57 | #1 de 2 | `7976c1a4-1228-4bd0-8101-1889f57856cf` | 55 | 20910 | `tanque_agua_hd/tanque_agua_hd.zip` | 8.3 MiB | `69140f7fa032fbc8f6a2141c6d9c1744125a625e0984a37071064dc913045e70` | `19917ecf95694c3ca862c6cbebe2e6fe90ed27195f0e4875eec42e73c57b7188` |
+| turbina_eolica | 08:57 | #2 de 2 | `f6c17936-07a9-4a21-8d82-2e4a5f87e937` | 55 | 20855 | `turbina_eolica_hd/turbina_eolica_hd.zip` | 7.2 MiB | `a75c3e766bea78ea46a89c017b63ac0d2d2fe7069c4cfd755f6966f3e08937b8` | `5dcf9852e03289d03e409903f58097633484b616c70e0ef076c603cd87f5e792` |
+| painel_solar | 08:57 | #1 de 2 | `70d24c3c-882f-4976-90a1-da41b13f5fab` | 55 | 20800 | `painel_solar_hd/painel_solar_hd.zip` | 9.6 MiB | `928399ec7c3b2c19afa8d497c67652a5e2a80751f601fcee9223526b6c937ccf` | `67ede9fc14cf3ab0d476608158bbc92bce3e3f340bfcdf85287be5739c3bace1` |
+| carro_passageiro | 08:57 | #2 de 2 | `c2c8d1c6-48f1-4d5e-bc88-2e0785d17186` | 55 | 20745 | `carro_passageiro_hd/carro_passageiro_hd.zip` | 8.7 MiB | `f1b118234d61df1c98d37dc9ec866bc3b1e374e8ecbada4db66799d5c2145929` | `c5ae72333e6d166884c6e0765bb693f542825d80967af41b2f2f4ecffa45a001` |
+| caminhonete_pista | 08:57 | #1 de 2 | `656038a2-f1c6-4162-b576-69845137f424` | 55 | 20690 | `caminhonete_pista_hd/caminhonete_pista_hd.zip` | 10.6 MiB | `b891e44251905e23542643d89b944b69228b8e68ecc3f489f82ce2b5a9d34530` | `3513e9da70237811db436c44a7102e8d9043f7978ac0e828aae30d486c8c926e` |
+
+### 2.5 Conta nova, 2026-10-30: Lotes 8, 9 e 10
+
+Mesma receita do §2.4 (HD 4K, 50 000 faces, Privado; objetos em "Blender 4K"; personagens com Auto Rig Mixamo em "Mixamo 4K, Export Skeleton"). Imagem escolhida entre 2 opções, 0 crédito.
+
+**Lote 8, A: identidade rural do Vale Verde**
+
+| Peça | Hora | Imagem | Task id | Créditos | Saldo depois | Arquivo (`arte/tripo/`) | Tamanho | SHA-256 do zip | SHA-256 do FBX |
+|---|---|---|---|---|---|---|---|---|---|
+| celeiro | 09:50 | #2 de 2 | `210b54ee-ab91-4f2b-8ed8-2d3d3d793fbb` | 55 | 20315 | `celeiro_hd/celeiro_hd.zip` | 11.7 MiB | `72313094cddb7ed7ab09423778fd29fdf59d030a6e5441670be4ad26c2bd7f1f` | `a262b0b76f3342b1d9206033e6e27a4fdd98f3d2b4ac7727e02596cfe217b823` |
+| silo_graos | 09:50 | #2 de 2 | `e704e644-dded-4b0b-897e-bc0e235d7270` | 55 | 20260 | `silo_graos_hd/silo_graos_hd.zip` | 10.1 MiB | `3bc42dd50b44554ba3fecd090e471b2203f7f45ece02d6abb5e723621c24bca8` | `4383e1fba6a46b20462f78ec492039293e5916716b4220ddaef69704b1b129b9` |
+| moinho_vento | 09:50 | #1 de 2 | `16e204e8-f7d5-4618-885e-c65e1b5feaee` | 55 | 20205 | `moinho_vento_hd/moinho_vento_hd.zip` | 10.6 MiB | `6ee84a94b4d82565e5566bd6e60ded0eabe90177d1b8e2fb781e21f6d38b8ac4` | `a8825ed39df95e87cb56deb74126f79fd819238530e4fe62b7b657baa0325918` |
+| trator_agricola | 09:50 | #2 de 2 | `4b7348ac-d8c5-4371-8720-40cbb5bb91c8` | 55 | 20150 | `trator_agricola_hd/trator_agricola_hd.zip` | 7.9 MiB | `ba69a0b246c99e6023a7a43df020fb005410676bb21ca4d56603afc0d322e42e` | `8ea4b881c8bdd4486fff07da3a9dd412459b8782335bd981e5d9394792e5695b` |
+| fardos_feno | 09:50 | #2 de 2 | `e61026b1-5e80-42a5-b5af-7a242d7d56d3` | 55 | 20095 | `fardos_feno_hd/fardos_feno_hd.zip` | 11.7 MiB | `d28cf4e42f599646089e48463cea96270790a5586da2c3b2b426b3a4e94401d6` | `d4e999e19f05df22ea7555446f3f95ce786dc6d793f065c4827da55ddcfe4a3e` |
+| casa_fazenda | 09:50 | #2 de 2 | `0e264a6a-07b0-4a27-bafd-ccb10104f1ff` | 55 | 20040 | `casa_fazenda_hd/casa_fazenda_hd.zip` | 11.2 MiB | `ecb9003e1500c7c6d15ff1f33b505292d6e0312c4f55ff968503a78f14a757ed` | `2b64f7c4ede5cdf3976ef9ad9856833109d082bf668a04c3bb909d7dfdbadd7d` |
+| estufa_vidro | 09:50 | #2 de 2 | `883fd748-bfbd-4713-898d-599a42922574` | 55 | 19985 | `estufa_vidro_hd/estufa_vidro_hd.zip` | 9.5 MiB | `93efecd9191c4072722e4d63637bac17a1dc6ae66563b3d7b29f51754a093a95` | `537b145849456c6c1ddd2d1d9368234dca75ed09006ff2869dac8d3ff07456bb` |
+| espantalho | 09:50 | #1 de 2 | `c97db7b9-0b17-48bc-8a03-40ab3c3720a0` | 55 | 19930 | `espantalho_hd/espantalho_hd.zip` | 8.8 MiB | `71a4e966c74810ccffb6cbb365704fc430d2939f1f2c3182b6ac249f9131feed` | `6e7d32806ab7812350625e67c240e2df5eb9e21daadfd892847783c6d3d88430` |
+
+**Lote 8, B: pátio e carga**
+
+| Peça | Hora | Imagem | Task id | Créditos | Saldo depois | Arquivo (`arte/tripo/`) | Tamanho | SHA-256 do zip | SHA-256 do FBX |
+|---|---|---|---|---|---|---|---|---|---|
+| caminhao_agua_potavel | 09:50 | #2 de 2 | `fd5698e8-cbaf-4c67-ae0b-45b4bdd5c6c1` | 55 | 19875 | `caminhao_agua_potavel_hd/caminhao_agua_potavel_hd.zip` | 9.6 MiB | `b80a90cdf97cfed4b430b2f6560404e591840fa619f02d4c256319a76a866dc4` | `4613897b77a9dfcdc40d40d189733a15b16d57ebf4acbc19294ed5d6607ce08b` |
+| caminhao_lavatorio | 09:50 | #1 de 2 | `7cce80e9-4838-460c-99d9-8926ad959c1b` | 55 | 19820 | `caminhao_lavatorio_hd/caminhao_lavatorio_hd.zip` | 8.9 MiB | `6b1147540b1088c905d81c80618055f784985758b1d5ce2b4820a88490e94a15` | `bee4d1dde32a0e274b6b9fb50d31ec09b2b2589490fb91e4fc08365ec0a22763` |
+| empilhadeira | 09:50 | #1 de 2 | `1a5c6af9-7506-496e-808f-da23a4099aa4` | 55 | 19765 | `empilhadeira_hd/empilhadeira_hd.zip` | 9.1 MiB | `db77d57665d7c0d228a547f66c259fd2bc474e920fa95c65f16f98572470dfcc` | `15552df4d79871fe79bcb3b797ced11cddbb4c0c00302187bb444f0e6eef0568` |
+| carreta_dolly | 09:50 | #1 de 2 | `b5c33e21-98aa-4df0-9340-5878232cd1b0` | 55 | 19710 | `carreta_dolly_hd/carreta_dolly_hd.zip` | 9.8 MiB | `3a4186281ca2629846e66d8ad9ba388610e5e7751433c6daeb4e7aa3b828aec9` | `8de937c2ef37a60cdfc7a0e725d2ea8dedfba50908452bc18daa6319184faeaa` |
+| paletes_carga | 09:50 | #1 de 2 | `559c44f9-e3af-4ed7-915c-da6f6d442543` | 55 | 19655 | `paletes_carga_hd/paletes_carga_hd.zip` | 11.3 MiB | `676c61d531b4ef6d3d47522059579305068824ec41847ba9f24755c455979c10` | `845d9607b8ff8c737bb6915e156fd32d0fe571efa0cfd71d31a3b2693163e430` |
+| caixotes_carga | 09:50 | #1 de 2 | `d3ee8c16-2779-4fbf-8502-850043e1870d` | 55 | 19600 | `caixotes_carga_hd/caixotes_carga_hd.zip` | 10.6 MiB | `5d43884e01afa762784c64a5abde4d0055b9235f0a6295e22390a7575a2ab9ff` | `575e0f63883e00e3c3d74b8f81eae66bda504f4e2a153356216337e8911c16bc` |
+| calcos_roda | 09:50 | #1 de 2 | `02e32a4c-98a5-4349-a3ed-17f902f5f1eb` | 55 | 19545 | `calcos_roda_hd/calcos_roda_hd.zip` | 8.8 MiB | `499273ecd502c6fe1939b3a215febe4880fb46dc04a2418b2666d92367938a3b` | `da47ae0475be4ef47258daa6c02c26a05ea90a723c9d5a7ccb4aadfbca331701` |
+| luzes_aproximacao | 09:50 | #1 de 2 | `429bc623-1326-4334-8894-b1eafbca4a1d` | 55 | 19490 | `luzes_aproximacao_hd/luzes_aproximacao_hd.zip` | 7.7 MiB | `cefa18e266da7ca929f6d947a9848e706151608d788542b66ac75304b9ad026c` | `2353f6fbf105201ccbd850730e2e734b661c16a4c480b31ab636320f43d8a2d3` |
+| placa_taxiway | 09:50 | #1 de 2 | `b9ba3e7a-5071-4754-97b1-013e2fd0d17a` | 55 | 19435 | `placa_taxiway_hd/placa_taxiway_hd.zip` | 7.1 MiB | `24a3125202000f9ce22bc48608909e4766ffbb88c144d7a7ad8fcacaf3bbb162` | `78e46edb9b657715f4b5e2fb7b6acbf38b50efb6dad56a68085767c18f715844` |
+| barreira_jato | 09:50 | #1 de 2 | `406c698b-b33d-4e54-b26d-26ee1c7237fa` | 55 | 19380 | `barreira_jato_hd/barreira_jato_hd.zip` | 9.3 MiB | `e3285c5ca900b1ec37a5ccd6d955f4671ef6a990a907b0e8b6d5aef0269602e7` | `1c5dc288020ef8d744f1fe22f0c92411b884eb6362605950247700d9d846d11e` |
+
+**Lote 8, C: interior extra**
+
+| Peça | Hora | Imagem | Task id | Créditos | Saldo depois | Arquivo (`arte/tripo/`) | Tamanho | SHA-256 do zip | SHA-256 do FBX |
+|---|---|---|---|---|---|---|---|---|---|
+| sofa_lounge | 09:50 | #1 de 2 | `7e3f0894-0511-4e08-9041-0a7c784dc9e4` | 55 | 19325 | `sofa_lounge_hd/sofa_lounge_hd.zip` | 7.6 MiB | `0a260d1ceb32163732bba2b230c5405c37abb2cf7680d4b9b47456c0dc71eade` | `17ca203788577f04b1cad88c2acc20b492d6f91d2886868ae06180248c7b967f` |
+| mesa_lounge | 09:50 | #2 de 2 | `3f812f95-dc14-41bb-99c8-0b5f2ff3ee3e` | 55 | 19270 | `mesa_lounge_hd/mesa_lounge_hd.zip` | 8.8 MiB | `379e2d91fa07f1491aa4a7fd0114b2734f4c7728a9d1017d96466abb556cef58` | `c3dead6afbf636f4addf93e7f34ec1ae82e3574f986647dbfa6fd96c63d21aab` |
+| bar_lounge | 09:50 | #2 de 2 | `fb67e1d0-cac0-459f-a788-901ccabe49de` | 55 | 19215 | `bar_lounge_hd/bar_lounge_hd.zip` | 9.2 MiB | `c9ef2fbc029157facf2ebe98a29281fb91b3843a913f7326edbe8bee7036c4f5` | `e00e8b254005b3a7621f7d7fad4e03befdf4d7bf2e9e24c94dadbbdd893ce285` |
+| balanca_bagagem | 09:50 | #2 de 2 | `45d00b1a-06f7-4f0d-991c-d8be574538d6` | 55 | 19160 | `balanca_bagagem_hd/balanca_bagagem_hd.zip` | 9.8 MiB | `2a70c7a8e2130db94f88cc2917ab195943de90f9c2777319f5f514f4eb6b110b` | `53877b1811bde147412e36d6a878ba490cb59bead713e736f308e36309721fc1` |
+| caixa_registradora | 09:50 | #2 de 2 | `fac6d554-6fd5-4d0e-b24a-f73faacbb46d` | 55 | 19105 | `caixa_registradora_hd/caixa_registradora_hd.zip` | 9.1 MiB | `4358221e5436d7986d35a93294d16d83f95da9b3959ab07b4b03aaa908e998bc` | `72410a79163d7140ecd062cba170ba3cd60d6c6777766acd18c2598487d7ea27` |
+| bebedouro | 09:50 | #2 de 2 | `4dcb3ad9-191e-49a0-aab2-ced1ecce3e36` | 55 | 19050 | `bebedouro_hd/bebedouro_hd.zip` | 9.2 MiB | `f79c18577ab68ab10c3dd5828ac388731fcefbbae3beab882d1a816844a04ce3` | `8d9be6a5f902967168a16818b5ddd3fff7fa8d0c6d97ab451fe48aa9eb5b3b5e` |
+| cadeira_rodas | 09:50 | #1 de 2 | `ae72d4f2-6a5c-4cbe-9db5-faf60715bbf1` | 55 | 18995 | `cadeira_rodas_hd/cadeira_rodas_hd.zip` | 10.3 MiB | `5dfe45ec6f0a30e06f41ef4dac573bd3a78d7575e85f2bb83866b83222b3285b` | `ba93d9d770a2c4cf12ad86a9f8a08a90eb621e05cd24da045253ebe850bfecd4` |
+| carrinho_bebe | 09:50 | #2 de 2 | `465c3130-69b2-445a-b8b0-da77e0e09383` | 55 | 18940 | `carrinho_bebe_hd/carrinho_bebe_hd.zip` | 9.6 MiB | `4e49dbc302b0265f0ccdfef8ab9e335604df4d3846346cde81c14a2e3eb2cae7` | `69398d5e1e86d6cc045f23b25446d30dc92e582c33baf238a775eb9f99a52781` |
+
+**Lote 8, D: terreno e mapa**
+
+| Peça | Hora | Imagem | Task id | Créditos | Saldo depois | Arquivo (`arte/tripo/`) | Tamanho | SHA-256 do zip | SHA-256 do FBX |
+|---|---|---|---|---|---|---|---|---|---|
+| colina_gramada | 09:50 | #2 de 2 | `7a2a8e27-1856-4172-aaaf-c15425c7c973` | 55 | 18885 | `colina_gramada_hd/colina_gramada_hd.zip` | 9.1 MiB | `45bcf6612e2bca5b6f846938f2166482014481015ebfaad32330bf0bf97b06c4` | `b973bfae1e24bcf0b7cf43a793a26b3b17f2881bfbefd5c961127e183e02ea94` |
+| rochas_grandes | 09:50 | #1 de 2 | `4d7778df-5327-4be7-94b3-713d5034b8ce` | 55 | 18830 | `rochas_grandes_hd/rochas_grandes_hd.zip` | 9.7 MiB | `68ffd7b06e7b8990389d7620e10991e0ee83978c9675168cf1f238098aeeb96b` | `e0ad6f67b78264da30f5b8137c48e510634c0552ba1926ddaa56ae65f961c3a0` |
+| lago_pequeno | 09:50 | #1 de 2 | `9c2c0852-2df8-4242-ba10-0ffd98a479d8` | 55 | 18775 | `lago_pequeno_hd/lago_pequeno_hd.zip` | 9.8 MiB | `4dd43e33699912d74a4d7d9789966d643277e52b18255e7aeb5f050d7dea02e6` | `e1b807b99b4fda1c03b78e31d5293c381b8d160b38dc17fcf3b8d85f63b28e37` |
+| duna_praia | 09:50 | #2 de 2 | `4022528c-38de-4eb0-b417-ed53f6956668` | 55 | 18720 | `duna_praia_hd/duna_praia_hd.zip` | 9.3 MiB | `28c60eb671ebba7fba9928e98fa696d6ea8018a32de5e4067e6a02e00bb37202` | `775bf572757f9dfedc57e261577ffcc1e56316c34df00994b229be63f4999a39` |
+| ilha_pequena | 09:50 | #1 de 2 | `b5304e86-560e-4442-b04d-6c53e1378214` | 55 | 18665 | `ilha_pequena_hd/ilha_pequena_hd.zip` | 7.5 MiB | `c214613148307f4fa26f179f1270ee91ae9d230a294ae367d3ad3f75f1f48ed5` | `6d00d9e141be7a9aadeb0a80329359e271a0a8a07d2bd85f7a10ae18b4a9f933` |
+| fonte_praca | 09:50 | #1 de 2 | `02695abc-2549-486f-bef2-5db63721ceb0` | 55 | 18610 | `fonte_praca_hd/fonte_praca_hd.zip` | 10.1 MiB | `06ea4487db6eb77fd1a90d36bcf5fa6709201b9021fee20618ada553f85e21c3` | `f0b97eb380784bcc6a7c3c88d8cb5cd0f197082cb4e28d3a5f03e3a28b8cdaaa` |
+| arco_entrada | 09:50 | #1 de 2 | `7659329a-cbbd-4e60-92ff-448a777ca2d2` | 55 | 18555 | `arco_entrada_hd/arco_entrada_hd.zip` | 9.4 MiB | `7ddddd290f8ae240a1e8710144d61799715f0882291bf293e5caca640d42bb57` | `aa611d5a4758586bec0d55da88bf9757cd4323ee5c4ef2ac5c9adde11940400a` |
+| caminho_pedra | 09:50 | #2 de 2 | `ff17cdf9-b464-48ea-813a-38a50333b728` | 55 | 18500 | `caminho_pedra_hd/caminho_pedra_hd.zip` | 9.1 MiB | `8eb071aae4508ff12095370e029335237f8ccb328414396308e3561f471fdcaa` | `6c287cbb2997ddd519e0c87141d4098cf42f77e006885fd580b4764b5bfcfe54` |
+
+**Lote 8, E: personagens**
+
+| Peça | Hora | Imagem | Task id | Créditos | Saldo depois | Arquivo (`arte/tripo/`) | Tamanho | SHA-256 do zip | SHA-256 do FBX |
+|---|---|---|---|---|---|---|---|---|---|
+| passageira_idosa | 09:50 | #2 de 2 | `e7fbe8da-8a79-4dba-a335-f9c4c06426e7` | 55 + 20 rig | 18445 | `passageira_idosa_hd/passageira_idosa_hd.zip` | 82.2 MiB | `ef7415c1edd2764596ec2b5510ba92678be3ed0c42ef4bd364e750ad16f61ed2` | `f1d871587f52d37b965dde93cfa7d9a92ff3fdb734febdc014a5bd0d003825cf` |
+| pai_familia | 09:50 | #1 de 2 | `e176d0b5-4c6f-4834-b660-89b4ed2149c9` | 55 + 20 rig | 18390 | `pai_familia_hd/pai_familia_hd.zip` | 65.5 MiB | `61744a19aea258b3c7351d3dd519f699088436f96f88368c2bedc948e41d7018` | `d3f8116ae8dffde3633ff7bbc7adb448c806e258d71285e86da64b2505ddc9c8` |
+| menino | 09:50 | #1 de 2 | `9cba17f4-03e1-4145-a8ff-63ce80ddcb2b` | 55 + 20 rig | 18335 | `menino_hd/menino_hd.zip` | 76.8 MiB | `12329f8455c10daf72b8bc4c126b6f0b5178646da52afe9f5bf6062873c7cd5e` | `3a1afcd07b46ba373aa5a1c0f5c1f2ace6be15b72e06bdf7474094636510e538` |
+| menina | 09:50 | #1 de 2 | `f601264f-671a-4306-96c5-b516c137016a` | 55 + 20 rig | 18280 | `menina_hd/menina_hd.zip` | 65.5 MiB | `2633d644d53ebfa00a4191800e5cdb380b3f725b091818d9904480ebaf1ea2c5` | `17ce335e4a1c49fc6bde9ef0d9d70ca911a6855fbcee6d4b18114983e4b3851a` |
+| atleta | 09:50 | #1 de 2 | `d099ecff-2d35-4597-b05d-42cd038c28c6` | 55 + 20 rig | 18225 | `atleta_hd/atleta_hd.zip` | 65.2 MiB | `70176b7afbf389fe46e4150e32098e7e0246b8e6b3c08d3cebb39aed3d812043` | `c3f8871da0116f8c57b03f6f4cd18cac065c93f3b4341ccf26a7ac1e57922481` |
+| gerente_terminal | 09:50 | #2 de 2 | `fa925b44-eb59-4bac-9c5a-5fe4fb171c73` | 55 + 20 rig | 18170 | `gerente_terminal_hd/gerente_terminal_hd.zip` | 55.6 MiB | `89ef306536e98333c847c9829b9c625df1a3528c91b506e30690fb647ac577a0` | `5c2c2f9b2149af0cb66a04e3b9deecd7ec20aae68abefc2120dddaaaa8747bfb` |
+
+**Lote 8, F: economia (cofre e recompensas)**
+
+| Peça | Hora | Imagem | Task id | Créditos | Saldo depois | Arquivo (`arte/tripo/`) | Tamanho | SHA-256 do zip | SHA-256 do FBX |
+|---|---|---|---|---|---|---|---|---|---|
+| cofre_dinheiro | 09:50 | #1 de 2 | `10cb140a-ed32-4334-a048-d8fea30e76ef` | 55 | 18115 | `cofre_dinheiro_hd/cofre_dinheiro_hd.zip` | 10.2 MiB | `a681a789d37aae96363e23bca8fa2a7927319bd41f2c440db5934f6bebc4cccc` | `15128fa8b4e0676ea5a133cc599718aa6b1743c83a563b4f6c052f5c0ec85ac1` |
+| pilha_moedas | 09:50 | #1 de 2 | `c32873bb-6815-4abe-8daa-dd347afd79bd` | 55 | 18060 | `pilha_moedas_hd/pilha_moedas_hd.zip` | 10.4 MiB | `dac6b142e689184a2df873a259332f57c249492616a35a82d03fab02a10be53f` | `9db7486164856deba05aec604f7af75b8118cd91c2577d5ad3ff1a4f79310fcb` |
+| bau_recompensa | 09:50 | #1 de 2 | `9c70c76a-2b0a-437e-8de6-a0b5fcc9dfe5` | 55 | 18005 | `bau_recompensa_hd/bau_recompensa_hd.zip` | 10.0 MiB | `a62b48805f063d9dbf013db2172386d780beaada665af706ebd76f95def4a50d` | `8db935a035b085eb0dc19519aba7240b0a6513b4a72ace1f9fe0733d25878452` |
+| caixa_presente | 09:50 | #1 de 2 | `5e08b7f6-3df7-4f93-b993-afdd17a5cd0b` | 55 | 17950 | `caixa_presente_hd/caixa_presente_hd.zip` | 9.3 MiB | `907f03ab80025596dd508fd8e75f81a66591ac4458a1923898f174022cdab8b3` | `7a79d7cc313d1b127bddf715b29d5729d4d56852dc4b68dd8bc06bffd298f140` |
+
+**Lote 9: passageiros de variedade**
+
+| Peça | Hora | Imagem | Task id | Créditos | Saldo depois | Arquivo (`arte/tripo/`) | Tamanho | SHA-256 do zip | SHA-256 do FBX |
+|---|---|---|---|---|---|---|---|---|---|
+| passageiro_hoodie | 10:16 | #1 de 2 | `4488e3ff-8e53-4a0d-b61d-a62c362f8050` | 55 + 20 rig | 17775 | `passageiro_hoodie_hd/passageiro_hoodie_hd.zip` | 60.4 MiB | `0d1aab0ccfeebc858d1c900b005856c2f782885a891be0e53874703a2a7385df` | `6eefb00fa44ce3dcf57cc652361ee1161fcc971ba54e0ceb193d1b7ca41c3740` |
+| passageira_casaco | 10:16 | #1 de 2 | `4bd9f186-7a70-4a04-88e6-4e9188a351a7` | 55 + 20 rig | 17720 | `passageira_casaco_hd/passageira_casaco_hd.zip` | 74.6 MiB | `6a2a9d049cf1cdebb48c04647aaadc3059b3ca8505445e4d62af0f173767d9a6` | `46c7847a5293981e08efd6ee4aac406d3f8946b158c99e74d3e553612dfa0919` |
+| passageiro_robusto | 10:16 | #1 de 2 | `904ae808-9c77-4836-a9d0-223c8e4e9fca` | 55 + 20 rig | 17665 | `passageiro_robusto_hd/passageiro_robusto_hd.zip` | 71.9 MiB | `882987c5274b0078dd321d2f21bc37ec190380a0bcc446f262cbbe016c06b690` | `ef1f37268751a83296d64a488578dc712372b0825bed86cf281af45315b65117` |
+| passageira_cacheada | 10:16 | #1 de 2 | `8149e59f-22bd-4493-9c24-71b86e1637aa` | 55 + 20 rig | 17610 | `passageira_cacheada_hd/passageira_cacheada_hd.zip` | 59.0 MiB | `9514197d9f31cef42a1b637e0302d4349b87c94dd3b45d61611e719d89558bb7` | `fca7749e5c86e492d055b75b233b4edfc8ed37633a332e572a8040aadf16575e` |
+| estudante | 10:16 | #1 de 2 | `dd9c12f3-8530-400f-9ebf-b353da33c474` | 55 + 20 rig | 17555 | `estudante_hd/estudante_hd.zip` | 70.1 MiB | `dc26f9e207dd523ac08ce8a4838d87a83a0f0d8f16eb01bef1f16b652db4df93` | `9bb5720845f3963414b77c70d8f8b513544902ecc31afd48f708ed317c45e437` |
+| passageiro_idoso_b | 10:16 | #1 de 2 | `45f347ba-2060-4428-b02f-76720eda19ca` | 55 + 20 rig | 17500 | `passageiro_idoso_b_hd/passageiro_idoso_b_hd.zip` | 77.7 MiB | `8ff5169ef0fc3dbe51eba3137f7c442d471f4d93be4a72a2cee894a953a02fa0` | `17b8d3c7c6bcf17ca86bef6f10a78cd1d53b37d08b59084edb0b40e74b8fb4d1` |
+| passageira_capa_chuva | 10:16 | #2 de 2 | `f2abbb7e-b4d0-409a-9007-90b9226c8046` | 55 + 20 rig | 17445 | `passageira_capa_chuva_hd/passageira_capa_chuva_hd.zip` | 56.3 MiB | `6d57437dd0fb194a3322118543005b0d7a06b44bad24f9b4e5ee90c37d3cbdcd` | `479b9c4c8147c579ab48c3c4dae2492f23e2edf020169e15a9932f278da3dbc5` |
+| passageiro_careca | 10:16 | #1 de 2 | `dcc01fa5-b1b2-4443-873c-830bd8960460` | 55 + 20 rig | 17390 | `passageiro_careca_hd/passageiro_careca_hd.zip` | 62.3 MiB | `8ed65549d62feefde86c396947442e6af363c0870b29c4242f292de8cbd053db` | `f77ebf5970355649d5336e9b614c78249334fd59a4312a6667040bffc03fa59a` |
+
+**Lote 10: incidentes de equipamento, frente fria, eventos, fila e a garçonete**
+
+| Peça | Hora | Imagem | Task id | Créditos | Saldo depois | Arquivo (`arte/tripo/`) | Tamanho | SHA-256 do zip | SHA-256 do FBX |
+|---|---|---|---|---|---|---|---|---|---|
+| placa_fora_de_servico | 10:20 | #1 de 2 | `72b6d43e-39b5-43df-8fba-bbf216de7d01` | 55 | 17335 | `placa_fora_de_servico_hd/placa_fora_de_servico_hd.zip` | 73.3 MiB | `b72f9f430277262520804c90bedc2aeec52e4ffc1607f4f0fc3ff951623f9e0a` | `8794bc3625710912c64bd6c44b06abf5923b89041fe205e285eb79b5b6043bb9` |
+| cavalete_manutencao | 10:20 | #2 de 2 | `4070c70c-9489-4940-a9b5-3007b62bd708` | 55 | 17280 | `cavalete_manutencao_hd/cavalete_manutencao_hd.zip` | 9.7 MiB | `7d6a17d4e1ae6a0d1935991efc63b41b5c3c4b43ffc1eabfdb5058c0b1628cfc` | `41faedced92facd6b8593b3c06723140931f0b4a8837a62d8639f5515fce9b9d` |
+| placa_piso_molhado | 10:20 | #1 de 2 | `3e5006e1-9277-432e-acd0-182ef4e44aa6` | 55 | 17225 | `placa_piso_molhado_hd/placa_piso_molhado_hd.zip` | 10.2 MiB | `20d178d6c46dabeffaa65331f2b9f15e7b7b7dfc33f0d628cf949d996b2a5aef` | `cd27c799eb7d456f0a5b7fc8d249b25959b8b0078cd2080bae8d977f2b4db433` |
+| escada_manutencao | 10:20 | #1 de 2 | `7553ead5-fcf4-4c8f-8d75-d73b2dde579e` | 55 | 17170 | `escada_manutencao_hd/escada_manutencao_hd.zip` | 10.4 MiB | `149bd36c0e0004b1711550ee6423c582394d8ff86813ee37328e21cb01906f21` | `ecacc49324652c8d4c6da66076441061ec009c8f95938b79244da45833f2cdd0` |
+| limpa_neve | 10:20 | #1 de 2 | `715c8ac0-9065-40d7-ada7-b4ee0c76ef4b` | 55 | 17115 | `limpa_neve_hd/limpa_neve_hd.zip` | 9.5 MiB | `db7743bab200fa201547a0bf5f88037b45d7df079b510d9383bbb724a41c5243` | `5e499e25a27fc0711111b51d353e76446e5053988371b0a3087e94c0bdb5dd39` |
+| aviao_acrobatico | 10:20 | #1 de 2 | `c112a376-f196-4223-bcf8-b7f273b3d86a` | 55 | 17060 | `aviao_acrobatico_hd/aviao_acrobatico_hd.zip` | 8.0 MiB | `89a68ba505b986be19067e0939bbe33e9931e0d3554f16331a0b74990435dc1c` | `5004e6a9d66a0fe90d07069841e1e1b7190fd67f8d5630086b65cc0aef218670` |
+| arquibancada | 10:20 | #1 de 2 | `e109a1f7-bccc-4f98-92b0-9e43bd223e05` | 55 | 17005 | `arquibancada_hd/arquibancada_hd.zip` | 7.6 MiB | `bc041ad8d0e8ab56f6324dee172f58a8d61d18cbb78eac2da147deaada0d9906` | `e3ae4c10688f30faa3dd5dc3371389139890a948d6585ca94ae9343786dccf02` |
+| balao_ar_quente | 10:20 | #1 de 2 | `b0286c84-d8f5-4112-a2db-9fe7063d3377` | 55 | 16950 | `balao_ar_quente_hd/balao_ar_quente_hd.zip` | 9.8 MiB | `9e502e97438e1fd93748ae56806adfccf4d863044837393585b9b693800b0ade` | `427d130540c921ec82b1e909830247e750aebbcf0ff490cfa5ab48f381e3ceda` |
+| bandeirolas | 10:20 | #1 de 2 | `f3ddcdce-247f-417c-9491-0b2b4b76b7db` | 55 | 16895 | `bandeirolas_hd/bandeirolas_hd.zip` | 8.5 MiB | `970bd0e441748cf7b221825c12a680b9ea470964de8faf0af9cb45a0ac26ae39` | `53eb161410723845a710be0f4712d5d9d2faed320ed660c6347a5da0a77dc7f2` |
+| tenda_evento | 10:20 | #1 de 2 | `be174d56-278f-4c55-acf8-02860313d25f` | 55 | 16840 | `tenda_evento_hd/tenda_evento_hd.zip` | 8.6 MiB | `eb9d155095cbafa8f9297d534150b66a97b98c98a1be056ed0ad58d0c89d186c` | `ab96ee3811293264142c19a6074366fea1566245cd130e44b2523cb54d526ddd` |
+| arvore_natal | 10:20 | #1 de 2 | `d3320534-00ba-4059-9910-6ac48781f2ce` | 55 | 16785 | `arvore_natal_hd/arvore_natal_hd.zip` | 8.9 MiB | `5283c8bb5fa8fabe09c2773d82c90433420969333041d8207e12afcd60290f41` | `3316292c343ab48ee52b210c9cfeefe923aff65a02ec6a6725efdcd75752d936` |
+| boneco_neve | 10:20 | #1 de 2 | `d1f677b3-83f8-43f8-a834-bcb125898dcc` | 55 | 16730 | `boneco_neve_hd/boneco_neve_hd.zip` | 7.9 MiB | `46cca3582e7b98639e76581f476644d2b4f953babcb32b6daebc23ca4b0d634b` | `a146dc445792d0eeceed4188868fcce741471046a7fa2a84dfa41758a4de257e` |
+| cordao_fila | 10:20 | #1 de 2 | `f587c9f0-5868-4c4d-93b9-bb7c96fffaea` | 55 | 16675 | `cordao_fila_hd/cordao_fila_hd.zip` | 8.1 MiB | `26da3fa43d5dc2878d92362946ea8f700ff14c47fcf6c889be8010f6335ff359` | `50ccee4067b9a467c513f3f9787c0484ddeed75897499acefa27e356ee1b14d0` |
+| garconete | 10:20 | #2 de 2 | `273f65e8-3939-46c3-a0f9-0719966c4915` | 55 + 20 rig | 16620 | `garconete_hd/garconete_hd.zip` | 61.6 MiB | `4436d64b4f8d9fee94d4b3533deb9f38b7cfb7d680209803b8e8ab15b047e26e` | `cfa0a3692573af45bc644e45dde2afdf099adf0031c8ea3a5b6e9e5052308f2b` |
 
 ## 3. Marca e arte de instalação (imagem, sem modelo 3D)
 
