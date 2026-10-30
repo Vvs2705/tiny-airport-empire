@@ -208,6 +208,17 @@ Pedido da sessão coordenadora: depois do Lote 7, gerar o que falta para o lanç
 
 Total dos Lotes 8 a 10: **3 930** créditos. Saldo no fim do dia: **16 440** (Max até 29/11). O que cada peça é para a integração está em `docs/INTEGRACAO_ARTE.md`.
 
+### 2.10 Lote 11 — cabine de corpo inteiro e garagem de pátio (30/10, pedido do Vinicius)
+
+Pedido: "até aquelas cabines de raio-x de corpo todo" e "espaço no hangar para os veículos muito pequeno". Conferido antes contra este arquivo e `arte/tripo/`: nada equivalente. `raio_x_n3` é a estação inteira (3 scanners corporais e 2 esteiras, §2.5), `portico_detector` é o pórtico e `scanner_mao` o detector de mão; nenhum é uma cabine avulsa. `garagem_estacionamento` é o estacionamento de carros da Aurora (§2.6, grupo 4) e os hangares são de aeronave. Gerado **peça a peça, com cliques normais** na interface, sem fila nem script de página (os termos do Tripo citam "automated tools"; `PROVENIENCIA.md` §4). Receita do §3: imagem Nano Banana 1:1 com 2 opções (0 crédito), HD H3.1, Ultra, 4K, PBR, remover iluminação, triângulos, 50 000 faces, 8K desligado, Privado, "Generate 55".
+
+| Peça | Para quê | Créditos |
+|---|---|---|
+| `cabine_scanner_corpo` | cabine aberta de raio-x de corpo inteiro (dois painéis curvos e piso com pegadas amarelas), genérica, sem marca; a estação de segurança usa no nível mais alto, uma por scanner | 55 |
+| `garagem_patio` | galpão largo, aberto na frente, com 6 vagas de linha amarela e telhado laranja com friso verde (paleta do Vale Verde, `ART_BIBLE.md` §4); guarda rebocador, esteira, ônibus, catering e combustível; vagas vazias, porque os veículos são peças próprias; bem maior que `garagem_estacionamento` | 55 |
+
+Total do Lote 11: **110** créditos. Saldo: 16 440 → **16 330** (Max até 2026-11-29).
+
 ## 5. Marca e arte de instalação (pedido do Vinicius, 2026-10-29)
 
 Feitas no gerador de imagem do Tripo (Nano Banana 2, 1024 px) e ampliadas para 4K (10 créditos cada). Entram no git (interface, não modelo pago), em `client/Assets/_TA/Art/Marca/`.

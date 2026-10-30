@@ -56,6 +56,11 @@
 | 10:19–10:32 | 9 Auto Rig (8 do Lote 9 e a garçonete; o rig do `passageiro_hoodie` foi refeito porque a 1ª tentativa começou com o modelo ainda gerando e não cobrou) | 16 440 | 180 | 9 × 20 |
 | 09:54–11:11 | Exports HD dos Lotes 8 a 10 (66 peças), em 2 abas do Chrome; as abas travaram duas vezes por falta de RAM e o grupo de abas caiu no fim, então a última fila (6 objetos) foi refeita numa aba nova | 16 440 | 0 | export não cobra |
 | 11:11 | **Fim do dia 30/10: 8 760 créditos gastos** (4 830 do grupo A e Lote 7 + 3 930 dos Lotes 8 a 10); **saldo 16 440**, Max até 2026-11-29 | **16 440** | 8 760 | 25 200 − 8 760 |
+| 12:35–12:40 | 2 rodadas de imagem (Nano Banana, 1:1, 2 opções): cabine de scanner de corpo inteiro e garagem de pátio (pedido do Vinicius) | 16 440 | 0 | imagem grátis; checagem prévia em `ASSETS.md` e `arte/tripo/` não achou peça equivalente |
+| 12:36 | 1 modelo HD (4K, 50 000 faces, "Generate 55"): `cabine_scanner_corpo` | 16 385 | 55 | clique normal na interface, sem script (§4, Automação) |
+| 12:42 | 1 modelo HD: `garagem_patio` | 16 330 | 55 | idem |
+| 12:40–12:45 | 2 exports FBX "Blender, 4K" | 16 330 | 0 | export não cobra |
+| 12:45 | **Fim do Lote 11: 110 créditos gastos; saldo 16 330**, Max até 2026-11-29 | **16 330** | 110 | 16 440 − 110 |
 
 ## 2. Registro por peça (Tripo)
 
@@ -458,6 +463,15 @@ Mesma receita do §2.4 (HD 4K, 50 000 faces, Privado; objetos em "Blender 4K"; p
 | boneco_neve | 10:20 | #1 de 2 | `d1f677b3-83f8-43f8-a834-bcb125898dcc` | 55 | 16730 | `boneco_neve_hd/boneco_neve_hd.zip` | 7.9 MiB | `46cca3582e7b98639e76581f476644d2b4f953babcb32b6daebc23ca4b0d634b` | `a146dc445792d0eeceed4188868fcce741471046a7fa2a84dfa41758a4de257e` |
 | cordao_fila | 10:20 | #1 de 2 | `f587c9f0-5868-4c4d-93b9-bb7c96fffaea` | 55 | 16675 | `cordao_fila_hd/cordao_fila_hd.zip` | 8.1 MiB | `26da3fa43d5dc2878d92362946ea8f700ff14c47fcf6c889be8010f6335ff359` | `50ccee4067b9a467c513f3f9787c0484ddeed75897499acefa27e356ee1b14d0` |
 | garconete | 10:20 | #2 de 2 | `273f65e8-3939-46c3-a0f9-0719966c4915` | 55 + 20 rig | 16620 | `garconete_hd/garconete_hd.zip` | 61.6 MiB | `4436d64b4f8d9fee94d4b3533deb9f38b7cfb7d680209803b8e8ab15b047e26e` | `cfa0a3692573af45bc644e45dde2afdf099adf0031c8ea3a5b6e9e5052308f2b` |
+
+### 2.6 Conta nova, 2026-10-30, tarde: Lote 11 (cabine de corpo inteiro e garagem de pátio)
+
+Mesma receita do §2.4 (HD 4K, 50 000 faces, Privado; objeto em "Blender 4K"). Gerado e exportado **peça a peça pela interface, com cliques normais**, sem fila nem script de página (§4, Automação). Imagem escolhida entre 2 opções, 0 crédito. O zip foi guardado em `arte/tripo/` e copiado para o backup (mesmo SHA nas duas cópias); também foi extraído na mesma pasta (FBX + `.fbm` com as texturas), como nas outras peças. Faces lidas no visualizador: cabine 41 712, garagem 38 624.
+
+| Peça | Hora | Imagem | Task id | Créditos | Saldo depois | Arquivo (`arte/tripo/`) | Tamanho | SHA-256 do zip | SHA-256 do FBX |
+|---|---|---|---|---|---|---|---|---|---|
+| cabine_scanner_corpo | 12:36 | #1 de 2 | `2b8bc1df-eb43-4d28-9a35-70b8ca61c87c` | 55 | 16385 | `cabine_scanner_corpo_hd/cabine_scanner_corpo_hd.zip` | 9.7 MiB | `35948a330e6132986d176f4c2ffa7553728ffd7ecd6fcc4956cdc1875570a2a3` | `581945e6c8f8ea92b87d8e789b56de2b7ae9fd410df19676dad793497f41a138` |
+| garagem_patio | 12:42 | #1 de 2 | `25d555f9-4d96-4538-bf14-6d72c5aad68c` | 55 | 16330 | `garagem_patio_hd/garagem_patio_hd.zip` | 10.7 MiB | `fc4c637ee21746a7c6b3a269666234ff0e55c6a43e8f96f6d98f5ca837a790b7` | `af6d3350029dea6ab5bbd33230f57e3cbacce391439b373fc28af8ed0c8fa0c7` |
 
 ## 3. Marca e arte de instalação (imagem, sem modelo 3D)
 
