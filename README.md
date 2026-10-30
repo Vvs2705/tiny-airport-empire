@@ -9,7 +9,7 @@
 **Como vai ser jogar:** começar fazendo tudo à mão e terminar comandando um império que funciona sozinho.
 
 ## Situação
-Fora desta rodada; o nome colide com outros apps (sugestão da revisão: "Little Terminal", falta checar marca). Ainda não há código: este repositório guarda o GDD e a estrutura do projeto, pronta para o desenvolvimento começar. A auditoria de 2026-10-29 deu **NO-GO** para o prazo de 29/10 (GDD §0.3).
+Em desenvolvimento; o nome colide com outros apps (sugestão da revisão: "Little Terminal", falta checar marca). A v0.1 é jogável em greybox, o núcleo da Fase C está na `main` e a arte do Tripo está gerada, ainda sem entrar no jogo. Ferramentas e lacunas: [`docs/ToolchainAudit/`](docs/ToolchainAudit/00-executive-summary.md). A auditoria de 2026-10-29 deu **NO-GO** para o prazo de 29/10 (GDD §0.3).
 
 - **GDD mestre (Little Terminal, v1.1):** [`docs/GDD.md`](docs/GDD.md): produção, segurança e publicação; decisões pendentes no §23.2.
 - **GDD de origem:** [`docs/GDD_ORIGEM.md`](docs/GDD_ORIGEM.md) (produto, revisão competitiva de 2026-10-09 e lições do Dungeon Courier).
