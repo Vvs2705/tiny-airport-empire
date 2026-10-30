@@ -509,3 +509,76 @@ Gerado por `client/tools/audio_gen.py` (Python 3.14.4, numpy 2.4.6, scipy 1.18.1
 - **Imagens do Nano Banana 2 dentro do Tripo:** mesmos termos do Tripo para o conteúdo gerado na conta. Logo, emblema, ícone e splash entram no git como arte de interface do jogo (prompt mestre §3.8).
 - **Mixamo:** nenhum clipe baixado hoje. Os clipes que virão do disco seguem o registro de origem de cada jogo (prompt mestre §4.1).
 - **Marca registrada:** "Little Terminal" ainda não passou pela busca no INPI, USPTO, EUIPO e nas lojas (D-03). A logo não vai para a loja antes disso.
+
+## 5. Derivados para o jogo (troca do greybox, 2026-10-29)
+
+Nada aqui gasta crédito: tudo sai dos arquivos HD do §2 por script, no Blender 5.2, neste PC.
+
+### 5.1 Malhas decimadas (fora do git)
+
+`client/tools/malhas_ta.py` decima cada corpo rígido HD (teto de triângulos por peça), normaliza a medida de projeto, põe o pivô no chão e reduz a textura base. A saída fica em `client/Assets/_TA/ArtLocal/Resources/Malhas/`, pasta ignorada pelo git: é o modelo do Tripo, que a licença não deixa redistribuir (GDD §10.2, decisão A). O registro completo de cada peça (triângulos antes e depois, medidas, SHA-256 do FBX de origem, do FBX e do PNG gerados) está no `malhas.json` dessa pasta; a tabela abaixo é o resumo.
+
+| Peça | Triângulos (HD → jogo) | Medidas (m) | Textura | SHA-256 do FBX decimado |
+|---|---|---|---|---|
+| `arvore` | 49236 → 1500 | 3.05 × 2.62 × 3.20 | 512 px | `17ea0652f99dc2524d154f4e2aa370bd8211d530059864fd2c11342cac44ca00` |
+| `aviao_narrow` | 48228 → 5000 | 9.00 × 8.95 × 4.50 | 1024 px | `5449dc9f6a5c64328363e0282cbd4b47f1c3418fc23e7f6c807555029a79d3d0` |
+| `aviao_regional` | 48774 → 5000 | 7.60 × 7.38 × 3.71 | 1024 px | `9150080594aff50bdb9577cc824becbbd3ab8c7596b599a09afe3da017c0a062` |
+| `balcao_checkin` | 42014 → 2000 | 0.75 × 0.71 × 0.46 | 512 px | `aafcec3ef6cac9ab547e9872583176210a19b2254bfebf8fd6d10cc8062d806d` |
+| `balcao_checkin_n2` | 42665 → 2000 | 0.75 × 0.47 × 0.37 | 512 px | `d3ecbb21566a03984a9b297fa720d68d3ecaf0ca9bf49d0a7630adcd5db2e6c4` |
+| `balcao_checkin_n3` | 44609 → 2000 | 0.75 × 0.75 × 0.39 | 512 px | `026a41faa0234d9a59653ff95b6b7c8f9639537a4b626eba59805f438345df18` |
+| `biruta` | 48921 → 998 | 1.46 × 1.03 × 2.60 | 256 px | `a70cde5d20429228f37672af19ae3a5946dedc515e4818fa953005de26de7034` |
+| `cadeiras_espera` | 48419 → 1500 | 1.60 × 0.42 × 0.60 | 512 px | `59cac73a64cbfec5901fc2547cb5a5cc7257a74763701fc23cf03db667803e2e` |
+| `caminhao_catering` | 45746 → 2500 | 2.80 × 1.28 × 2.67 | 512 px | `02d320134e1fae7317a5cc29b4041ac21f34a6d32409fdf8ed12f864f4873c38` |
+| `caminhao_combustivel` | 46077 → 2500 | 2.60 × 1.13 × 1.17 | 512 px | `ac2aa37aa3d698f7315a1915151e933a7d8ed1327fbd361d83dd9c69510741a9` |
+| `carrinho_bagagem` | 44193 → 2500 | 2.60 × 0.78 × 0.89 | 512 px | `b575ec51c24222f6f4124981383239faef9772d7c815da4561c02d102b9a12f3` |
+| `cone` | 46502 → 300 | 0.25 × 0.25 × 0.35 | 128 px | `d9f387b8f852dd64f9d3326d6924e40a63cabbddfc4e55e6c67892465c998d8c` |
+| `conteiner_bagagem` | 45570 → 1200 | 1.30 × 0.98 × 1.35 | 256 px | `8394597cc8914ee7c58a15f82796edb770c728cfe9786406a907ecc83a13f15b` |
+| `escada_embarque` | 45628 → 2000 | 1.17 × 2.30 × 1.78 | 512 px | `5fe94b04af154a3b9dc9a4af3f843ba3bd399cba9b08d907c3704d8956882be0` |
+| `hangar_manutencao` | 42370 → 4000 | 7.00 × 6.38 × 4.65 | 1024 px | `e1db8b4ba62ed7bb3e0563ce900cae48bdac5bb16da6938fbad8201e697f70f6` |
+| `loja` | 44868 → 2500 | 1.40 × 1.21 × 1.51 | 512 px | `378652bf695b96e9f8fa8bdc63309c2d0e99979a800df5f4cd982f03ade65c68` |
+| `loja_n2` | 44066 → 2499 | 1.40 × 1.17 × 0.99 | 512 px | `43ce27912c150027e4f086ef02724038cf6f072797cf0d0794c3a79b76f97439` |
+| `loja_n3` | 41970 → 2500 | 1.31 × 1.40 × 1.80 | 512 px | `7b3bcb40e25f72301dcf4371b436953324bf374b8cac3149701f01927dc62416` |
+| `onibus_patio` | 43737 → 2500 | 1.47 × 3.20 × 1.40 | 512 px | `458bb34fa56a39d2f380f6f30e0c332dd80cc59bef15243a7b398dc57865a8de` |
+| `ponte_embarque` | 44185 → 2499 | 1.08 × 3.40 × 2.09 | 512 px | `7d4c4dc5cff0f3ed567421143342a37d017c5a735fc773a4d2e393ccc32247c9` |
+| `portao_embarque` | 45758 → 2000 | 0.75 × 0.56 × 0.53 | 512 px | `59054ac09343df15984d2dc0a22f4a010364c3e09547745fbba1231a76bf686a` |
+| `portao_embarque_n2` | 42813 → 1999 | 0.68 × 0.75 × 0.42 | 512 px | `7bfa72d5fc2dde20142afd80a486181395b1c815835b69be1341248a92a2a387` |
+| `portao_embarque_n3` | 40701 → 1998 | 0.75 × 0.75 × 0.45 | 512 px | `8a82d8aa1d181291f2120c95b6763177e1dc45107858a725d1ba7c0cf3aca836` |
+| `poste` | 46942 → 800 | 1.73 × 0.93 × 4.00 | 256 px | `be5cdbc82b8ec29642077953c79c2e1fddbacca6022f59f39c7f9664dd4e02f3` |
+| `radar` | 46548 → 1500 | 0.86 × 0.86 × 2.40 | 256 px | `5076160c400aa9247ffbe90c40daaa9f2832a5f247b54ea54ce430ce3ed1f181` |
+| `raio_x` | 45511 → 2500 | 0.93 × 1.15 × 0.74 | 512 px | `243d50952e12a9e38e5ddf3d252fce7df90f413d25c6c765f61355b2f283c2ff` |
+| `raio_x_n2` | 41413 → 2499 | 1.11 × 1.15 × 0.58 | 512 px | `9e47f13aae842ba31beed02abab3b6f8f844f81af26d29abc101bf49d74ebe5e` |
+| `raio_x_n3` | 42501 → 2500 | 1.15 × 1.15 × 0.50 | 512 px | `96d285c9a30b7d97df99be36c8e27831330e36a76b5ebea2d712236dcefdad52` |
+| `rebocador` | 43078 → 2000 | 1.50 × 0.76 × 0.79 | 512 px | `5941014382cd1cdd35ceaaa3c9abc2839e64394b1a9fc2ab4300925ea9caea4f` |
+| `terminal_vale_verde` | 43119 → 5999 | 9.00 × 7.17 × 6.71 | 1024 px | `4e5a6f2aee8620d8a0a8fba87fdc849323cd2f6c5e46d81e5769435f3ee4a7fe` |
+| `torre_controle` | 42898 → 3000 | 2.18 × 2.20 × 5.43 | 512 px | `7f1bd1163cd61974528253ce82c32cf16c7fc58e8a9d48dd3a7b9c92447fc27a` |
+| `vaso_planta` | 47330 → 800 | 0.50 × 0.47 × 0.60 | 256 px | `a2d5c2cc7572ec013bc73e89e2822d331160d6f97dc39247e367eba9d3d009f1` |
+
+### 5.2 Clipes de animação (fora do git, `arte/mixamo/ta_pax` e `ta_func`)
+
+| Clipe | Origem | SHA-256 | Licença |
+|---|---|---|---|
+| `Walk.fbx` | `Walking.fbx` do Forge Street (Mixamo, In Place), backup `3D Objects\ForgeStreet-BACKUP\arte-fonte\mixamo\` | `87c18ad47c01e126faf31921d316cf0714e7867c3ab29fbedc404ca79d528585` | Mixamo (Adobe): uso em jogo comercial permitido, sem redistribuir o arquivo |
+| `Idle.fbx` | `Idle.fbx` do Forge Street (Mixamo Breathing Idle; janela 199–289) | `befaa0fa9c5684a4e82dd229b04710588b1f32bc026704cc1856cae9c80f4220` | Mixamo (Adobe), idem |
+| `Atende.fbx` | `_blender/Grab.fbx` do Dungeon Courier (keyframe por script no `anim_blender.py`, entregar o cartão) | `0c431dbde330dba2aa06f8c3bc8a456316bea18f37c9003492379f3cf22684b5` | do estúdio (gerado por script) |
+
+### 5.3 Folhas das pessoas (no git)
+
+`client/tools/elenco_ta.py` faz o `.blend` leve de cada personagem (só a textura base, 1024 px, e o uniforme no material `TA_MASK`), fora do git, em `arte/tripo/_leve/`. O `client/tools/elenco_sprites.sh` renderiza com o `render_sprites.py` (preset TA: 45°/45°, 180 px/m, 4 diagonais com espelho) e grava em `client/Assets/_TA/Resources/Sprites/<ator>/`. A folha é render, não o modelo, e entra no git, como no Dungeon Courier.
+
+| Ator | Clipes | Folha | SHA-256 do `Walk.png` |
+|---|---|---|---|
+| `atendente` | Atende, Idle, Walk | 2496 × 832 px | `b0e8198536c65e96aa720ab9235e2896220648a7e054fafd3efe4ed7d8f9cebb` |
+| `bagageiro` | Idle, Walk | 2496 × 832 px | `040dbedfed9f17735eb75cd73e181b8ca25dff9216e8a5fcc7f04ed90c628459` |
+| `comissaria` | Idle, Walk | 2496 × 832 px | `cb4f71a7ce46c4a4b5fb754c5fc821a7b5cd96ca144ac3070b4e0d1d2d340ebc` |
+| `comissario` | Idle, Walk | 2496 × 832 px | `0d2f99879edb38d31920401e58fcd3d17431837959af9ec1429041603b669dda` |
+| `crianca` | Idle, Walk | 1920 × 640 px | `94e8f97e1da7697b167f6c9a6f657e8630f5faee74ae576d6ef343e641788f9b` |
+| `despachante` | Idle, Walk | 2496 × 832 px | `2c01da1d114b40011445d4d3ec9a1ace8422e0aed930f28ce35f4ccffd222ca5` |
+| `mecanico` | Idle, Walk | 2496 × 832 px | `9279ce65e8c9d460714af5a0a52be1312a13b3b9249ee39c9d17462fad173b88` |
+| `passageira_b` | Idle, Walk | 2496 × 832 px | `887c4572a6d8cdb60dbbf563a6622333852ce3a270fa7942f5a111a8189bf784` |
+| `passageiro_a` | Idle, Walk | 2496 × 832 px | `c59e5a6bf1c7034da52e414c63576e6fa8d67b0238eeec5f4148d717eaf88687` |
+| `passageiro_idoso` | Idle, Walk | 2496 × 832 px | `72a0633080c2c59091268b9b9e0547884f681c4949099380eb53e25b3c054b83` |
+| `piloto` | Idle, Walk | 2496 × 832 px | `cf1cfef362d90ecc48b8c8f9ce274810a10864eaaabbf50096f8a3c4d079a57c` |
+| `seguranca` | Atende, Idle, Walk | 2496 × 832 px | `635cfec09fea7c46213f0a18fff8d3d9b00c9fb1a1d03eba135e3e0aa4ee9cf7` |
+| `vendedor` | Atende, Idle, Walk | 2496 × 832 px | `3cbaae40b9824d7f46f840f7bbfb6efe0a8fa741183558d7ad2b64d210f0bb3e` |
+
+Total das folhas: 14.4 MB em PNG. Máscara: `elenco_ta.py` (uniforme de Ana, Beto e Cida por cor e faixa de altura) e `--mask-attach` (a mala dos passageiros). Tripulação e técnicos ficam com a cor do modelo, sem máscara.

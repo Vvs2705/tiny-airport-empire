@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text;
@@ -24,8 +25,13 @@ namespace TA
     ///   -onda K       comeca na onda K (1 = a 1a).   -passageiros N   estresse: N passageiros por onda (60 = o K3).
     ///   -tutorial     liga o tutorial no -testsession (sem gravar; com -bot o ENTENDI se aperta sozinho).
     ///   -shot f.png [-shotdelay s]   espera s s reais (padrao 1), abre a -tela, fotografa e sai 0.
-    ///   -record pasta [-recordseg s]  grava s s (padrao 10) de quadros PNG a 30 qps na pasta e sai 0.
+    ///   -record pasta [-recordseg s]  grava s s (padrao 10) de quadros PNG a 30 qps na pasta e sai 0. Com -recordini r [-recordspeed v]:
+    ///                 anda r s reais na -speed e so entao grava, na velocidade v (padrao 1): o pushback e a decolagem no GIF.
     ///   -demo         contrata os 3 e, 1,5 s depois, manda a Ana do check-in para a loja (o -record da caminhada e da troca de uniforme).
+    ///   -vista nome   perto | patio | geral: enquadramento das fotos e do -record (Mundo.Vista).
+    ///   -diag arq.csv [-diagseg s]  grava a pose dos avioes e veiculos (client/tools/diag_patio.py mede o escorregamento) e sai 0.
+    ///   -perf s       K3 (GDD §5.13): depois de 5 s de aquecimento, mede s s de quadros, loga PERF p10=.. media=.. com as pessoas, os
+    ///                 avioes e os veiculos na tela e sai 0. Usar com -passageiros 60.
     /// </summary>
     public sealed class Game : MonoBehaviour
     {
@@ -111,6 +117,9 @@ namespace TA
             else if (!string.IsNullOrEmpty(tela)) AbreTelaDev(tela);
             if (!string.IsNullOrEmpty(rec)) StartCoroutine(Record(rec));
             if (Arg("-demo") != null) StartCoroutine(Demo());
+            if (!string.IsNullOrEmpty(Arg("-vista"))) _hud.M.Vista(Arg("-vista"));
+            if (Arg("-perf") != null) StartCoroutine(Perf(ArgF("-perf", 20f)));
+            if (!string.IsNullOrEmpty(Arg("-diag"))) StartCoroutine(DiagPatio(Arg("-diag"), ArgF("-diagseg", 60f)));
         }
 
         void Update()
@@ -320,9 +329,33 @@ namespace TA
             Sim.Move(0, Estacao.Loja);   // do check-in (azul) para a loja (verde): a troca de colete e a loja abrindo
         }
 
+        /// <summary>K3: p10 do FPS (o quadro mais lento dos 90% mais rapidos) e a media, em tempo real, sem o aquecimento.</summary>
+        IEnumerator Perf(float seg)
+        {
+            yield return new WaitForSecondsRealtime(5f);
+            var dts = new List<float>();
+            float fim = Time.realtimeSinceStartup + seg;
+            while (Time.realtimeSinceStartup < fim) { yield return null; dts.Add(Time.unscaledDeltaTime); }
+            dts.Sort();
+            float p90 = dts[Mathf.Clamp((int)(dts.Count * 0.9f), 0, dts.Count - 1)], soma = 0f;
+            foreach (float d in dts) soma += d;
+            Debug.Log(string.Format(Inv, "PERF p10={0:0.0} media={1:0.0} quadros={2} {3} {4}x{5}", 1f / p90, dts.Count / soma, dts.Count, _hud.M.Contagem(), Screen.width, Screen.height));
+            Application.Quit(0);
+        }
+
+        IEnumerator DiagPatio(string arq, float seg)
+        {
+            _hud.M.Diag(arq);
+            yield return new WaitForSecondsRealtime(seg);
+            _hud.M.DiagFim();
+            Application.Quit(0);
+        }
+
         IEnumerator Record(string pasta)
         {
             Directory.CreateDirectory(pasta);
+            float ini = ArgF("-recordini", 0f);
+            if (ini > 0f) { yield return new WaitForSecondsRealtime(ini); _speed = ArgF("-recordspeed", 1f); }
             Time.captureFramerate = 30;
             int total = Mathf.RoundToInt(ArgF("-recordseg", 10f) * 30f);
             for (int i = 0; i < total; i++)

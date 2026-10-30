@@ -13,7 +13,7 @@ namespace TA
         static readonly CultureInfo Br = CultureInfo.GetCultureInfo("pt-BR");
 
         public static readonly string[] Estacao = { L("CHECK-IN"), L("SEGURANÇA"), L("LOJA"), L("PORTÃO") };
-        public static readonly string[] Funcionario = { L("Ana"), L("Beto"), L("Caio") };
+        public static readonly string[] Funcionario = { L("Ana"), L("Beto"), L("Cida") };
         public static readonly string[] Destino = { L("Campinas"), L("Recife"), L("Curitiba"), L("Salvador"), L("Belo Horizonte"), L("Porto Alegre"),
             L("Florianópolis"), L("Fortaleza"), L("Brasília"), L("Manaus") };
         public static readonly string[] Historia = { L("Dona Rosa vai ao casamento da neta") };
@@ -34,7 +34,7 @@ namespace TA
         public static string Contratar(long custo) => custo < 0 ? L("Equipe completa") : L("Contratar ") + Num(custo);
         public static readonly string Melhorias = L("Melhorias"), Pausa = L("II"), Fechar = L("Fechar"), Continuar = L("Continuar"),
             Pausado = L("Pausado"), ReverTutorial = L("Rever tutorial"), ExportarDiario = L("Exportar diário"), Album = L("Álbum"),
-            Quadro = L("PARTIDAS"), Toque = L("TOQUE"), Fechada = L("fechada: sem funcionário"), Entendi = L("ENTENDI"), Pular = L("Pular tutorial"),
+            Quadro = L("PARTIDAS"), Toque = L("TOQUE"), FechadaCurto = L("(fechada)"), Entendi = L("ENTENDI"), Pular = L("Pular tutorial"),
             Cancelar = L("Cancelar"), Coletar = L("Coletar"), SoltaFora = L("Solte o funcionário em cima de uma estação"),
             AnuncioSimulado = L("Anúncio (simulado na v0.1)"), FecharSemRecompensa = L("Fechar sem recompensa"),
             SaveRecusado = L("Este save é de outra versão do jogo: ele não será apagado nem gravado por cima."),

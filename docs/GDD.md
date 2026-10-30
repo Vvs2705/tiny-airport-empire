@@ -925,6 +925,8 @@ Os passos 5 a 7 abaixo valem para as pessoas.
 
 Arte crua paga (zips do Tripo, FBX, `.blend` com modelo) fica fora do git, no checkout principal, com backup privado. A licença dos modelos não permite redistribuir, e o repositório é público.
 
+**Malha decimada (decisão A, Vinicius, 29/10):** também fica fora do git. Ela é gerada por `client/tools/malhas_ta.py` em `client/Assets/_TA/ArtLocal/Resources/Malhas/`, pasta ignorada; o build sai deste PC, e um clone sem a pasta mostra as primitivas da v0.1. Os sprites das pessoas são render, não o modelo, e entram no git (`client/Assets/_TA/Resources/Sprites/`). A alternativa B (repositório privado com as malhas no git) fica para quando o lançamento pedir CI com build.
+
 Interface pintada (logo, ícones, retratos) sai do gerador de imagens grátis, sobre fundo liso e recortada por script.
 
 **Créditos estimados (HIPÓTESE, preço da Origem: modelo HD 45, rig 20):**
