@@ -25,6 +25,7 @@ Passo a passo em `05-installation-plan.md`.
 | C | Atualizar o Unity quando o patch sair | condição para o AAB da loja | quando a Unity publicar |
 | F | Decidir como medir em Android de entrada | o POCO F4 não representa a meta do K3 | decisão |
 | G | Desligar conectores sem uso neste repositório | contexto de cada sessão | 5 min |
+| H | Atualizar Git, Node e .NET | falha do Brotli na lista de exploração conhecida da CISA | 15 min |
 
 ## Antes do envio à loja
 

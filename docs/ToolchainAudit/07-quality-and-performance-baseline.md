@@ -23,6 +23,8 @@ Medido em 2026-10-30 neste PC, com o Chrome do Tripo aberto e entre 1 e 2 GB de 
 | Viewcheck | 0 avisos, 0 erros |
 | Selftests | `checa_repo` 23 quebras, `checa_apk` 6, `auditar_arte` 8 cenários |
 | Prova vermelha do `EnumsTests` | trocar `Loja` e `Portao` derruba o teste; `Defs.cs` restaurado; a Fase C2 só cresce no fim e não quebra |
+| Determinismo entre sistemas | as 15 linhas das tabelas do bot saíram **idênticas** no Ubuntu do CI e no Windows |
+| Tabelas do `BALANCE.md` | as 3 linhas da v0.1 reproduzidas, sem diferença |
 | Mutação (`mutacao.py`) | **9 de 9 mutantes mortos**, em 25 s, sobre o estado final |
 
 A cobertura foi medida sem instalar nada: o `Microsoft.CodeCoverage` já vem com o `Microsoft.NET.Test.Sdk`.
@@ -30,6 +32,8 @@ A cobertura foi medida sem instalar nada: o `Microsoft.CodeCoverage` já vem com
 ```bash
 dotnet test client/tools/coretests --collect:"Code Coverage;Format=cobertura"
 ```
+
+O `verify.sh full` não foi repetido nos últimos commits: outra sessão estava com o Blender aberto, e a trava nova recusou nas duas tentativas. Desde o último `full` verde, nada mudou em `client/Assets`, `client/Packages` nem `client/ProjectSettings`.
 
 ## Portões do bot
 

@@ -56,6 +56,26 @@ Quando https://unity.com/security/unity-brotli-decoder-vulnerability mostrar a v
 
 **Por que depende de você:** enviar arte paga a um serviço externo exige aval. **Escolha:** drive privado da V-STACK ou HD externo. **Tamanho:** 4,9 GB (só os zips). O backup atual está no mesmo disco C:.
 
+### H. Atualizar Git, Node e .NET (falha do Brotli)
+
+**Por que depende de você:** é instalação global. **Custo:** zero. **Tamanho do download:** não verificado.
+
+Feche as sessões e o Unity antes:
+
+```bash
+winget upgrade --id Microsoft.DotNet.SDK.10
+```
+
+```bash
+winget upgrade --id OpenJS.NodeJS.LTS
+```
+
+```bash
+winget upgrade --id Git.Git
+```
+
+**Antes de rodar:** o winget oferece Git 2.56.0.3, e a correção citada está na 2.56.0.windows.4; confira se a versão oferecida já chegou lá. O Node sobe de 24 para 26, então confira os MCPs depois. **Não testado.** O CI não precisa de nada: `10.0.x` pega a versão mais nova sozinho.
+
 ## Não instalar
 
 Ver `04-tool-recommendations.md`. Em especial: nenhum MCP de Unity, nenhum gerador local, nenhum agente adicional e nenhum pacote de agentes de terceiros.

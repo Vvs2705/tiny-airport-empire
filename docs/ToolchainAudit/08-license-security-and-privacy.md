@@ -27,7 +27,18 @@ Lidas nas páginas oficiais em 2026-10-30.
 
 **Nada foi publicado**, então não há jogador exposto. A condição é: **o AAB da loja sai de um Editor com o patch.**
 
-A falha do Brotli também foi corrigida em Node.js e .NET ([Field Effect](https://fieldeffect.com/blog/brotli-vulnerability-affects-multiple-software-ecosystems), [CSO Online](https://www.csoonline.com/article/4241027/node2shell-puts-microsoft-and-node-js-on-brotli-patch-duty.html)). Node 24.15.0 e .NET SDK 10.0.400 aqui são só ferramentas locais; não verifiquei se já estão nas versões corrigidas. Atualizar é simples e não afeta o jogo.
+### A mesma falha nas ferramentas deste PC
+
+A falha do Brotli não é só do Unity, e pesa mais do que parecia: a CISA a incluiu na lista de exploração conhecida em 2026-10-27 ([alerta do Canadá](https://cyber.gc.ca/en/alerts-advisories/al26-027-critical-vulnerability-impacting-google-brotli-cve-2026-111497), VERIFICADO). As três ferramentas abaixo estão desatualizadas.
+
+| Ferramenta | Instalada | Corrigida a partir de | Rótulo |
+|---|---|---|---|
+| Git for Windows | 2.54.0.windows.1 | 2.56.0.windows.4 | PROVÁVEL ([análise técnica](https://lilting.ch/en/articles/brotli-cve-2026-111497-python-curl-git)). O winget ainda oferece 2.56.0.3 |
+| Node.js | 24.15.0 | 24.22.1 | PROVÁVEL ([Field Effect](https://fieldeffect.com/blog/brotli-vulnerability-affects-multiple-software-ecosystems)) |
+| .NET | runtime 10.0.11 | 10.0.14 | PROVÁVEL (Field Effect; não achei o aviso da Microsoft) |
+| Pacotes Python `brotli`, `brotlicffi` | não instalados | — | VERIFICADO |
+
+O risco depende de receber resposta comprimida de um servidor hostil. Aqui, Git e npm falam com GitHub e npm, mas `git clone` em servidor desconhecido deve esperar a atualização. Passos no item H de `05-installation-plan.md`.
 
 ## Dados enviados para fora
 
