@@ -52,7 +52,7 @@ Também existe **My Perfect Airport** (Yelo Hood, fev/2026), cópia direta do mo
 | Moedas | cash + gemas | ≥3* | 3 | 2 | 3 | 2 | GDD 5 → **MVP 1** |
 | Horário de voo / hora do rush | não descrito | não descrito | não descrito | não descrito | não descrito | ✔ agenda 24 h (mid-core) | **proposto (TA-1)** |
 | Mover equipe entre estações | ? | ? | ? | ? | ? | ? | **proposto (TA-2)** |
-| Clima | não descrito | não descrito | não descrito | não descrito | não descrito | ? | GDD evento → **proposto (TA-4)**; só o World of Airports (mid-core) tem |
+| Clima | não descrito | não descrito | não descrito | não descrito | não descrito | ? | GDD §5.14 → **proposto (TA-4, TA-9)**; só o World of Airports (mid-core) tem |
 | Passageiro com história | não encontrado | não encontrado | não encontrado | não encontrado | não encontrado | não encontrado | **proposto (TA-3)** |
 | Coleção de aviões / cidades reais | ? | ? | ✔ | ? | ✔ | ? | GDD ✔ (§28) — é item mínimo, não diferencial |
 
@@ -99,6 +99,7 @@ Critério: o que os similares **não têm ou fazem mal**, que seja **barato para
 - **Como funciona:** com aviso de 30 s, a pista fecha por 60 s. Quem adianta o embarque do próximo voo antes não perde nada. Depois, a pista reabre e vem uma onda dupla. Só com o jogo aberto, no máximo 1 a cada ~10 min.
 - **Risco:** parecer punição aleatória. Mitigação: aviso sempre visível e horário determinístico.
 - **Validar barato:** ≥ 50% reagem ao aviso; nenhum testador chama de injusto.
+- **Desde o GDD v1.3:** a frente fria é um dos 5 climas do §5.14, com previsão no quadro de partidas (TA-9).
 
 ### TA-5. Nada atrás de vídeo nem de sorteio — custo **P**
 - **Por que importa:** ataca as reclamações nº 1 e nº 2 do tema (itens c1, c2) e o selo de loot box dos concorrentes. É **contraposicionamento**: HYPERCELL e Airport Inc. ganham vendendo gerente e offline e não podem largar isso sem perder receita.
@@ -123,6 +124,12 @@ Critério: o que os similares **não têm ou fazem mal**, que seja **barato para
 - **Como funciona:** GDD §5.11 (pilotos e comissários com escala e descanso) e §5.12 (turnaround como 2º gargalo, desgaste, checagem no pátio e revisão no hangar).
 - **Risco:** virar microgestão. Mitigação: a escala e o pátio são automáticos por padrão; o jogador só intervém no rush.
 - **Validar barato:** bot: quem escala e manda ao hangar na hora certa rende ≥ 1,10 × o bot que deixa tudo no automático (GDD §5.13). Se não render, fica só visual.
+
+### TA-9. Um dia de aeroporto: clima com previsão e falha que você mesmo arrisca — custo **G** (2026-10-30)
+- **Por que importa:** nos concorrentes da matriz do §b, clima não aparece, salvo no World of Airports, e os problemas operacionais costumam ser cronômetro. Aqui o dia tem hora de pico, o ano tem estações, cada aeroporto tem seu perigo e a falha de avião nasce de uma decisão do jogador: voar acima do aviso de 80%. É o pedido do Vinicius: "simular um dia a dia de um aeroporto".
+- **Como funciona:** GDD §5.14. O quadro mostra a previsão, o aviso dá 30 s, e o jogador adianta, atrasa ou segura. A falha termina sempre em pouso seguro.
+- **Risco:** parecer punição aleatória, ou pesar no tom de um jogo aconchegante. Mitigação: todo perigo tem aviso, causa, duração e opções; custa no máximo a receita do voo; sem acidente, morte, fogo ou queda.
+- **Validar barato:** bot: Planejador ≥ 1,10 × Automático por sistema (GDD §5.13). Com gente: nenhum testador chama de injusto.
 
 ---
 
