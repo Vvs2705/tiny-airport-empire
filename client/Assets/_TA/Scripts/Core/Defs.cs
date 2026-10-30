@@ -4,8 +4,12 @@ using System.Collections.Generic;
 // Tipos e numeros do nucleo (docs/CONTRATO_V01.md §3 e §4). Enum salvo por indice: so cresce no FIM; o nome de exibicao nunca e' chave.
 namespace TA.Core
 {
-    /// <summary>As 4 estacoes da v0.1, na ordem do fluxo. Indice vai no save.</summary>
-    public enum Estacao { CheckIn, Seguranca, Loja, Portao }
+    /// <summary>As 4 estacoes da v0.1, na ordem do fluxo, e as 4 da Fase C2 (CONTRATO_FASE_C2 §1), que abrem pelo marco. Indice vai no save.
+    /// Fluxo: check-in -> [bagagem] -> seguranca -> [loja] -> [alimentacao] -> portao. Oficina e despacho nao tem fila de passageiros.</summary>
+    public enum Estacao { CheckIn, Seguranca, Loja, Portao, Bagagem, Alimentacao, Manutencao, Despacho }
+
+    /// <summary>Os 6 perfis do GDD §5.5, um por pessoa, na ordem de contratacao (Ana, Beto, Caio, Dani, Edu, Fatima). Indice vai no save.</summary>
+    public enum Perfil { Atendente, Seguranca, Vendedor, Bagageiro, Mecanico, Despachante }
 
     /// <summary>Upgrades por estacao (CONTRATO_V01 §4).</summary>
     public enum Melhoria { Velocidade, Capacidade }
@@ -51,6 +55,8 @@ namespace TA.Core
         ChecagemFeita,      // A = aviao, B = desgaste depois                                     -> maintenance_check_done
         HangarIniciado,     // A = aviao, B = custo                                               -> hangar_started
         HangarFeito,        // A = aviao                                                          -> hangar_done
+        // Fase C2 (CONTRATO_FASE_C2): estacoes novas pelo marco
+        EstacaoAberta,      // A = estacao                                                        -> station_unlocked
     }
 
     /// <summary>Funcoes da tripulacao (GDD §5.11). Indice vai no save.</summary>
@@ -112,9 +118,10 @@ namespace TA.Core
     public sealed class Pax
     {
         public int Id;
-        /// <summary>Passos que faltam no atendimento atual (0 na fila).</summary>
-        public int Resto;
-        public bool Loja, Historia;
+        /// <summary>Passos que faltam no atendimento atual (0 na fila) e o total dele (o anel de progresso: 1 - Resto/Total).</summary>
+        public int Resto, Total;
+        /// <summary>Loja, mala despachada e fome saem da semente (nao se compram).</summary>
+        public bool Loja, Historia, Mala, Fome;
         public int Onda => Id / 1000;
         public int Voo => Id / 500 % 2;
         public int Indice => Id % 500;
@@ -140,10 +147,30 @@ namespace TA.Core
     {
         /// <summary>Indice na ordem de contratacao (vai no save e no diario).</summary>
         public int Id;
+        /// <summary>Perfil fixo (GDD §5.5): a especialidade rende Tuning.Especialista a partir do marco Tuning.EspecialistaMarco.</summary>
+        public Perfil Perfil;
         /// <summary>Estacao onde esta ou para onde esta andando.</summary>
         public Estacao Em, De;
         /// <summary>Passos de caminhada que faltam (0 = presente e atendendo).</summary>
         public int Andando;
+
+        /// <summary>Estacoes da especialidade de cada perfil (CONTRATO_FASE_C2 §2).</summary>
+        public static bool Especialidade(Perfil p, Estacao e)
+        {
+            switch (p)
+            {
+                case Perfil.Atendente: return e == Estacao.CheckIn || e == Estacao.Portao;
+                case Perfil.Seguranca: return e == Estacao.Seguranca;
+                case Perfil.Vendedor: return e == Estacao.Loja || e == Estacao.Alimentacao;
+                case Perfil.Bagageiro: return e == Estacao.Bagagem;
+                case Perfil.Mecanico: return e == Estacao.Manutencao;
+                default: return e == Estacao.Despacho;
+            }
+        }
+
+        /// <summary>A estacao principal do perfil: para onde o bot que planeja o leva de volta (o Vendedor vai a alimentacao, que vende mais).</summary>
+        public static Estacao Casa(Perfil p) =>
+            new[] { Estacao.CheckIn, Estacao.Seguranca, Estacao.Alimentacao, Estacao.Bagagem, Estacao.Manutencao, Estacao.Despacho }[(int)p];
     }
 
     public sealed class Voo
@@ -175,17 +202,34 @@ namespace TA.Core
         public int PaxInicial = 10, PaxPorOnda = 4, PaxMax = 36;
         /// <summary>Chegadas espalhadas de 0 ate (fechamento - ChegadaFolga).</summary>
         public float ChegadaFolga = 70f;
-        /// <summary>s por passageiro no nivel 0, na ordem de Estacao.</summary>
-        public float[] Tempo = { 4f, 5f, 3f, 1.5f };
+        /// <summary>s por passageiro no nivel 0, na ordem de Estacao (oficina e despacho nao atendem passageiro).</summary>
+        public float[] Tempo = { 4f, 5f, 3f, 1.5f, 3f, 4f, 0f, 0f };
         public float VelFator = 0.88f;
         public int VelNiveis = 5, VelCusto = 40; public float VelCresce = 1.6f;
         public int CapNiveis = 2, CapCusto = 300; public float CapCresce = 2.5f;
-        /// <summary>Balcoes de cada estacao no nivel 0 de capacidade, na ordem de Estacao.</summary>
-        public int[] PostosBase = { 2, 2, 1, 1 };
+        /// <summary>Balcoes (postos) de cada estacao no nivel 0 de capacidade, na ordem de Estacao.</summary>
+        public int[] PostosBase = { 2, 2, 1, 1, 1, 1, 1, 1 };
+        /// <summary>LojaFolgaMin vale para as 3 paradas opcionais (loja, bagagem e alimentacao): so vai quem tem essa folga no voo.</summary>
         public float LojaChance = 0.5f, LojaFolgaMin = 40f; public int LojaVenda = 6;
         public int Tarifa = 8, TarifaPorMarco = 2;
         public float Bonus = 0.25f;
-        public int[] Contratacao = { 20, 150, 400 };
+        /// <summary>Preco fixo por perfil (Ana, Beto, Caio pela ordem da v0.1; Dani, Edu e Fatima depois do marco deles).</summary>
+        public int[] Contratacao = { 20, 150, 400, 300, 450, 450 };
+
+        // ---- Fase C2 (CONTRATO_FASE_C2 §1-§2, hipoteses) ----
+        /// <summary>Portao de design do GDD §5.13 por sistema (false = so visual: a estacao abre e a equipe fica la, mas nao rende). A
+        /// especializacao ficou so visual: ganho 1,00 e, ligada, derruba o TA-2 para 1,07 (BALANCE.md D-C2a).</summary>
+        public bool RegraEspecialista = false, RegraBagagem = true, RegraAlimentacao = true, RegraOficina = true, RegraDespacho = true;
+        /// <summary>Marco do terminal que abre cada estacao (ordem de Estacao), que libera cada perfil e a especializacao.</summary>
+        public int[] Abre = { 0, 0, 0, 0, 1, 1, 2, 2 };
+        public int[] PerfilMarco = { 0, 0, 0, 1, 2, 2 };
+        public int EspecialistaMarco = 1;
+        /// <summary>O especialista rende isto na estacao dele: tempo / x, venda x, forca x (oficina e despacho).</summary>
+        public float Especialista = 1.5f;
+        public float MalaChance = 0.35f; public int MalaTaxa = 5;
+        public float FomeChance = 0.5f; public int ComidaVenda = 8;
+        /// <summary>Despacho com gente: bonus de pontualidade + DespachoBonus x forca dos presentes.</summary>
+        public float DespachoBonus = 0.25f;
         /// <summary>Funcionarios no jogo novo (decisao da Fase B, BALANCE.md): 0 = comeca no toque manual.</summary>
         public int FuncionariosIniciais = 0;
         public float Caminhada = 2.5f;

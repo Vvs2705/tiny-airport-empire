@@ -15,7 +15,7 @@ namespace TA.Core
         public void AtualizaEstados(bool emitir = false)
         {
             double agora = PassoNaOnda * (double)Step;
-            foreach (Station s in Stations)
+            foreach (Station s in Estacoes)
             {
                 double min = double.PositiveInfinity;
                 int risco = -1;
@@ -50,7 +50,7 @@ namespace TA.Core
         /// <summary>Hora (s na onda) em que embarca quem sai da estacao `e` no instante `sai`.</summary>
         double Saida(Estacao e, double sai, Voo v)
         {
-            if (e == Estacao.CheckIn) sai += TempoSeg(Estacao.Seguranca);
+            if (e == Estacao.CheckIn || e == Estacao.Bagagem) sai += TempoSeg(Estacao.Seguranca);
             return Math.Max(sai, v.AbrePasso * (double)Step) + TempoSeg(Estacao.Portao);
         }
 

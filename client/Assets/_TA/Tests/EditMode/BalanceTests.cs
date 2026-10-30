@@ -115,6 +115,62 @@ namespace TA.Tests
             Assert.GreaterOrEqual(ganho, 1.10, "GDD §5.13: Planejador / Automatico");
         }
 
+        /// <summary>Os 2 sistemas com escolha da Fase C2 (CONTRATO_FASE_C2 §5): a especializacao (item 5) e as 4 estacoes novas (item 4, uma
+        /// decisao so: tirar gente do fluxo para uma estacao nova). As estacoes uma a uma saem na tabela, sem portao (BALANCE.md D-C2c).</summary>
+        public static readonly string[] SistemasC2 = { "especialista", "estacoes" };
+        static readonly string[] EstacoesC2 = { "bagagem", "alimentacao", "oficina", "despacho" };
+
+        /// <summary>So o sistema `so` com regra ("estacoes" = as 4; ou uma estacao pelo nome), tudo aberto desde o comeco (o desbloqueio so
+        /// atrasa a entrada).</summary>
+        public static Tuning SoC2(string so, Tuning b = null)
+        {
+            Tuning t = b ?? new Tuning();
+            bool todas = so == "estacoes";
+            t.RegraEspecialista = so == "especialista"; t.RegraBagagem = todas || so == "bagagem"; t.RegraAlimentacao = todas || so == "alimentacao";
+            t.RegraOficina = todas || so == "oficina"; t.RegraDespacho = todas || so == "despacho";
+            t.Abre = new int[8]; t.PerfilMarco = new int[6]; t.EspecialistaMarco = 0;
+            return t;
+        }
+
+        /// <summary>A chave de cada sistema no Tuning padrao (o que o portao deixou com regra).</summary>
+        public static bool RegraPadrao(string so)
+        {
+            Tuning t = Tuning.Padrao;
+            return so == "especialista" ? t.RegraEspecialista : t.RegraBagagem && t.RegraAlimentacao && t.RegraOficina && t.RegraDespacho;
+        }
+
+        /// <summary>Portao do GDD §5.13 por sistema novo com escolha: a equipe planejada &gt;= 1,10 x a automatica, ou o sistema fica so visual.</summary>
+        [Test]
+        public void Portao_FaseC2_PorSistema()
+        {
+            var ci = CultureInfo.InvariantCulture;
+            TestContext.Out.WriteLine("| sistema | emb. planejada | emb. automatica | receita planejada | receita automatica | ganho | regra |\n|---|---|---|---|---|---|---|");
+            string falhas = "";
+            foreach (string so in new[] { "especialista", "estacoes", "bagagem", "alimentacao", "oficina", "despacho" })
+            {
+                Tuning t = SoC2(so);
+                Linha pl = Rodar(BotProfile.EquipePlanejada, t, Sementes, OndasFaseC), au = Rodar(BotProfile.EquipeAutomatica, t, Sementes, OndasFaseC);
+                double g = pl.Receita / au.Receita;
+                bool sistema = System.Array.IndexOf(SistemasC2, so) >= 0;
+                TestContext.Out.WriteLine(string.Format(ci, "| {0} | {1:0.0}% | {2:0.0}% | {3:0} | {4:0} | {5:0.000} | {6} |", so, pl.Embarque * 100, au.Embarque * 100,
+                    pl.Receita, au.Receita, g, !sistema ? "(parte das estacoes)" : RegraPadrao(so) ? "ligada" : "so visual"));
+                if (sistema && g < 1.10 && RegraPadrao(so)) falhas += " " + so + "=" + g.ToString("0.000", ci);
+            }
+            Assert.IsEmpty(falhas, "GDD §5.13: sistema com regra precisa de ganho >= 1,10");
+        }
+
+        /// <summary>O "antes" da Fase C2: as estacoes novas, os perfis novos e a especializacao nunca abrem (a main da Fase C).</summary>
+        public static Tuning SemFaseC2() => new Tuning { Abre = new[] { 0, 0, 0, 0, 99, 99, 99, 99 }, PerfilMarco = new[] { 0, 0, 0, 99, 99, 99 }, EspecialistaMarco = 99 };
+
+        [Test]
+        public void Antes_FaseC2()
+        {
+            Tuning t = SemFaseC2();
+            Linha bom = Rodar(BotProfile.Bom, t), lento = Rodar(BotProfile.Lento, t), parado = Rodar(BotProfile.Parado, t);
+            Imprime("antes da Fase C2 (a main da Fase C)", new[] { bom, lento, parado });
+            TestContext.Out.WriteLine(string.Format(CultureInfo.InvariantCulture, "ganho de mover (Bom/Parado) = {0:0.000}", bom.Receita / parado.Receita));
+        }
+
         /// <summary>Varredura do BALANCE.md (Fase C): cada sistema sozinho, 100 sementes x 20 ondas, ganho de planejar por variante.</summary>
         [Test]
         public void Varredura_FaseC()

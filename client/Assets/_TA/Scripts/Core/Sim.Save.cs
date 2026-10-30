@@ -28,7 +28,7 @@ namespace TA.Core
             sb.Append("ema=").Append(RateEma.ToString("R", Ci)).Append('\n');
             Kv(sb, "saved", SavedAt); Kv(sb, "claim", LastClaim); Kv(sb, "claimcash", LastClaimCash); Kv(sb, "dia", Dia);
             if (FusoGravado) Kv(sb, "fuso", Fuso);
-            foreach (Station s in Stations)
+            foreach (Station s in Estacoes)
             {
                 int i = (int)s.Tipo;
                 sb.Append("est.").Append(i).Append('=').Append(s.Vel).Append(',').Append(s.Cap).Append('\n');
@@ -37,7 +37,7 @@ namespace TA.Core
                     sb.Append("at.").Append(i).Append('=').Append(string.Join(";", s.Atendendo.ConvertAll(p => p.Id.ToString(Ci) + ":" + p.Resto.ToString(Ci)))).Append('\n');
             }
             foreach (Funcionario f in Staff)
-                sb.Append("func.").Append(f.Id).Append('=').Append((int)f.Em).Append(',').Append((int)f.De).Append(',').Append(f.Andando).Append('\n');
+                sb.Append("func.").Append(f.Id).Append('=').Append((int)f.Em).Append(',').Append((int)f.De).Append(',').Append(f.Andando).Append(',').Append((int)f.Perfil).Append('\n');
             foreach (Voo v in Voos)
                 if (v != null)
                     sb.Append("voo.").Append(v.Indice).Append('=').Append(v.Criados).Append(',').Append(v.Embarcados).Append(',').Append(v.Receita)
@@ -177,16 +177,20 @@ namespace TA.Core
             s.SavedAt = Get(kv, "saved", 0); s.LastClaim = Get(kv, "claim", 0); s.LastClaimCash = Math.Max(0, Get(kv, "claimcash", 0));
             s.Dia = Get(kv, "dia", 0);
             if (kv.TryGetValue("fuso", out string fz)) { s.Fuso = L(fz, 0); s.FusoGravado = true; }
-            foreach (Station st in s.Stations)
+            foreach (Station st in s.Estacoes)
             {
                 int[] n = Ints(kv, "est." + (int)st.Tipo);
-                if (n.Length >= 2) { st.Vel = Math.Max(0, Math.Min(s.T.VelNiveis, n[0])); st.Cap = Math.Max(0, Math.Min(s.T.CapNiveis, n[1])); st.Postos += st.Cap; }
+                if (n.Length >= 2 && s.Desbloqueada(st.Tipo)) { st.Vel = Math.Max(0, Math.Min(s.T.VelNiveis, n[0])); st.Cap = Math.Max(0, Math.Min(s.T.CapNiveis, n[1])); st.Postos += st.Cap; }
             }
-            for (int i = 0; i < MaxFuncionarios; i++)
+            for (int i = 0; i < MaxEquipe; i++)
             {
                 int[] f = Ints(kv, "func." + i);
                 if (f.Length < 3 || s.Staff.Count != i) break;   // contratados em ordem: um buraco encerra a lista
-                s.Staff.Add(new Funcionario { Id = i, Em = Est(f[0]), De = Est(f[1]), Andando = Math.Max(0, Math.Min((int)Math.Round(s.T.Caminhada * Hz), f[2])) });
+                // schema 2 nao tem o perfil: os 3 generalistas viram Atendente, Agente e Vendedor pela ordem (CONTRATO_FASE_C2 §4)
+                var p = (Perfil)Math.Max(0, Math.Min(MaxEquipe - 1, f.Length >= 4 ? f[3] : i));
+                if (s.Contratado(p) || f.Length < 4 && i >= MaxFuncionarios) break;   // perfil repetido ou sem perfil acima da v0.1: lixo
+                Estacao em = s.Est(f[0]), de = s.Est(f[1]);
+                s.Staff.Add(new Funcionario { Id = i, Perfil = p, Em = em, De = de, Andando = Math.Max(0, Math.Min((int)Math.Round(s.T.Caminhada * Hz), f[2])) });
             }
             int onda = (int)Get(kv, "onda", -1);
             if (onda >= 0 && onda == (int)(s.Steps / s.OndaPassos)) s.CarregaOnda(onda, kv);   // onda que nao bate com o relogio: comeca a dele
@@ -211,16 +215,18 @@ namespace TA.Core
                 if (v.Partiu) v.Criados = v.Total;
             }
             var vistos = new HashSet<int>();
-            foreach (Station st in Stations)
+            foreach (Station st in Estacoes)
             {
                 int i = (int)st.Tipo;
+                if (!Desbloqueada(st.Tipo) || st.Tipo == Estacao.Manutencao || st.Tipo == Estacao.Despacho) continue;   // fechada ou sem passageiro
                 if (kv.TryGetValue("at." + i, out string at))
                     foreach (string tok in at.Split(';'))
                     {
                         string[] a = tok.Split(':');
                         Pax p = a.Length == 2 ? Valido(L(a[0], -1), vistos) : null;
                         if (p == null) continue;
-                        p.Resto = (int)Math.Max(1, Math.Min(TempoPassos(st.Tipo), L(a[1], 1)));
+                        p.Resto = (int)Math.Max(1, Math.Min(TempoBase(st.Tipo), L(a[1], 1)));
+                        p.Total = Math.Max(p.Resto, TempoPassos(st.Tipo));
                         if (st.Atendendo.Count < st.Postos) st.Atendendo.Add(p); else st.Fila.Add(p);
                     }
                 if (kv.TryGetValue("fila." + i, out string fila))
@@ -242,7 +248,12 @@ namespace TA.Core
             return p;
         }
 
-        static Estacao Est(int i) => (Estacao)Math.Max(0, Math.Min(3, i));
+        /// <summary>Estacao do save, limitada: fora da faixa vai para a ponta; ainda fechada pelo marco cai nas 4 da v0.1.</summary>
+        Estacao Est(int i)
+        {
+            var e = (Estacao)Math.Max(0, Math.Min(Estacoes.Length - 1, i));
+            return Desbloqueada(e) ? e : (Estacao)Math.Min(3, (int)e);
+        }
 
         static long Get(Dictionary<string, string> kv, string k, long def) => kv.TryGetValue(k, out string v) ? L(v, def) : def;
 

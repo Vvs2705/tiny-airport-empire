@@ -22,8 +22,11 @@ using System.Collections.Generic;
 //               sim.Pronto(aviao) (o embarque pode abrir), sim.Tripulacao (Nome, Funcao, Trechos, Aviao; sim.Livre, sim.DescansoFalta),
 //               sim.EquipePatio, sim.ServicoPassos(s), sim.Veiculos(s), sim.MecanicoLivre, sim.CustoTripulante(f), sim.CustoPatio(),
 //               sim.CustoPatio(s, m), sim.TetoTripulacao. Ev.VooPartiu = portao fechou; Ev.Decolou = o aviao saiu (patio terminado).
+//   Fase C2:    sim.Estacoes[0..7] (as 8; sim.Stations continua com as 4 da v0.1), sim.Desbloqueada(e) (abre pelo marco: Ev.EstacaoAberta),
+//               sim.Rende(e) (o especialista presente), Funcionario.Perfil, sim.Contratado(p), sim.CustoContratar(p) e sim.Hire(p) (Dani, Edu
+//               e Fatima; sim.Hire() continua contratando os 3 da v0.1), Pax.Total (anel de progresso), Sim.MaxEquipe (6).
 //   Gravar:     texto = sim.Save(versaoDoJogo, nowUnix): payload chave=valor dentro do SaveEnvelope (SHA-256 + schema). Grava filas e o
-//               relogio do quadro: reabrir retoma a onda do ponto gravado. Schema 2; o save da v0.1 (schema 1) migra no Load.
+//               relogio do quadro: reabrir retoma a onda do ponto gravado. Schema 3; os saves da v0.1 (1) e da Fase C (2) migram no Load.
 //
 // Nomes acima sao estaveis (so crescem). Mudou a API: atualize este cabecalho e o docs/MAPA_CODIGO.md no mesmo PR.
 
@@ -37,9 +40,10 @@ namespace TA.Core
         /// <summary>Teto do dt de um quadro (s): uma travada longa nao vira um salto de minutos no relogio do quadro de partidas.</summary>
         public const float MaxFrame = 0.25f;
         /// <summary>Versao do formato do save (SaveEnvelope). Sobe a cada mudanca de formato; save de schema maior e' recusado; menor migra
-        /// no Load (2 = Fase C: avioes, tripulacao e patio; o 1 e' a v0.1).</summary>
-        public const int Schema = 2;
-        public const int MaxFuncionarios = 3;
+        /// no Load (3 = Fase C2: 8 estacoes e o perfil de cada funcionario; 2 = Fase C: avioes, tripulacao e patio; o 1 e' a v0.1).</summary>
+        public const int Schema = 3;
+        /// <summary>A equipe da v0.1 (Hire()): Ana, Beto e Caio. MaxEquipe = os 6 perfis, com Dani, Edu e Fatima (Hire(perfil)).</summary>
+        public const int MaxFuncionarios = 3, MaxEquipe = 6;
 
         /// <summary>Passos fixos ja simulados (o relogio do quadro; vai no save; nao anda com o jogo fechado).</summary>
         public long Steps;
@@ -51,6 +55,8 @@ namespace TA.Core
         public readonly Tuning T;
         /// <summary>Semente das chegadas, da loja e do passageiro com historia (vai no save).</summary>
         public readonly int Seed;
+        /// <summary>As 8 estacoes (ordem de Estacao). Stations = as 4 da v0.1 (os mesmos objetos), para quem ainda so desenha essas.</summary>
+        public readonly Station[] Estacoes = new Station[8];
         public readonly Station[] Stations = new Station[4];
         public readonly List<Funcionario> Staff = new List<Funcionario>();
         /// <summary>Os 2 voos da onda atual (quadro de partidas). Null antes do 1o passo.</summary>
@@ -72,7 +78,7 @@ namespace TA.Core
         public int PassoNaOnda => (int)(Steps % OndaPassos);
         public int Marco { get { int m = 0; foreach (int x in T.Marcos) if (TotalEmbarcados >= x) m++; return m; } }
         public int Tarifa => T.Tarifa + T.TarifaPorMarco * Marco;
-        public Station St(Estacao e) => Stations[(int)e];
+        public Station St(Estacao e) => Estacoes[(int)e];
 
         float _acc;
 
@@ -82,9 +88,10 @@ namespace TA.Core
         {
             T = t ?? Tuning.Padrao;
             Seed = seed;
-            for (int i = 0; i < Stations.Length; i++) Stations[i] = new Station { Tipo = (Estacao)i, Postos = Math.Max(1, T.PostosBase[i]) };
+            for (int i = 0; i < Estacoes.Length; i++) Estacoes[i] = new Station { Tipo = (Estacao)i, Postos = Math.Max(1, T.PostosBase[i]) };
+            Array.Copy(Estacoes, Stations, Stations.Length);
             Anuncios = new Anuncios(this);
-            for (int i = 0; i < Math.Min(MaxFuncionarios, T.FuncionariosIniciais); i++) Staff.Add(new Funcionario { Id = i, Em = Lugar(), De = Lugar() });
+            for (int i = 0; i < Math.Min(MaxFuncionarios, T.FuncionariosIniciais); i++) Staff.Add(new Funcionario { Id = i, Perfil = (Perfil)i, Em = Lugar(), De = Lugar() });
             Avioes = new[] { new Aviao { Id = 0 }, new Aviao { Id = 1 } };
             EquipePatio = T.PatioIniciais;
             for (int f = 0; f < T.TripPorVoo.Length; f++)
@@ -134,12 +141,12 @@ namespace TA.Core
             }
             foreach (Funcionario f in Staff)
                 if (f.Andando > 0 && --f.Andando == 0) Emit(Ev.Chegou, f.Id, (int)f.Em);
-            foreach (Station s in Stations) Atende(s, loc);
+            foreach (Station s in Estacoes) Atende(s, loc);
             foreach (Voo v in Voos) if (!v.Partiu && loc >= v.FechaPasso) Fecha(v);
             Decolagens();
             if (BoostLeft > 0) BoostLeft--;
             if (Steps % (Hz / 2) == 0) AtualizaEstados(true);
-            if (Steps % (10 * Hz) == 0) foreach (Station s in Stations) Emit(Ev.Fila, (int)s.Tipo, s.Fila.Count, (int)s.Estado);
+            if (Steps % (10 * Hz) == 0) foreach (Station s in Estacoes) if (Desbloqueada(s.Tipo)) Emit(Ev.Fila, (int)s.Tipo, s.Fila.Count, (int)s.Estado);
             RateEma += (_ganhoPasso * (double)Hz - RateEma) * Math.Min(1.0, Step / T.RendaTau);
             _ganhoPasso = 0;
             Steps++;
@@ -182,6 +189,8 @@ namespace TA.Core
         {
             var p = new Pax { Id = id };
             p.Loja = U(p.Onda, p.Voo, p.Indice, 1) < T.LojaChance;
+            p.Mala = U(p.Onda, p.Voo, p.Indice, 2) < T.MalaChance;
+            p.Fome = U(p.Onda, p.Voo, p.Indice, 3) < T.FomeChance;
             p.Historia = p.Onda >= 1 && p.Voo == VooDaHistoria(p.Onda) && p.Indice == T.Pax(p.Onda) / 2;
             return p;
         }
@@ -218,12 +227,16 @@ namespace TA.Core
         /// <summary>Loja sem funcionario fica fechada: os passageiros passam direto (CONTRATO_V01 §3.4).</summary>
         public bool LojaAberta => Presentes(Estacao.Loja) > 0;
 
-        /// <summary>Passos de atendimento de um passageiro na estacao, com o upgrade de velocidade.</summary>
-        public int TempoPassos(Estacao e) => Math.Max(1, (int)Math.Round(T.Tempo[(int)e] * Math.Pow(T.VelFator, St(e).Vel) * Hz));
+        /// <summary>Passos de atendimento de um passageiro na estacao, com o upgrade de velocidade e o especialista presente (tempo / Rende).
+        /// Na loja e na alimentacao o especialista vende mais, nao atende mais rapido.</summary>
+        public int TempoPassos(Estacao e) => Vende(e) ? TempoBase(e) : Math.Max(1, (int)Math.Round(T.Tempo[(int)e] * Math.Pow(T.VelFator, St(e).Vel) * Hz / Rende(e)));
         public float TempoSeg(Estacao e) => TempoPassos(e) * Step;
+        /// <summary>Sem o especialista: o teto do atendimento gravado (o especialista pode ter saido no meio).</summary>
+        int TempoBase(Estacao e) => Math.Max(1, (int)Math.Round(T.Tempo[(int)e] * Math.Pow(T.VelFator, St(e).Vel) * Hz));
 
         void Atende(Station s, int loc)
         {
+            if (s.Tipo == Estacao.Manutencao || s.Tipo == Estacao.Despacho) return;   // sem fila de passageiros
             for (int i = 0; i < s.Atendendo.Count; i++)
             {
                 Pax p = s.Atendendo[i];
@@ -231,10 +244,10 @@ namespace TA.Core
                 s.Atendendo.RemoveAt(i--);
                 Avanca(s, p, loc);
             }
-            if (s.Tipo == Estacao.Loja && !LojaAberta)
+            if (Opcional(s.Tipo) && !Funcionando(s.Tipo))
             {
-                // a vendedora saiu: a fila da loja segue para o portao, na ordem
-                St(Estacao.Portao).Fila.AddRange(s.Fila);
+                // parada opcional sem ninguem (a vendedora saiu): a fila segue para a proxima estacao, na ordem
+                St(s.Tipo == Estacao.Bagagem ? Estacao.Seguranca : Estacao.Portao).Fila.AddRange(s.Fila);
                 s.Fila.Clear();
                 return;
             }
@@ -250,7 +263,7 @@ namespace TA.Core
                 Pax p = s.Fila[i];
                 if (s.Tipo == Estacao.Portao && !(VooDe(p)?.Embarque ?? false)) continue;
                 s.Fila.RemoveAt(i);
-                p.Resto = TempoPassos(s.Tipo);
+                p.Resto = p.Total = TempoPassos(s.Tipo);
                 s.Atendendo.Add(p);
                 return true;
             }
@@ -262,13 +275,20 @@ namespace TA.Core
             Voo v = VooDe(p);
             switch (s.Tipo)
             {
-                case Estacao.CheckIn: St(Estacao.Seguranca).Fila.Add(p); break;
+                case Estacao.CheckIn: St(Para(p.Mala, Estacao.Bagagem, v, loc) ? Estacao.Bagagem : Estacao.Seguranca).Fila.Add(p); break;
+                case Estacao.Bagagem:
+                    Emit(Ev.Venda, p.Id, (int)Ganha(T.MalaTaxa));
+                    St(Estacao.Seguranca).Fila.Add(p);
+                    break;
                 case Estacao.Seguranca:
-                    bool loja = p.Loja && LojaAberta && v != null && v.FechaPasso - loc > T.LojaFolgaMin * Hz;
-                    St(loja ? Estacao.Loja : Estacao.Portao).Fila.Add(p);
+                    St(Para(p.Loja, Estacao.Loja, v, loc) ? Estacao.Loja : Para(p.Fome, Estacao.Alimentacao, v, loc) ? Estacao.Alimentacao : Estacao.Portao).Fila.Add(p);
                     break;
                 case Estacao.Loja:
-                    Emit(Ev.Venda, p.Id, (int)Ganha(T.LojaVenda));
+                    Emit(Ev.Venda, p.Id, (int)Ganha((long)Math.Round(T.LojaVenda * (double)Rende(Estacao.Loja))));
+                    St(Para(p.Fome, Estacao.Alimentacao, v, loc) ? Estacao.Alimentacao : Estacao.Portao).Fila.Add(p);
+                    break;
+                case Estacao.Alimentacao:
+                    Emit(Ev.Venda, p.Id, (int)Ganha((long)Math.Round(T.ComidaVenda * (double)Rende(Estacao.Alimentacao))));
                     St(Estacao.Portao).Fila.Add(p);
                     break;
                 case Estacao.Portao:
@@ -278,7 +298,11 @@ namespace TA.Core
                     v.Receita += Tarifa;
                     Emit(Ev.Embarcou, p.Id, (int)Ganha(Tarifa));
                     TotalEmbarcados++;
-                    if (Marco > marco) Emit(Ev.Marco, Marco);
+                    if (Marco > marco)
+                    {
+                        Emit(Ev.Marco, Marco);
+                        for (int e = 0; e < Estacoes.Length; e++) if (T.Abre[e] == Marco) Emit(Ev.EstacaoAberta, e);
+                    }
                     if (p.Historia)
                     {
                         const int h = 0;   // ponytail: 1 historia na v0.1; com mais, a proxima ainda fora do album
@@ -305,7 +329,7 @@ namespace TA.Core
         void Fecha(Voo v)
         {
             FechaAviao(v);
-            foreach (Station s in Stations)
+            foreach (Station s in Estacoes)
             {
                 s.Fila.RemoveAll(p => p.Onda == v.Onda && p.Voo == v.Indice);
                 s.Atendendo.RemoveAll(p => p.Onda == v.Onda && p.Voo == v.Indice);
@@ -313,8 +337,10 @@ namespace TA.Core
             v.Partiu = true;
             v.Criados = v.Total;
             TotalPerdidos += v.Perdidos;
+            // Fase C2: o despacho com gente aumenta o bonus de quem sai na hora (CONTRATO_FASE_C2 §2)
+            double bonus = T.Bonus + (Ativa(Estacao.Despacho) ? T.DespachoBonus * Forca(Estacao.Despacho) : 0);
             if (v.Perdidos == 0 && v.Total > 0 && NoHorario(v))
-                Emit(Ev.Bonus, v.Id, (int)Ganha((long)Math.Round(v.Receita * (double)T.Bonus)));
+                Emit(Ev.Bonus, v.Id, (int)Ganha((long)Math.Round(v.Receita * bonus)));
             Emit(Ev.VooPartiu, v.Id, v.Embarcados, v.Total);
             if (v.Perdidos > 0) Emit(Ev.VooPerdido, v.Id, v.Perdidos, v.Total);
         }
@@ -322,20 +348,24 @@ namespace TA.Core
         // ------------------------------------------------------------------ intencoes do jogador
 
         /// <summary>Toque manual: estacao sem funcionario comeca o atendimento do 1o da fila, no tempo da estacao (o toque nao acelera,
-        /// substitui o funcionario). Loja sem funcionario esta fechada: false.</summary>
+        /// substitui o funcionario). So check-in, seguranca e portao: as paradas opcionais sem funcionario estao fechadas: false.</summary>
         public bool Tap(Estacao e)
         {
+            if (!Tocavel(e)) return false;
             Station s = St(e);
-            if (e == Estacao.Loja || Presentes(e) > 0 || s.Atendendo.Count >= s.Postos || !Inicia(s)) return false;
+            if (Presentes(e) > 0 || s.Atendendo.Count >= s.Postos || !Inicia(s)) return false;
             Emit(Ev.Toque, (int)e);
             return true;
         }
 
+        static bool Tocavel(Estacao e) => e == Estacao.CheckIn || e == Estacao.Seguranca || e == Estacao.Portao;
+
         /// <summary>O toque comecaria um atendimento agora (a View acende a mao; o bot escolhe onde tocar).</summary>
         public bool PodeTocar(Estacao e)
         {
+            if (!Tocavel(e)) return false;
             Station s = St(e);
-            if (e == Estacao.Loja || Presentes(e) > 0 || s.Atendendo.Count >= s.Postos) return false;
+            if (Presentes(e) > 0 || s.Atendendo.Count >= s.Postos) return false;
             foreach (Pax p in s.Fila) if (e != Estacao.Portao || (VooDe(p)?.Embarque ?? false)) return true;
             return false;
         }
@@ -344,7 +374,7 @@ namespace TA.Core
         /// (quem ja estava em atendimento termina). Redirecionar no meio do caminho recomeca a caminhada.</summary>
         public bool Move(int funcionario, Estacao destino)
         {
-            if (funcionario < 0 || funcionario >= Staff.Count || (int)destino < 0 || (int)destino >= Stations.Length) return false;
+            if (funcionario < 0 || funcionario >= Staff.Count || (int)destino < 0 || (int)destino >= Estacoes.Length || !Desbloqueada(destino)) return false;
             Funcionario f = Staff[funcionario];
             if (f.Em == destino) return false;
             f.De = f.Em;
@@ -354,21 +384,46 @@ namespace TA.Core
             return true;
         }
 
-        /// <summary>Custo da proxima contratacao (-1 = equipe completa). Preco fixo: nada sai de sorteio.</summary>
-        public long CustoContratar() => Staff.Count >= MaxFuncionarios || Staff.Count >= T.Contratacao.Length ? -1 : T.Contratacao[Staff.Count];
+        /// <summary>Custo da proxima contratacao da v0.1 (-1 = Ana, Beto e Caio ja contratados). Preco fixo: nada sai de sorteio.</summary>
+        public long CustoContratar()
+        {
+            for (int p = 0; p < MaxFuncionarios; p++) if (!Contratado((Perfil)p)) return CustoContratar((Perfil)p);
+            return -1;
+        }
 
-        /// <summary>Contrata: o novo funcionario aparece no 1o posto vazio na ordem check-in, seguranca, portao, loja (o tutorial ensina a
-        /// atendente do check-in). Deterministico, sem sorteio.</summary>
+        /// <summary>Contrata o proximo da v0.1 (Ana, Beto, Caio): aparece no 1o posto vazio na ordem check-in, seguranca, portao, loja (o
+        /// tutorial ensina a atendente do check-in). Deterministico, sem sorteio.</summary>
         public bool Hire()
         {
-            long c = CustoContratar();
+            for (int p = 0; p < MaxFuncionarios; p++) if (!Contratado((Perfil)p)) return Hire((Perfil)p);
+            return false;
+        }
+
+        /// <summary>Custo do perfil (-1 = ja contratado, antes do marco dele ou equipe cheia). Preco fixo pelo perfil.</summary>
+        public long CustoContratar(Perfil p)
+        {
+            if ((int)p < 0 || (int)p >= MaxEquipe || Contratado(p) || Staff.Count >= MaxEquipe || Marco < T.PerfilMarco[(int)p]) return -1;
+            return T.Contratacao[(int)p];
+        }
+
+        /// <summary>Contrata o perfil: aparece no 1o posto vazio (Lugar), como na v0.1. O nucleo nao escolhe a estacao pelo perfil: levar a
+        /// pessoa para a especialidade ou para uma estacao nova e' a decisao do jogador (CONTRATO_FASE_C2 §2, BALANCE.md D-C2b).</summary>
+        public bool Hire(Perfil p)
+        {
+            long c = CustoContratar(p);
             if (c < 0 || Cash < c) return false;
             Cash -= c;
-            var f = new Funcionario { Id = Staff.Count, Em = Lugar() };
+            var f = new Funcionario { Id = Staff.Count, Perfil = p, Em = Lugar() };
             f.De = f.Em;
             Staff.Add(f);
             Emit(Ev.Contratado, f.Id, (int)c, (int)f.Em);
             return true;
+        }
+
+        public bool Contratado(Perfil p)
+        {
+            foreach (Funcionario f in Staff) if (f.Perfil == p) return true;
+            return false;
         }
 
         Estacao Lugar()
@@ -384,6 +439,8 @@ namespace TA.Core
         /// <summary>Custo do proximo nivel (-1 = no maximo): Velocidade 40 x 1,6^n e Capacidade 300 x 2,5^n, arredondados a 5.</summary>
         public long Custo(Estacao e, Melhoria m)
         {
+            // estacao fechada, so visual ou o despacho (sem upgrade): nada a venda
+            if ((int)e < 0 || (int)e >= Estacoes.Length || !Ativa(e) || e == Estacao.Despacho) return -1;
             int n = Nivel(e, m);
             if (n >= NivelMax(m)) return -1;
             double c = m == Melhoria.Velocidade ? T.VelCusto * Math.Pow(T.VelCresce, n) : T.CapCusto * Math.Pow(T.CapCresce, n);
@@ -392,7 +449,6 @@ namespace TA.Core
 
         public bool Buy(Estacao e, Melhoria m)
         {
-            if ((int)e < 0 || (int)e >= Stations.Length) return false;
             long c = Custo(e, m);
             if (c < 0 || Cash < c) return false;
             Cash -= c;
@@ -401,13 +457,21 @@ namespace TA.Core
             return true;
         }
 
-        /// <summary>Menor custo de algo ainda a venda (contratacao ou upgrade); tudo comprado = o mais caro de todos (teto do cofre).</summary>
+        /// <summary>Menor custo de algo ainda a venda (contratacao ou upgrade das estacoes abertas); tudo comprado = o mais caro de todos (teto
+        /// do cofre). Nao olha a Fase C (tripulacao e patio).</summary>
         public long MaisBaratoTravado()
         {
-            long best = CustoContratar(), top = T.Contratacao.Length > 0 ? T.Contratacao[T.Contratacao.Length - 1] : 0;
-            foreach (Station s in Stations)
+            long best = CustoContratar(), top = T.Contratacao[MaxFuncionarios - 1];
+            for (int p = MaxFuncionarios; p < MaxEquipe; p++)
+            {
+                long c = CustoContratar((Perfil)p);
+                if (c >= 0 && (best < 0 || c < best)) best = c;
+                if (Marco >= T.PerfilMarco[p]) top = Math.Max(top, T.Contratacao[p]);
+            }
+            foreach (Station s in Estacoes)
                 foreach (Melhoria m in new[] { Melhoria.Velocidade, Melhoria.Capacidade })
                 {
+                    if (!Ativa(s.Tipo) || s.Tipo == Estacao.Despacho) continue;
                     long c = Custo(s.Tipo, m);
                     if (c >= 0 && (best < 0 || c < best)) best = c;
                     int n = NivelMax(m) - 1;   // custo do ultimo nivel, para o teto com tudo comprado
