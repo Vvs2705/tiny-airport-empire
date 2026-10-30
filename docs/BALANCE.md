@@ -296,7 +296,7 @@ Depois (padrão do `Tuning`: Curitiba abre no marco 1; o resto só depois das 10
 
 Ganho de mover = **1,426** (era 1,408). **TA-1 e TA-2 passam.** A receita das 10 ondas cai 1% a 5%: a rota é paga no meio da janela, e o retorno vem depois (rotas em Vale Verde: +22% em 20 ondas).
 
-`-autoplay 10` no build (semente 1): RESULTADO_AUTOPLAY
+`-autoplay 10` no build (semente 1): `embarque_bom=95.5% embarque_lento=73.2% embarque_parado=89.5% ganho_mover=1.423 receita_bom=6795 moves_bom=30 marcos_bom=13.7min,-,- retomada=igual`.
 
 ### Portão do §5.13 (200 sementes × 20 ondas, tudo aberto, um sistema por vez)
 

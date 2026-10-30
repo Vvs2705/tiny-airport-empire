@@ -68,15 +68,15 @@ namespace TA.Core
         public static readonly Rota[] Rotas =
         {
             new Rota { Id = "vv_campinas", Nome = "Campinas" },
-            new Rota { Id = "vv_ribeirao", Nome = "Ribeirao Preto" },
+            new Rota { Id = "vv_ribeirao", Nome = "Ribeirão Preto" },
             new Rota { Id = "vv_curitiba", Nome = "Curitiba", Marco = 1, Custo = 250, Extra = 10f, Pax = 1.3f },
             new Rota { Id = "vv_bh", Nome = "Belo Horizonte", Marco = 2, Custo = 500, Extra = 20f, Pax = 0.9f, Tarifa = 1.5f, Risco = 1 },
             new Rota { Id = "ca_salvador", Nome = "Salvador", Tipo = TipoRota.Turistica, Aeroporto = 1, Marco = 2, Extra = 10f, Pax = 1.3f, Tarifa = 1.1f, Gasto = 1.5f, Pico = 0.5f, Risco = 1, Aeronave = 1 },
             new Rota { Id = "ca_recife", Nome = "Recife", Tipo = TipoRota.Turistica, Aeroporto = 1, Marco = 2, Extra = 20f, Pax = 1.2f, Tarifa = 1.2f, Gasto = 1.5f, Pico = 0.5f, Risco = 1, Aeronave = 1 },
             new Rota { Id = "ca_fortaleza", Nome = "Fortaleza", Tipo = TipoRota.Turistica, Aeroporto = 1, Marco = 2, Custo = 800, Extra = 20f, Pax = 1.5f, Tarifa = 1.2f, Gasto = 2f, Pico = 0.6f, Risco = 1, Aeronave = 1 },
-            new Rota { Id = "ca_brasilia", Nome = "Brasilia", Tipo = TipoRota.Conexao, Aeroporto = 1, Marco = 3, Custo = 1000, Pax = 1.35f, Tarifa = 1f, Pico = 0.7f, Bonus = 0.25f, Risco = 1, Aeronave = 1 },
+            new Rota { Id = "ca_brasilia", Nome = "Brasília", Tipo = TipoRota.Conexao, Aeroporto = 1, Marco = 3, Custo = 1000, Pax = 1.35f, Tarifa = 1f, Pico = 0.7f, Bonus = 0.25f, Risco = 1, Aeronave = 1 },
             new Rota { Id = "ag_guarulhos", Nome = "Guarulhos", Tipo = TipoRota.Conexao, Aeroporto = 2, Marco = 3, Pax = 1.25f, Tarifa = 1.1f, Pico = 0.7f, Bonus = 0.25f, Risco = 1, Aeronave = 1 },
-            new Rota { Id = "ag_galeao", Nome = "Galeao", Tipo = TipoRota.Conexao, Aeroporto = 2, Marco = 3, Extra = 10f, Pax = 1.3f, Tarifa = 1.15f, Pico = 0.7f, Bonus = 0.25f, Risco = 1, Aeronave = 1 },
+            new Rota { Id = "ag_galeao", Nome = "Galeão", Tipo = TipoRota.Conexao, Aeroporto = 2, Marco = 3, Extra = 10f, Pax = 1.3f, Tarifa = 1.15f, Pico = 0.7f, Bonus = 0.25f, Risco = 1, Aeronave = 1 },
             new Rota { Id = "ag_manaus", Nome = "Manaus", Tipo = TipoRota.Longa, Aeroporto = 2, Marco = 3, Custo = 1500, Extra = 180f, Cada = 2, Pax = 1.7f, Tarifa = 3f, Gasto = 1.2f, Risco = 2, Aeronave = 2 },
             new Rota { Id = "ag_lisboa", Nome = "Lisboa", Tipo = TipoRota.Longa, Aeroporto = 2, Marco = 3, Custo = 2500, Extra = 180f, Cada = 2, Pax = 2f, Tarifa = 3f, Gasto = 1.2f, Risco = 2, Aeronave = 2 },
         };
