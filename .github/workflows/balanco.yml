@@ -1,4 +1,4 @@
-# Portões de balanceamento (TA-1, TA-2 e GDD §5.13): os testes [Explicit] de BalanceTests, 200 sementes, ~2 min. Rodam no runner grátis do
+# Portões de balanceamento (TA-1, TA-2 e GDD §5.13): os testes [Explicit] de BalanceTests, 200 sementes, ~2 min no PC e ~6 min aqui. Rodam no runner grátis do
 # repositório público, sem Unity e sem segredo, em todo PR que mexe no núcleo; à mão pela aba Actions (ou gh workflow run balanco).
 name: balanco
 on:
@@ -24,7 +24,7 @@ jobs:
         run: |
           set -o pipefail
           dotnet test client/tools/coretests -nologo --filter "FullyQualifiedName~BalanceTests.Portao" --logger "console;verbosity=normal" | tee portoes.log
-          grep -q 'Passed!' portoes.log   # filtro que nao casa teste nenhum sai 0: sem isto o job ficaria verde sem portao
+          grep -Eq '^ *Passed: +[1-9]' portoes.log   # filtro que nao casa teste nenhum sai 0: sem isto o job ficaria verde sem portao
       - name: Tabela no resumo
         if: always()
         run: grep -E '^\s*(\||ganho|so )' portoes.log | sed 's/^ *//' >> "$GITHUB_STEP_SUMMARY" || true
