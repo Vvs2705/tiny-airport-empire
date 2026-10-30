@@ -105,9 +105,23 @@ A v0.1 está pronta quando **todas** as linhas abaixo estiverem feitas, com evid
 | 7 | Fotos 540×960 de cada tela, incluindo uma com 60 passageiros andando na tela, conferidas à mão, e um `-record` de um funcionário mudando de setor (sai do balcão, anda pelo corredor, chega com o uniforme trocado) | `client/tools/fotos_v01.sh` → `client/Builds/validation_v01/`; montagem no PR |
 | 8 | Tutorial passos 1–9 jogáveis, puláveis e desligados no `-testsession` | foto de cada passo com `-tutorial -bot` |
 
-O K3 (p10 de FPS ≥ 30 com 60 passageiros num Android de entrada) é medido no aparelho, por último; ele não trava a v0.1, mas trava a arte do Lote 1.
+O K3 (p10 de FPS ≥ 30 com 60 passageiros num Android de entrada) é medido no aparelho, por último. O K3 ampliado do GDD §5.13 já tem a medida do PC, com a arte do Tripo: **p10 de 58,7 FPS e média de 59,5 (trava de 60)**, com 56 pessoas, 2 aviões e 6 veículos, em 540×960 (`-passageiros 60 -perf 20`, `perf_60.txt`). O número que vale, no Android de entrada, ainda falta.
 
-**Estado em 2026-10-29:** linhas 1, 2 e 4 a 8 feitas, com a evidência nos PRs #5 (núcleo) e da View. A linha 3 (K2) espera o playtest com pelo menos 5 pessoas: o diário e o `diario_report.py` já medem.
+**Movimento do pátio** (defeito visto pelo Vinicius em 30/10: "alguns parece estarem deslizando ou patinando"), medido com `-diag` e `client/tools/diag_patio.py` num ciclo inteiro, no pivô de cada peça:
+
+| Medida | Antes | Depois | Critério |
+|---|---|---|---|
+| Escorregamento p95 (jato, combustível, carrinho, catering) | 90° (andavam de lado) | ≤ 2,1° | ≤ 5° |
+| Escorregamento p95 (regional, escada, ônibus) | 4,2° a 7,4° | ≤ 1,8° | ≤ 5° |
+| Escorregamento p95 (rebocador) | 90° | 4,5° (pico de 13° no começo da curva do recuo: a barra articula) | ≤ 5° |
+| Giro máximo de veículo na curva | 225°/s | 53°/s | sem número |
+| Aceleração de veículo (partida) | 4,4 m/s², instantânea | ~1 m/s² | visível |
+| Saltos de velocidade | 27 no rebocador (teletransporte), 2 em cada avião | 0 | 0 |
+| Giro parado | 0, porque a peça virava em movimento numa quina | ≤ 2,4°/s nos veículos e 6°/s no rebocador, residuais de parada em curva; 0 nos aviões | sem giro no lugar |
+
+Causas confirmadas: a frente de 5 malhas do Tripo não era o eixo de avanço (tabela `Frente`); o rumo era o do centro da peça, com a quina quase sem raio; a velocidade era constante, com partida e parada instantâneas; o limite de curva não enxergava o trecho seguinte. Fora de causa: a escala da velocidade (taxi a 0,35 comprimento por segundo, corrida a 1,9). As rodas são parte da malha: o peso aparece na inclinação do corpo.
+
+**Estado em 2026-10-30:** linhas 1, 2 e 4 a 8 feitas, com a evidência nos PRs #5 (núcleo) e da View e, com a arte do Tripo, nas fotos `docs/fotos/v01_arte_telas.jpg`, `v01_arte_mover.gif` e `v01_arte_patio.gif`. A linha 3 (K2) espera o playtest com pelo menos 5 pessoas: o diário e o `diario_report.py` já medem.
 
 ## 9. O que cada fase entrega
 
