@@ -4,15 +4,13 @@ Uma página: cada arquivo, para que serve e as funções-chave. Atualize no PR q
 
 Convenção de origem: `fs:` = Forge Street (`Vvs2705/forge-street`), `dc:` = Dungeon Courier (`Vvs2705/dungeon-courier`). Estado: Fase B, v0.1 jogável em greybox: núcleo com bot e testes, View com quadro, arrasto, tutorial e diário (`docs/CONTRATO_V01.md` §9). Fase C com tela: tripulação, pátio e manutenção (`docs/CONTRATO_FASE_C.md`) e as 8 estações com os 6 perfis (`docs/CONTRATO_FASE_C2.md`).
 
-Fase C3 no núcleo, ainda sem tela: 3 aeroportos, 12 rotas e 4 incidentes (`docs/CONTRATO_FASE_C3.md`).
-
 ## Núcleo — `client/Assets/_TA/Scripts/Core/` (`TA.Core`, C# puro, sem UnityEngine)
 
 | Arquivo | Para quê | Funções-chave | Origem |
 |---|---|---|---|
 | `Sim.cs` | fachada do núcleo; API para a View documentada no topo. Relógio do quadro (passo fixo de 1/30 s), onda com 2 voos, chegadas (função pura da semente), filas FIFO, atendimento por posto, portão que fecha na hora, renda, marcos, história | `Tick(dt)`; `Tap`, `Move`, `Buy`, `Hire`, `Hire(perfil)`; `Estacoes` (as 8) e `Stations` (as 4 da v0.1); `Contratado`, `CustoContratar(perfil)`; `PodeTocar`, `Presentes`, `Alocados`, `Custo`, `CustoContratar`, `TempoPassos`; `Chegada`, `NovoPax`, `VooDaHistoria`; `IrParaOnda` (flag `-onda`) | passo fixo de `dc:Scripts/Core/Run.cs`; sequência de Weyl do VIP de `fs:Scripts/Core/Sim.cs` |
 | `Sim.Estacoes.cs` | Fase C2: o que abre em cada marco, as paradas opcionais (loja, bagagem, alimentação), o especialista e a força da oficina e do despacho; as chaves `Regra*` de só visual | `Desbloqueada(e)`, `Ativa(e)`, `Rende(e)`, `Forca(e)`, `Especializa`, `PassosOficina` | — |
-| `Sim.Rotas.cs` | Fase C3: aeroporto em operação, rotas abertas e programadas por vaga, viagem que vale na próxima onda, passageiros e tarifa da rota | `CustoViagem(a)`, `Viajar(a)`, `RotaAberta(r)`, `CustoRota(r)`, `AbreRota(r)`, `Programa(vaga, r)`, `TrechoSeg(r)`, `Aero`, `Prog` | — |
+| `Sim.Rotas.cs` | Fase C3 (`docs/CONTRATO_FASE_C3.md`, ainda sem tela): aeroporto em operação, rotas abertas e programadas por vaga, viagem que vale na próxima onda, passageiros e tarifa da rota | `CustoViagem(a)`, `Viajar(a)`, `RotaAberta(r)`, `CustoRota(r)`, `AbreRota(r)`, `Programa(vaga, r)`, `TrechoSeg(r)`, `Aero`, `Prog` | — |
 | `Sim.Incidentes.cs` | Fase C3: os 4 incidentes da semente, um por vez, com aviso; as saídas | `SorteiaIncidente(w)`, `Inc`, `PistaFechada`, `Falhou(e)`, `Adianta()`, `Repara()`, `Prioriza()` | — |
 | `Rotas.cs` | as tabelas da Fase C3 (`Tabelas.Rotas`, `Tabelas.Aeroportos`: id estável, nome de trabalho da D-13), `Rota`, `Aeroporto`, `Incidente`, `TipoRota`, `TipoIncidente` | `Tabelas`, `Rota.Receita`, `Copia()` | — |
 | `Sim.Estados.cs` | estado de cada estação (normal, atenção, crítico) e o voo em risco, a cada 0,5 s | `AtualizaEstados(emitir)` | — |
