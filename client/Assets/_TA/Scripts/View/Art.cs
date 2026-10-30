@@ -22,7 +22,7 @@ namespace TA
             Coin = Hex(0xF5A623), Gold = Hex(0xE0B23A), Bg = Hex(0x14203A), Dim = Hex(0x8A98B8), Off = Hex(0x4F5866), Dark = Hex(0x0B1220),
             Painel = Hex(0x1E2D4D), Board = Hex(0x0E1526), BoardInk = Hex(0xFFD54A), Paper = Hex(0xF3EEE2);
         /// <summary>Cor de cada estacao (Estacao) e de cada voo da onda (o passageiro tem a cor do voo dele, ligando a fila ao quadro).</summary>
-        public static readonly Color[] EstacaoCor = { Hex(0x2F6F9E), Hex(0x5B4A9E), Hex(0x2F8A6A), Hex(0x9E5B2F) };
+        public static readonly Color[] EstacaoCor = { Hex(0x2F6F9E), Hex(0x5B4A9E), Hex(0x2F8A6A), Hex(0x9E5B2F), Hex(0x1F9A9A), Hex(0xB8405E), Hex(0x6B7280), Hex(0xC28A1E) };
         public static readonly Color[] VooCor = { Hex(0x4FC3F7), Hex(0xFF8A65) };
         public static readonly Color[] FuncCor = { Hex(0xFFD54A), Hex(0xB2FF59), Hex(0xFF80AB) };
 
@@ -62,6 +62,23 @@ namespace TA
         /// <summary>Colete (uniforme da estacao, tingido pelo SpriteRenderer): retangulo arredondado com decote em V.</summary>
         /// <summary>Cabelo: meia cabeca de cima, com franja.</summary>
         public static Sprite Mala() => Get("mala", (x, y) => RoundedIn(x, (y + 0.2f) * 1.25f) || (Mathf.Abs(x) < 0.4f && y > 0.55f && y < 0.85f && Mathf.Abs(x) > 0.2f) || (Mathf.Abs(x) < 0.4f && y > 0.75f && y < 0.85f));
+
+        // icones dos servicos do patio (GDD §5.12) e dos perfis (GDD §5.5), na ordem de Servico e de Perfil
+        public static Sprite Pessoa() => Get("pessoa", (x, y) => x * x + (y - 0.5f) * (y - 0.5f) <= 0.12f || (y < 0.08f && y > -0.85f && Mathf.Abs(x) < 0.5f - y * 0.08f));
+        public static Sprite Talher() => Get("talher", (x, y) => SegD(x, y, -0.45f, -0.85f, -0.45f, 0.1f) < 0.11f || (y > 0f && y < 0.85f && Mathf.Abs(x + 0.45f) < 0.32f && Mathf.Abs(x + 0.45f) % 0.2f < 0.09f)
+            || SegD(x, y, 0.45f, -0.85f, 0.45f, 0.85f) < 0.11f || (y > 0.05f && y < 0.85f && x > 0.45f && x < 0.72f));
+        public static Sprite Gota() => Get("gota", (x, y) => x * x + (y + 0.28f) * (y + 0.28f) <= 0.36f || (y > -0.1f && y < 0.92f && Mathf.Abs(x) < (0.92f - y) * 0.6f));
+        public static Sprite Chave() => Get("chave", (x, y) =>
+        {
+            float a = (x - 0.45f) * (x - 0.45f) + (y - 0.45f) * (y - 0.45f);
+            return SegD(x, y, -0.65f, -0.65f, 0.3f, 0.3f) < 0.17f || (a <= 0.2f && !(x - y > -0.2f && x - y < 0.2f && x + y > 0.9f));
+        });
+        public static Sprite Escudo() => Get("escudo", (x, y) => y < 0.8f && Mathf.Abs(x) < Mathf.Min(0.72f, (y + 0.95f) * 0.8f));
+        public static Sprite Sacola() => Get("sacola", (x, y) => (Mathf.Abs(x) < 0.62f && y > -0.85f && y < 0.25f) || (x * x + (y - 0.3f) * (y - 0.3f) <= 0.19f && x * x + (y - 0.3f) * (y - 0.3f) >= 0.09f && y > 0.25f));
+        public static Sprite Bilhete() => Get("bilhete", (x, y) => Mathf.Abs(x) < 0.85f && Mathf.Abs(y) < 0.5f && !(Mathf.Abs(x - 0.35f) < 0.05f && Mathf.Abs(y) % 0.3f < 0.15f));
+        public static Sprite Radio() => Get("radio", (x, y) => (Mathf.Abs(x) < 0.42f && y > -0.85f && y < 0.4f) || (x > 0.14f && x < 0.3f && y >= 0.4f && y < 0.9f));
+        public static Sprite IconeServico(int s) { switch (s) { case 0: return Pessoa(); case 1: return Talher(); case 2: return Gota(); default: return Mala(); } }
+        public static Sprite IconePerfil(int p) { switch (p) { case 0: return Bilhete(); case 1: return Escudo(); case 2: return Sacola(); case 3: return Mala(); case 4: return Chave(); default: return Radio(); } }
 
         /// <summary>Arco de progresso (anel cheio no sentido horario a partir do topo ate frac). ponytail: 24 degraus em cache.</summary>
         public static Sprite Arc(float frac)

@@ -21,7 +21,8 @@ using System.Collections.Generic;
 //               Fase C: sim.Avioes[f] (o aviao do voo f: Desgaste, NoPatio, Falta/Fazendo por Servico, Check/Inspecao, Hangar, VooId),
 //               sim.Pronto(aviao) (o embarque pode abrir), sim.Tripulacao (Nome, Funcao, Trechos, Aviao; sim.Livre, sim.DescansoFalta),
 //               sim.EquipePatio, sim.ServicoPassos(s), sim.Veiculos(s), sim.MecanicoLivre, sim.CustoTripulante(f), sim.CustoPatio(),
-//               sim.CustoPatio(s, m), sim.TetoTripulacao. Ev.VooPartiu = portao fechou; Ev.Decolou = o aviao saiu (patio terminado).
+//               sim.CustoPatio(s, m), sim.TetoTripulacao, sim.PodeChecagem(a), sim.PodeHangar(a), sim.PodeEscala(a) (a tela pergunta antes de
+//               oferecer). Ev.VooPartiu = portao fechou; Ev.Decolou = o aviao saiu (patio terminado).
 //   Fase C2:    sim.Estacoes[0..7] (as 8; sim.Stations continua com as 4 da v0.1), sim.Desbloqueada(e) (abre pelo marco: Ev.EstacaoAberta),
 //               sim.Rende(e) (o especialista presente), Funcionario.Perfil, sim.Contratado(p), sim.CustoContratar(p) e sim.Hire(p) (Dani, Edu
 //               e Fatima; sim.Hire() continua contratando os 3 da v0.1), Pax.Total (anel de progresso), Sim.MaxEquipe (6).

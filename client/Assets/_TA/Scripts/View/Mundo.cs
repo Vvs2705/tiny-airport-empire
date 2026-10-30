@@ -11,10 +11,13 @@ namespace TA
     /// <summary>
     /// O aeroporto em 3D em tempo real (direcao do Vinicius em 29/10; GDD §5.13 e D-18). Le o Sim a cada quadro; nada aqui muda regra.
     ///  - Camera ortografica em angulo isometrico fixo (45 graus de cima, 45 de lado; nao gira), com pan (arrastar no vazio) e zoom (pinca,
-    ///    roda do mouse). O enquadramento inicial e de perto, nas 4 salas: da para ler o uniforme; o patio e a pista ficam a um pan.
+    ///    roda do mouse). O enquadramento e de perto, nas salas abertas (a sala nova reenquadra): da para ler o uniforme; o patio e a pista
+    ///    ficam a um pan.
     ///  - Planta em escada, para o fluxo subir na tela em retrato: entrada -> check-in -> seguranca (leste) -> loja (norte) -> portao
-    ///    (leste) -> ponte de embarque -> aviao no patio. Salas de 4 x 4 em corte (paredes baixas, sem teto), portas entre salas, fila
-    ///    indiana entre fitas e os balcoes junto a parede de saida. Atras das salas, o predio do terminal; no patio, torre e hangar.
+    ///    (leste) -> ponte de embarque -> aviao no patio. As 4 salas da Fase C2 encostam nessas: bagagem (norte do check-in), alimentacao
+    ///    (sul do portao), despacho (leste do portao) e oficina (leste do despacho, com porta para o patio). Fechada pelo marco, a sala e
+    ///    so o piso com a placa. Salas de 4 x 4 em corte (paredes baixas, sem teto), portas na tabela Portas, fila indiana entre fitas e
+    ///    os balcoes junto a parede de saida. Atras das salas, o predio do terminal, que cresce com o marco; no patio, torre e hangar.
     ///  - Corpos rigidos = malhas do Tripo decimadas (client/tools/malhas_ta.py, em Resources/Malhas de Assets/_TA/ArtLocal, fora do git
     ///    pela licenca; GDD §10.2). Sem a pasta (clone do repositorio), as primitivas da v0.1 entram no lugar.
     ///  - Placa pequena no chao de cada sala (nome; "fechada" na loja sem gente) e, so quando ha problema, um selo curto do estado acima
@@ -40,17 +43,53 @@ namespace TA
             Nova(4f, 0f, new Vector2(4f, 2f), new Vector2(6f, 4f), new Vector2(0f, 1f)),     // seguranca: entra a oeste, sai ao norte
             Nova(4f, 4f, new Vector2(6f, 4f), new Vector2(8f, 6f), new Vector2(1f, 0f)),     // loja: entra ao sul, sai a leste
             Nova(8f, 4f, new Vector2(8f, 6f), new Vector2(10f, 8f), new Vector2(0f, 1f)),    // portao: entra a oeste, sai ao norte (ponte)
+            Nova(0f, 4f, new Vector2(2f, 4f), new Vector2(2f, 8f), new Vector2(0f, 1f)),     // bagagem: entra pelo check-in, balcoes ao norte
+            Nova(8f, 0f, new Vector2(10f, 4f), new Vector2(10f, 0f), new Vector2(0f, -1f)),  // alimentacao: entra pelo portao, balcoes ao sul
+            Nova(16f, 4f, new Vector2(16f, 6f), new Vector2(18f, 8f), new Vector2(0f, 1f)),  // oficina: entra pelo despacho, sai ao norte (patio)
+            Nova(12f, 4f, new Vector2(12f, 6f), new Vector2(16f, 6f), new Vector2(1f, 0f)),  // despacho: entra pelo portao, sai para a oficina
         };
 
-        /// <summary>Malha de balcao de cada estacao e a escala dela (a loja e um quiosque grande: 0,6 cabe 1 por posto).</summary>
-        static readonly string[] BalcaoMalha = { "balcao_checkin", "raio_x", "loja", "portao_embarque" };
-        static readonly float[] BalcaoEscala = { 1f, 1f, 0.6f, 1f };
+        /// <summary>Porta no meio de uma parede: liga as salas A e B (B = -1: para fora).</summary>
+        struct Porta { public int A, B; public Vector2 P; public Porta(int a, int b, float x, float z) { A = a; B = b; P = new Vector2(x, z); } }
+
+        static readonly Porta[] Portas =
+        {
+            new Porta(0, 1, 4f, 2f), new Porta(1, 2, 6f, 4f), new Porta(2, 3, 8f, 6f), new Porta(0, 4, 2f, 4f), new Porta(3, 5, 10f, 4f), new Porta(3, 7, 12f, 6f), new Porta(7, 6, 16f, 6f),
+            new Porta(0, -1, 0f, 2f), new Porta(3, -1, 10f, 8f), new Porta(3, -1, 11.2f, 8f), new Porta(6, -1, 18f, 8f),
+        };
+
+        /// <summary>Acrescenta a `r` as portas do caminho da sala `de` ate `para`: busca em largura nas Portas, a partir do destino.</summary>
+        public static void PelasPortas(int de, int para, List<Vector2> r)
+        {
+            var prox = new int[Salas.Length];
+            for (int i = 0; i < prox.Length; i++) prox[i] = -1;
+            prox[para] = para;
+            var fila = new Queue<int>();
+            fila.Enqueue(para);
+            while (fila.Count > 0)
+            {
+                int z = fila.Dequeue();
+                foreach (Porta p in Portas)
+                {
+                    int o = p.A == z ? p.B : p.B == z ? p.A : -1;
+                    if (o >= 0 && prox[o] < 0) { prox[o] = z; fila.Enqueue(o); }
+                }
+            }
+            for (int z = de; z != para && prox[z] >= 0; z = prox[z])
+                foreach (Porta p in Portas)
+                    if ((p.A == z && p.B == prox[z]) || (p.B == z && p.A == prox[z])) { r.Add(p.P); break; }
+        }
+
+        /// <summary>Malha de balcao de cada estacao e a escala dela (a loja e um quiosque grande: 0,6 cabe 1 por posto). A oficina tem a
+        /// bancada aqui e o predio dela fica no mundo (Planta): o mecanico da Fase C mora la antes de a sala abrir.</summary>
+        static readonly string[] BalcaoMalha = { "balcao_checkin", "raio_x", "loja", "portao_embarque", "esteira_bagagem", "alimentacao", "balcao_informacoes", "balcao_informacoes" };
+        static readonly float[] BalcaoEscala = { 1f, 1f, 0.6f, 1f, 1f, 0.6f, 1f, 1f };
         /// <summary>Nivel de Velocidade a partir do qual o balcao troca pela malha `<malha>_n2` e `_n3` (Lotes 5 e 6): o upgrade muda o predio
         /// (GDD §5.13). Sem a malha daquele nivel, fica a do nivel abaixo.</summary>
         static readonly int[] NivelMalha = { 0, 2, 4 };
         static readonly Color ReservaCor = new Color(1f, 0.93f, 0.78f);
         /// <summary>Placa no chao, do lado de fora da parede mais perto da camera (onde nao ha outra sala).</summary>
-        static readonly Vector2[] PlacaEm = { new Vector2(2.2f, -0.9f), new Vector2(5.5f, -0.85f), new Vector2(3.15f, 4.95f), new Vector2(9.6f, 3.2f) };
+        static readonly Vector2[] PlacaEm = { new Vector2(2.2f, -0.9f), new Vector2(5.5f, -0.85f), new Vector2(5f, 5f), new Vector2(9f, 5f), new Vector2(-0.95f, 5.6f), new Vector2(9.9f, -0.85f), new Vector2(17.7f, 3.2f), new Vector2(13.9f, 3.2f) };
 
         static Sala Nova(float x, float z, Vector2 entra, Vector2 sai, Vector2 n) =>
             new Sala { Min = new Vector2(x, z), In = entra, Out = sai, N = n, T = new Vector2(n.y, n.x) };
@@ -76,7 +115,7 @@ namespace TA
 
         static int SalaEm(Vector2 p)
         {
-            for (int e = 0; e < 4; e++)
+            for (int e = 0; e < Salas.Length; e++)
             {
                 Vector2 m = Salas[e].Min;
                 if (p.x >= m.x && p.x <= m.x + Lado && p.y >= m.y && p.y <= m.y + Lado) return e;
@@ -110,21 +149,26 @@ namespace TA
         readonly Stack<Boneco> _livres = new Stack<Boneco>();
         readonly HashSet<int> _vistos = new HashSet<int>(), _embarcou = new HashSet<int>();
         readonly List<int> _sair = new List<int>();
-        readonly Boneco[] _func = new Boneco[Sim.MaxFuncionarios];
-        readonly int[] _colete = { -1, -1, -1 };
-        readonly float[] _troca = new float[Sim.MaxFuncionarios], _falha = new float[Sim.MaxFuncionarios];
-        readonly Estacao[] _rotaPara = new Estacao[Sim.MaxFuncionarios];
-        readonly List<Vector2>[] _rota = { new List<Vector2>(), new List<Vector2>(), new List<Vector2>() };
-        readonly Text[] _nome = new Text[Sim.MaxFuncionarios];
-        readonly Renderer[] _piso = new Renderer[4];
-        readonly Renderer[][] _moldura = new Renderer[4][];
-        readonly GameObject[,,] _mesa = new GameObject[4, 4, 3];
-        readonly SpriteRenderer[,] _arco = new SpriteRenderer[4, 4];
-        readonly SpriteRenderer[] _mao = new SpriteRenderer[4];
-        readonly TextMesh[] _placa = new TextMesh[4];
-        readonly RectTransform[] _selo = new RectTransform[4];
-        readonly Text[] _seloTexto = new Text[4];
-        readonly Image[] _seloFundo = new Image[4];
+        readonly Boneco[] _func = new Boneco[Sim.MaxEquipe];
+        readonly int[] _colete = { -1, -1, -1, -1, -1, -1 };
+        readonly float[] _troca = new float[Sim.MaxEquipe], _falha = new float[Sim.MaxEquipe];
+        readonly Estacao[] _rotaPara = new Estacao[Sim.MaxEquipe];
+        readonly List<Vector2>[] _rota = { new List<Vector2>(), new List<Vector2>(), new List<Vector2>(), new List<Vector2>(), new List<Vector2>(), new List<Vector2>() };
+        readonly Text[] _nome = new Text[Sim.MaxEquipe];
+        readonly Renderer[] _piso = new Renderer[8];
+        readonly Renderer[][] _moldura = new Renderer[8][];
+        readonly GameObject[,,] _mesa = new GameObject[8, 4, 3];
+        readonly SpriteRenderer[,] _arco = new SpriteRenderer[8, 4];
+        readonly SpriteRenderer[] _mao = new SpriteRenderer[8];
+        readonly TextMesh[] _placa = new TextMesh[8];
+        readonly RectTransform[] _selo = new RectTransform[8];
+        readonly Text[] _seloTexto = new Text[8];
+        readonly Image[] _seloFundo = new Image[8];
+        /// <summary>O que aparece quando a sala abre pelo marco (paredes, balcoes, fitas), a sala que esta aberta na tela e os predios por nivel.</summary>
+        readonly Transform[] _sala = new Transform[8];
+        readonly bool[] _aberta = new bool[8];
+        Transform _cont;
+        Transform[] _hangar, _torre, _terminal;
 
         // camera e gesto
         Vector3 _alvo;
@@ -141,7 +185,7 @@ namespace TA
         /// <summary>Funcionario sendo arrastado (-1 = nenhum).</summary>
         public int Arrastando => _arrasto ? _press : -1;
 
-        static readonly Color CorParede = Art.Hex(0xD9DEE8), Fita = Art.Hex(0x2F6FE4), Asfalto = Art.Hex(0x5A5F6B), Grama = Art.Hex(0x7FB069);
+        static readonly Color CorParede = Art.Hex(0xD9DEE8), Fita = Art.Hex(0x2F6FE4), Asfalto = Art.Hex(0x5A5F6B), Grama = Art.Hex(0x7FB069), Trancada = Art.Hex(0xA9ADB5);
 
         public Mundo(Hud h, Game g, RectTransform rotulos)
         {
@@ -171,245 +215,6 @@ namespace TA
             GentePatio();
         }
 
-        // ------------------------------------------------------------------ construcao da planta
-
-        Renderer Bloco(string nome, PrimitiveType tipo, Vector3 centro, Vector3 tam, Color cor, Transform pai = null)
-        {
-            GameObject go = GameObject.CreatePrimitive(tipo);
-            go.name = nome;
-            // sem colisor: o projeto nao tem o modulo de fisica (a selecao e por conta, no chao em Y = 0)
-            go.transform.SetParent(pai != null ? pai : _raiz, false);
-            go.transform.localPosition = centro;
-            go.transform.localScale = tam;
-            Renderer r = go.GetComponent<Renderer>();
-            if (Material != null) r.sharedMaterial = Material;
-            Cor(r, cor);
-            return r;
-        }
-
-        static void Cor(Renderer r, Color c)
-        {
-            _mpb.SetColor("_Color", c);
-            r.SetPropertyBlock(_mpb);
-        }
-
-        /// <summary>Yaw que leva a frente da malha do Tripo ao +z: a maioria sai de frente, mas estas sairam de lado ou de costas e andavam
-        /// escorregando 90 graus (medido em 30/10 com -diag; a frente de cada uma foi conferida na vista de cima e de ponta no Blender).</summary>
-        static readonly Dictionary<string, float> Frente = new Dictionary<string, float>
-        {
-            { "aviao_narrow", -90f }, { "rebocador", -90f }, { "carrinho_bagagem", -90f }, { "caminhao_combustivel", -90f }, { "caminhao_catering", -90f }, { "escada_embarque", 180f },
-        };
-
-        /// <summary>Malha do Tripo (Resources/Malhas/nome.fbx + nome.png, pivo no chao, de frente para +z) num pai que gira em yaw; null se a
-        /// pasta ArtLocal nao existe (quem chama desenha a primitiva). Material Legacy Diffuse com a textura, 1 por peca.</summary>
-        Transform Peca(string nome, Vector3 pos, float yaw, float escala = 1f, float eixo = 0f)
-        {
-            var src = Resources.Load<GameObject>("Malhas/" + nome);
-            MeshFilter mf = src != null ? src.GetComponentInChildren<MeshFilter>() : null;
-            if (mf == null || Material == null) return null;
-            if (!_matMalha.TryGetValue(nome, out Material mat))
-                _matMalha[nome] = mat = new Material(Material) { name = nome, mainTexture = Resources.Load<Texture2D>("Malhas/" + nome) };
-            var pai = new GameObject(nome).transform;
-            pai.SetParent(_raiz, false);
-            pai.localPosition = pos;
-            pai.localRotation = Quaternion.Euler(0f, yaw, 0f);
-            var go = new GameObject("malha");
-            go.transform.SetParent(pai, false);
-            Frente.TryGetValue(nome, out float frente);
-            go.transform.localRotation = Quaternion.Euler(0f, frente, 0f) * mf.transform.rotation;   // o giro do import (FBX do Blender), relativo a raiz do modelo
-            go.transform.localPosition = new Vector3(0f, 0f, eixo);   // pivo `eixo` m atras do centro da malha (o eixo traseiro dos veiculos)
-            go.transform.localScale = mf.transform.lossyScale * escala;
-            go.AddComponent<MeshFilter>().sharedMesh = mf.sharedMesh;
-            var r = go.AddComponent<MeshRenderer>();
-            r.sharedMaterial = mat;
-            r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-            r.receiveShadows = false;
-            return pai;
-        }
-
-        /// <summary>Sombra plana de uma malha: a mesma malha achatada no chao (TA/Sombra). Null sem o shader ou sem malha (primitivas).</summary>
-        Transform SombraPlana(Transform t)
-        {
-            MeshFilter mf = t.GetComponentInChildren<MeshFilter>();
-            if (_matSombra == null) { Shader sh = Shader.Find("TA/Sombra"); if (sh != null) _matSombra = new Material(sh); }
-            if (mf == null || _matSombra == null || mf.transform.parent != t) return null;
-            var pai = new GameObject("Sombra" + t.name).transform;
-            pai.SetParent(_raiz, false);
-            pai.localScale = new Vector3(1f, 0.002f, 1f);
-            var go = new GameObject("malha");
-            go.transform.SetParent(pai, false);
-            go.transform.localRotation = mf.transform.localRotation;
-            go.transform.localScale = mf.transform.localScale;
-            go.transform.localPosition = mf.transform.localPosition;
-            go.AddComponent<MeshFilter>().sharedMesh = mf.sharedMesh;
-            var r = go.AddComponent<MeshRenderer>();
-            r.sharedMaterial = _matSombra;
-            r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-            r.receiveShadows = false;
-            return pai;
-        }
-
-        void Planta()
-        {
-            Bloco("Gramado", PrimitiveType.Cube, new Vector3(9f, -0.12f, 9f), new Vector3(90f, 0.1f, 90f), Grama);
-            Bloco("Calcada", PrimitiveType.Cube, new Vector3(-1.6f, -0.06f, 2f), new Vector3(3.2f, 0.1f, 4.4f), Art.Hex(0xB8B2A6));
-            Bloco("Rua", PrimitiveType.Cube, new Vector3(-4.4f, -0.07f, 4f), new Vector3(2.6f, 0.1f, 22f), Asfalto);
-            Bloco("Saguao", PrimitiveType.Cube, new Vector3(6f, -0.08f, 4f), new Vector3(12.6f, 0.1f, 8.6f), Art.Hex(0xCFC7B5));
-            for (int e = 0; e < 4; e++) Sala3D(e);
-            // ponte de embarque, da porta norte do portao ate a porta do aviao
-            Transform ponte = Peca("ponte_embarque", new Vector3(10f, 0f, 9.7f), 0f);
-            if (ponte == null)
-            {
-                Bloco("Ponte", PrimitiveType.Cube, new Vector3(10f, 0.04f, 9.55f), new Vector3(0.8f, 0.08f, 3.1f), Art.Hex(0x9AA6BC));
-                Bloco("PonteLadoE", PrimitiveType.Cube, new Vector3(9.58f, 0.3f, 9.55f), new Vector3(0.06f, 0.5f, 3.1f), Art.Hex(0x6E7A90));
-                Bloco("PonteLadoD", PrimitiveType.Cube, new Vector3(10.42f, 0.3f, 9.55f), new Vector3(0.06f, 0.5f, 3.1f), Art.Hex(0x6E7A90));
-            }
-            // cenario (so com as malhas; sem elas o greybox da v0.1 nao tinha nada aqui)
-            Peca("terminal_vale_verde", new Vector3(1.2f, 0f, 13.2f), 180f);
-            Peca("torre_controle", new Vector3(26.5f, 0f, 6.5f), 225f);
-            Peca("hangar_manutencao", new Vector3(30f, 0f, 13.5f), 270f);
-            Peca("cadeiras_espera", new Vector3(-1.9f, 0f, 4.6f), 90f);
-            Peca("cadeiras_espera", new Vector3(-1.9f, 0f, -0.6f), 90f);
-            foreach (Vector2 v in new[] { new Vector2(-0.5f, 4.5f), new Vector2(-0.5f, -0.5f), new Vector2(8.5f, -0.5f), new Vector2(12.5f, 3.5f) })
-                Peca("vaso_planta", V3(v), 0f);
-            // arvores so nas bordas (esquerda, direita e atras da pista): na frente das salas tampariam a fila
-            foreach (Vector2 v in new[] { new Vector2(-8f, 2f), new Vector2(-8.5f, 8f), new Vector2(-6f, 14.5f), new Vector2(15f, -2f), new Vector2(19f, 1f), new Vector2(0f, 27.5f), new Vector2(9f, 27.8f), new Vector2(18f, 27.5f) })
-                Peca("arvore", V3(v), v.x * 37f);
-            foreach (Vector2 v in new[] { new Vector2(6.8f, 10.2f), new Vector2(16.2f, 9.8f), new Vector2(25f, 10.2f) }) Peca("poste", V3(v), 45f, 0.75f);
-            foreach (Vector2 v in new[] { new Vector2(7.3f, 14.6f), new Vector2(15.5f, 14.6f), new Vector2(17.1f, 14.6f), new Vector2(25f, 14.6f) }) Peca("cone", V3(v), 0f);
-            Peca("conteiner_bagagem", new Vector3(16.3f, 0f, 9.7f), 0f);
-            Peca("conteiner_bagagem", new Vector3(16.3f, 0f, 8.4f), 0f);
-            Peca("biruta", new Vector3(31f, 0f, 19.8f), 0f);
-            Peca("radar", new Vector3(29.2f, 0f, 4.4f), 0f);
-            Patio3D();
-        }
-
-        void Sala3D(int e)
-        {
-            Sala s = Salas[e];
-            Vector2 c = Centro(e);
-            _piso[e] = Bloco("Piso" + e, PrimitiveType.Cube, new Vector3(c.x, -0.05f, c.y), new Vector3(Lado - 0.04f, 0.1f, Lado - 0.04f), Color.white);
-            // moldura de estado no chao (normal/atencao/critico; destino aceso no arrasto)
-            _moldura[e] = new Renderer[4];
-            for (int i = 0; i < 4; i++)
-            {
-                bool hor = i < 2;
-                float off = (i % 2 == 0 ? -1f : 1f) * (Lado * 0.5f - 0.08f);
-                Vector3 p = hor ? new Vector3(c.x, 0.01f, c.y + off) : new Vector3(c.x + off, 0.01f, c.y);
-                _moldura[e][i] = Bloco("Moldura" + e + i, PrimitiveType.Cube, p, hor ? new Vector3(Lado - 0.1f, 0.02f, 0.12f) : new Vector3(0.12f, 0.02f, Lado - 0.1f), Art.Good);
-            }
-            // paredes baixas (corte) com as portas de entrada e de saida
-            Vector2 m = s.Min;
-            Parede(new Vector2(m.x, m.y), new Vector2(m.x + Lado, m.y), s);                 // sul
-            Parede(new Vector2(m.x, m.y + Lado), new Vector2(m.x + Lado, m.y + Lado), s);   // norte
-            Parede(new Vector2(m.x, m.y), new Vector2(m.x, m.y + Lado), s);                 // oeste
-            Parede(new Vector2(m.x + Lado, m.y), new Vector2(m.x + Lado, m.y + Lado), s);   // leste
-            for (int i = 0; i < 4; i++)
-            {
-                Vector2 b = Balcao(e, i);
-                Transform t = Peca(BalcaoMalha[e], V3(b), Rumo(-s.N), BalcaoEscala[e]);   // de frente para a fila
-                if (t != null)
-                {
-                    _mesa[e, i, 0] = t.gameObject;
-                    string ant = BalcaoMalha[e];
-                    for (int n = 1; n < NivelMalha.Length; n++)
-                    {
-                        string nome = BalcaoMalha[e] + "_n" + (n + 1);
-                        Transform tn = Peca(nome, V3(b), Rumo(-s.N), BalcaoEscala[e]);
-                        if (tn != null) ant = nome;
-                        else if ((tn = Peca(ant, V3(b), Rumo(-s.N), BalcaoEscala[e] * (1f + 0.08f * n))) != null)   // reserva ate o export chegar
-                            foreach (Renderer r in tn.GetComponentsInChildren<Renderer>()) Cor(r, ReservaCor);   // (ASSETS §2.6): maior e dourado
-                        _mesa[e, i, n] = tn != null ? tn.gameObject : null;
-                    }
-                }
-                else
-                {
-                    bool longoX = Mathf.Abs(s.N.y) > 0.5f;
-                    _mesa[e, i, 0] = Bloco("Balcao" + e + i, PrimitiveType.Cube, new Vector3(b.x, 0.25f, b.y), longoX ? new Vector3(0.55f, 0.5f, 0.3f) : new Vector3(0.3f, 0.5f, 0.55f), Art.Paper).gameObject;
-                }
-                _arco[e, i] = Billboard("Arco" + e + i, Art.Arc(0f), Art.Good, 0.32f);
-            }
-            // fitas da fila: postes nas pontas das fileiras
-            for (int r = 0; r < 5; r++)
-                for (int lado = -1; lado <= 1; lado += 2)
-                {
-                    Vector2 p = Em(e, 2.05f + r * 0.42f + 0.21f, lado * 1.85f);
-                    Bloco("Poste", PrimitiveType.Cylinder, new Vector3(p.x, 0.2f, p.y), new Vector3(0.05f, 0.2f, 0.05f), Fita);
-                }
-            for (int r = 0; r < 4; r++)
-            {
-                Vector2 p = Em(e, 2.05f + r * 0.42f + 0.21f, (r % 2 == 0 ? 0.25f : -0.25f));
-                bool longoX = Mathf.Abs(s.T.x) > 0.5f;
-                Bloco("Fita", PrimitiveType.Cube, new Vector3(p.x, 0.32f, p.y), longoX ? new Vector3(3.2f, 0.03f, 0.02f) : new Vector3(0.02f, 0.03f, 3.2f), Fita);
-            }
-            _mao[e] = Billboard("Toque" + e, Art.Mao(), Art.BoardInk, 0.6f);
-            Placa(e);
-        }
-
-        /// <summary>Parede baixa de a ate b, com vao de porta onde estiver a entrada ou a saida da sala.</summary>
-        void Parede(Vector2 a, Vector2 b, Sala s)
-        {
-            Vector2 d = (b - a).normalized;
-            float len = Vector2.Distance(a, b);
-            var cortes = new List<float>();
-            foreach (Vector2 porta in new[] { s.In, s.Out })
-            {
-                float t = Vector2.Dot(porta - a, d);
-                if (t > 0f && t < len && Vector2.Distance(a + d * t, porta) < 0.01f) cortes.Add(t);
-            }
-            cortes.Sort();
-            float ini = 0f;
-            foreach (float t in cortes) { Muro(a, d, ini, t - PortaLarg * 0.5f); ini = t + PortaLarg * 0.5f; }
-            Muro(a, d, ini, len);
-        }
-
-        void Muro(Vector2 a, Vector2 d, float t0, float t1)
-        {
-            if (t1 - t0 < 0.05f) return;
-            Vector2 c = a + d * ((t0 + t1) * 0.5f);
-            float l = t1 - t0;
-            bool x = Mathf.Abs(d.x) > 0.5f;
-            Bloco("Parede", PrimitiveType.Cube, new Vector3(c.x, 0.17f, c.y), x ? new Vector3(l + 0.06f, 0.34f, 0.08f) : new Vector3(0.08f, 0.34f, l + 0.06f), CorParede);
-        }
-
-        /// <summary>Placa no chao (faixa na cor do setor com o nome deitado, lido de frente pela camera) e o selo do estado, que so aparece
-        /// em atencao ou critico.</summary>
-        void Placa(int e)
-        {
-            Vector3 p = V3(PlacaEm[e], 0.012f);
-            Vector3 longe = new Vector3(_cam.transform.forward.x, 0f, _cam.transform.forward.z).normalized;   // "para cima" na tela
-            Bloco("Placa" + e, PrimitiveType.Cube, p, new Vector3(2.3f, 0.02f, 0.5f), Art.EstacaoCor[e]).transform.rotation = Quaternion.LookRotation(longe, Vector3.up);
-            var go = new GameObject("PlacaNome" + e);
-            go.transform.SetParent(_raiz, false);
-            go.transform.SetPositionAndRotation(p + Vector3.up * 0.02f, Quaternion.LookRotation(Vector3.down, longe));
-            TextMesh tm = go.AddComponent<TextMesh>();
-            tm.font = Art.Font();
-            tm.fontSize = 72;
-            tm.characterSize = 0.045f;
-            tm.anchor = TextAnchor.MiddleCenter;
-            tm.alignment = TextAlignment.Center;
-            tm.fontStyle = FontStyle.Bold;
-            tm.color = Art.Ink;
-            tm.text = Textos.Estacao[e];
-            go.GetComponent<MeshRenderer>().sharedMaterial = Art.Font().material;
-            _placa[e] = tm;
-
-            RectTransform r = Art.Node(_rotulos, "Selo" + e, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
-            r.sizeDelta = new Vector2(250f, 40f);
-            _selo[e] = r;
-            _seloFundo[e] = Art.Panel(r, "Fundo", Art.A(Art.Dark, 0.7f), Vector2.zero, Vector2.one);
-            _seloFundo[e].raycastTarget = false;
-            Art.Img(r, "Icone", Art.Alerta(), Color.white, new Vector2(0.02f, 0.1f), new Vector2(0.15f, 0.9f)).raycastTarget = false;
-            _seloTexto[e] = Art.Outlined(Art.NewText(r, "Estado", 20, new Vector2(0.17f, 0f), new Vector2(0.98f, 1f), TextAnchor.MiddleLeft), 2f);
-        }
-
-        SpriteRenderer Billboard(string nome, Sprite s, Color c, float tam)
-        {
-            SpriteRenderer r = Art.NewSprite(_raiz, nome, s, c, 0, Vector2.zero, new Vector2(tam, tam));
-            r.enabled = false;
-            return r;
-        }
-
         // ------------------------------------------------------------------ quadro a quadro
 
         /// <summary>Hud.LateUpdate: camera, gestos, passageiros, funcionarios, salas, patio e rotulos. `dt` = s de jogo do quadro (0 parado).</summary>
@@ -432,7 +237,10 @@ namespace TA
         void Enquadra()
         {
             Vector3 dir = _cam.transform.right, up = _cam.transform.up;
-            var pts = new[] { new Vector3(-0.6f, 0f, 0f), new Vector3(8f, 0f, -0.6f), new Vector3(1.6f, 0f, -1.6f), new Vector3(12.4f, 0f, 4f), new Vector3(0f, 1f, 4.4f), new Vector3(4f, 1f, 8.4f), new Vector3(12f, 1f, 8f), new Vector3(10f, 1f, 10f) };
+            var pts = new List<Vector3> { new Vector3(-0.6f, 0f, 0f), new Vector3(8f, 0f, -0.6f), new Vector3(1.6f, 0f, -1.6f), new Vector3(12.4f, 0f, 4f), new Vector3(0f, 1f, 4.4f), new Vector3(4f, 1f, 8.4f), new Vector3(12f, 1f, 8f), new Vector3(10f, 1f, 10f) };
+            for (int e = 4; e < Salas.Length; e++)   // as salas abertas entram no quadro (a que abrir no meio do jogo pede de novo: Evento)
+                if (S.Desbloqueada((Estacao)e))
+                    foreach (Vector2 c in new[] { Vector2.zero, new Vector2(Lado, 0f), new Vector2(0f, Lado), new Vector2(Lado, Lado) }) pts.Add(V3(Salas[e].Min + c, 1f));
             float x0 = float.MaxValue, x1 = float.MinValue, y0 = float.MaxValue, y1 = float.MinValue;
             foreach (Vector3 p in pts)
             {
@@ -488,10 +296,24 @@ namespace TA
         void Salas3D(Sim s)
         {
             int sob = _arrasto ? SalaEm(Chao(Input.mousePosition)) : -1;
-            for (int e = 0; e < 4; e++)
+            MostraNivel(_hangar, NivelDe(s.St(Estacao.Manutencao).Vel));
+            MostraNivel(_torre, Mathf.Min(s.Marco, 2));
+            MostraNivel(_terminal, Mathf.Min(s.Marco, 2));
+            for (int e = 0; e < Salas.Length; e++)
             {
-                Station st = s.Stations[e];
-                bool fechada = st.Tipo == Estacao.Loja && s.Alocados(Estacao.Loja) == 0;
+                Station st = s.Estacoes[e];
+                bool aberta = s.Desbloqueada(st.Tipo);
+                if (aberta != _aberta[e] || _sala[e].gameObject.activeSelf != aberta) { _aberta[e] = aberta; _sala[e].gameObject.SetActive(aberta); }
+                if (!aberta)
+                {
+                    Cor(_piso[e], Trancada);
+                    string trancada = Textos.PlacaTrancada(e, s.T.Abre[e]);
+                    if (_placa[e].text != trancada) { _placa[e].text = trancada; _placa[e].characterSize = 0.03f; }
+                    _mao[e].enabled = false;
+                    _selo[e].gameObject.SetActive(false);
+                    continue;
+                }
+                bool fechada = e != (int)Estacao.CheckIn && e != (int)Estacao.Seguranca && e != (int)Estacao.Portao && s.Alocados(st.Tipo) == 0;
                 Cor(_piso[e], Color.Lerp(Art.EstacaoCor[e], Color.white, fechada ? 0.1f : 0.55f) * (fechada ? 0.6f : 1f));
                 Color cor = st.Estado == Estado.Critico ? Art.Bad : st.Estado == Estado.Atencao ? Art.Warn : Art.Good;
                 bool destino = Arrastando >= 0 && s.Staff[Arrastando].Em != st.Tipo;
@@ -500,8 +322,8 @@ namespace TA
                 foreach (Renderer m in _moldura[e]) { Cor(m, cor * pulso); m.transform.localScale = Escalada(m.transform.localScale, destino ? 0.2f : 0.12f); }
                 for (int i = 0; i < 4; i++)
                 {
-                    int nivel = 0;
-                    for (int n = 1; n < NivelMalha.Length; n++) if (_mesa[e, i, n] != null && st.Vel >= NivelMalha[n]) nivel = n;
+                    int nivel = NivelDe(st.Vel);
+                    while (nivel > 0 && _mesa[e, i, nivel] == null) nivel--;
                     for (int n = 0; n < NivelMalha.Length; n++) if (_mesa[e, i, n] != null) _mesa[e, i, n].SetActive(i < st.Postos && n == nivel);
                 }
                 bool toque = s.PodeTocar(st.Tipo);
@@ -528,6 +350,14 @@ namespace TA
             }
         }
 
+        /// <summary>Nivel da malha (0..2) pelo nivel de Velocidade.</summary>
+        static int NivelDe(int vel)
+        {
+            int n = 0;
+            for (int i = 1; i < NivelMalha.Length; i++) if (vel >= NivelMalha[i]) n = i;
+            return n;
+        }
+
         /// <summary>Engrossa a moldura (lado curto) para o destino aceso, sem mexer no comprimento.</summary>
         static Vector3 Escalada(Vector3 s, float g) => s.x < s.z ? new Vector3(g, s.y, s.z) : new Vector3(s.x, s.y, g);
 
@@ -535,13 +365,14 @@ namespace TA
         public void Evento(Evento e)
         {
             if (e.Tipo == Ev.Embarcou) _embarcou.Add(e.A);
+            else if (e.Tipo == Ev.EstacaoAberta) _enquadrado = false;   // a sala nova entra no quadro
             EventoPatio(e);
         }
 
         /// <summary>Para a medida do K3 (-perf): pessoas, avioes e veiculos ativos agora.</summary>
         public string Contagem()
         {
-            int pessoas = _pax.Count + _patio.Count + S.Staff.Count, avioes = 0;
+            int pessoas = _pax.Count + _patio.Count + _equipe.Count + _andantes.Count + S.Staff.Count, avioes = 0;
             foreach (Aviao a in _avioes) if (a.T.gameObject.activeSelf) avioes++;
             return "pessoas=" + pessoas + " avioes=" + avioes + " veiculos=" + _veiculos.Count;
         }
@@ -652,6 +483,8 @@ namespace TA
             else if (quem >= 0) _h.AbreMover(quem);
             else if (!pan && !longe)
             {
+                int av = _h.Tutorial ? -1 : AviaoEm(sp);
+                if (av >= 0) { _h.AbreVoo(av); return; }
                 int z = SalaEm(Chao(sp));
                 if (z >= 0) _g.Tap((Estacao)z);
             }

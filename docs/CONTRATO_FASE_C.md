@@ -106,4 +106,4 @@ A decisão do jogador seria a escala: quem voa agora e quem fica na sala para de
 
 **Estado em 2026-10-29:** linhas 1 a 6 feitas neste PR; a 7 fica com a saída do `verify.sh full` no PR.
 
-**Fica para a próxima frente (View):** quadro da tripulação e troca no quadro de partidas, ícone do serviço e anel de progresso em cima do avião, veículos de pátio andando pelos serviços, mecânico saindo da oficina, hangar, aviso de 80% e os eventos novos no diário CSV.
+**Tela (2026-10-30):** quadro da tripulação e troca da escala ao tocar no voo, ícone do serviço e anel de progresso em cima do avião, veículo por serviço com vaga e mão única, mecânico saindo da oficina, hangar, aviso de 80%, decisão entre checagem e hangar e os eventos novos no diário CSV. Os aviões seguem `sim.Avioes`: cada um no seu estande, com o pouso começando antes da hora para encostar quando o núcleo encosta. Só o desembarque no estande G é sem veículo (pela ponte). `PodeChecagem`, `PodeHangar` e `PodeEscala` são a única adição ao núcleo: as mesmas travas das intenções, para a tela perguntar antes de oferecer.

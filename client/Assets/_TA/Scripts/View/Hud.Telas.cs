@@ -17,8 +17,9 @@ namespace TA
 
         Modal _melhorias, _mover, _cofre, _anuncio, _pausa, _album;
         readonly List<Modal> _modais = new List<Modal>();
-        readonly Button[,] _melhoriaBtn = new Button[4, 2];
-        readonly Button[] _moverBtn = new Button[4];
+        readonly Button[,] _melhoriaBtn = new Button[7, 2];   // as 8 estacoes menos o despacho, que nao tem upgrade
+        readonly Text[] _melhoriaNome = new Text[7];
+        readonly Button[] _moverBtn = new Button[8];
         Button _dobrar;
         int _moverQuem = -1;
         float _anuncioFalta;
@@ -45,34 +46,35 @@ namespace TA
 
         void BuildTelas(RectTransform canvas)
         {
-            _melhorias = NovoModal(canvas, "Melhorias", 0.14f, 0.88f);
+            _melhorias = NovoModal(canvas, "Melhorias", 0.08f, 0.92f);
             _melhorias.Titulo.text = Textos.Melhorias;
             RectTransform pm = PainelDe(_melhorias);
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < 7; i++)
             {
-                float y1 = 0.84f - i * 0.18f;
-                Text n = Art.NewText(pm, "Est" + i, 38, new Vector2(0.05f, y1 - 0.05f), new Vector2(0.95f, y1), TextAnchor.MiddleLeft);
+                float y1 = 0.86f - i * 0.105f;
+                Text n = Art.NewText(pm, "Est" + i, 28, new Vector2(0.03f, y1 - 0.1f), new Vector2(0.27f, y1), TextAnchor.MiddleLeft);
                 n.text = Textos.Estacao[i]; n.color = Color.Lerp(Art.EstacaoCor[i], Art.Ink, 0.5f);
+                _melhoriaNome[i] = n;
                 for (int m = 0; m < 2; m++)
                 {
                     var e = (Estacao)i; var mm = (Melhoria)m;
-                    _melhoriaBtn[i, m] = Art.NewButton(pm, "", 30, m == 0 ? Art.EstacaoCor[1] : Art.EstacaoCor[2],
-                        new Vector2(0.04f + m * 0.47f, y1 - 0.165f), new Vector2(0.49f + m * 0.47f, y1 - 0.055f), () => _g.Buy(e, mm));
+                    _melhoriaBtn[i, m] = Art.NewButton(pm, "", 28, m == 0 ? Art.EstacaoCor[1] : Art.EstacaoCor[2],
+                        new Vector2(0.28f + m * 0.35f, y1 - 0.1f), new Vector2(0.62f + m * 0.35f, y1), () => _g.Buy(e, mm));
                 }
             }
             _melhorias.Corpo.text = "";
             Art.NewButton(pm, Textos.Fechar, 40, Art.Off, new Vector2(0.3f, 0.02f), new Vector2(0.7f, 0.1f), () => Fecha(_melhorias));
 
-            _mover = NovoModal(canvas, "Mover", 0.3f, 0.72f);
+            _mover = NovoModal(canvas, "Mover", 0.22f, 0.78f);
             RectTransform pv = PainelDe(_mover);
             _mover.Corpo.text = "";
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < 8; i++)
             {
                 var e = (Estacao)i;
-                _moverBtn[i] = Art.NewButton(pv, Textos.Estacao[i], 38, Art.EstacaoCor[i], new Vector2(0.05f + (i % 2) * 0.46f, 0.6f - (i / 2) * 0.28f),
-                    new Vector2(0.49f + (i % 2) * 0.46f, 0.82f - (i / 2) * 0.28f), () => { int q = _moverQuem; Fecha(_mover); _g.Move(q, e); });
+                _moverBtn[i] = Art.NewButton(pv, Textos.Estacao[i], 32, Art.EstacaoCor[i], new Vector2(0.05f + (i % 2) * 0.46f, 0.69f - (i / 2) * 0.17f),
+                    new Vector2(0.49f + (i % 2) * 0.46f, 0.84f - (i / 2) * 0.17f), () => { int q = _moverQuem; Fecha(_mover); _g.Move(q, e); });
             }
-            Art.NewButton(pv, Textos.Cancelar, 38, Art.Off, new Vector2(0.3f, 0.04f), new Vector2(0.7f, 0.2f), () => Fecha(_mover));
+            Art.NewButton(pv, Textos.Cancelar, 38, Art.Off, new Vector2(0.3f, 0.03f), new Vector2(0.7f, 0.16f), () => Fecha(_mover));
 
             _cofre = NovoModal(canvas, "Cofre", 0.3f, 0.7f);
             RectTransform pc = PainelDe(_cofre);
@@ -115,6 +117,10 @@ namespace TA
                 case "pausa": Abre(_pausa); break;
                 case "album": Abre(_album); break;
                 case "anuncio": _g.VerAnuncio(Anuncio.Receita); break;
+                case "equipe": Abre(_equipe); break;
+                case "tripulacao": Abre(_trip); break;
+                case "patio": Abre(_patio); break;
+                case "voo": AbreVoo(0); break;
             }
         }
 
@@ -144,20 +150,32 @@ namespace TA
         {
             Sim s = S;
             if (_melhorias.Rt.gameObject.activeSelf)
-                for (int i = 0; i < 4; i++)
+                for (int i = 0; i < 7; i++)
+                {
+                    bool aberta = s.Desbloqueada((Estacao)i);
+                    _melhoriaNome[i].gameObject.SetActive(aberta);
                     for (int m = 0; m < 2; m++)
                     {
+                        _melhoriaBtn[i, m].gameObject.SetActive(aberta);
+                        if (!aberta) continue;
                         var e = (Estacao)i; var mm = (Melhoria)m;
                         long c = s.Custo(e, mm);
                         int n = s.Nivel(e, mm);
+                        float baseSeg = e == Estacao.Manutencao ? s.T.CheckSeg : s.T.Tempo[i];   // na oficina, a Velocidade encurta a checagem
                         string efeito = mm == Melhoria.Velocidade
-                            ? Textos.Seg(s.TempoSeg(e)) + (c < 0 ? "" : " → " + Textos.Seg((float)(s.T.Tempo[i] * Math.Pow(s.T.VelFator, n + 1))))
+                            ? Textos.Seg((float)(baseSeg * Math.Pow(s.T.VelFator, n))) + (c < 0 ? "" : " → " + Textos.Seg((float)(baseSeg * Math.Pow(s.T.VelFator, n + 1))))
                             : s.St(e).Postos + (c < 0 ? "" : " → " + (s.St(e).Postos + 1));
                         Art.Rotulo(_melhoriaBtn[i, m]).text = Textos.MelhoriaLinha(mm, n, s.NivelMax(mm), efeito + " · " + Textos.Custo(c));
                         _melhoriaBtn[i, m].interactable = c >= 0 && s.Cash >= c;
                     }
+                }
             if (_mover.Rt.gameObject.activeSelf && _moverQuem >= 0 && _moverQuem < s.Staff.Count)
-                for (int i = 0; i < 4; i++) _moverBtn[i].interactable = s.Staff[_moverQuem].Em != (Estacao)i;
+                for (int i = 0; i < 8; i++)
+                {
+                    bool aberta = s.Desbloqueada((Estacao)i);
+                    _moverBtn[i].interactable = aberta && s.Staff[_moverQuem].Em != (Estacao)i;
+                    Art.Rotulo(_moverBtn[i]).text = aberta ? Textos.Estacao[i] : Textos.PlacaTrancada(i, s.T.Abre[i]);
+                }
             if (_cofre.Rt.gameObject.activeSelf)
             {
                 bool pode = s.Anuncios.Pode(Anuncio.Cofre);
@@ -176,6 +194,7 @@ namespace TA
                 for (int h = 0; h < Textos.Historia.Length; h++) sb.Append(Textos.AlbumLinha(h, (s.Album & (1 << h)) != 0)).Append('\n');
                 _album.Corpo.text = sb.ToString();
             }
+            PintaOperacao();
         }
     }
 }

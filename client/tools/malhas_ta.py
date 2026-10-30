@@ -54,6 +54,22 @@ PECAS = {
     "cone": (300, 128, -0.35),
     "biruta": (1000, 256, -2.6),
     "radar": (1500, 256, -2.4),
+    # as 4 salas novas (Fase C2), a sala da tripulacao e o que muda de nivel fora das salas
+    "esteira_bagagem": (2500, 512, 1.15),
+    "esteira_bagagem_n2": (2500, 512, 1.15),
+    "esteira_bagagem_n3": (2500, 512, 1.15),
+    "alimentacao": (2500, 512, 1.4),
+    "alimentacao_n2": (2500, 512, 1.4),
+    "alimentacao_n3": (2500, 512, 1.4),
+    "balcao_informacoes": (1500, 512, 0.9),
+    "oficina_mecanico": (3000, 512, 3.2),
+    "sala_tripulacao": (3000, 512, 3.2),
+    "hangar_manutencao_n2": (4000, 1024, 7.0),
+    "hangar_manutencao_n3": (4000, 1024, 7.0),
+    "torre_controle_n2": (3000, 512, 2.2),
+    "torre_controle_n3": (3000, 512, 2.2),
+    "terminal_vale_verde_n2": (6000, 1024, 9.0),
+    "terminal_vale_verde_n3": (6000, 1024, 9.0),
 }
 
 
@@ -133,7 +149,11 @@ def peca(nome, src, out):
     vs = [v.co for v in ob.data.vertices]
     lo = Vector((min(v.x for v in vs), min(v.y for v in vs), min(v.z for v in vs)))
     hi = Vector((max(v.x for v in vs), max(v.y for v in vs), max(v.z for v in vs)))
-    k = largura / max(hi.x - lo.x, hi.y - lo.y) if largura > 0 else -largura / (hi.z - lo.z)
+    k = (
+        largura / max(hi.x - lo.x, hi.y - lo.y)
+        if largura > 0
+        else -largura / (hi.z - lo.z)
+    )
     c = Vector(((lo.x + hi.x) / 2, (lo.y + hi.y) / 2, lo.z))
     ob.data.transform(Matrix.Scale(k, 4) @ Matrix.Translation(-c))
     ob.data.update()
