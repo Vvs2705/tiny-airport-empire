@@ -1,16 +1,10 @@
 # Contrato da Fase C2: as 8 estações e os 6 perfis no núcleo (2026-10-29)
 
-> **CONTINUAR DAQUI (2026-10-29, parada pelo limite de uso; branch `claude/fase-c-estacoes-perfis-ada843`, commit WIP sem PR)**
-> - Feito no núcleo: 8 estações (enum + `Sim.Estacoes.cs`), 6 perfis (`Hire(perfil)`), desbloqueio pelo marco, save schema 3 com migração do save real do schema 2, bot com `Equipe`, testes (83 verdes: `EstacoesPerfisTests`, 4 invariantes C2 no `ExploitTests`, migração no `SaveTests`). `Stations` continua com as 4 da v0.1 para a View.
-> - Medido (100 sementes): especialização ligada derruba o TA-2 (1,05–1,07) e o portão dela dá 1,00 → `RegraEspecialista = false`. Desligada: Bom 99,7%, Lento 75,5%, TA-2 1,408. Por estação: bagagem 1,02, alimentação 1,06, oficina 1,04, despacho 1,05; as 4 juntas ainda sem medida (o `Portao_FaseC2_PorSistema` foi interrompido).
-> - Próximo comando: `dotnet test client/tools/coretests --filter "FullyQualifiedName~BalanceTests.Portao_|FullyQualifiedName~BalanceTests.Antes_FaseC2" --logger "console;verbosity=detailed"` (~10 min). Se "estacoes" der < 1,10, desligue as 4 chaves `Regra*` das estações e meça de novo o TA-2.
-> - Depois: `BALANCE.md` §6 (tabelas), linhas 4 e 5 do `CONTRATO_LANCAMENTO.md`, `CHANGELOG.md`, `verify.sh full` (pedir à sessão da View para fechar o Blender), `sync_with_base_branch`, PR com "Para a View" (ler `sim.Estacoes`, arrays por `Sim.MaxEquipe`, nomes de Dani/Edu/Fátima, `Pax.Total` no anel, `Hire(perfil)`) e merge.
-
 Fonte da verdade: `GDD.md` §4.1 (8 estações e 6 perfis), §5.5 (perfis), §5.6 (estações), §5.12 (manutenção), §5.13 (portão de design), §14.2 (migração) e `CONTRATO_LANCAMENTO.md` linhas 4 e 5. Continua o `CONTRATO_FASE_C.md`: a tripulação, o pátio e a manutenção de lá não mudam de regra.
 
 Todo número é **hipótese**: o bot mede e o `BALANCE.md` §6 registra.
 
-**Medido em 2026-10-29 (`BALANCE.md` §6):** as 4 estações novas passaram no portão do §5.13 como um sistema (§5) e ficam com regra; a **especialização ficou só visual** (`Tuning.RegraEspecialista = false`, D-C2a): ganho 1,00 e, ligada, derruba o TA-2. O contratado aparece no 1º posto vazio, como na v0.1 (D-C2b). Mudou regra ou número? Atualize aqui e no `BALANCE.md` no mesmo commit.
+**Medido em 2026-10-30 (`BALANCE.md` §6):** as 4 estações novas passaram no portão do §5.13 como um sistema (ganho 1,366, §5) e ficam com regra; a **especialização ficou só visual** (`Tuning.RegraEspecialista = false`, D-C2a): ganho 1,00 e, ligada, derruba o TA-2 para 1,05–1,10. O contratado aparece no 1º posto vazio, como na v0.1 (D-C2b). TA-1: Bom 99,3 → 99,7%, Lento 74,5 → 75,4%. TA-2: 1,248 → 1,408. O começo não mudou: com as estações novas fechadas, a tabela do bot é igual à da main, número a número. Portão da Fase C: 1,151 → 1,114. Mudou regra ou número? Atualize aqui e no `BALANCE.md` no mesmo commit.
 
 ## 1. O que entra
 
@@ -54,7 +48,7 @@ Schema 3. Grava as 8 estações (níveis, fila e atendimento) e o perfil de cada
 
 - **TA-1 e TA-2** (200 sementes × 10 ondas, desbloqueio pelo marco): Bom ≥ 85%, Lento ≥ 60%, Bom/Parado ≥ 1,10.
 - **Portão do §5.13 por sistema com escolha** (200 sementes × 20 ondas, tudo desbloqueado desde o começo para o sistema aparecer na medida, um sistema ligado por vez). São 2 sistemas: a **especialização** (item 5: quem vai para onde) e as **4 estações novas** (item 4: uma decisão só, tirar gente do fluxo para uma estação nova). Cada estação sozinha também sai na tabela, sem portão próprio (D-C2c). **Planejador** = o Bom que leva cada um para a estação principal do perfil quando a atual está normal, manda gente à oficina quando um avião está pendente e só tira alguém de uma estação nova para cobrir crise em último caso; **Automático** = o mesmo Bom, com a equipe no padrão do núcleo (contratado no 1º posto vazio, depois só o mover para a estação crítica). Ganho < 1,10 = o sistema fica **só visual** (chave `Tuning.Regra*`), como a tripulação.
-- O resultado medido vai para o `BALANCE.md` §6 e para a tabela abaixo.
+- **Medido (200 sementes × 20 ondas):** as 4 estações juntas **1,366**, passam; a especialização **1,000**, só visual. Sozinhas, as estações dão bagagem 1,020, alimentação 1,056, oficina 1,036 e despacho 1,049. A leitura de que elas são um sistema só está na D-C2c do `BALANCE.md`, com a ressalva e o que muda se o corte for por estação.
 
 ## 6. Critério de pronto
 
@@ -68,4 +62,6 @@ Schema 3. Grava as 8 estações (níveis, fila e atendimento) e o perfil de cada
 | 6 | `MAPA_CODIGO.md`, cabeçalho do `Sim.cs` e `CHANGELOG.md` | o PR |
 | 7 | `client/tools/verify.sh full` verde | saída no PR |
 
-**Fica para a View:** desenhar as 4 salas novas, os 3 bonecos novos e o ícone do perfil; ler `sim.Estacoes` (as 8) no lugar de `sim.Stations` (as 4 da v0.1).
+**Estado em 2026-10-30:** linhas 1 a 6 feitas neste PR; a 7 fica com a saída do `verify.sh full` no PR.
+
+**Fica para a View:** desenhar as 4 salas novas, os 3 bonecos novos e o ícone do perfil; ler `sim.Estacoes` (as 8) no lugar de `sim.Stations` (as 4 da v0.1); a lista completa está no corpo do PR.

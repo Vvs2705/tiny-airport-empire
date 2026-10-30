@@ -162,3 +162,87 @@ Cada trava sai do código, o `dotnet test` roda e algum teste tem de cair (mutan
 
 - Se o aviso de 80% não fizer ninguém mandar o avião ao hangar antes de ficar pendente, o aviso precisa ser maior na tela, não a regra mais fraca.
 - A tripulação visual é o primeiro candidato a voltar com regra quando a Costa Azul trouxer mais voos: medir de novo com `RegraTripulacao = true` antes de ligar.
+
+## 6. Fase C2: as 8 estações e os 6 perfis (2026-10-30, `CONTRATO_FASE_C2.md`)
+
+**Como medir:** `dotnet test client/tools/coretests --filter "FullyQualifiedName~BalanceTests.Portao_|FullyQualifiedName~BalanceTests.Antes_FaseC2" --logger "console;verbosity=detailed"` (~10 min). No filtro entra só o `BalanceTests`: com um teste não `[Explicit]` junto, o NUnit pula os explícitos. `Antes_FaseC2` roda com as estações e os perfis novos nunca abrindo; `Portao_FaseC2_PorSistema` mede cada sistema sozinho, com tudo aberto desde o começo.
+
+**Bots:** EquipePlanejada = o Bom que leva cada um para a estação principal do perfil quando a atual está normal, manda gente à oficina quando um avião está pendente e só tira alguém de uma estação nova em último caso. EquipeAutomatica = o mesmo Bom, com a equipe no padrão do núcleo. Os dois compram igual. A Fase C (escala, checagem e hangar) fica ligada nos dois.
+
+### D-C2a. A especialização fica só visual
+
+Com o especialista rendendo mais, o Parado deixa de sofrer: ele já tem a Ana no check-in e o Beto na segurança, na estação certa e de graça. O TA-2 cai abaixo do portão com qualquer fator, e a decisão de "quem vai para onde" não rende nada. Varredura (100 sementes × 10 ondas no TA, × 20 no ganho):
+
+| fator do especialista | contratado | Bom | Lento | Parado | TA-2 | ganho da especialização |
+|---|---|---|---|---|---|---|
+| 1,15 | na estação do perfil | 98,7% | 81,2% | 96,6% | 1,079 | 1,195 |
+| 1,25 | na estação do perfil | 98,7% | 82,4% | 98,4% | 1,049 | 1,140 |
+| 1,5 | na estação do perfil | 99,9% | 84,5% | 99,6% | 1,069 | 1,222 |
+| 1,15 | no 1º posto vazio | 98,7% | 81,2% | 96,6% | 1,098 | 1,051 |
+| 1,25 | no 1º posto vazio | 98,7% | 82,4% | 98,7% | 1,055 | 1,005 |
+| 1,5 | no 1º posto vazio | 99,9% | 84,5% | 99,6% | 1,069 | 1,000 |
+| **desligada (escolhida)** | **no 1º posto vazio** | **99,7%** | **75,4%** | **92,2%** | **1,408** | — |
+
+O ganho alto da 2ª a 4ª linha vinha só de abrir a loja com o Vendedor, não da especialização. **`Tuning.RegraEspecialista = false`**: os 6 perfis continuam fixos, nomeados e com a estação principal, mas não rendem mais nela. Volta a ter regra quando houver mais voos do que a equipe dá conta: é a mesma escassez que falta à tripulação.
+
+### D-C2b. O contratado aparece no 1º posto vazio
+
+O contrato dizia "na estação do perfil". Com isso, o padrão do núcleo já fazia o certo e nenhuma estação nova gerava decisão (bagagem 1,025, alimentação 1,000, oficina 1,061, despacho 1,026). Voltou a regra da v0.1: o contratado aparece no 1º posto vazio, e levar a pessoa para uma estação nova é a escolha do jogador. Na mesma medida, a alimentação passou a vender mais que a loja (50% com fome, refeição 8) e virou a estação principal do Vendedor.
+
+### D-C2c. As 4 estações novas contam como um sistema
+
+Cada estação sozinha não passa, mas a decisão é uma só: tirar gente do fluxo para uma estação nova. Com as 4 ligadas, oficina, despacho e paradas se somam, porque o voo que a oficina salva também paga o bônus do despacho e as vendas. **Ressalva:** isto é uma leitura do "por sistema" do GDD. Se o corte tiver de ser por estação, as 4 ficam só visuais (`RegraBagagem`, `RegraAlimentacao`, `RegraOficina` e `RegraDespacho` = false) e o TA-2 volta perto do 1,248.
+
+| sistema (200 sementes × 20 ondas, tudo aberto) | emb. planejada | emb. automática | receita planejada | receita automática | ganho | regra |
+|---|---|---|---|---|---|---|
+| especialização | 95,0% | 95,0% | 18310 | 18309 | 1,000 | só visual |
+| **as 4 estações juntas** | **99,7%** | **94,1%** | **22324** | **16342** | **1,366** | **ligada** |
+| só bagagem | 94,4% | 94,1% | 16665 | 16342 | 1,020 | parte das 4 |
+| só alimentação | 93,5% | 94,1% | 17258 | 16342 | 1,056 | parte das 4 |
+| só oficina | 98,3% | 94,1% | 16936 | 16342 | 1,036 | parte das 4 |
+| só despacho | 93,9% | 94,1% | 17145 | 16342 | 1,049 | parte das 4 |
+
+### Antes e depois do TA-1 e do TA-2 (200 sementes × 10 ondas)
+
+Antes (estações e perfis novos nunca abrem, `Antes_FaseC2`): **igual à tabela "depois" da §5, número a número**. É a prova de que o começo da v0.1 não mudou para o bot.
+
+| perfil | embarque médio | p10 | receita | movimentos | toques | marco 1 | marco 2 | marco 3 |
+|---|---|---|---|---|---|---|---|---|
+| Bom | 99.3% | 99.0% | 5969 | 4.7 | 809 | 13.7 min | - | - |
+| Lento | 74.5% | 71.6% | 3581 | 32.5 | 578 | 15.8 min | - | - |
+| Parado | 92.2% | 92.0% | 4783 | 0.0 | 473 | 13.7 min | - | - |
+
+Depois (padrão do `Tuning`: bagagem e alimentação abrem no marco 1, oficina e despacho no marco 2, que o Bom só alcança depois das 10 ondas):
+
+| perfil | embarque médio | p10 | receita | movimentos | toques | marco 1 | marco 2 | marco 3 |
+|---|---|---|---|---|---|---|---|---|
+| Bom | 99.7% | 99.4% | 6913 | 4.7 | 981 | 13.7 min | - | - |
+| Lento | 75.4% | 71.0% | 3838 | 38.0 | 569 | 15.8 min | - | - |
+| Parado | 92.2% | 92.0% | 4911 | 0.0 | 372 | 13.7 min | - | - |
+
+Ganho de mover = **1,408** (era 1,248). **TA-1 e TA-2 passam.** O Parado fica no mesmo embarque, porque nunca leva ninguém às estações novas; a Dani, que cai na loja pelo 1º posto vazio, é o que ele ganha.
+
+### Portão da Fase C, de novo (200 sementes × 20 ondas)
+
+| perfil | embarque médio | receita | inspeções | hangar | checagens | trocas de escala |
+|---|---|---|---|---|---|---|
+| Planejador | 99.7% | 22293 | 2.0 | 0.0 | 35.0 | 44.0 |
+| Automático | 89.8% | 20020 | 6.0 | 0.0 | 0.0 | 0.0 |
+
+Ganho de planejar = **1,114** (era 1,151): continua passando, mais perto do limite. A oficina tira parte do valor do hangar: quem tem gente lá salva o voo do pendente sem ir ao hangar, e o Automático também usa a equipe. Só a manutenção 1,114; só a tripulação 1,030 (segue visual); as duas 1,149.
+
+### Prova de mutação (`python client/tools/mutacao.py`)
+
+As 4 travas novas entram no `mutacao.py`, que continua pegando as 9 da Fase C. Resultado em 2026-10-30: **13 de 13 mortos**.
+
+| trava retirada | testes que caíram |
+|---|---|
+| perfil novo só pelo marco | 3, entre eles `Desbloqueio_PeloMarco_AntesDoMarco1EAV01` |
+| preço fixo por perfil | 6, entre eles `Perfis_SeisFixos_TodosNoPrimeiroPostoVazio` e `Invariante_C2_NadaPagoEAleatorio_PerfilOrdemEPreco` |
+| offline não anda as estações novas | `Invariante_C2_Offline_NuncaPerdeVoo_NemAndaAsEstacoesNovas` |
+| passageiro na parada opcional não fica para trás quando o voo fecha | `Invariante_C2_VooPerdido_CustaSoAReceita_ComGenteNaBagagemENaAlimentacao` |
+
+### Para medir com gente
+
+- As estações novas só rendem se a pessoa levar alguém para lá: se o playtest mostrar que ninguém descobre isso, o contratado pode voltar a nascer na estação do perfil, e aí o portão precisa ser medido de novo.
+- Os números do Bom depois do marco 2 só aparecem em partidas de mais de 34 min: medir a oficina e o despacho com gente exige partida longa.

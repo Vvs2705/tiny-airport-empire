@@ -68,6 +68,30 @@ MUTANTES = [
         "_sim.Recompensa(a, v);",
         "foreach (Aviao av in _sim.Avioes) av.Desgaste = 0; _sim.Recompensa(a, v);",
     ),
+    (
+        "perfil novo so pelo marco",
+        "Sim.cs",
+        "|| Staff.Count >= MaxEquipe || Marco < T.PerfilMarco[(int)p]) return -1;",
+        "|| Staff.Count >= MaxEquipe) return -1;",
+    ),
+    (
+        "preco fixo por perfil",
+        "Sim.cs",
+        "return T.Contratacao[(int)p];",
+        "return T.Contratacao[(int)p] + Math.Abs(Seed) % 7;",
+    ),
+    (
+        "offline nao anda as estacoes novas",
+        "Sim.Offline.cs",
+        "LastClaim = claimId;",
+        "LastClaim = claimId; foreach (Station e in Estacoes) if ((int)e.Tipo >= 4) e.Atendendo.Clear();",
+    ),
+    (
+        "passageiro na parada opcional nao fica para tras",
+        "Sim.cs",
+        "s.Fila.RemoveAll(p => p.Onda == v.Onda && p.Voo == v.Indice);",
+        "if ((int)s.Tipo < 4) s.Fila.RemoveAll(p => p.Onda == v.Onda && p.Voo == v.Indice);",
+    ),
 ]
 
 

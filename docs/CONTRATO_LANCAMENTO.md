@@ -8,7 +8,7 @@ Base: `GDD.md` §4.1 (conteúdo obrigatório), §17 (fases e portões), §21 (ma
 
 **Guardrails que não mudam:** 1 moeda (Cash) na v0.1, e Gems só com D-05 e D-07; offline com teto de 2 h no código; nada aleatório pago (ECA Digital, Lei 15.211/2025); nenhum interstitial; anúncio não personalizado, sem `AD_ID`; perder voo custa só a receita dele; criativos gravados do jogo real; nenhum dado pessoal no diário.
 
-## 1. Matriz §4.1 × feito (estado em 2026-10-29: Fase B feita, menos o K2; Fase C começou pelo núcleo da tripulação, do pátio e da manutenção)
+## 1. Matriz §4.1 × feito (estado em 2026-10-30: Fase B feita, menos o K2; Fase C no núcleo: tripulação, pátio, manutenção, 8 estações e 6 perfis)
 
 Estados: **feito** (com evidência) · **parcial** · **falta** · **depende** (de decisão, conta ou recurso externo).
 
@@ -18,12 +18,12 @@ Estados: **feito** (com evidência) · **parcial** · **falta** · **depende** (
 | 1 | 3 aeroportos com identidade e desafios diferentes | Vale Verde | falta | B (Vale Verde), C (Costa Azul, Aurora Global) | P-05 |
 | 2 | 12 rotas desbloqueáveis (distância, frequência, receita, risco) | — | falta | C; nomes dependem de D-13 | P-06 |
 | 3 | 8 variantes visuais de aeronaves | — | depende | C; arte depende de D-14 (Lote 2) | P-06, P-12 |
-| 4 | 8 estações (check-in, segurança, bagagem, portão, loja, alimentação, manutenção, despacho) | 4 | falta | B (4), C (as outras 4) | P-02 |
-| 5 | 6 perfis de funcionários com especialização | 3 generalistas | falta | B (3), C (6 perfis, §5.5) | P-04 |
-| 6 | Equipe limitada e reposicionável entre estações (TA-2) | sim | **feito** na v0.1, menos o K2: bot com ganho de mover 1,259 (`BALANCE.md`); arrastar e "mover para" no mundo com bonecos que andam pelo corredor e vestem o uniforme do setor; K2 com gente **pendente (externo)** | B; portão: bot ≥ +10% e K2 com gente | P-04 |
+| 4 | 8 estações (check-in, segurança, bagagem, portão, loja, alimentação, manutenção, despacho) | 4 | **parcial**: núcleo feito, com regra (`CONTRATO_FASE_C2.md`): bagagem e alimentação abrem no marco 1, oficina e despacho no marco 2; testes e invariantes; portão do §5.13 **passou: 1,366** com as 4 juntas (sozinhas 1,02–1,06, `BALANCE.md` D-C2c); falta a tela | C (núcleo); View na próxima frente | P-02 |
+| 5 | 6 perfis de funcionários com especialização | 3 generalistas | **parcial**: núcleo feito (6 perfis fixos, um por pessoa, ordem e preço fixos, os 3 novos por marco); o bônus do especialista está **desligado (só visual)**: portão 1,00 e, ligado, derruba o TA-2 (`BALANCE.md` D-C2a); falta a tela | C (núcleo); View na próxima frente; bônus volta com mais voos | P-04 |
+| 6 | Equipe limitada e reposicionável entre estações (TA-2) | sim | **feito** na v0.1, menos o K2: bot com ganho de mover 1,408 (`BALANCE.md` §6); arrastar e "mover para" no mundo com bonecos que andam pelo corredor e vestem o uniforme do setor; K2 com gente **pendente (externo)** | B; portão: bot ≥ +10% e K2 com gente | P-04 |
 | 6a | Tripulação contratada e escalada: pilotos e comissários (§5.11) | — | **parcial**: núcleo feito (contratação com teto por marco, nomes fixos, escala automática e troca manual, trechos e descanso, testes e invariantes; `CONTRATO_FASE_C.md`); a regra está **desligada (só visual)** porque o portão do §5.13 mediu 1,02 com ela sozinha (`BALANCE.md` D-C2); falta a tela | C (núcleo); View na próxima frente; regra volta com mais voos e a narrow 2+2 | P-04 |
 | 6b | Pátio visível em cada voo e manutenção com desgaste, checagem e hangar (§5.12) | avião e veículos só visuais | **parcial**: núcleo feito, com regra: turnaround (4 serviços, equipe e veículos de pátio, upgrades), "decola quando embarcou e o pátio terminou", desgaste, aviso de 80%, inspeção obrigatória, checagem rápida e hangar; portão do §5.13 **passou: 1,151** (`BALANCE.md` §5); falta a tela | C (núcleo); View na próxima frente | P-02 |
-| 7 | Quadro de partidas com horários e estados (TA-1) | 2 voos por onda | **feito** na v0.1: quadro com horário, estado, a bordo e barra; bot 99,2% (Bom) e 73,6% (Lento) | B; portão: bot ≥ 85% / ≥ 60% | P-03 |
+| 7 | Quadro de partidas com horários e estados (TA-1) | 2 voos por onda | **feito** na v0.1: quadro com horário, estado, a bordo e barra; bot 99,7% (Bom) e 75,4% (Lento) | B; portão: bot ≥ 85% / ≥ 60% | P-03 |
 | 8 | Fluxo de passageiros, filas, embarque, partida e perda de receita por voo perdido | sim | **feito** na v0.1: núcleo testado e bonecos andando pela fila, embarque pela ponte e saída de quem perdeu o voo | B | P-02 |
 | 9 | 4 incidentes com aviso prévio | — | falta | C | P-06 |
 | 10 | 20 micro-histórias de passageiros (TA-3) | 1 | **parcial**: 1 história feita (coração no boneco e no quadro, álbum no save); as 20 na C | B (1), C (20) | P-06 |
@@ -34,7 +34,7 @@ Estados: **feito** (com evidência) · **parcial** · **falta** · **depende** (
 | 15 | Loja de compras digitais com catálogo fixo e preços da loja | — | depende | D; D-05, D-06 e Play Console (D-U-N-S, previsão 2026-11-25) | P-08 |
 | 16 | Anúncios recompensados opcionais | simulado | depende: regras dos 2 rewarded no núcleo (`Anuncios.cs`, testes de id de transação e teto diário); LevelPlay real depende de D-03 | B (regras e simulador no núcleo), D (LevelPlay real) | P-09 |
 | 17 | Sem interstitial forçado | sim | **feito** no núcleo: não existe código de interstitial; `Anuncios` só tem os 2 rewarded | B | P-09 |
-| 18 | Save local, migração de schema, restauração de compras, nuvem se configurada | save + envelope | **parcial**: save em disco com escrita atômica, autosave de 5 s e na pausa, retomada no meio da onda, schema futuro recusado; migração feita no schema 2 (Fase C), testada com um save real gravado pela v0.1; falta restaurar compras (D) | B (save), C (migração), D (restaurar compras), C/D (nuvem, se houver) | P-10 |
+| 18 | Save local, migração de schema, restauração de compras, nuvem se configurada | save + envelope | **parcial**: save em disco com escrita atômica, autosave de 5 s e na pausa, retomada no meio da onda, schema futuro recusado; migração feita nos schemas 2 (Fase C) e 3 (Fase C2), testadas com saves reais gravados pelo código anterior; falta restaurar compras (D) | B (save), C (migração), D (restaurar compras), C/D (nuvem, se houver) | P-10 |
 | 19 | Progressão offline limitada a 2 h | sim | **feito**: `ApplyOffline` com as travas (`ExploitTests`) e a tela do cofre com o tempo e o cálculo, ao abrir e ao voltar da pausa | B | P-10 |
 | 20 | Tutorial contextual (12 passos da Origem) | passos 1–9 | **parcial**: passos 1–9 feitos (fotos de cada passo e rodada `-tutorial -bot`); 10–12 na C | B (1–9), C (10–12) | P-02 |
 | 21 | Configurações, áudio, acessibilidade básica, política de privacidade, suporte e exclusão de dados | — | depende | C (telas e áudio); política e suporte dependem de D-09, D-10 e D-12 | P-11 |

@@ -4,7 +4,7 @@ Fonte da verdade: `GDD.md` §5.4 (perder voo custa só a receita dele), §5.8 (r
 
 Este documento fixa **as regras, os números e o critério de pronto** da tripulação, do pátio e da manutenção no `TA.Core`. Todo número é **hipótese**: o bot mede e o `docs/BALANCE.md` §5 registra o antes e o depois.
 
-**Medido em 2026-10-29 (`BALANCE.md` §5):** o portão do §8 passou com 1,151. A manutenção mudou de número (D-C1: desgaste 15, checagem −10 por 10 Cash, inspeção de 110 s). A tripulação não gerou decisão sozinha (1,02) e ficou **só visual** (`Tuning.RegraTripulacao = false`, D-C2): as regras do §2 estão no núcleo e testadas com a chave ligada, mas a falta de tripulação não segura o embarque. O pátio começa com 1 pessoa (D-C3). Mudou regra ou número? Atualize aqui e no `BALANCE.md` no mesmo commit. A tela (View) liga esses sistemas na próxima frente; aqui é só o núcleo, os testes e o bot.
+**Medido em 2026-10-29 (`BALANCE.md` §5):** o portão do §8 passou com 1,151 (1,114 depois da Fase C2, `BALANCE.md` §6). A manutenção mudou de número (D-C1: desgaste 15, checagem −10 por 10 Cash, inspeção de 110 s). A tripulação não gerou decisão sozinha (1,02) e ficou **só visual** (`Tuning.RegraTripulacao = false`, D-C2): as regras do §2 estão no núcleo e testadas com a chave ligada, mas a falta de tripulação não segura o embarque. O pátio começa com 1 pessoa (D-C3). Mudou regra ou número? Atualize aqui e no `BALANCE.md` no mesmo commit. A tela (View) liga esses sistemas na próxima frente; aqui é só o núcleo, os testes e o bot.
 
 ## 1. O ciclo do avião (a peça que liga os três sistemas)
 

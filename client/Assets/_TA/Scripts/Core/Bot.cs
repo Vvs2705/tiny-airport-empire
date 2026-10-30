@@ -32,7 +32,7 @@ namespace TA.Core
     /// 3) e compra a contratacao ou o upgrade mais barato que couber (upgrade da loja so com a loja aberta: loja fechada nao vende), e a
     ///    proxima pessoa de patio depois que o patio atrasou um embarque (CONTRATO_FASE_C §8).
     /// Com Planeja, tambem (Planeja): escala o tripulante mais descansado, checa o aviao quando cabe antes do embarque e manda o pendente
-    /// ao hangar no lugar da inspecao. Nao e' IA de jogo: e' um jogador previsivel para medir o TA-1, o TA-2 e o portao do §5.13.
+    /// ao hangar no lugar da inspecao. Com Equipe, cuida das estacoes novas e dos perfis (Bot.Equipe). Nao e' IA de jogo: e' um jogador previsivel para medir o TA-1, o TA-2 e o portao do §5.13.
     /// </summary>
     public sealed class Bot
     {
@@ -63,7 +63,7 @@ namespace TA.Core
         }
 
         /// <summary>
-        /// Fase C2: 1) avião pendente (no ar ou no patio) e ninguem na oficina: leva o mecanico (ou quem sobra numa estacao normal) para ela
+        /// Fase C2: 1) aviao pendente (no ar ou no patio) e ninguem na oficina: leva o mecanico (ou quem sobra numa estacao normal) para ela
         /// chegar antes do pouso; 2) senao, quem esta fora da especialidade numa estacao normal volta para a estacao do perfil se la cabe
         /// (os 3 da v0.1 so depois da especializacao; o mecanico so vai quando a oficina precisa). Uma mudanca por decisao.
         /// </summary>
