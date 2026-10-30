@@ -46,4 +46,10 @@ grep -o "PERF .*" "$OUT/perf_60.log" | tr -d '' | tee "$OUT/perf_60.txt" | grep
 rm -rf "$OUT/record_mover"
 "$EXE" -testsession -screen-fullscreen 0 -screen-width 540 -screen-height 960 -logFile "$OUT/record_mover.log" -demo -speed 2 -vista patio -record "$OUT/record_mover" -recordseg 13 > /dev/null 2>&1
 python "$ROOT/client/tools/montagem.py" "$OUT/record_mover" --saida "$OUT/mover" || falhas=$((falhas + 1))
+
+# -record do patio: o rebocador encosta, o pushback, o taxi e a decolagem do 1o voo (18,5 s na -speed 6 e 26 s de jogo a 2x)
+rm -rf "$OUT/record_patio"
+"$EXE" -testsession -screen-fullscreen 0 -screen-width 540 -screen-height 960 -logFile "$OUT/record_patio.log" -bot -speed 6 -recordini 18.5 -recordspeed 2 -vista geral -record "$OUT/record_patio" -recordseg 24 > /dev/null 2>&1
+python "$ROOT/client/tools/montagem.py" "$OUT/record_patio" --saida "$OUT/patio" --qps 10 || falhas=$((falhas + 1))
+rm -rf "$OUT/record_patio" "$OUT/record_mover"
 [ $falhas -eq 0 ] && echo "fotos: OK em $OUT" || { echo "fotos: $falhas falhas" >&2; exit 1; }

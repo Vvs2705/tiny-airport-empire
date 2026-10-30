@@ -17,6 +17,8 @@ namespace TA
     public sealed partial class Mundo
     {
         static readonly string[] PaxAtor = { "passageiro_a", "passageira_b", "passageiro_idoso", "passageira_b", "passageiro_a", "crianca" };
+        /// <summary>Corpo do passageiro: hash de Fibonacci do id (a conta linear so caia em indices pares e a fila saia quase toda igual).</summary>
+        static string CorpoDe(Pax p) => PaxAtor[(int)(((uint)p.Id * 2654435761u) >> 24) % PaxAtor.Length];
         static readonly string[] FuncAtor = { "atendente", "seguranca", "vendedor" };   // Ana, Beto, Cida (Textos.Funcionario; a vendedora do Tripo e mulher: o Caio virou Cida em 29/10)
         const float PassoNatural = 1.1f;   // m/s em que o andar da folha nao patina (adulto de 1 m)
 
@@ -127,7 +129,7 @@ namespace TA
             _vistos.Add(p.Id);
             if (!_pax.TryGetValue(p.Id, out Boneco b))
             {
-                string ator = PaxAtor[(p.Id * 7 + p.Indice) % PaxAtor.Length];
+                string ator = CorpoDe(p);
                 if (_livres.Count > 0) { b = _livres.Pop(); Veste(b, ator); } else b = NovoBoneco(ator);
                 b.T.gameObject.SetActive(true);
                 b.Pos = Calcada + new Vector2(-0.4f * (p.Indice % 3), 0.3f * (p.Indice % 4) - 0.45f);
@@ -215,6 +217,7 @@ namespace TA
                 _nome[k].enabled = existe;
                 if (!existe) continue;
                 Funcionario f = s.Staff[k];
+                if ((int)f.Em >= Salas.Length) { b.T.gameObject.SetActive(false); _nome[k].enabled = false; continue; }   // estacao sem sala no mundo (Fase C2): a View dela desenha
                 if (_colete[k] < 0) { _colete[k] = (int)f.Em; b.Pos = Lugar(s, f, out _); _troca[k] = Troca; }   // contratado: aparece ja de uniforme
                 b.Atende = false;
                 if (Arrastando == k) { b.Andou = false; }   // o arrasto posiciona

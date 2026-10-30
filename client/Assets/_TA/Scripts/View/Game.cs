@@ -25,9 +25,11 @@ namespace TA
     ///   -onda K       comeca na onda K (1 = a 1a).   -passageiros N   estresse: N passageiros por onda (60 = o K3).
     ///   -tutorial     liga o tutorial no -testsession (sem gravar; com -bot o ENTENDI se aperta sozinho).
     ///   -shot f.png [-shotdelay s]   espera s s reais (padrao 1), abre a -tela, fotografa e sai 0.
-    ///   -record pasta [-recordseg s]  grava s s (padrao 10) de quadros PNG a 30 qps na pasta e sai 0.
+    ///   -record pasta [-recordseg s]  grava s s (padrao 10) de quadros PNG a 30 qps na pasta e sai 0. Com -recordini r [-recordspeed v]:
+    ///                 anda r s reais na -speed e so entao grava, na velocidade v (padrao 1): o pushback e a decolagem no GIF.
     ///   -demo         contrata os 3 e, 1,5 s depois, manda a Ana do check-in para a loja (o -record da caminhada e da troca de uniforme).
     ///   -vista nome   perto | patio | geral: enquadramento das fotos e do -record (Mundo.Vista).
+    ///   -diag arq.csv [-diagseg s]  grava a pose dos avioes e veiculos (client/tools/diag_patio.py mede o escorregamento) e sai 0.
     ///   -perf s       K3 (GDD §5.13): depois de 5 s de aquecimento, mede s s de quadros, loga PERF p10=.. media=.. com as pessoas, os
     ///                 avioes e os veiculos na tela e sai 0. Usar com -passageiros 60.
     /// </summary>
@@ -117,6 +119,7 @@ namespace TA
             if (Arg("-demo") != null) StartCoroutine(Demo());
             if (!string.IsNullOrEmpty(Arg("-vista"))) _hud.M.Vista(Arg("-vista"));
             if (Arg("-perf") != null) StartCoroutine(Perf(ArgF("-perf", 20f)));
+            if (!string.IsNullOrEmpty(Arg("-diag"))) StartCoroutine(DiagPatio(Arg("-diag"), ArgF("-diagseg", 60f)));
         }
 
         void Update()
@@ -340,9 +343,19 @@ namespace TA
             Application.Quit(0);
         }
 
+        IEnumerator DiagPatio(string arq, float seg)
+        {
+            _hud.M.Diag(arq);
+            yield return new WaitForSecondsRealtime(seg);
+            _hud.M.DiagFim();
+            Application.Quit(0);
+        }
+
         IEnumerator Record(string pasta)
         {
             Directory.CreateDirectory(pasta);
+            float ini = ArgF("-recordini", 0f);
+            if (ini > 0f) { yield return new WaitForSecondsRealtime(ini); _speed = ArgF("-recordspeed", 1f); }
             Time.captureFramerate = 30;
             int total = Mathf.RoundToInt(ArgF("-recordseg", 10f) * 30f);
             for (int i = 0; i < total; i++)

@@ -50,7 +50,7 @@ namespace TA
         static readonly int[] NivelMalha = { 0, 2, 4 };
         static readonly Color ReservaCor = new Color(1f, 0.93f, 0.78f);
         /// <summary>Placa no chao, do lado de fora da parede mais perto da camera (onde nao ha outra sala).</summary>
-        static readonly Vector2[] PlacaEm = { new Vector2(2.7f, -1.05f), new Vector2(6.7f, -1.05f), new Vector2(2.95f, 6.7f), new Vector2(10.7f, 2.95f) };
+        static readonly Vector2[] PlacaEm = { new Vector2(2.2f, -0.9f), new Vector2(5.5f, -0.85f), new Vector2(3.15f, 4.95f), new Vector2(9.6f, 3.2f) };
 
         static Sala Nova(float x, float z, Vector2 entra, Vector2 sai, Vector2 n) =>
             new Sala { Min = new Vector2(x, z), In = entra, Out = sai, N = n, T = new Vector2(n.y, n.x) };
@@ -193,9 +193,16 @@ namespace TA
             r.SetPropertyBlock(_mpb);
         }
 
+        /// <summary>Yaw que leva a frente da malha do Tripo ao +z: a maioria sai de frente, mas estas sairam de lado ou de costas e andavam
+        /// escorregando 90 graus (medido em 30/10 com -diag; a frente de cada uma foi conferida na vista de cima e de ponta no Blender).</summary>
+        static readonly Dictionary<string, float> Frente = new Dictionary<string, float>
+        {
+            { "aviao_narrow", -90f }, { "rebocador", -90f }, { "carrinho_bagagem", -90f }, { "caminhao_combustivel", -90f }, { "caminhao_catering", -90f }, { "escada_embarque", 180f },
+        };
+
         /// <summary>Malha do Tripo (Resources/Malhas/nome.fbx + nome.png, pivo no chao, de frente para +z) num pai que gira em yaw; null se a
         /// pasta ArtLocal nao existe (quem chama desenha a primitiva). Material Legacy Diffuse com a textura, 1 por peca.</summary>
-        Transform Peca(string nome, Vector3 pos, float yaw, float escala = 1f)
+        Transform Peca(string nome, Vector3 pos, float yaw, float escala = 1f, float eixo = 0f)
         {
             var src = Resources.Load<GameObject>("Malhas/" + nome);
             MeshFilter mf = src != null ? src.GetComponentInChildren<MeshFilter>() : null;
@@ -208,7 +215,9 @@ namespace TA
             pai.localRotation = Quaternion.Euler(0f, yaw, 0f);
             var go = new GameObject("malha");
             go.transform.SetParent(pai, false);
-            go.transform.localRotation = mf.transform.rotation;   // o giro do import (FBX do Blender), relativo a raiz do modelo
+            Frente.TryGetValue(nome, out float frente);
+            go.transform.localRotation = Quaternion.Euler(0f, frente, 0f) * mf.transform.rotation;   // o giro do import (FBX do Blender), relativo a raiz do modelo
+            go.transform.localPosition = new Vector3(0f, 0f, eixo);   // pivo `eixo` m atras do centro da malha (o eixo traseiro dos veiculos)
             go.transform.localScale = mf.transform.lossyScale * escala;
             go.AddComponent<MeshFilter>().sharedMesh = mf.sharedMesh;
             var r = go.AddComponent<MeshRenderer>();
@@ -231,6 +240,7 @@ namespace TA
             go.transform.SetParent(pai, false);
             go.transform.localRotation = mf.transform.localRotation;
             go.transform.localScale = mf.transform.localScale;
+            go.transform.localPosition = mf.transform.localPosition;
             go.AddComponent<MeshFilter>().sharedMesh = mf.sharedMesh;
             var r = go.AddComponent<MeshRenderer>();
             r.sharedMaterial = _matSombra;
