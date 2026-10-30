@@ -225,12 +225,23 @@ namespace TA.Core
             return a;
         }
 
+        /// <summary>A tela pergunta antes de oferecer: a checagem, o hangar e a troca da escala valem agora (as condicoes das intencoes).</summary>
+        public bool PodeChecagem(int aviao)
+        {
+            Aviao a = AntesDoEmbarque(aviao);
+            return a != null && T.RegraManutencao && !a.Checou && a.Check == 0 && !a.Pendente && a.Desgaste > 0 && MecanicoLivre && Cash >= T.CheckCusto;
+        }
+
+        public bool PodeHangar(int aviao) => AntesDoEmbarque(aviao) != null && T.RegraManutencao && Cash >= T.HangarCusto;
+
+        public bool PodeEscala(int aviao) => AntesDoEmbarque(aviao) is Aviao a && a.VooId >= 0;
+
         /// <summary>Checagem rapida (CONTRATO_FASE_C §4): o mecanico tira CheckTira de desgaste em CheckSeg s, por CheckCusto Cash, uma por
         /// turnaround e antes de o embarque abrir. Pendente nao: esse recebe a inspecao obrigatoria. So Cash e tempo.</summary>
         public bool Checagem(int aviao)
         {
-            Aviao a = AntesDoEmbarque(aviao);
-            if (a == null || !T.RegraManutencao || a.Checou || a.Check > 0 || a.Pendente || a.Desgaste <= 0 || !MecanicoLivre || Cash < T.CheckCusto) return false;
+            if (!PodeChecagem(aviao)) return false;
+            Aviao a = Avioes[aviao];
             Cash -= T.CheckCusto;
             a.Check = PassosOficina(T.CheckSeg); a.Inspecao = false; a.Checou = true;
             Emit(Ev.ChecagemIniciada, a.Id, T.CheckCusto, 0);
@@ -242,8 +253,8 @@ namespace TA.Core
         /// hangar. So Cash e tempo.</summary>
         public bool Hangar(int aviao)
         {
-            Aviao a = AntesDoEmbarque(aviao);
-            if (a == null || !T.RegraManutencao || Cash < T.HangarCusto) return false;
+            if (!PodeHangar(aviao)) return false;
+            Aviao a = Avioes[aviao];
             Cash -= T.HangarCusto;
             Desembarca(a, false);
             for (int s = 0; s < 4; s++) { a.Falta[s] = 0; a.Fazendo[s] = false; }

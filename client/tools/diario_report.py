@@ -21,6 +21,12 @@ Eventos (a/b/c):
   staff_hired a=funcionário b=custo c=estação | story_delivered a=história b=passageiro c=1 se nova no álbum |
   offline_claim a=cash b=segundos | rewarded_ad_offered/_completed a=anúncio(0 cofre 2x,1 receita 2x) |
   reward_granted a=anúncio b=valor | diary_export.
+  Fase C (a/b/c, contados no total, sem conta própria): crew_hired tripulante/custo/função | crew_assigned tripulante/voo/1 manual |
+  crew_missing voo/função | crew_rest_started tripulante/s | aircraft_landed avião/voo | ground_service_done avião/serviço |
+  turnaround_done avião/voo/1 depois do fechamento | flight_takeoff avião/voo/atraso s | ground_staff_hired pessoas/custo |
+  ground_vehicle_upgraded serviço/melhoria/nível | maintenance_warning e maintenance_due avião/desgaste |
+  maintenance_check_started avião/custo/1 inspeção | maintenance_check_done avião/desgaste | hangar_started avião/custo |
+  hangar_done avião | station_unlocked estação.
 Um arquivo cujo cabeçalho não é o acima (diário de outro jogo ou de outra versão do formato) é contado e ignorado.
 """
 

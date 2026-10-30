@@ -31,6 +31,13 @@ foto cofre            -shotdelay 2 -tela cofre
 foto anuncio          -onda 2 -shotdelay 2 -tela anuncio
 foto pausa            -bot -speed 4 -shotdelay 4 -tela pausa
 foto album            -shotdelay 2 -tela album
+foto voo              -bot -speed 6 -shotdelay 8 -tela voo -cenario desgaste
+foto tripulacao       -bot -speed 6 -shotdelay 6 -tela tripulacao
+foto patio_tela       -bot -speed 6 -shotdelay 6 -tela patio
+foto equipe           -speed 4 -shotdelay 4 -tela equipe -cenario oficina
+foto salas_abertas    -speed 4 -shotdelay 6 -cenario oficina
+foto desgaste_80      -speed 4 -shotdelay 8 -vista patio -cenario desgaste
+foto hangar           -bot -speed 4 -shotdelay 20 -vista hangar -cenario hangar -hangarespera 2
 for n in 1 2 3 4 5 6 7 8 9; do foto "passo$n" -tutorial -bot -speed 8 -shotdelay 12 -tela "passo$n"; done
 
 # tutorial jogavel: o bot joga com o tutorial ligado (ENTENDI sozinho em 2 s); o log diz quais passos apareceram e terminaram
@@ -51,5 +58,10 @@ python "$ROOT/client/tools/montagem.py" "$OUT/record_mover" --saida "$OUT/mover"
 rm -rf "$OUT/record_patio"
 "$EXE" -testsession -screen-fullscreen 0 -screen-width 540 -screen-height 960 -logFile "$OUT/record_patio.log" -bot -speed 6 -recordini 18.5 -recordspeed 2 -vista geral -record "$OUT/record_patio" -recordseg 24 > /dev/null 2>&1
 python "$ROOT/client/tools/montagem.py" "$OUT/record_patio" --saida "$OUT/patio" --qps 10 || falhas=$((falhas + 1))
-rm -rf "$OUT/record_patio" "$OUT/record_mover"
+
+# -record da manutencao: o aviao com 85% vai ao hangar pela taxiway (rebocador, recuo e entrada de nariz)
+rm -rf "$OUT/record_hangar"
+"$EXE" -testsession -screen-fullscreen 0 -screen-width 540 -screen-height 960 -logFile "$OUT/record_hangar.log" -bot -speed 4 -cenario hangar -hangarespera 1 -recordini 11 -recordspeed 3 -vista hangar -record "$OUT/record_hangar" -recordseg 12 > /dev/null 2>&1
+python "$ROOT/client/tools/montagem.py" "$OUT/record_hangar" --saida "$OUT/hangar" --qps 10 || falhas=$((falhas + 1))
+rm -rf "$OUT/record_patio" "$OUT/record_mover" "$OUT/record_hangar"
 [ $falhas -eq 0 ] && echo "fotos: OK em $OUT" || { echo "fotos: $falhas falhas" >&2; exit 1; }

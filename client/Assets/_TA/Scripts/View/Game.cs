@@ -21,13 +21,15 @@ namespace TA
     ///   -autoplay N   sem render: o bot joga N ondas (Bom, Lento, Parado; retomada no meio da onda), loga AUTOPLAY OK|FAIL e sai 0/1.
     ///                 Usar com -batchmode -nographics (client/tools/verify.sh full).
     ///   -bot          o bot Bom joga na tela.        -speed N   multiplica o dt (0,1..20).
-    ///   -tela nome    jogo | melhorias | mover | cofre | anuncio | pausa | album | passoN (tutorial, passo N).
+    ///   -tela nome    jogo | melhorias | mover | cofre | anuncio | pausa | album | equipe | tripulacao | patio | voo | passoN (tutorial, passo N).
     ///   -onda K       comeca na onda K (1 = a 1a).   -passageiros N   estresse: N passageiros por onda (60 = o K3).
     ///   -tutorial     liga o tutorial no -testsession (sem gravar; com -bot o ENTENDI se aperta sozinho).
     ///   -shot f.png [-shotdelay s]   espera s s reais (padrao 1), abre a -tela, fotografa e sai 0.
     ///   -record pasta [-recordseg s]  grava s s (padrao 10) de quadros PNG a 30 qps na pasta e sai 0. Com -recordini r [-recordspeed v]:
     ///                 anda r s reais na -speed e so entao grava, na velocidade v (padrao 1): o pushback e a decolagem no GIF.
     ///   -demo         contrata os 3 e, 1,5 s depois, manda a Ana do check-in para a loja (o -record da caminhada e da troca de uniforme).
+    ///   -cenario nome oficina = abre tudo, com o Edu na oficina; desgaste = o aviao do 1o voo pousa com 85%; hangar = o mesmo, e o manda ao
+    ///                 hangar assim que encostar (o -record da manutencao).
     ///   -vista nome   perto | patio | geral: enquadramento das fotos e do -record (Mundo.Vista).
     ///   -diag arq.csv [-diagseg s]  grava a pose dos avioes e veiculos (client/tools/diag_patio.py mede o escorregamento) e sai 0.
     ///   -perf s       K3 (GDD §5.13): depois de 5 s de aquecimento, mede s s de quadros, loga PERF p10=.. media=.. com as pessoas, os
@@ -117,6 +119,7 @@ namespace TA
             else if (!string.IsNullOrEmpty(tela)) AbreTelaDev(tela);
             if (!string.IsNullOrEmpty(rec)) StartCoroutine(Record(rec));
             if (Arg("-demo") != null) StartCoroutine(Demo());
+            if (!string.IsNullOrEmpty(Arg("-cenario"))) StartCoroutine(Cenario(Arg("-cenario")));
             if (!string.IsNullOrEmpty(Arg("-vista"))) _hud.M.Vista(Arg("-vista"));
             if (Arg("-perf") != null) StartCoroutine(Perf(ArgF("-perf", 20f)));
             if (!string.IsNullOrEmpty(Arg("-diag"))) StartCoroutine(DiagPatio(Arg("-diag"), ArgF("-diagseg", 60f)));
@@ -157,6 +160,13 @@ namespace TA
         public bool Move(int f, Estacao e) => Sim.Move(f, e);
         public void Buy(Estacao e, Melhoria m) => Sim.Buy(e, m);
         public void Hire() => Sim.Hire();
+        public void Hire(Perfil p) => Sim.Hire(p);
+        public void HireTripulante(Funcao f) => Sim.HireTripulante(f);
+        public void Escala(int voo, int tripulante) => Sim.Escala(voo, tripulante);
+        public void HirePatio() => Sim.HirePatio();
+        public void BuyPatio(Servico s, Melhoria m) => Sim.BuyPatio(s, m);
+        public void Checagem(int aviao) => Sim.Checagem(aviao);
+        public void Hangar(int aviao) => Sim.Hangar(aviao);
 
         /// <summary>Botao de rewarded: pede o id de transacao ao nucleo e abre o anuncio simulado. Nunca durante arrasto (o botao some no
         /// tutorial e nas telas modais, Hud).</summary>
@@ -213,6 +223,24 @@ namespace TA
                 case Ev.Recompensa: Diario("reward_granted", e.A, e.B); break;
                 case Ev.Bonus: _hud.Toast(Textos.Bonus(e.B)); break;
                 case Ev.Marco: _hud.Toast(Textos.Marco(e.A + 1)); break;
+                // Fase C e C2 (GDD §15.1, CONTRATO_FASE_C §5)
+                case Ev.TripulanteContratado: Diario("crew_hired", e.A, e.B, e.C); break;
+                case Ev.Escalado: Diario("crew_assigned", e.A, e.B, e.C); break;
+                case Ev.SemTripulacao: Diario("crew_missing", e.A, e.B); break;
+                case Ev.Descanso: Diario("crew_rest_started", e.A, e.B); break;
+                case Ev.Pousou: Diario("aircraft_landed", e.A, e.B); break;
+                case Ev.ServicoFeito: Diario("ground_service_done", e.A, e.B); break;
+                case Ev.TurnaroundFeito: Diario("turnaround_done", e.A, e.B, e.C); break;
+                case Ev.Decolou: Diario("flight_takeoff", e.A, e.B, e.C); break;
+                case Ev.PatioContratado: Diario("ground_staff_hired", e.A, e.B); break;
+                case Ev.PatioMelhorou: Diario("ground_vehicle_upgraded", e.A, e.B, e.C); break;
+                case Ev.ManutencaoAviso: Diario("maintenance_warning", e.A, e.B); _hud.Toast(Textos.ManutencaoAviso(e.B)); break;
+                case Ev.ManutencaoPendente: Diario("maintenance_due", e.A, e.B); _hud.Toast(Textos.ManutencaoPendente); break;
+                case Ev.ChecagemIniciada: Diario("maintenance_check_started", e.A, e.B, e.C); break;
+                case Ev.ChecagemFeita: Diario("maintenance_check_done", e.A, e.B); break;
+                case Ev.HangarIniciado: Diario("hangar_started", e.A, e.B); break;
+                case Ev.HangarFeito: Diario("hangar_done", e.A); _hud.Toast(Textos.HangarFeito); break;
+                case Ev.EstacaoAberta: Diario("station_unlocked", e.A); _hud.Toast(Textos.EstacaoAberta(e.A)); break;
             }
         }
 
@@ -327,6 +355,26 @@ namespace TA
             while (Sim.Hire()) { }
             yield return new WaitForSeconds(1.5f);
             Sim.Move(0, Estacao.Loja);   // do check-in (azul) para a loja (verde): a troca de colete e a loja abrindo
+        }
+
+        /// <summary>-cenario (so no -testsession): deixa na mesa o que as fotos e o -record da manutencao e das salas novas precisam mostrar.</summary>
+        IEnumerator Cenario(string nome)
+        {
+            Sim.Cash += 5000;
+            if (nome == "oficina")
+            {
+                Sim.TotalEmbarcados = Math.Max(Sim.TotalEmbarcados, Sim.T.Marcos[1]);
+                while (Sim.Hire()) { }
+                for (int p = Sim.MaxFuncionarios; p < Sim.MaxEquipe; p++) Sim.Hire((Perfil)p);
+                yield return null;
+                for (int i = 0; i < Sim.Staff.Count; i++) Sim.Move(i, Funcionario.Casa(Sim.Staff[i].Perfil));
+                yield break;
+            }
+            Sim.Avioes[0].Desgaste = 85;
+            if (nome != "hangar") yield break;
+            while (!Sim.Avioes[0].NoPatio) yield return null;
+            yield return new WaitForSeconds(ArgF("-hangarespera", 6f));
+            Sim.Hangar(0);
         }
 
         /// <summary>K3: p10 do FPS (o quadro mais lento dos 90% mais rapidos) e a media, em tempo real, sem o aquecimento.</summary>

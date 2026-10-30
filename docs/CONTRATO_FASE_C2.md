@@ -64,4 +64,4 @@ Schema 3. Grava as 8 estações (níveis, fila e atendimento) e o perfil de cada
 
 **Estado em 2026-10-30:** linhas 1 a 6 feitas neste PR; a 7 fica com a saída do `verify.sh full` no PR.
 
-**Fica para a View:** desenhar as 4 salas novas, os 3 bonecos novos e o ícone do perfil; ler `sim.Estacoes` (as 8) no lugar de `sim.Stations` (as 4 da v0.1); a lista completa está no corpo do PR.
+**Tela (2026-10-30):** as 4 salas no mapa (bagagem ao norte do check-in, alimentação ao sul do portão, despacho e oficina a leste do portão), fechadas até o marco; Dani, Edu e Fátima com a máscara do uniforme; ícone por perfil; tela da Equipe; mover para as 8. O despacho não tem upgrade, então a torre cresce com o marco, como o terminal; o hangar cresce com a Velocidade da oficina.

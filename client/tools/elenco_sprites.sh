@@ -33,8 +33,8 @@ for a in "${lista[@]}"; do
   case $a in
     crianca) pax "$a" 0.30 ;;
     passageiro_*|passageira_*) pax "$a" 0.40 ;;
-    atendente|seguranca|vendedor) ator "$a" ta_func ;;   # o uniforme (elenco_ta.py, material TA_MASK) tinge na cor do setor
-    *) ator "$a" ta_pax ;;   # patio: uniforme fixo da funcao, sem mascara
+    atendente|seguranca|vendedor|bagageiro|mecanico|despachante) ator "$a" ta_func ;;   # o uniforme (elenco_ta.py, material TA_MASK) tinge na cor do setor
+    *) ator "$a" ta_pax ;;   # tripulacao: uniforme fixo da funcao, sem mascara
   esac || falhas=$((falhas + 1))
 done
 [ $falhas -eq 0 ] && echo "elenco: OK em $OUT" || { echo "elenco: $falhas falhas" >&2; exit 1; }

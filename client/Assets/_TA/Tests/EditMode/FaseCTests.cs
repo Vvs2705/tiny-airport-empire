@@ -188,6 +188,26 @@ namespace TA.Tests
         }
 
         [Test]
+        public void Tela_PodeChecagem_PodeHangar_PodeEscala_SaoAsMesmasTravasDasIntencoes()
+        {
+            Sim s = Pronta();
+            Run(s, 25f);
+            s.Avioes[0].Desgaste = 30;
+            s.Cash = s.T.CheckCusto - 1;
+            Assert.IsFalse(s.PodeChecagem(0), "sem Cash");
+            Assert.IsFalse(s.PodeHangar(0), "sem Cash");
+            Assert.IsTrue(s.PodeEscala(0), "a escala nao custa Cash");
+            Assert.IsFalse(s.PodeEscala(1), "o aviao 1 ainda nao encostou");
+            s.Cash = 1000;
+            Assert.IsTrue(s.PodeChecagem(0));
+            Assert.IsTrue(s.PodeHangar(0));
+            Assert.IsTrue(s.Checagem(0));
+            Assert.IsFalse(s.PodeChecagem(0), "uma por turnaround");
+            Run(s, 60f);
+            Assert.IsFalse(s.PodeChecagem(0) || s.PodeHangar(0) || s.PodeEscala(0), "embarque aberto");
+        }
+
+        [Test]
         public void Manutencao_ChecagemRapida_UmaPorTurnaround_SoAntesDoEmbarque_SoComCash()
         {
             Sim s = Pronta();
