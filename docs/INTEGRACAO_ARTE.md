@@ -1,6 +1,6 @@
 # Little Terminal — Arte para integrar no jogo (2026-10-30)
 
-**Estado:** 236 peças HD no disco (4K, ~50 000 faces, Privado, licença `tripo_pago`), todas com a origem e o SHA em `PROVENIENCIA.md` e a lista de pedido em `ASSETS.md`. Esta página é o roteiro da etapa de integração; nenhum modelo foi convertido ainda.
+**Estado:** 238 peças HD no disco (4K, ~50 000 faces, Privado, licença `tripo_pago`), todas com a origem e o SHA em `PROVENIENCIA.md` e a lista de pedido em `ASSETS.md`. Esta página é o roteiro da etapa de integração; nenhum modelo foi convertido ainda.
 
 ## Regras de integração
 
@@ -22,6 +22,7 @@
 | `raio_x` | `raio_x_hd/` | estação segurança, nível 1 | malha |
 | `raio_x_n2` | `raio_x_n2_hd/` | estação segurança, nível 2 | malha |
 | `raio_x_n3` | `raio_x_n3_hd/` | estação segurança, nível 3 | malha |
+| `cabine_scanner_corpo` | `cabine_scanner_corpo_hd/` | cabine de raio-x de corpo inteiro, peça avulsa da segurança no nível mais alto (a View repete uma por scanner); os painéis saíram em verde-água opaco, trocar por material de vidro se quiser translúcido | malha |
 | `esteira_bagagem` | `esteira_bagagem_hd/` | estação bagagem, nível 1 | malha |
 | `esteira_bagagem_n2` | `esteira_bagagem_n2_hd/` | estação bagagem, nível 2 | malha |
 | `esteira_bagagem_n3` | `esteira_bagagem_n3_hd/` | estação bagagem, nível 3 | malha |
@@ -247,6 +248,7 @@
 | `arco_entrada` | `arco_entrada_hd/` | entrada do aeroporto | malha |
 | `fonte_praca` | `fonte_praca_hd/` | praça | malha |
 | `caminho_pedra` | `caminho_pedra_hd/` | calçada | malha |
+| `garagem_patio` | `garagem_patio_hd/` | galpão de pátio com 6 vagas, aberto na frente, para rebocador, esteira, ônibus, catering e combustível (Vale Verde); vagas vazias, escalar bem maior que `garagem_estacionamento` | malha |
 
 ## 10. Terreno, obra e mapa que cresce (malha)
 
