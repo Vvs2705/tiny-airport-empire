@@ -95,8 +95,8 @@ MUTANTES = [
     (
         "incidente nao tira Cash",
         "Sim.Incidentes.cs",
-        'if (Steps == i.Inicio) Emit(Ev.IncidenteInicio, (int)i.Tipo, i.Vaga, (int)i.Estacao);',
-        'if (Steps == i.Inicio) { Cash = Math.Max(0, Cash - 10); Emit(Ev.IncidenteInicio, (int)i.Tipo, i.Vaga, (int)i.Estacao); }',
+        "if (Steps == i.Inicio) Emit(Ev.IncidenteInicio, (int)i.Tipo, i.Vaga, (int)i.Estacao);",
+        "if (Steps == i.Inicio) { Cash = Math.Max(0, Cash - 10); Emit(Ev.IncidenteInicio, (int)i.Tipo, i.Vaga, (int)i.Estacao); }",
     ),
     (
         "um incidente por vez, com folga depois",
@@ -145,6 +145,78 @@ MUTANTES = [
         "Sim.cs",
         "s.Fila.RemoveAll(p => p.Onda == v.Onda && p.Voo == v.Indice);",
         "if ((int)s.Tipo < 4) s.Fila.RemoveAll(p => p.Onda == v.Onda && p.Voo == v.Indice);",
+    ),
+    (
+        "falha de aviao so acima do aviso",
+        "Sim.Clima.cs",
+        " && Avioes[aviao].Desgaste >= T.DesgasteAviso;",
+        ";",
+    ),
+    (
+        "uma falha por voo",
+        "Sim.Clima.cs",
+        "if (a.VooId < 0 || a.VooId == a.Falhou || !EmRisco(a.Id))",
+        "if (a.VooId < 0 || !EmRisco(a.Id))",
+    ),
+    (
+        "reparo da pane so com Cash",
+        "Sim.Clima.cs",
+        "if (aviao < 0 || aviao >= Avioes.Length || Cash < T.PaneCusto || Reparo > 0) return false;",
+        "if (aviao < 0 || aviao >= Avioes.Length || Reparo > 0) return false;",
+    ),
+    (
+        "clima tem o aviso inteiro",
+        "Sim.Clima.cs",
+        "Aviso = inicio - Passos(T.AvisoSeg) };",
+        "Aviso = inicio };",
+    ),
+    (
+        "Cash nao muda o clima",
+        "Sim.Clima.cs",
+        "double x = U(w, 0, 0, 30);",
+        "double x = U(w, 0, 0, 30) + (Cash > 0 ? 0.5 : 0);",
+    ),
+    (
+        "anuncio nao evita falha",
+        "Sim.Clima.cs",
+        "if (U(w, a.Id, 0, 20) >= T.FalhaAviaoChance) return TipoFalha.Nenhuma;",
+        "if (BoostLeft > 0 || U(w, a.Id, 0, 20) >= T.FalhaAviaoChance) return TipoFalha.Nenhuma;",
+    ),
+    (
+        "pane nao tira Cash",
+        "Sim.Clima.cs",
+        "a.Falhou = a.VooId; a.Pane = true;",
+        "a.Falhou = a.VooId; a.Pane = true; Cash = Math.Max(0, Cash - 5);",
+    ),
+    (
+        "todo retorno pousa seguro",
+        "Sim.Clima.cs",
+        "Emit(Ev.PousoSeguro, a.Id);",
+        "",
+    ),
+    (
+        "retorno tem prioridade na pista",
+        "Sim.Patio.cs",
+        "(a.Retorno > 0 ? Steps >= a.Chega : Steps >= a.Chega + EsperaPista && !PistaFechada && Steps >= PistaAte)",
+        "Steps >= a.Chega + EsperaPista && !PistaFechada && Steps >= PistaAte",
+    ),
+    (
+        "sem Cash a pane nao trava o jogo",
+        "Sim.Patio.cs",
+        "if (a.NoPatio && (a.Pendente || a.Pane) && a.Check == 0 && a.FechouEm < 0 && MecanicoLivre)",
+        "if (a.NoPatio && a.Pendente && a.Check == 0 && a.FechouEm < 0 && MecanicoLivre)",
+    ),
+    (
+        "com clima a frente fria sai dos pesos",
+        "Sim.Incidentes.cs",
+        "if (T.RegraClima) pesos[(int)TipoIncidente.FrenteFria] = 0;",
+        "",
+    ),
+    (
+        "atrasar custa o bonus",
+        "Sim.Patio.cs",
+        "return !PistaFechada && !v.Atrasado && EsperaDecolagem(a) == 0 &&",
+        "return !PistaFechada && EsperaDecolagem(a) == 0 &&",
     ),
 ]
 

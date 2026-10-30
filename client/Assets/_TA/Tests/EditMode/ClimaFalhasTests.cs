@@ -56,14 +56,14 @@ namespace TA.Tests
         // ------------------------------------------------------------------ relogio e demanda
 
         [Test]
-        public void Relogio_1Onda3Horas_Dia8Ondas_Ano64Ondas()
+        public void Relogio_1Onda3Horas_Dia8Ondas_Ano32Ondas()
         {
             var noite = new Sim();
             Assert.AreEqual((6f, 0, false, Epoca.Verao), (noite.Hora, noite.DiaJogo, noite.Noite, noite.Epoca), "a onda 0 comeca as 06:00, no verao");
             foreach ((int onda, float hora, int dia, bool escuro, Epoca e) in new[]
             {
-                (1, 9f, 0, false, Epoca.Verao), (4, 18f, 0, true, Epoca.Verao), (6, 0f, 0, true, Epoca.Verao), (8, 6f, 1, false, Epoca.Verao),
-                (16, 6f, 2, false, Epoca.Outono), (32, 6f, 4, false, Epoca.Inverno), (48, 6f, 6, false, Epoca.Primavera), (64, 6f, 8, false, Epoca.Verao),
+                (1, 9f, 0, false, Epoca.Verao), (4, 18f, 0, true, Epoca.Verao), (6, 0f, 0, true, Epoca.Verao), (7, 3f, 0, true, Epoca.Verao),
+                (8, 6f, 1, false, Epoca.Outono), (16, 6f, 2, false, Epoca.Inverno), (24, 6f, 3, false, Epoca.Primavera), (32, 6f, 4, false, Epoca.Verao),
             })
             {
                 var s = new Sim();
@@ -84,7 +84,7 @@ namespace TA.Tests
             int salvador = (int)Math.Round(t.Pax(0) * (double)t.Rotas[4].Pax);
             Assert.AreEqual(salvador, s.Voos[0].Total, "antes do marco 1 a demanda nao muda");
 
-            foreach ((int onda, double fator) in new[] { (0, 1.25 * 1.3), (2, 0.9 * 1.3), (6, 0.75 * 1.3), (16, 1.25 * 0.9), (32, 1.25 * 0.8) })
+            foreach ((int onda, double fator) in new[] { (0, 1.25 * 1.3), (2, 0.9 * 1.3), (6, 0.75 * 1.3), (8, 1.25 * 0.9), (16, 1.25 * 0.8) })
             {
                 var o = new Sim(t, 1) { TotalEmbarcados = 150 };
                 o.IrParaOnda(onda);
@@ -92,7 +92,7 @@ namespace TA.Tests
                 Assert.AreEqual((int)Math.Round(t.Pax(onda) * (double)t.Rotas[4].Pax * (double)(float)(fator / 1.0)), o.Voos[0].Total, 1, "onda " + onda);
             }
             Tuning desligada = BalanceTests.AbertoC4(1);
-            desligada.RegraEpocas = false;
+            desligada.RegraEpocas = desligada.RegraPicos = false;
             var d = new Sim(desligada, 1);
             RegrasTests.Run(d, 1f);
             Assert.AreEqual(salvador, d.Voos[0].Total, "chave desligada: so visual");
@@ -190,21 +190,50 @@ namespace TA.Tests
         }
 
         [Test]
-        public void VentoENeblina_CadaPousoEDecolagemEspera()
+        public void Neblina_CadaPousoEDecolagemEspera_SaiSemBonus()
         {
-            foreach (TipoIncidente tipo in new[] { TipoIncidente.Vento, TipoIncidente.Neblina })
-            {
-                Sim s = Pronta(ComClima(tipo));
-                Incidente i = RotasIncidentesTests.AteOAviso(s);
-                RotasIncidentesTests.Ate(s, i.Inicio + 1);
-                Assert.AreEqual((int)(s.ClimaDe(tipo).Espera * Sim.Hz), s.EsperaPista, tipo.ToString());
-                Evento? d = null;
-                while (s.Steps < i.Fim && d == null) d = Espera(s, Ev.Decolou, 1f);
-                Assert.IsNotNull(d, tipo + ": alguem decola na janela");
-                Assert.GreaterOrEqual(d.Value.C, (int)s.ClimaDe(tipo).Espera - 1, tipo + ": a decolagem esperou");
-                RotasIncidentesTests.Ate(s, i.Fim + 1);
-                Assert.AreEqual(0, s.EsperaPista);
-            }
+            Sim s = Pronta(ComClima(TipoIncidente.Neblina));
+            Incidente i = RotasIncidentesTests.AteOAviso(s);
+            RotasIncidentesTests.Ate(s, i.Inicio + 1);
+            Assert.AreEqual((int)(s.ClimaDe(TipoIncidente.Neblina).Espera * Sim.Hz), s.EsperaPista);
+            Evento? d = null;
+            while (s.Steps < i.Fim && d == null) d = Espera(s, Ev.Decolou, 1f);
+            Assert.IsNotNull(d, "alguem decola na janela");
+            Assert.GreaterOrEqual(d.Value.C, (int)s.ClimaDe(TipoIncidente.Neblina).Espera - 1, "a decolagem esperou");
+            RotasIncidentesTests.Ate(s, i.Fim + 1);
+            Assert.AreEqual(0, s.EsperaPista);
+        }
+
+        [Test]
+        public void Vento_RajadaFechaAPista_SemPararOPatio()
+        {
+            Sim s = Pronta(ComClima(TipoIncidente.Vento, 1));
+            Incidente i = RotasIncidentesTests.AteOAviso(s);
+            RotasIncidentesTests.Ate(s, i.Inicio + 1);
+            Assert.AreEqual((true, false, 0), (s.PistaFechada, s.PatioParado, s.EsperaPista));
+            Assert.AreEqual(45 * Sim.Hz, i.Fim - i.Inicio);
+        }
+
+        [Test]
+        public void Adiantar_NoTemporal_ContinuaEmbarcandoPelaPonte_NaNeblinaPegaAVez()
+        {
+            Sim s = Pronta(ComClima(TipoIncidente.Temporal));
+            Incidente i;
+            do { RotasIncidentesTests.Ate(s, s.Steps + s.OndaPassos); i = RotasIncidentesTests.AteOAviso(s); } while (i.Vaga != 0);
+            s.Hire();
+            Assert.IsTrue(s.Adianta());
+            RotasIncidentesTests.Ate(s, i.Inicio + 1);
+            int bordo = s.Voos[0].Embarcados;
+            RotasIncidentesTests.Ate(s, i.Inicio + 12 * Sim.Hz);
+            Assert.Greater(s.Voos[0].Embarcados + s.St(Estacao.Portao).Atendendo.Count + s.St(Estacao.Portao).Fila.Count, bordo - 1, "o portao segue");
+
+            Sim n = Pronta(ComClima(TipoIncidente.Neblina));
+            Incidente j = RotasIncidentesTests.AteOAviso(n);
+            Assert.IsTrue(n.Adianta());
+            Voo v = n.Voos[j.Vaga];
+            var ev = new List<Evento>();
+            for (int k = 0; k < 170 * Sim.Hz && !ev.Any(e => e.Tipo == Ev.Decolou && e.B == v.Id); k++) { n.Tick(Sim.Step); ev.AddRange(n.Events); }
+            Assert.LessOrEqual(ev.Single(e => e.Tipo == Ev.Decolou && e.B == v.Id).C, 20, "quem adiantou nao espera a neblina");
         }
 
         [Test]
@@ -224,7 +253,7 @@ namespace TA.Tests
             Voo w = o.Voos[j.Vaga];
             var ev = new List<Evento>();
             for (int k = 0; k < 170 * Sim.Hz && !ev.Any(e => e.Tipo == Ev.VooPartiu && e.A == w.Id); k++) { o.Tick(Sim.Step); ev.AddRange(o.Events); }
-            Assert.AreEqual(0, o.Avioes[w.Indice].FechouEm >= 0 ? (o.Degelando(w.Indice) ? 1 : 0) : 0, "quem adiantou nao fica esperando o caminhao");
+            Assert.IsFalse(o.Degelando(w.Indice), "quem adiantou nao fica esperando o caminhao");
         }
 
         [Test]
@@ -433,6 +462,7 @@ namespace TA.Tests
             for (int i = 0; i < ondas * s.OndaPassos; i++)
             {
                 if (i % s.OndaPassos == 0) foreach (Aviao a in s.Avioes) a.Desgaste = Math.Max(a.Desgaste, 85);   // sempre na faixa: todo voo pode falhar
+                if (seed % 2 == 0) s.Atrasa();   // o bot adianta: nas sementes pares o portao atrasa antes
                 b.Step(s);
                 foreach (Evento e in s.Events)
                 {

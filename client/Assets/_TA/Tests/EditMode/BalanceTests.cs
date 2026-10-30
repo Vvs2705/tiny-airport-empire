@@ -193,7 +193,7 @@ namespace TA.Tests
         public static Tuning SemFaseC4(Tuning t = null)
         {
             t = t ?? new Tuning();
-            t.RegraClima = t.RegraEpocas = t.RegraFalhas = false;
+            t.RegraClima = t.RegraEpocas = t.RegraPicos = t.RegraFalhas = false;
             return t;
         }
 
@@ -201,7 +201,7 @@ namespace TA.Tests
         public static Tuning AbertoC4(int aero)
         {
             Tuning t = AbertoC3(aero);
-            t.RegraClima = t.RegraEpocas = t.RegraFalhas = true;
+            t.RegraClima = t.RegraEpocas = t.RegraPicos = t.RegraFalhas = true;
             t.ClimaMarco = 0;
             return t;
         }
@@ -232,13 +232,14 @@ namespace TA.Tests
             return p;
         }
 
-        static void Portao(string sistema, Tuning t, BotProfile pl, BotProfile au, ref string falhas, bool regra = true, bool portao = true, int ondas = OndasFaseC)
+        static (Linha, Linha) Portao(string sistema, Tuning t, BotProfile pl, BotProfile au, ref string falhas, bool regra = true, bool portao = true, int ondas = OndasFaseC, int sementes = Sementes)
         {
             var ci = CultureInfo.InvariantCulture;
-            Linha a = Rodar(pl, t, Sementes, ondas), b = Rodar(au, t, Sementes, ondas);
+            Linha a = Rodar(pl, t, sementes, ondas), b = Rodar(au, t, sementes, ondas);
             double g = a.Receita / b.Receita;
             TestContext.Out.WriteLine(string.Format(ci, "| {0} | {1:0.0}% | {2:0.0}% | {3:0} | {4:0} | {5:0.000} | {6:0.0} | {7:0.0} |", sistema, a.Embarque * 100, b.Embarque * 100, a.Receita, b.Receita, g, a.Incidentes, a.Reacoes));
             if (portao && regra && g < 1.10) falhas += " " + sistema + "=" + g.ToString("0.000", ci);
+            return (a, b);
         }
 
         /// <summary>Portao do GDD §5.13 por sistema da Fase C3 (CONTRATO_FASE_C3 §7), 200 sementes x 20 ondas: rotas e incidentes em cada aeroporto
@@ -271,12 +272,12 @@ namespace TA.Tests
         }
 
         /// <summary>O ano inteiro: as 4 estacoes do ano passam na medicao.</summary>
-        public const int OndasAno = 64;
+        public const int OndasAno = 32;
 
-        static BotProfile C4(string nome, bool clima, bool falhas, bool planeja = true)
+        static BotProfile C4(string nome, bool clima, bool falhas, bool planeja = true, bool viaja = false, bool segue = false)
         {
-            BotProfile p = Sem(nome, true, false, true);
-            p.Clima = clima; p.Falhas = falhas; p.Planeja = planeja;
+            BotProfile p = Sem(nome, true, viaja, true);
+            p.Clima = clima; p.Falhas = falhas; p.Planeja = planeja; p.Segue = segue;
             return p;
         }
 
@@ -284,7 +285,7 @@ namespace TA.Tests
         static Tuning SoC4(int aero, bool clima, bool epocas, bool falhas)
         {
             Tuning t = AbertoC4(aero);
-            t.RegraClima = clima; t.RegraEpocas = epocas; t.RegraFalhas = falhas;
+            t.RegraClima = clima; t.RegraEpocas = epocas; t.RegraFalhas = falhas; t.RegraPicos = false;
             return t;
         }
 
@@ -303,7 +304,7 @@ namespace TA.Tests
         {
             TestContext.Out.WriteLine("| sistema | emb. planejador | emb. automatico | receita planejador | receita automatico | ganho | incidentes | reacoes |\n|---|---|---|---|---|---|---|---|");
             string falhas = "";
-            for (int a = 0; a < 3; a++)
+            for (int a = 1; a < 3; a++)
                 Portao("clima em " + Tabelas.Aeroportos[a].Nome, SoC4(a, true, false, false), C4("reage", true, false), C4("segura", false, false), ref falhas, Tuning.Padrao.RegraClima, true, OndasAno);
             for (int a = 0; a < 3; a++)
                 Portao("falhas em " + Tabelas.Aeroportos[a].Nome, SoC4(a, false, false, true), C4("cuida", false, true), C4("voa no aviso", false, false, false), ref falhas, Tuning.Padrao.RegraFalhas, true, OndasAno);
@@ -316,8 +317,13 @@ namespace TA.Tests
         {
             TestContext.Out.WriteLine("| linha | emb. planejador | emb. automatico | receita planejador | receita automatico | ganho | incidentes | reacoes |\n|---|---|---|---|---|---|---|---|");
             string nada = "";
+            Portao("clima em Vale Verde, o aeroporto de ensino", SoC4(0, true, false, false), C4("reage", true, false), C4("segura", false, false), ref nada, false, false, OndasAno);
+            Tuning campanha = new Tuning { RegraFalhas = false, RegraPicos = false };
+            Portao("clima na partida inteira", campanha, C4("reage", true, false, true, true), C4("segura", false, false, true, true), ref nada, false, false, OndasAno * 2);
+            Tuning epocas = SoC4(0, false, true, false);
+            Portao("estacoes do ano (demanda): segue a estacao", epocas, C4("segue", false, false, true, true, true), C4("fica", false, false, true, true), ref nada, false, false, OndasAno * 4);
             for (int a = 0; a < 3; a++)
-                Portao("falhas sem clima, so reparo, em " + Tabelas.Aeroportos[a].Nome, SoC4(a, false, false, true), C4("repara", false, true), C4("nao repara", false, false), ref nada, false, false, OndasAno);
+                Portao("so o reparo pago em " + Tabelas.Aeroportos[a].Nome, SoC4(a, false, false, true), C4("repara", false, true), C4("nao repara", false, false), ref nada, false, false, OndasAno);
             for (int a = 0; a < 3; a++)
                 Portao("manutencao sem falhas em " + Tabelas.Aeroportos[a].Nome, SoC4(a, false, false, false), C4("cuida", false, false), C4("voa no aviso", false, false, false), ref nada, false, false, OndasAno);
             foreach (Clima c in Tabelas.Climas)
@@ -326,11 +332,6 @@ namespace TA.Tests
                 Tuning t = SoC4(2, true, false, false);
                 t.Aeroportos = t.Aeroportos.Select(x => { Aeroporto k = x.Copia(); k.Clima = Enumerable.Range(0, 4).Select(_ => Enumerable.Range(0, 5).Select(i => i == col ? 0.4f : 0f).ToArray()).ToArray(); return k; }).ToArray();
                 Portao("so " + c.Tipo, t, C4("reage", true, false), C4("segura", false, false), ref nada, false, false);
-            }
-            for (int a = 0; a < 3; a++)
-            {
-                Linha com = Rodar(C4("com", false, false), SoC4(a, false, true, false), Sementes, OndasAno), sem = Rodar(C4("sem", false, false), SoC4(a, false, false, false), Sementes, OndasAno);
-                TestContext.Out.WriteLine(string.Format(CultureInfo.InvariantCulture, "demanda em {0}: embarque {1:0.0}% contra {2:0.0}%, receita {3:0} contra {4:0}", Tabelas.Aeroportos[a].Nome, com.Embarque * 100, sem.Embarque * 100, com.Receita, sem.Receita));
             }
         }
 

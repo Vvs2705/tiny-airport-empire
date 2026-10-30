@@ -324,16 +324,17 @@ namespace TA.Core
         public float PicoExtra = 0.35f, ConexaoExtra = 0.25f, ConexaoAntes = 30f; public int ConexaoTarifa = 3;
 
         // ---- Fase C4 (CONTRATO_FASE_C4, hipoteses) ----
-        /// <summary>Portao de design do GDD §5.13 por sistema. Tudo false = o jogo da Fase C3 (a frente fria volta aos pesos do aeroporto).</summary>
-        public bool RegraClima = true, RegraEpocas = true, RegraFalhas = true;
+        /// <summary>Portao de design do GDD §5.13 por sistema. Tudo false = o jogo da Fase C3 (a frente fria volta aos pesos do aeroporto). A demanda
+        /// por estacao do ano ficou so visual: ganho 0,985 (BALANCE.md D-C4a). Os picos do dia nao tem escolha propria: so nao podem quebrar os portoes.</summary>
+        public bool RegraClima = true, RegraEpocas = false, RegraPicos = true, RegraFalhas = true;
         /// <summary>Ondas por dia (1 onda = 3 h de jogo), dias por estacao do ano, hora em que a onda 0 comeca e marco que abre clima e demanda.</summary>
-        public int DiaOndas = 8, EpocaDias = 2, ClimaMarco = 1; public float HoraInicial = 6f;
+        public int DiaOndas = 8, EpocaDias = 1, ClimaMarco = 1; public float HoraInicial = 6f;
         /// <summary>Fator de passageiros de cada onda do dia, a partir das 06h: picos de manha e no fim da tarde.</summary>
         public float[] DemandaHora = { 1.25f, 1f, 0.9f, 1f, 1.25f, 1f, 0.75f, 0.85f };
         /// <summary>As linhas de clima (Rotas.cs) e os s que o portao atrasado fecha depois de reabrir.</summary>
         public Clima[] Climas = Tabelas.Climas; public float AtrasoFolga = 20f;
         /// <summary>Falha por voo com o desgaste no aviso, e os pesos de pane, rejeicao e retorno.</summary>
-        public float FalhaAviaoChance = 0.3f; public int[] FalhaAviaoPesos = { 3, 2, 1 };
+        public float FalhaAviaoChance = 0.4f; public int[] FalhaAviaoPesos = { 3, 2, 1 };
         public int PaneCusto = 30; public float PaneSeg = 8f;
         /// <summary>Rejeicao: o aviao sai RejeicaoSeg s depois. Retorno: pede RetornoPede s depois de decolar e pousa RetornoVolta s depois disso.
         /// Os dois deixam a pista bloqueada por PistaBloqueioSeg s.</summary>

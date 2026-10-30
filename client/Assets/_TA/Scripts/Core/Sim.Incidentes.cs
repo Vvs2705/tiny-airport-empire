@@ -118,8 +118,8 @@ namespace TA.Core
         // ------------------------------------------------------------------ intencoes do jogador
 
         /// <summary>Clima, durante o aviso: o embarque do voo atingido abre agora e continua com a pista fechada (TA-4: quem adianta nao perde o
-        /// voo). A decolagem espera a pista abrir; na neve, quem adiantou ja degelou. Sem adiantar, o portao para ate a pista abrir e quem ficou
-        /// perde so a propria receita.</summary>
+        /// voo). A decolagem espera a pista abrir; com vento, neblina ou neve, quem adiantou ja pegou a vez e ja degelou. Sem adiantar, o portao
+        /// para ate a pista abrir e quem ficou perde so a propria receita.</summary>
         public bool Adianta()
         {
             Incidente i = Inc;

@@ -26,7 +26,10 @@ namespace TA.Core
         Epoca EpocaDe(int w) => (Epoca)(w / (T.DiaOndas * T.EpocaDias) % 4);
 
         /// <summary>Fator de passageiros da onda w: hora do dia x estacao do ano no aeroporto. Abre no marco Tuning.ClimaMarco.</summary>
-        double Demanda(int w) => T.RegraEpocas && Marco >= T.ClimaMarco ? T.DemandaHora[w % T.DiaOndas] * (double)T.Aeroportos[AeroportoAtual].Demanda[(int)EpocaDe(w)] : 1.0;
+        double Demanda(int w) => Marco < T.ClimaMarco ? 1.0 : (T.RegraPicos ? T.DemandaHora[w % T.DiaOndas] : 1.0) * (T.RegraEpocas ? DemandaDe(AeroportoAtual, w) : 1.0);
+
+        /// <summary>Fator da estacao do ano no aeroporto a, na onda w.</summary>
+        public double DemandaDe(int a, int w) => T.Aeroportos[a].Demanda[(int)EpocaDe(w)];
 
         // ------------------------------------------------------------------ clima
 
@@ -40,7 +43,7 @@ namespace TA.Core
         /// <summary>O clima em curso, entre Inicio e Fim (null = nenhum).</summary>
         Clima ClimaAgora => T.RegraIncidentes && _inc != null && Steps >= _inc.Inicio && Steps < _inc.Fim ? ClimaDe(_inc.Tipo) : null;
 
-        /// <summary>Raio perto: servicos e embarque param por tempo definido.</summary>
+        /// <summary>Raio perto: os servicos do patio param por tempo definido, e a pista fecha junto.</summary>
         public bool PatioParado => ClimaAgora?.ParaPatio == true;
 
         /// <summary>Passos que cada pouso e decolagem espera agora (vento e neblina: capacidade da pista reduzida).</summary>
@@ -71,12 +74,12 @@ namespace TA.Core
             _inc = new Incidente { Tipo = tipo, Vaga = vaga, Inicio = inicio, Fim = inicio + Passos(c.Seg), Aviso = inicio - Passos(T.AvisoSeg) };
         }
 
-        /// <summary>Passos que a pista ou o degelo seguram o aviao depois do portao. Quem adiantou o embarque na neve ja degelou.</summary>
+        /// <summary>Passos que a pista ou o degelo seguram o aviao depois do portao. Quem adiantou o embarque ja pegou a vez na pista e ja degelou.</summary>
         int EsperaDecolagem(Aviao a)
         {
             Clima c = ClimaAgora;
-            if (c == null) return 0;
-            return c.Espera > 0 ? Passos(c.Espera) : c.Degelo > 0 && VooDo(a)?.Adiantado != true ? Passos(c.Degelo) : 0;
+            if (c == null || VooDo(a)?.Adiantado == true) return 0;
+            return c.Espera > 0 ? Passos(c.Espera) : c.Degelo > 0 ? Passos(c.Degelo) : 0;
         }
 
         /// <summary>O caminhao de degelo esta no aviao agora.</summary>

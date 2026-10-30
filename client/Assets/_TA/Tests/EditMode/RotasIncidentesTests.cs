@@ -376,7 +376,7 @@ namespace TA.Tests
             {
                 BotProfile sem = BotProfile.Bom;
                 sem.Rotas = sem.Viaja = sem.Incidentes = false;
-                Bot.Resultado a = Bot.Medir(BotProfile.Bom, seed, 6, BalanceTests.SemFaseC3()), b = Bot.Medir(sem, seed, 6);
+                Bot.Resultado a = Bot.Medir(BotProfile.Bom, seed, 6, BalanceTests.SemFaseC3()), b = Bot.Medir(sem, seed, 6, BalanceTests.SemFaseC4());
                 Assert.AreEqual((b.Receita, b.Embarque, b.Moves), (a.Receita, a.Embarque, a.Moves));
             }
         }

@@ -130,7 +130,7 @@ namespace TA.Core
             foreach (Aviao a in Avioes)
                 if (a.NoPatio && (a.Pendente || a.Pane) && a.Check == 0 && a.FechouEm < 0 && MecanicoLivre)
                 {
-                    a.Check = PassosOficina(T.InspecaoSeg); a.Inspecao = true; a.Checou = true;
+                    a.Check = a.Pane ? Passos(T.InspecaoSeg) : PassosOficina(T.InspecaoSeg); a.Inspecao = true; a.Checou = true;
                     Emit(Ev.ChecagemIniciada, a.Id, 0, 1);
                 }
         }

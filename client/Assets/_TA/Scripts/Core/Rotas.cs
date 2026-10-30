@@ -83,11 +83,11 @@ namespace TA.Core
         {
             new Aeroporto { Id = "vv", Nome = "Vale Verde", Pesos = new[] { 1, 1, 1, 0 }, Clima = new[]
             {
-                new[] { 0f, 0.3f, 0f, 0f, 0f }, new[] { 0.1f, 0f, 0f, 0.15f, 0f }, new[] { 0.15f, 0f, 0f, 0.15f, 0f }, new[] { 0f, 0.15f, 0f, 0f, 0f },
+                new[] { 0f, 0.35f, 0f, 0f, 0f }, new[] { 0.15f, 0f, 0f, 0.1f, 0f }, new[] { 0.2f, 0f, 0f, 0.1f, 0f }, new[] { 0f, 0.2f, 0f, 0f, 0f },
             } },
             new Aeroporto { Id = "ca", Nome = "Costa Azul", Marco = 2, Custo = 1200, Incidentes = 0.4f, Desgaste = 1.5f, Pesos = new[] { 4, 3, 2, 1 }, Demanda = new[] { 1.3f, 0.9f, 0.8f, 1f }, Clima = new[]
             {
-                new[] { 0f, 0.15f, 0.2f, 0f, 0f }, new[] { 0f, 0f, 0.25f, 0f, 0f }, new[] { 0.15f, 0f, 0.25f, 0f, 0f }, new[] { 0f, 0f, 0.15f, 0f, 0f },
+                new[] { 0f, 0.2f, 0.25f, 0f, 0f }, new[] { 0f, 0f, 0.3f, 0f, 0f }, new[] { 0.2f, 0f, 0.25f, 0f, 0f }, new[] { 0f, 0.1f, 0.2f, 0f, 0f },
             } },
             new Aeroporto { Id = "ag", Nome = "Aurora Global", Marco = 3, Custo = 3000, Incidentes = 0.5f, Pesos = new[] { 4, 3, 1, 2 }, Demanda = new[] { 1f, 1f, 1.2f, 0.8f }, Clima = new[]
             {
@@ -99,8 +99,8 @@ namespace TA.Core
         public static readonly Clima[] Climas =
         {
             new Clima { Tipo = TipoIncidente.FrenteFria, Antes = 48f, Seg = 60f, FechaPista = true },
-            new Clima { Tipo = TipoIncidente.Temporal, Antes = 48f, Seg = 40f, FechaPista = true, ParaPatio = true },
-            new Clima { Tipo = TipoIncidente.Vento, Antes = 60f, Seg = 90f, Espera = 25f },
+            new Clima { Tipo = TipoIncidente.Temporal, Antes = 48f, Seg = 55f, FechaPista = true, ParaPatio = true },
+            new Clima { Tipo = TipoIncidente.Vento, Antes = 48f, Seg = 45f, FechaPista = true },
             new Clima { Tipo = TipoIncidente.Neblina, Antes = 60f, Seg = 90f, Espera = 35f },
             new Clima { Tipo = TipoIncidente.Neve, Antes = 60f, Seg = 90f, Degelo = 25f },
         };

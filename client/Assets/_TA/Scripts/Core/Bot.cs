@@ -14,6 +14,8 @@ namespace TA.Core
         public string Name; public float Decide; public bool Move, Planeja, Equipe, Rotas, Viaja, Incidentes;
         /// <summary>Clima = reage ao aviso de clima; Falhas = paga o reparo da pane (CONTRATO_FASE_C4 §8). Sem eles, segura e espera a inspecao.</summary>
         public bool Clima, Falhas;
+        /// <summary>Segue = troca para o aeroporto com a melhor estacao do ano (CONTRATO_FASE_C4 §8).</summary>
+        public bool Segue;
 
         public static readonly BotProfile Bom = new BotProfile { Name = "Bom", Decide = 1f, Move = true, Planeja = true, Equipe = true, Rotas = true, Viaja = true, Incidentes = true, Clima = true, Falhas = true };
         public static readonly BotProfile Lento = new BotProfile { Name = "Lento", Decide = 2.5f, Move = true, Planeja = true, Equipe = true, Rotas = true, Viaja = true, Incidentes = true, Clima = true, Falhas = true };
@@ -66,15 +68,32 @@ namespace TA.Core
             if (P.Rotas) Programa(s);
             if (P.Incidentes) Reage(s);
             if (P.Clima) ReageClima(s);
+            if (P.Segue) SegueEpoca(s);
             if (P.Falhas) foreach (Aviao a in s.Avioes) if (a.Pane && s.ReparaAviao(a.Id)) Reparos++;
         }
 
-        /// <summary>Fase C4: com a pista fechada ou a neve, adianta no aviso; com vento ou neblina o aviao vem atrasado, entao atrasa o portao.</summary>
+        /// <summary>Fase C4: adianta no aviso; quem perdeu o aviso ainda pode atrasar o portao.</summary>
         void ReageClima(Sim s)
         {
             Incidente i = s.Inc;
-            Clima c = i != null && !i.Resolvido ? s.ClimaDe(i.Tipo) : null;
-            if (c != null && (c.Espera > 0 ? s.Atrasa() : s.Adianta())) Reacoes++;
+            if (i != null && !i.Resolvido && s.ClimaDe(i.Tipo) != null && (s.Adianta() || s.Atrasa())) Reacoes++;
+        }
+
+        /// <summary>Fase C4: na virada da estacao do ano, vai ao aeroporto ja pago em que a receita da rota mais rica x demanda fica melhor.</summary>
+        void SegueEpoca(Sim s)
+        {
+            int w = s.Onda + 1, melhor = s.AeroportoAtual;
+            if (s.ProximoAeroporto >= 0) return;
+            double Nota(int a)
+            {
+                double r = 0;
+                foreach (Rota x in s.T.Rotas) if (x.Aeroporto == a && s.RotaAberta(x.Id == null ? 0 : System.Array.IndexOf(s.T.Rotas, x))) r = Math.Max(r, x.Receita);
+                return r * s.DemandaDe(a, w);
+            }
+            double nota = Nota(melhor) * 1.05;
+            for (int a = 0; a < s.T.Aeroportos.Length; a++)
+                if (a != melhor && s.CustoViagem(a) == 0 && Nota(a) > nota) { melhor = a; nota = Nota(a); }
+            if (melhor != s.AeroportoAtual) s.Viajar(melhor);
         }
 
         readonly int[] _vooVisto = { -1, -1 };

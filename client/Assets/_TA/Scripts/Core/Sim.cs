@@ -296,8 +296,8 @@ namespace TA.Core
             return false;
         }
 
-        /// <summary>O portao atende este voo: embarque aberto, patio andando (raio perto) e, com a pista fechada, so quem adiantou (clima).</summary>
-        bool PodeEmbarcar(Voo v) => v != null && v.Embarque && !PatioParado && (!PistaFechada || v.Adiantado);
+        /// <summary>O portao atende este voo: embarque aberto e, com a pista fechada, so quem adiantou (clima).</summary>
+        bool PodeEmbarcar(Voo v) => v != null && v.Embarque && (!PistaFechada || v.Adiantado);
 
         void Avanca(Station s, Pax p, int loc)
         {
