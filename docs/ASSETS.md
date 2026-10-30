@@ -185,6 +185,29 @@ Total do Lote 7: 76 peças = 60 objetos × 55 + 16 personagens × (55 + 20) = **
 
 **Auditoria de 30/10** (`docs/ASSETS.md` §1 a §2.5 contra `arte/tripo/`): as 94 peças dos Lotes 1 a 6 têm o zip HD no disco; nenhuma precisou ser regerada. As 8 variantes de aeronave do contrato (item 3) já estavam cobertas desde o Lote 5.
 
+### 2.7 Lote 8 — variedade útil ao jogo (30/10, aval do Vinicius: "todas as imagens, e todos os materiais")
+
+Pedido da sessão coordenadora: depois do Lote 7, gerar o que falta para o lançamento e a variedade útil, sem repetir peça e sem gastar crédito em peça que não entra no jogo. 44 peças (38 objetos × 55 + 6 personagens × 75 = **2 540** créditos), cada uma ligada a uma linha do GDD:
+
+| Grupo | Peças | Para quê |
+|---|---|---|
+| A. Vale Verde rural (8) | `celeiro`, `silo_graos`, `moinho_vento`, `trator_agricola`, `fardos_feno`, `casa_fazenda`, `estufa_vidro`, `espantalho` | identidade do aeroporto regional (GDD §5.10) |
+| B. Pátio e carga (10) | `caminhao_agua_potavel`, `caminhao_lavatorio`, `empilhadeira`, `carreta_dolly`, `paletes_carga`, `caixotes_carga`, `calcos_roda`, `luzes_aproximacao`, `placa_taxiway`, `barreira_jato` | pátio visível em cada voo (§5.12), rotas de carga |
+| C. Interior extra (8) | `sofa_lounge`, `mesa_lounge`, `bar_lounge`, `balanca_bagagem`, `caixa_registradora`, `bebedouro`, `cadeira_rodas`, `carrinho_bebe` | lounge da Aurora, check-in, loja, assistência e família |
+| D. Terreno e mapa (8) | `colina_gramada`, `rochas_grandes`, `lago_pequeno`, `duna_praia`, `ilha_pequena`, `fonte_praca`, `arco_entrada`, `caminho_pedra` | mapa que cresce, bordas e praça (§5.13) |
+| E. Personagens (6) | `passageira_idosa`, `pai_familia`, `menino`, `menina`, `atleta`, `gerente_terminal` | variedade da fila e chefe de terminal |
+| F. Economia (4) | `cofre_dinheiro`, `pilha_moedas`, `bau_recompensa`, `caixa_presente` | tela do cofre (offline) e recompensas |
+
+### 2.8 Lote 9 — passageiros de variedade (30/10)
+
+8 personagens com rig (8 × 75 = **600** créditos): `passageiro_hoodie`, `passageira_casaco`, `passageiro_robusto`, `passageira_cacheada`, `estudante`, `passageiro_idoso_b`, `passageira_capa_chuva`, `passageiro_careca`. Variam corpo, cabelo, idade e roupa, para a fila não repetir silhueta.
+
+### 2.9 Lote 10 — incidentes, eventos e fila (30/10)
+
+14 peças (13 objetos × 55 + 1 personagem × 75 = **790** créditos), ligadas ao GDD §5.8 (falha de equipamento, frente fria), ao §6.5 (eventos Air Show e Holiday) e à fila no rush: `placa_fora_de_servico`, `cavalete_manutencao`, `placa_piso_molhado`, `escada_manutencao`, `limpa_neve`, `aviao_acrobatico`, `arquibancada`, `balao_ar_quente`, `bandeirolas`, `tenda_evento`, `arvore_natal`, `boneco_neve`, `cordao_fila`, `garconete`.
+
+Total dos Lotes 8 a 10: **3 930** créditos. Saldo no fim do dia: **16 440** (Max até 29/11). O que cada peça é para a integração está em `docs/INTEGRACAO_ARTE.md`.
+
 ## 5. Marca e arte de instalação (pedido do Vinicius, 2026-10-29)
 
 Feitas no gerador de imagem do Tripo (Nano Banana 2, 1024 px) e ampliadas para 4K (10 créditos cada). Entram no git (interface, não modelo pago), em `client/Assets/_TA/Art/Marca/`.
