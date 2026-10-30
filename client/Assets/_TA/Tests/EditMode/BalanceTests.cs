@@ -69,7 +69,7 @@ namespace TA.Tests
         static string Min(double s) => s < 0 ? "-" : (s / 60).ToString("0.0", CultureInfo.InvariantCulture) + " min";
 
         /// <summary>As regras da v0.1: tripulacao, patio e manutencao so visuais (o "antes" do BALANCE.md).</summary>
-        public static Tuning SemFaseC() => new Tuning { RegraTripulacao = false, RegraPatio = false, RegraManutencao = false };
+        public static Tuning SemFaseC() => FechaC3(new Tuning { RegraTripulacao = false, RegraPatio = false, RegraManutencao = false });
 
         static void Imprime(string titulo, Linha[] ls, bool faseC = false)
         {
@@ -162,7 +162,7 @@ namespace TA.Tests
         }
 
         /// <summary>O "antes" da Fase C2: as estacoes novas, os perfis novos e a especializacao nunca abrem (a main da Fase C).</summary>
-        public static Tuning SemFaseC2() => new Tuning { Abre = new[] { 0, 0, 0, 0, 99, 99, 99, 99 }, PerfilMarco = new[] { 0, 0, 0, 99, 99, 99 }, EspecialistaMarco = 99 };
+        public static Tuning SemFaseC2() => FechaC3(new Tuning { Abre = new[] { 0, 0, 0, 0, 99, 99, 99, 99 }, PerfilMarco = new[] { 0, 0, 0, 99, 99, 99 }, EspecialistaMarco = 99 });
 
         [Test]
         public void Antes_FaseC2()
@@ -174,7 +174,14 @@ namespace TA.Tests
         }
 
         /// <summary>O "antes" da Fase C3: so as 2 rotas iniciais e Vale Verde (a main da Fase C2). Tem de repetir a tabela dela, numero a numero.</summary>
-        public static Tuning SemFaseC3() => new Tuning { Rotas = Tabelas.Rotas.Take(2).ToArray(), Aeroportos = Tabelas.Aeroportos.Take(1).ToArray() };
+        public static Tuning SemFaseC3() => FechaC3(new Tuning());
+
+        static Tuning FechaC3(Tuning t)
+        {
+            t.Rotas = Tabelas.Rotas.Take(2).ToArray();
+            t.Aeroportos = Tabelas.Aeroportos.Take(1).ToArray();
+            return t;
+        }
 
         [Test]
         public void Antes_FaseC3()

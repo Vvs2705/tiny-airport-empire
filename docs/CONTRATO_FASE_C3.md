@@ -4,6 +4,8 @@ Fonte da verdade: `GDD.md` §4.1 (itens 1, 2 e 9), §5.4 (quadro), §5.7 (rotas)
 
 Todo número é **hipótese**: o bot mede e o `BALANCE.md` §7 registra.
 
+**Medido em 2026-10-30 (`BALANCE.md` §7):** os 3 sistemas passaram no portão do §5.13 e ficam com regra: rotas 1,221 (Vale Verde), 1,124 (Costa Azul) e 1,273 (Aurora); aeroportos 1,151; incidentes 1,146 (Costa Azul) e 1,170 (Aurora). TA-6: melhor ÷ segunda ≤ 1,161. TA-1: Bom 99,7 → 96,1%, Lento 75,4 → 73,0%. TA-2: 1,408 → 1,426. O começo não mudou: com o conteúdo novo fechado, a tabela do bot é igual à da main, número a número. Mudou regra ou número? Atualize aqui e no `BALANCE.md` no mesmo commit.
+
 ## 1. O que entra
 
 - **Tabelas no `Tuning`:** `Tuning.Rotas` (12 linhas) e `Tuning.Aeroportos` (3 linhas), dados e não código. Cada linha tem um `Id` estável (`vv_campinas`, `ca_salvador`, `ag_manaus`) e um `Nome` de trabalho. O save grava o índice, que só cresce no fim. A D-13 troca só o `Nome`.
@@ -16,8 +18,8 @@ Todo número é **hipótese**: o bot mede e o `BALANCE.md` §7 registra.
 | Id | Nome de trabalho | Abre | Viagem | Rotas | Desafio |
 |---|---|---|---|---|---|
 | `vv` | Vale Verde | início | — | 4 curtas | fluxo e equipe móvel; sem incidente, salvo na rota de risco |
-| `ca` | Costa Azul | marco 2 | 1.200 | 3 turísticas + 1 conexão | pico de chegada, gasto alto em loja e comida, maresia (desgaste × 1,5), incidentes |
-| `ag` | Aurora Global | marco 3 | 3.000 | 2 conexões + 2 longas | conexões sem check-in, longas que tiram o avião por 2 ondas, incidentes mais frequentes |
+| `ca` | Costa Azul | marco 2 | 1.200 | 3 turísticas + 1 conexão | pico de chegada, gasto alto em loja e comida, maresia (desgaste × 1,5), incidentes (0,4 por onda) |
+| `ag` | Aurora Global | marco 3 | 3.000 | 2 conexões + 2 longas | conexões sem check-in, longas que tiram o avião por 2 ondas, incidentes mais frequentes (0,5 por onda) |
 
 `Sim.Viajar(a)` paga a viagem uma vez (voltar é grátis) e vale na próxima onda. Na chegada, as 2 rotas sem preço do aeroporto abrem e entram nas vagas.
 
@@ -31,31 +33,31 @@ Campos: `Extra` (s além do `Tuning.Trecho`: a distância), `Cada` (voa a cada N
 | 1 | `vv_ribeirao` | Ribeirão Preto | curta | 0 | 0 | 0 | 1 | 1,0 | 1,0 | 1 | 0 | 0 | 0 |
 | 2 | `vv_curitiba` | Curitiba | curta | 1 | 250 | 10 | 1 | 1,3 | 1,0 | 1 | 0 | 0 | 0 |
 | 3 | `vv_bh` | Belo Horizonte | curta | 2 | 500 | 20 | 1 | 0,9 | 1,5 | 1 | 0 | 0 | 1 |
-| 4 | `ca_salvador` | Salvador | turística | 2 | 0 | 10 | 1 | 1,2 | 1,1 | 1,5 | 0,5 | 0 | 1 |
-| 5 | `ca_recife` | Recife | turística | 2 | 0 | 20 | 1 | 1,1 | 1,2 | 1,5 | 0,5 | 0 | 1 |
-| 6 | `ca_fortaleza` | Fortaleza | turística | 2 | 800 | 20 | 1 | 1,5 | 1,1 | 2 | 0,6 | 0 | 1 |
-| 7 | `ca_brasilia` | Brasília | conexão | 3 | 1.000 | 0 | 1 | 1,2 | 1,4 | 1 | 0,7 | 0,25 | 1 |
-| 8 | `ag_guarulhos` | Guarulhos | conexão | 3 | 0 | 0 | 1 | 1,3 | 1,4 | 1 | 0,7 | 0,25 | 1 |
-| 9 | `ag_galeao` | Galeão | conexão | 3 | 0 | 10 | 1 | 1,4 | 1,4 | 1 | 0,7 | 0,25 | 1 |
-| 10 | `ag_manaus` | Manaus | longa | 3 | 1.500 | 180 | 2 | 2,0 | 2,0 | 1,2 | 0 | 0 | 2 |
-| 11 | `ag_lisboa` | Lisboa | longa | 3 | 2.500 | 180 | 2 | 2,2 | 2,2 | 1,2 | 0 | 0 | 2 |
+| 4 | `ca_salvador` | Salvador | turística | 2 | 0 | 10 | 1 | 1,3 | 1,1 | 1,5 | 0,5 | 0 | 1 |
+| 5 | `ca_recife` | Recife | turística | 2 | 0 | 20 | 1 | 1,2 | 1,2 | 1,5 | 0,5 | 0 | 1 |
+| 6 | `ca_fortaleza` | Fortaleza | turística | 2 | 800 | 20 | 1 | 1,5 | 1,2 | 2 | 0,6 | 0 | 1 |
+| 7 | `ca_brasilia` | Brasília | conexão | 3 | 1.000 | 0 | 1 | 1,35 | 1,0 | 1 | 0,7 | 0,25 | 1 |
+| 8 | `ag_guarulhos` | Guarulhos | conexão | 3 | 0 | 0 | 1 | 1,25 | 1,1 | 1 | 0,7 | 0,25 | 1 |
+| 9 | `ag_galeao` | Galeão | conexão | 3 | 0 | 10 | 1 | 1,3 | 1,15 | 1 | 0,7 | 0,25 | 1 |
+| 10 | `ag_manaus` | Manaus | longa | 3 | 1.500 | 180 | 2 | 1,7 | 3,0 | 1,2 | 0 | 0 | 2 |
+| 11 | `ag_lisboa` | Lisboa | longa | 3 | 2.500 | 180 | 2 | 2,0 | 3,0 | 1,2 | 0 | 0 | 2 |
 
 - **Curta:** `Pax` × `Tarifa` é a escolha entre volume e tarifa. A distância come o turnaround: quem volta mais tarde pressiona o pátio.
 - **Turística:** chegadas concentradas e gasto maior: a alimentação e a loja pagam mais.
 - **Conexão:** o passageiro já fez check-in na origem e entra na segurança, em bloco no fim da janela. O bônus de pontualidade é maior.
-- **Longa:** o avião fica fora por 2 ondas (`Extra` = 1 onda). Na onda em que ele está fora, a vaga não tem voo (`Voo.Total` = 0): ninguém chega e nada se perde.
+- **Longa:** o avião fica fora da onda seguinte (`Extra` = 1 onda, `Cada` = 2). Nessa onda a vaga não tem voo (`Voo.Total` = 0): ninguém chega e nada se perde.
 - **Risco:** soma na chance de incidente da onda (§4). É o preço das rotas melhores.
 
 ## 4. Incidentes
 
-Na virada de cada onda, com chance = `Aeroporto.Incidentes` + `Tuning.RiscoChance` × (soma do risco das 2 rotas), teto `Tuning.IncidenteTeto`, sai um incidente da semente. Depois de um incidente, `Tuning.IncidenteFolga` ondas sem nenhum. O tipo sai dos pesos do aeroporto. A vaga atingida é a de maior risco que tem voo. Todos dão `Tuning.AvisoSeg` = 30 s de aviso, mostrados em `sim.Inc`, que fica null até a hora do aviso.
+Na virada de cada onda, com chance = `Aeroporto.Incidentes` + `Tuning.RiscoChance` (0,1) × (soma do risco das 2 rotas), teto `Tuning.IncidenteTeto` (0,8), sai um incidente da semente. Depois de um incidente, `Tuning.IncidenteFolga` (1) onda sem nenhum, e a chegada a um aeroporto conta como incidente nessa folga. O tipo sai dos pesos do aeroporto (frente fria, falha, pico, conexão): Vale Verde 1, 1, 1, 0; Costa Azul 4, 3, 2, 1; Aurora 4, 3, 1, 2. A vaga atingida é a de maior risco que tem voo. Todos dão `Tuning.AvisoSeg` = 30 s de aviso, mostrados em `sim.Inc`, que fica null até a hora do aviso.
 
 | Tipo | O que acontece | Saída | Números iniciais |
 |---|---|---|---|
-| Frente fria (TA-4) | a pista fecha: ninguém embarca, pousa nem decola; quem fecha com a pista fechada perde o bônus | `Sim.Adianta()` no aviso: o embarque abre já e o portão fecha no início do fechamento | fecha 45 s antes do portão da vaga, por 60 s |
-| Falha de equipamento | check-in, segurança ou portão fica 3× mais lento | `Sim.Repara()`: Cash e o mecânico da Fase C por 6 s; ou o Edu presente na estação repara de graça | 60 s, reparo 30 Cash |
+| Frente fria (TA-4) | a pista fecha: ninguém pousa nem decola, e o embarque para; quem fecha o portão com a pista fechada perde o bônus | `Sim.Adianta()` no aviso: o embarque abre já e continua com a pista fechada (D-C3a); a decolagem espera a pista | fecha 48 s antes do portão da vaga, por 60 s |
+| Falha de equipamento | check-in, segurança ou portão fica 5× mais lento (o check-in fica de fora em voo de conexão, que não passa por ele) | `Sim.Repara()`: Cash e o mecânico da Fase C por 6 s; reparar no aviso evita a falha; ou o Edu presente na estação repara de graça | 60 s, reparo 30 Cash |
 | Pico de demanda | grupo extra chega de uma vez ao check-in logo depois das chegadas normais | levar gente ao check-in antes | +35% da onda |
-| Atraso de conexão | grupo extra entra na segurança 45 s antes do portão e paga tarifa dobrada | `Sim.Prioriza()`: o grupo fura a fila em todas as estações | +25% da onda |
+| Atraso de conexão | grupo extra entra na segurança 30 s antes do portão e paga tarifa × 3 | `Sim.Prioriza()`: o grupo fura a fila em todas as estações | +25% da onda |
 
 ## 5. Regras de justiça e invariantes (testes negativos no `ExploitTests`)
 
@@ -68,7 +70,7 @@ Na virada de cada onda, com chance = `Aeroporto.Incidentes` + `Tuning.RiscoChanc
 
 ## 6. Save
 
-Schema 4. Grava aeroporto atual, aeroportos pagos, rotas abertas, rota programada por vaga, a rota e os dados de cada voo da onda, a volta de cada avião, o incidente em andamento, o reparo e a última onda com incidente. O schema 3 migra sem conta: chave ausente = Vale Verde, rotas iniciais, nenhum incidente. Teste com um save real gravado pelo código do schema 3 (semente 7, 1.000 s, depois do marco 1): migrar dá o mesmo jogo que jogar até ali com o código novo.
+Schema 4. Grava aeroporto atual, aeroportos pagos, rotas abertas, rota programada por vaga, a rota e os dados de cada voo da onda, a volta de cada avião, o incidente em andamento, o reparo, a última onda com incidente e o estado de cada estação (D-C3d). O schema 3 migra sem conta: chave ausente = Vale Verde, rotas iniciais, nenhum incidente. Teste com um save real gravado pelo código do schema 3 (semente 7, 1.000 s, depois do marco 1): migrar dá o mesmo jogo que jogar até ali com o código novo.
 
 ## 7. Bot e portões
 
@@ -88,3 +90,7 @@ Schema 4. Grava aeroporto atual, aeroportos pagos, rotas abertas, rota programad
 | 5 | TA-1, TA-2, TA-6 e os portões do §7 medidos | `BalanceTests` e `BALANCE.md` §7 |
 | 6 | `MAPA_CODIGO.md`, cabeçalho do `Sim.cs` e `CHANGELOG.md` | o PR |
 | 7 | `client/tools/verify.sh full` verde | saída no PR |
+
+**Estado em 2026-10-30:** linhas 1 a 6 feitas neste PR; a 7 fica com a saída do `verify.sh full` no PR.
+
+**Fica para a View:** quadro com rota, destino e voo sem avião (`Voo.Total` = 0); telas de rotas e de viagem; aviso e saídas dos incidentes; a lista completa está no corpo do PR. **Fica para depois:** níveis por aeroporto, o TA-7 (aeroporto antigo vira hub) e a compatibilidade rota × aeronave, que entra com o item 3.

@@ -248,3 +248,121 @@ As 4 travas novas entram no `mutacao.py`, que continua pegando as 9 da Fase C. R
 
 - As estações novas só rendem se a pessoa levar alguém para lá: se o playtest mostrar que ninguém descobre isso, o contratado pode voltar a nascer na estação do perfil, e aí o portão precisa ser medido de novo.
 - Os números do Bom depois do marco 2 só aparecem em partidas de mais de 34 min: medir a oficina e o despacho com gente exige partida longa.
+
+## 7. Fase C3: 3 aeroportos, 12 rotas e 4 incidentes (2026-10-30, `CONTRATO_FASE_C3.md`)
+
+**Como medir:** `dotnet test client/tools/coretests --filter "FullyQualifiedName~BalanceTests.Portao_|FullyQualifiedName~BalanceTests.Antes_|FullyQualifiedName~BalanceTests.Longo_" --logger "console;verbosity=detailed"` (~17 min). `Antes_FaseC3` roda com rotas e aeroportos novos fechados; `Portao_FaseC3_PorSistema` mede cada sistema, com tudo aberto desde o começo; `Portao_TA6_NenhumaRotaDomina` prende as 2 vagas em cada rota; `Longo_FaseC3` é a partida de 40 ondas.
+
+**Bots:** o perfil ganhou 3 chaves: `Rotas` (abre rota e programa as vagas), `Viaja` (vai ao próximo aeroporto) e `Incidentes` (reage ao aviso). Bom, Lento e Parado têm as 3. Em cada portão, o Planejador e o Automático são o mesmo Bom, com uma chave de diferença. Rotas: depois de cada voo, a vaga sobe para a rota de receita maior se ele embarcou ≥ 95% e desce se embarcou < 85%; o Automático fica nas 2 rotas iniciais. Aeroportos: viaja quando pode pagar e o último voo embarcou ≥ 90%; o Automático fica em Vale Verde. Incidentes: usa a saída assim que o aviso aparece; o Automático ignora o aviso e só tem o mover da crise. Os perfis das Fases C e C2 ficam sem as chaves, e por isso os portões delas não mudaram (1,114 e 1,366).
+
+### D-C3a. A frente fria: quem adianta continua embarcando
+
+A 1ª regra fazia o `Adianta()` fechar o portão antes da pista. O embarque ganhava só 10 s (abre no pouso + pátio, não 60 s antes), e o portão fechava mais cedo: reagir rendia **1,033**. A regra virou a do TA-4 ao pé da letra, "quem adianta o embarque não perde o voo": sem adiantar, o portão para enquanto a pista está fechada; com `Adianta()`, o embarque abre já e continua até a hora, e só a decolagem espera a pista. Sozinha, a frente fria passou a render **1,335**. A pista fecha 48 s antes do portão para não pegar o pouso da vaga 2 nem a decolagem da vaga 1.
+
+### D-C3b. A tabela de rotas, de novo
+
+Na 1ª medição (200 sementes × 20 ondas), a conexão dominava e a longa não pagava: Brasília 42,6 mil contra Fortaleza 31,4 mil; Galeão 50,8 mil contra Lisboa 23,9 mil. Quem vem de conexão não ocupa o check-in e ainda tem bônus maior, e a longa perde o bônus no primeiro passageiro que fica. A conexão baixou para Pax × Tarifa de 1,35 a 1,5, e a longa subiu para tarifa × 3, com volume menor (1,7 e 2,0). O TA-6 passou, e o bot deixou de subir para uma rota pior.
+
+### D-C3c. Os 4 incidentes contam como um sistema
+
+A decisão é uma só: reagir ao aviso em vez de ignorar. Com a mesma leitura da D-C2c, os tipos saem na tabela, sem portão próprio. **Ressalva:** só a frente fria passa sozinha. Se o corte tiver de ser por tipo, falha, pico e conexão saem dos `Aeroporto.Pesos` (ou ficam só visuais) e o ganho do sistema fica o da frente fria.
+
+### D-C3d. O estado das estações entrou no save
+
+Em Aurora, com fila cheia, a retomada dava um jogo diferente: o bot decide no passo em que o jogo reabre, e `Estado`, `Folga` e `VooEmRisco` voltavam zerados. Em jogo só mudaria a cor por 0,5 s, mas `retomada=igual` é portão do build. O save grava as linhas `stt.` e a View deixa de emitir uma troca de estado falsa ao abrir. `Aviao.Inspecao` também passou a limpar no fim da checagem: ficava ligado sem checagem nenhuma e quebrava a ida e volta do save.
+
+### D-C3e. Decisões de desenho
+
+- **A empresa é uma só:** viajar leva Cash, equipe, níveis e frota. O GDD não diz se cada aeroporto tem terminal próprio, e essa é a opção mais simples. Se o playtest pedir níveis por aeroporto, são 3 cópias do `Station` no save.
+- **Incidente só onde o GDD pede:** Vale Verde não tem chance própria, e o único risco lá é a rota de Belo Horizonte (risco 1), que é escolha do jogador. Costa Azul e Aurora têm 0,4 e 0,5 por onda; com o risco das rotas e a folga de 1 onda, dá 1 incidente a cada 2,5 ondas (7 a 8 min).
+
+### Antes e depois do TA-1 e do TA-2 (200 sementes × 10 ondas)
+
+Antes (rotas e aeroportos novos fechados, `Antes_FaseC3`): **igual à tabela "depois" da §6, número a número**. É a prova de que o começo não mudou para o bot.
+
+| perfil | embarque médio | p10 | receita | movimentos | toques | marco 1 | marco 2 | marco 3 |
+|---|---|---|---|---|---|---|---|---|
+| Bom | 99.7% | 99.4% | 6913 | 4.7 | 981 | 13.7 min | - | - |
+| Lento | 75.4% | 71.0% | 3838 | 38.0 | 569 | 15.8 min | - | - |
+| Parado | 92.2% | 92.0% | 4911 | 0.0 | 372 | 13.7 min | - | - |
+
+Depois (padrão do `Tuning`: Curitiba abre no marco 1; o resto só depois das 10 ondas):
+
+| perfil | embarque médio | p10 | receita | movimentos | toques | marco 1 | marco 2 | marco 3 |
+|---|---|---|---|---|---|---|---|---|
+| Bom | 96.1% | 95.3% | 6827 | 32.7 | 972 | 13.7 min | - | - |
+| Lento | 73.0% | 71.2% | 3629 | 38.7 | 573 | 15.8 min | - | - |
+| Parado | 89.7% | 89.4% | 4788 | 0.0 | 404 | 13.7 min | - | - |
+
+Ganho de mover = **1,426** (era 1,408). **TA-1 e TA-2 passam.** A receita das 10 ondas cai 1% a 5%: a rota é paga no meio da janela, e o retorno vem depois (rotas em Vale Verde: +22% em 20 ondas).
+
+`-autoplay 10` no build (semente 1): RESULTADO_AUTOPLAY
+
+### Portão do §5.13 (200 sementes × 20 ondas, tudo aberto, um sistema por vez)
+
+| sistema | emb. planejador | emb. automático | receita planejador | receita automático | ganho | incidentes por partida | regra |
+|---|---|---|---|---|---|---|---|
+| rotas em Vale Verde | 97,8% | 99,7% | 27256 | 22324 | **1,221** | 1,4 | ligada |
+| rotas em Costa Azul | 95,9% | 96,0% | 31870 | 28364 | **1,124** | 7,6 | ligada |
+| rotas em Aurora Global | 98,8% | 100,0% | 46861 | 36799 | **1,273** | 8,4 | ligada |
+| aeroportos | 96,6% | 97,8% | 31365 | 27256 | **1,151** | 1,7 | ligada |
+| incidentes em Costa Azul | 91,6% | 82,7% | 28728 | 25061 | **1,146** | 7,6 | ligada |
+| incidentes em Aurora Global | 93,5% | 86,0% | 44565 | 38089 | **1,170** | 8,2 | ligada |
+| só frente fria (Aurora) | 89,5% | 75,4% | 38182 | 28605 | 1,335 | 8,4 | parte dos incidentes |
+| só falha (Aurora) | 98,7% | 94,5% | 46626 | 44767 | 1,042 | 8,4 | parte dos incidentes |
+| só pico (Aurora) | 98,1% | 97,3% | 50945 | 47402 | 1,075 | 8,3 | parte dos incidentes |
+| só conexão (Aurora) | 97,8% | 97,1% | 55706 | 53447 | 1,042 | 8,2 | parte dos incidentes |
+
+As linhas de incidente mostram o Bom com as rotas ligadas, reagindo e sem reagir. O embarque do Automático em incidentes (83–86%) também mostra o TA-1 em Costa Azul e Aurora.
+
+### TA-6: nenhuma rota domina (200 sementes × 20 ondas, sem incidente, as 2 vagas presas na rota)
+
+| aeroporto | rota | embarque | receita |
+|---|---|---|---|
+| Vale Verde | Campinas | 99,7% | 22324 |
+| Vale Verde | Ribeirão Preto | 99,7% | 22324 |
+| Vale Verde | Curitiba | 96,0% | 28648 |
+| Vale Verde | Belo Horizonte | 100,0% | 29216 |
+| Costa Azul | Salvador | 93,5% | 27390 |
+| Costa Azul | Recife | 97,6% | 30377 |
+| Costa Azul | Fortaleza | 90,2% | 33775 |
+| Costa Azul | Brasília | 100,0% | 35363 |
+| Aurora Global | Guarulhos | 100,0% | 35018 |
+| Aurora Global | Galeão | 100,0% | 38439 |
+| Aurora Global | Manaus | 87,9% | 37666 |
+| Aurora Global | Lisboa | 87,8% | 44639 |
+
+Melhor ÷ segunda: Vale Verde 1,020; Costa Azul 1,047; Aurora 1,161. **Passa** (teto 1,20). A escolha muda com a equipe: Curitiba e Fortaleza pedem volume, Belo Horizonte traz risco, Lisboa fica com o avião fora uma onda. As iniciais rendem menos que as pagas, e é o que dá sentido a abrir rota.
+
+### Partida longa (200 sementes × 40 ondas, 2 h de jogo, desbloqueio normal)
+
+| perfil | embarque médio | receita | incidentes | reações | chega à Costa Azul | chega a Aurora |
+|---|---|---|---|---|---|---|
+| Bom | 93,7% | 104821 | 9,5 | 8,9 | onda 13,9 (200/200) | onda 21,2 (200/200) |
+| Lento | 78,1% | 58249 | 6,4 | 6,4 | onda 21,2 (200/200) | onda 28,7 (200/200) |
+| Parado | 63,9% | 26135 | 7,4 | 5,4 | onda 18,9 (200/200) | nunca |
+
+O Parado é a referência do TA-2, não um jogador: sem mover ninguém, a Costa Azul o derruba, e ele nunca volta a Vale Verde, embora voltar seja grátis.
+
+### Prova de mutação (`python client/tools/mutacao.py`)
+
+As 9 travas novas entram no `mutacao.py`, que continua pegando as 13 das Fases C e C2. Resultado em 2026-10-30: **22 de 22 mortos**.
+
+| trava retirada | testes que caíram |
+|---|---|
+| incidente sempre tem aviso prévio | 4, entre eles `Invariante_C3_IncidenteTemAviso_ENuncaDerrubaOProgresso` |
+| incidente não tira Cash | `Invariante_C3_IncidenteTemAviso_ENuncaDerrubaOProgresso`, `Invariante_C3_VooPerdido_CustaSoAReceita_ComIncidenteERotaLonga` |
+| um incidente por vez, com folga depois | `Incidente_UmPorVez_ComFolgaDepois` |
+| reparo só com Cash | `Invariante_C3_Reparo_SoComCash_NuncaAnuncio`, `RetomadaComFaseC3_ContinuaIgual` |
+| offline não anda incidente | `Invariante_C3_Offline_NuncaPerdeVoo_NemAndaIncidente` |
+| preço fixo de rota | `Invariante_C3_NadaPagoEAleatorio_PrecoDeRotaEViagem`, `Rota_AbrePeloMarcoEPrecoFixo_EProgramaValeNaProximaOnda` |
+| rota só depois do marco | `Rota_AbrePeloMarcoEPrecoFixo_EProgramaValeNaProximaOnda` |
+| rota longa sem voo na onda fora | `Longa_AviaoFicaFora_AVagaFicaSemVoo_ENadaSePerde` |
+| frente fria segura o portão | `FrenteFria_SemSaida_NinguemEmbarcaNemDecola_EOVooPerdeOBonus` |
+
+### Para medir com gente
+
+- O portão do Automático supõe que o jogador ignora o aviso. Se quase todo mundo reagir, a frente fria vira rotina, e o que importa é se ela é entendida na 1ª vez. O TA-4 pede ≥ 50% de reação ao aviso e nenhum "injusto" no playtest.
+- Perder quase um voo inteiro por ignorar a frente fria é o incidente mais duro. Se a reclamação vier, baixe a `FrenteAntes` (mais embarque antes de a pista fechar) antes de mexer na frequência.
+- Um incidente a cada 7–8 min é hipótese do bot, que reage em 1 s. Com gente, medir se 0,4 e 0,5 por onda cansam.
+- A tripulação visual (D-C2) não voltou com regra: a Fase C3 não trouxe mais voos por onda, só voos maiores.
