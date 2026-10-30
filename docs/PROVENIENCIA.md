@@ -1,4 +1,4 @@
-# Little Terminal — Proveniência e licença de arte
+# Little Terminal — Proveniência e licença de arte e áudio
 
 ## Regras
 
@@ -473,6 +473,35 @@ Geradas no gerador de imagem do Tripo (Nano Banana 2, 1024 px; splash 9:16 em 76
 **Reservas (só em `arte/marca/`, fora do jogo):** `logo_a_4k.jpeg` (`e8bec7c95400847eca6ec1ad59171f4a77cd71cbfd6c326eaeaf3e7e1ad9bdcb`), outra composição da mesma logo. **Descartadas:** `splash_a_4k.jpeg` (`d16c066fe0a78eb2fc53a5e9eeeb5cdf9d2fdc58d9610a8966d2ca247fb83b88`), porque escreveu "AIRPORT" no prédio, e `icone_app_b_4k.jpeg` (`7434ce86daadd76e58ef7def9f278f6fcd4f6a8395ae81e7096e21a261bd6333`), um avião com olhos no para-brisa e boca, convenção visual muito associada a uma franquia de animação conhecida (GDD §10.5: não imitar identidade de terceiros).
 
 O nome "Little Terminal" é provisório (D-03): se mudar, só a logo se refaz (1 rodada de imagem + 1 ampliação). Ícone, emblema e splash não têm texto.
+
+## 3.1. Áudio sintetizado (0 crédito, sem asset de terceiros)
+
+Gerado por `client/tools/audio_gen.py` (Python 3.14.4, numpy 2.4.6, scipy 1.18.1), sem rede, sem serviço externo e sem amostra gravada: osciladores, ruído, filtros e Karplus-Strong escritos no script. Blocos de síntese, medição de loudness e escrita vêm de `dc:client/tools/audio_gen.py`; o banco de sons e a música são novos. Semente fixa por arquivo (crc32 do nome; música: semente fixa por faixa): rodar de novo dá o mesmo SHA.
+
+- 2026-10-30: 16 arquivos, 9,28 MB: os 7 momentos do GDD §12 em 8 sons e 13 WAV (a decolagem tem hélice e jato) e 3 laços de música, a mesma composição com tom, andamento e voz próprios de cada aeroporto.
+- `audio_gen.py`: SHA-256 `0f4a82f4118136c5858ab53132e918c207b73d5764aaa5885865b0a20cfcb3d8` (calculado com fim de linha LF, o mesmo com checkout CRLF).
+- Comando: `python client/tools/audio_gen.py --md` (gera os arquivos, confere pico, DC, laço e alerta macio e imprime estas linhas).
+- Licença: própria (sintetizado). Os `.meta` de import do Unity saem do mesmo script e não entram na tabela.
+- Motor de avião, o risco do GDD §12, testado antes do resto e aprovado **por medida**: ninguém ouviu ainda, nem em celular. Com um filtro de 300 Hz a 8 kHz imitando o alto-falante do celular, sobram 90% da energia da hélice e 74% da do jato. A hélice mostra as harmônicas das pás e o batimento das duas hélices (2,7 Hz); o jato mostra o apito da turbina 16 dB acima do fundo, subindo com a rotação e caindo com o Doppler. Plano B do GDD (faixa licenciada) não acionado; se soar pobre ao ouvido, a troca é só destes 4 WAV.
+
+| Arquivo (`Resources/`) | Ferramenta | SHA-256 do script | SHA-256 do WAV | Licença |
+|---|---|---|---|---|
+| `Audio/sfx/toque_1.wav` | `client/tools/audio_gen.py` (numpy/scipy) | `0f4a82f4…b3d8` | `49b4fdcc8d8b7b2da4f6354a47b0108b144edb3780ffc5cf928b4cf7805a7552` | própria (sintetizado) |
+| `Audio/sfx/toque_2.wav` | `client/tools/audio_gen.py` (numpy/scipy) | `0f4a82f4…b3d8` | `d86c102c586cf2b47ab56dcffd9bd435449274eb513843d5c2367f24248c2560` | própria (sintetizado) |
+| `Audio/sfx/melhoria_1.wav` | `client/tools/audio_gen.py` (numpy/scipy) | `0f4a82f4…b3d8` | `fecddb12d3bf1fd295ddec449b0e43d16e8d6e3f64ae4fb235fa9f2c7191c0a3` | própria (sintetizado) |
+| `Audio/sfx/embarque_1.wav` | `client/tools/audio_gen.py` (numpy/scipy) | `0f4a82f4…b3d8` | `04bbde5c9b6df6b9283dc3cef30d6b2fb7b28d24879c07d00a2cd5d4408887c7` | própria (sintetizado) |
+| `Audio/sfx/decolagem_helice_1.wav` | `client/tools/audio_gen.py` (numpy/scipy) | `0f4a82f4…b3d8` | `8be19abbc6b530352a2c7813d7f98271f966bc22d689a3f607750b7c7b68776e` | própria (sintetizado) |
+| `Audio/sfx/decolagem_helice_2.wav` | `client/tools/audio_gen.py` (numpy/scipy) | `0f4a82f4…b3d8` | `a71f247ee68ae977fd7e8f96c55a32ec67757357a587728c75a259ea5cb8cb13` | própria (sintetizado) |
+| `Audio/sfx/decolagem_jato_1.wav` | `client/tools/audio_gen.py` (numpy/scipy) | `0f4a82f4…b3d8` | `8ada0ce70ae57f621012c83f75eacf81aa471417f6dba751b69291f9cf13e132` | própria (sintetizado) |
+| `Audio/sfx/decolagem_jato_2.wav` | `client/tools/audio_gen.py` (numpy/scipy) | `0f4a82f4…b3d8` | `6ea59450cd9467060a8a2cb958881b34e9a5dba4c0fed091a024cd52ca6660fc` | própria (sintetizado) |
+| `Audio/sfx/recompensa_1.wav` | `client/tools/audio_gen.py` (numpy/scipy) | `0f4a82f4…b3d8` | `02945cca07be5005b5637a8ae9fa8b935e98212ebe095cd72539a94faa2224d2` | própria (sintetizado) |
+| `Audio/sfx/recompensa_2.wav` | `client/tools/audio_gen.py` (numpy/scipy) | `0f4a82f4…b3d8` | `f0b0bf86a3fe5cee7ce1504575981f696c7b1cb0a2499a5d59f1a7660d5b4ab2` | própria (sintetizado) |
+| `Audio/sfx/recompensa_3.wav` | `client/tools/audio_gen.py` (numpy/scipy) | `0f4a82f4…b3d8` | `37bb4eab77045a6c35fb5f8be57ba34244371be004ed8bd3abc41a69960a2dd6` | própria (sintetizado) |
+| `Audio/sfx/alerta_1.wav` | `client/tools/audio_gen.py` (numpy/scipy) | `0f4a82f4…b3d8` | `da839a123edf0ea118c2bc96d6155d67632760730b1ec720fb21ae4a6f1c4ed6` | própria (sintetizado) |
+| `Audio/sfx/missao_1.wav` | `client/tools/audio_gen.py` (numpy/scipy) | `0f4a82f4…b3d8` | `5c33328787b60281453b54eb475bfe82cae02ae9ec64afa0acc565bc8ca15774` | própria (sintetizado) |
+| `Audio/musica/vale_verde.wav` | `client/tools/audio_gen.py` (numpy/scipy) | `0f4a82f4…b3d8` | `23bc1d8c3c1771297cf7ad716f1b8cf5b2aff5048064b5d2cd04f326fb9fa5a9` | própria (sintetizado) |
+| `Audio/musica/costa_azul.wav` | `client/tools/audio_gen.py` (numpy/scipy) | `0f4a82f4…b3d8` | `c0d8479b1f4566d27f04d77fade814a48bd23c719faba153db363141c86f94aa` | própria (sintetizado) |
+| `Audio/musica/aurora_global.wav` | `client/tools/audio_gen.py` (numpy/scipy) | `0f4a82f4…b3d8` | `62b5ef05d5bbb031e711fdb74be46716e25510229865cd38e41f9d7e355985d5` | própria (sintetizado) |
 
 ## 4. Licenças e termos
 

@@ -42,6 +42,7 @@ Convenção de origem: `fs:` = Forge Street (`Vvs2705/forge-street`), `dc:` = Du
 | `Art.cs` | arte procedural (formas com antialias em cache) e helpers de uGUI (`Node`, `Img`, `NewText`, `Panel`, `NewButton`, `Toque`), `Aperta`, `Dp` e `AreaSegura` | `Art.*`, `Dp.Px`, `AreaSegura.AncorarDentro` | `dc:Scripts/View/Art.cs`, `Dp.cs`, `AreaSegura.cs` |
 | `Textos.cs` | todo texto de tela em pt-BR numa tabela `L(pt)`, pronta para as colunas en/es/id da D-08 | `Textos.*` | `dc:Scripts/View/Textos.cs` |
 | `Exportar.cs` | exportar o diário só quando o jogador manda (Android: MediaStore/ACTION_SEND; Windows: abre a pasta) | `Exportar.Diario` | cópia de `dc:Scripts/View/Exportar.cs` | leitura de flags de `dc:Scripts/View/Game.cs` |
+| `Audio.cs` | áudio do GDD §12: efeitos com variação e música por aeroporto com crossfade, volumes separados (`ta_som`, `ta_musica`), corte ao ir para o segundo plano e rampa de 2,5 s na volta, fallback silencioso e `AudioListener` garantido. **Ainda sem chamada no jogo:** ligar em `Game.cs`, `Mundo.cs` e na pausa depois do merge de `feat/view-tripo` | `Init(host)`, `Play(nome)`, `Music(faixa)`, `MusicaAeroporto(1..3)`, `SetVolumes(som, musica)` | `dc:Scripts/View/Audio.cs` |
 | `TA.asmdef` | assembly da View (só referencia o `TA.Core`) | — | `dc:DC.asmdef` |
 
 ## Editor — `client/Assets/_TA/Editor/` (`TA.EditorTools`)
@@ -64,10 +65,17 @@ Convenção de origem: `fs:` = Forge Street (`Vvs2705/forge-street`), `dc:` = Du
 | `EnumsTests.cs` | os enums salvos só crescem no fim: trocar a ordem, renomear ou tirar um item cai aqui |
 | `BalanceTests.cs` | `[Explicit]`: portão TA-1/TA-2 com 200 sementes × 10 ondas, o "antes" com as regras da v0.1, o portão da Fase C (Planejador × Automático, 200 × 20 ondas), o portão da Fase C2 por sistema, o "antes" da C2 e a varredura, com as tabelas do `docs/BALANCE.md` |
 
-## Cena e pacotes
+Em `client/Assets/_TA/Tests/EditModeView/` (`TA.ViewTests`, só no Unity: o `dotnet test` não compila a View):
+
+| Arquivo | Cobre |
+|---|---|
+| `AudioTests.cs` | banco importado com o tipo de carga certo, clipe ausente em silêncio, volumes separados e limitados, volta do segundo plano sem pico de volume |
+
+## Cena, recursos e pacotes
 
 - `client/Assets/_TA/Scenes/Main.unity`: gerada pelo `Setup.Apply`, vazia.
-- `client/Packages/manifest.json`: `com.unity.test-framework`, `com.unity.ugui` (a HUD) e os módulos de UI, IMGUI, captura de tela e conversão de imagem. A entrada é a do Input Manager antigo com o `StandaloneInputModule` do uGUI; Input System, IAP e LevelPlay entram com o sistema que os usa.
+- `client/Assets/_TA/Resources/Audio/`: `sfx/<nome>_<n>.wav` (8 sons em 13 arquivos) e `musica/<aeroporto>.wav` (3 laços), todos saídos do `audio_gen.py` e registrados no `docs/PROVENIENCIA.md` §3.1. Os WAV entram no git; o Unity comprime em Vorbis no import.
+- `client/Packages/manifest.json`: `com.unity.test-framework`, `com.unity.ugui` (a HUD) e os módulos de áudio, UI, IMGUI, captura de tela e conversão de imagem. A entrada é a do Input Manager antigo com o `StandaloneInputModule` do uGUI; Input System, IAP e LevelPlay entram com o sistema que os usa.
 
 ## Ferramentas — `client/tools/`
 
@@ -82,5 +90,6 @@ Convenção de origem: `fs:` = Forge Street (`Vvs2705/forge-street`), `dc:` = Du
 | `viewcheck/` (`unity_refs.props`, `core/`, `view/`) | `dotnet build`: compila a View contra as DLLs do Unity 6000.3.27f1 e a `UnityEngine.UI.dll` de `client/Library/ScriptAssemblies`, sem abrir o Unity | `dc:client/tools/viewcheck` |
 | `fotos_v01.sh` | fotos 540×960 de cada tela, do estresse com 60 passageiros (parados e andando) e de cada passo do tutorial, a rodada `-tutorial -bot` e o `-record` do funcionário mudando de setor; saída em `client/Builds/validation_v01/` | — |
 | `montagem.py` | folha de contato e GIF de um `-record` (Pillow) | — |
+| `audio_gen.py` | sintetiza todo o áudio com numpy e scipy, de forma determinística, e confere pico, DC, laço e o alerta macio; `--md` imprime as linhas do `PROVENIENCIA.md` | `dc:client/tools/audio_gen.py` (blocos, medição e escrita; banco e música novos) |
 | `mutacao.py` | prova de mutação das travas da Fase C: tira cada trava, roda o `dotnet test` e exige que algum teste caia | — |
 | `diario_report.py` | relatório do playtest a partir dos diários CSV exportados: K2 (pessoas e episódios), embarque médio, uso de offline, anúncio, histórias e upgrades; `--autoteste` com diários sintéticos | `dc:client/tools/diario_report.py` |
