@@ -31,7 +31,8 @@ PECAS = {
     "raio_x_n2": (2500, 512, 1.15),
     "loja_n2": (2500, 512, 1.4),
     "portao_embarque_n2": (2000, 512, 0.75),
-    # Lote 6 (29/10): nivel 3 (a loja_n3 ainda nao foi exportada: a loja para no n2)
+    # Lote 6: nivel 3
+    "loja_n3": (2500, 512, 1.4),
     "balcao_checkin_n3": (2000, 512, 0.75),
     "raio_x_n3": (2500, 512, 1.15),
     "portao_embarque_n3": (2000, 512, 0.75),

@@ -50,7 +50,7 @@ namespace TA
         static readonly int[] NivelMalha = { 0, 2, 4 };
         static readonly Color ReservaCor = new Color(1f, 0.93f, 0.78f);
         /// <summary>Placa no chao, do lado de fora da parede mais perto da camera (onde nao ha outra sala).</summary>
-        static readonly Vector2[] PlacaEm = { new Vector2(2f, -0.5f), new Vector2(6f, -0.5f), new Vector2(3.5f, 6f), new Vector2(10f, 3.5f) };
+        static readonly Vector2[] PlacaEm = { new Vector2(2.7f, -1.05f), new Vector2(6.7f, -1.05f), new Vector2(2.95f, 6.7f), new Vector2(10.7f, 2.95f) };
 
         static Sala Nova(float x, float z, Vector2 entra, Vector2 sai, Vector2 n) =>
             new Sala { Min = new Vector2(x, z), In = entra, Out = sai, N = n, T = new Vector2(n.y, n.x) };
@@ -94,7 +94,7 @@ namespace TA
         readonly Transform _raiz;
         readonly RectTransform _rotulos;
         static MaterialPropertyBlock _mpb;
-        static Material _mat;
+        static Material _mat, _matSombra;
         static readonly Dictionary<string, Material> _matMalha = new Dictionary<string, Material>();
         /// <summary>Um material para todas as primitivas (Legacy Diffuse, iluminado e leve; o Setup.Apply o poe no build), cor por
         /// MaterialPropertyBlock. Sem o shader (editor sem o Setup), fica o material padrao.</summary>
@@ -154,10 +154,10 @@ namespace TA
             _cam.transparencySortMode = TransparencySortMode.Orthographic;
             var luz = new GameObject("Sol").AddComponent<Light>();
             luz.type = LightType.Directional;
-            luz.intensity = 1.0f;
+            luz.intensity = 0.72f;
             luz.transform.rotation = Quaternion.Euler(50f, -30f, 0f);   // do alto a esquerda, como a luz gravada nas folhas (ART_BIBLE §2)
             RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
-            RenderSettings.ambientLight = new Color(0.6f, 0.62f, 0.66f);
+            RenderSettings.ambientLight = new Color(0.52f, 0.54f, 0.58f);
             _raiz = new GameObject("Mundo").transform;
             Planta();
             for (int k = 0; k < _func.Length; k++)
@@ -218,6 +218,27 @@ namespace TA
             return pai;
         }
 
+        /// <summary>Sombra plana de uma malha: a mesma malha achatada no chao (TA/Sombra). Null sem o shader ou sem malha (primitivas).</summary>
+        Transform SombraPlana(Transform t)
+        {
+            MeshFilter mf = t.GetComponentInChildren<MeshFilter>();
+            if (_matSombra == null) { Shader sh = Shader.Find("TA/Sombra"); if (sh != null) _matSombra = new Material(sh); }
+            if (mf == null || _matSombra == null || mf.transform.parent != t) return null;
+            var pai = new GameObject("Sombra" + t.name).transform;
+            pai.SetParent(_raiz, false);
+            pai.localScale = new Vector3(1f, 0.002f, 1f);
+            var go = new GameObject("malha");
+            go.transform.SetParent(pai, false);
+            go.transform.localRotation = mf.transform.localRotation;
+            go.transform.localScale = mf.transform.localScale;
+            go.AddComponent<MeshFilter>().sharedMesh = mf.sharedMesh;
+            var r = go.AddComponent<MeshRenderer>();
+            r.sharedMaterial = _matSombra;
+            r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            r.receiveShadows = false;
+            return pai;
+        }
+
         void Planta()
         {
             Bloco("Gramado", PrimitiveType.Cube, new Vector3(9f, -0.12f, 9f), new Vector3(90f, 0.1f, 90f), Grama);
@@ -244,7 +265,7 @@ namespace TA
             // arvores so nas bordas (esquerda, direita e atras da pista): na frente das salas tampariam a fila
             foreach (Vector2 v in new[] { new Vector2(-8f, 2f), new Vector2(-8.5f, 8f), new Vector2(-6f, 14.5f), new Vector2(15f, -2f), new Vector2(19f, 1f), new Vector2(0f, 27.5f), new Vector2(9f, 27.8f), new Vector2(18f, 27.5f) })
                 Peca("arvore", V3(v), v.x * 37f);
-            foreach (Vector2 v in new[] { new Vector2(6.8f, 10.2f), new Vector2(16.2f, 9.8f), new Vector2(25f, 10.2f) }) Peca("poste", V3(v), 45f);
+            foreach (Vector2 v in new[] { new Vector2(6.8f, 10.2f), new Vector2(16.2f, 9.8f), new Vector2(25f, 10.2f) }) Peca("poste", V3(v), 45f, 0.75f);
             foreach (Vector2 v in new[] { new Vector2(7.3f, 14.6f), new Vector2(15.5f, 14.6f), new Vector2(17.1f, 14.6f), new Vector2(25f, 14.6f) }) Peca("cone", V3(v), 0f);
             Peca("conteiner_bagagem", new Vector3(16.3f, 0f, 9.7f), 0f);
             Peca("conteiner_bagagem", new Vector3(16.3f, 0f, 8.4f), 0f);
@@ -401,7 +422,7 @@ namespace TA
         void Enquadra()
         {
             Vector3 dir = _cam.transform.right, up = _cam.transform.up;
-            var pts = new[] { new Vector3(-0.6f, 0f, 0f), new Vector3(8f, 0f, -0.6f), new Vector3(12.4f, 0f, 4f), new Vector3(0f, 1f, 4.4f), new Vector3(4f, 1f, 8.4f), new Vector3(12f, 1f, 8f), new Vector3(10f, 1f, 10f) };
+            var pts = new[] { new Vector3(-0.6f, 0f, 0f), new Vector3(8f, 0f, -0.6f), new Vector3(1.6f, 0f, -1.6f), new Vector3(12.4f, 0f, 4f), new Vector3(0f, 1f, 4.4f), new Vector3(4f, 1f, 8.4f), new Vector3(12f, 1f, 8f), new Vector3(10f, 1f, 10f) };
             float x0 = float.MaxValue, x1 = float.MinValue, y0 = float.MaxValue, y1 = float.MinValue;
             foreach (Vector3 p in pts)
             {
@@ -483,8 +504,8 @@ namespace TA
                     _mao[e].transform.localScale = Vector3.one * (0.55f + 0.1f * Mathf.PingPong(Time.unscaledTime * 3f, 1f));
                     _mao[e].sortingOrder = Ordem(pm) + 9;
                 }
-                string nome = fechada ? Textos.Estacao[e] + " · " + Textos.Fechada : Textos.Estacao[e];
-                if (_placa[e].text != nome) _placa[e].text = nome;
+                string nome = fechada ? Textos.Estacao[e] + " " + Textos.FechadaCurto : Textos.Estacao[e];
+                if (_placa[e].text != nome) { _placa[e].text = nome; _placa[e].characterSize = fechada ? 0.032f : 0.045f; }
                 bool alerta = st.Estado != Estado.Normal;
                 _selo[e].gameObject.SetActive(alerta);
                 if (alerta)

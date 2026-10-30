@@ -38,7 +38,8 @@ namespace TA
         sealed class Aviao
         {
             public Transform T;
-            public SpriteRenderer Sombra, Selo;
+            public Transform Sombra;
+            public SpriteRenderer Selo;
             public float Meio = 3.7f, Espera;
             public Fase Fase;
             public int Estande = -1, Voo = -1;
@@ -84,7 +85,7 @@ namespace TA
                 a.T = Peca(AviaoMalha[k], Vector3.zero, 0f);
                 if (a.T == null) a.T = AviaoPrimitivo(k);
                 else a.Meio = Medida(a.T).z * 0.5f;
-                a.Sombra = SombraDe(a.T);
+                a.Sombra = SombraPlana(a.T);
                 a.Selo = Billboard("Selo" + k, Art.Aviao(), Art.VooCor[k], 0.9f);
                 a.T.gameObject.SetActive(false);
             }
@@ -287,7 +288,7 @@ namespace TA
             }
             bool visivel = a.Fase != Fase.Fora || a.Trechos.Count > 0;
             a.T.gameObject.SetActive(visivel);
-            a.Sombra.enabled = visivel;
+            if (a.Sombra != null) a.Sombra.gameObject.SetActive(visivel && a.T.position.y < 5f);   // no alto, a sombra fica longe e some
             a.Selo.enabled = visivel && a.Fase != Fase.Saindo && a.Voo >= 0;
             if (!visivel) return;
             if (a.Trechos.Count > 0)
@@ -312,10 +313,11 @@ namespace TA
                 }
             }
             Vector3 p = a.T.position;
-            float alt = Mathf.Clamp01(p.y / 9f);
-            a.Sombra.transform.position = new Vector3(p.x + p.y * 0.35f, 0.015f, p.z + p.y * 0.35f);
-            a.Sombra.transform.rotation = Quaternion.Euler(90f, a.T.eulerAngles.y, 0f);
-            a.Sombra.color = new Color(0f, 0f, 0f, 0.28f * (1f - alt));
+            if (a.Sombra != null)
+            {
+                a.Sombra.position = new Vector3(p.x + 0.25f + p.y * 0.35f, 0.015f, p.z + p.y * 0.35f);   // a luz vem do alto a esquerda
+                a.Sombra.rotation = Quaternion.Euler(0f, a.T.eulerAngles.y, 0f);
+            }
             if (a.Selo.enabled)
             {
                 Vector3 ps = p + Vector3.up * 4.4f;
