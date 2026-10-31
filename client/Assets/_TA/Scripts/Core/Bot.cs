@@ -67,7 +67,7 @@ namespace TA.Core
             if (!moveu && P.Move && P.Equipe) Equipe(s);
             if (P.Rotas) Programa(s);
             if (P.Incidentes) Reage(s);
-            if (P.Clima) ReageClima(s);
+            if (P.Clima && s.T.RegraClima) ReageClima(s);
             if (P.Segue) SegueEpoca(s);
             if (P.Falhas) foreach (Aviao a in s.Avioes) if (a.Pane && s.ReparaAviao(a.Id)) Reparos++;
         }
