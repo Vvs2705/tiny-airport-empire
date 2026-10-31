@@ -144,10 +144,92 @@ namespace TA.Tests
             Assert.AreEqual(SemEma(n.Save("0.3.0", T + 1)), SemEma(m.Save("0.3.0", T + 1)));
         }
 
-        /// <summary>O save sem o hash e sem a media da renda: o V02 foi gravado no .NET e o Mono do Unity difere no ultimo digito do double. Em
-        /// jogo o save e' lido pelo mesmo runtime que gravou (IdaEVolta cobre o ema).</summary>
+        /// <summary>Save real gravado pelo codigo do schema 3 (main de 2026-10-30, PR #18: semente 7, bot Bom, 1.000 s = onda 5 aos 100 s): depois do
+        /// marco 1, com as 8 estacoes gravadas, filas nas 4 da v0.1 e um servico de patio em andamento.</summary>
+        const string V03 = "sha256=28c1323b4eff598349d3bd7b5f7e28280191327108308f96edeb25582435dfa1\nschema=3\ncontent=0.3.0\nat=1700000000\nt=30000\ncash=121\n" +
+            "seed=7\nonda=5\nemb=205\nperd=3\nalbum=1\nbst=0\nema=3.068808198567419\nsaved=1700000000\nclaim=0\nclaimcash=0\ndia=0\nest.0=5,0\nfila.0=5523;5524;5525;5526;5527;5528;5529\n" +
+            "at.0=5521:2;5522:32\nest.1=5,0\nfila.1=5516;5517;5518;5519;5520\nat.1=5029:15;5515:57\nest.2=0,0\nest.3=4,0\nfila.3=5500;5501;5502;5503;5504;5505;5506;5507;5508;5509;5510;5511;5512;5513;5514\n" +
+            "at.3=5028:26\nest.4=0,0\nest.5=0,0\nest.6=0,0\nest.7=0,0\nfunc.0=1,3,0,0\nfunc.1=1,1,0,1\nvoo.0=30,28,280,1,0\nvoo.1=30,0,0,0,0\naviao.0=35,27600,1,10,-1,0,0,1,0,0\n" +
+            "srv.0=0:0,0:0,0:0,0:0\naviao.1=25,29100,1,11,-1,0,0,1,0,0\nsrv.1=0:0,0:0,0:0,420:1\ntrip.0=0,3,2399,-1\ntrip.1=0,1,3842,0\ntrip.2=0,1,0,1\n" +
+            "trip.3=1,3,2399,-1\ntrip.4=1,1,3812,0\ntrip.5=1,1,0,1\npatio=2\npatioatraso=1\n";
+
+        /// <summary>O Bom sem o que a Fase C3 acrescentou: o jogo que o schema 3 gravava.</summary>
+        static Bot SemC3()
+        {
+            BotProfile p = BotProfile.Bom;
+            p.Rotas = p.Viaja = p.Incidentes = false;
+            return new Bot(p);
+        }
+
+        /// <summary>CONTRATO_FASE_C3 §6: o save do schema 3 abre em Vale Verde, com as rotas iniciais, e da o mesmo jogo que jogar ate ali com o
+        /// codigo novo; e o que entrou (rota, viagem) funciona depois de migrar.</summary>
+        [Test]
+        public void MigracaoDoSchema3_SaveReal_DaOMesmoJogoQueJogarComOCodigoNovo()
+        {
+            Sim m = Sim.Load(V03);
+            Assert.IsFalse(m.SaveRefused, "schema 3 migra, nao e' recusado");
+            Assert.AreEqual((121L, 30000L, 205L, 2, 1), (m.Cash, m.Steps, m.TotalEmbarcados, m.Staff.Count, m.Marco));
+            Assert.AreEqual((0, 3, 0, 1, -1), (m.AeroportoAtual, m.RotasAbertas, m.Prog[0], m.Prog[1], m.ProximoAeroporto));
+            Assert.IsNull(m.Inc);
+            Assert.AreEqual((0, 1, 0, 0), (m.Voos[0].Rota, m.Voos[1].Rota, m.Voos[0].Grupo, m.Avioes[0].VoltaOnda));
+            Assert.AreEqual((30, 30), (m.Voos[0].Total, m.Voos[1].Total));
+
+            Sim n = new Sim(null, 7);
+            Bot bn = SemC3();
+            for (int i = 0; i < 1000 * Sim.Hz; i++) bn.Step(n);
+            string a = m.Save("0.4.0", T);
+            StringAssert.Contains("\nschema=4\n", a);
+            Assert.AreEqual(SemEma(n.Save("0.4.0", T)), SemEma(a), "migrar = jogar ate ali com o codigo novo");
+            Assert.AreEqual(a, Sim.Load(a).Save("0.4.0", T), "ida e volta estavel no schema 4");
+
+            Bot b1 = SemC3(), b2 = SemC3();
+            for (int i = 0; i < 300 * Sim.Hz; i++) { b1.Step(m); b2.Step(n); }
+            Assert.AreEqual(SemEma(n.Save("0.4.0", T + 1)), SemEma(m.Save("0.4.0", T + 1)));
+            m.Cash = 1000;
+            Assert.IsTrue(m.AbreRota(2), "a rota do marco 1 abre no save migrado");
+            Assert.IsTrue(m.Programa(0, 2));
+        }
+
+        /// <summary>Fechar e reabrir no meio de cada onda, com rotas, viagem, rota longa e os 4 incidentes em jogo: 20 ondas iguais a sem fechar.</summary>
+        [Test]
+        public void RetomadaComFaseC3_ContinuaIgual()
+        {
+            foreach (int aero in new[] { 1, 2 })
+                foreach (BotProfile p in new[] { BotProfile.Bom, BotProfile.Lento })
+                    for (int seed = 1; seed <= 3; seed++)
+                    {
+                        Tuning t = BalanceTests.AbertoC3(aero);
+                        Bot.Resultado a = Bot.Medir(p, seed, 20, t), b = Bot.Medir(p, seed, 20, t, true);
+                        Assert.AreEqual((a.Receita, a.Embarque, a.Incidentes, a.Reacoes, a.Viagens), (b.Receita, b.Embarque, b.Incidentes, b.Reacoes, b.Viagens), p.Name + " semente " + seed);
+                        Assert.Greater(a.Incidentes, 0, "os incidentes entraram em jogo");
+                    }
+        }
+
+        [Test]
+        public void LixoDaFaseC3_ViraPadraoLimitado()
+        {
+            string payload = "t=90\nemb=10\nonda=0\naero=9,-1,9\nrotas=999999\nprog=99,-4\nvr.0=99,99999,999,-5,1,1,-9,999999\nvoo.0=5,0,0,0,0\n" +
+                             "av.0=99,99999\ninc=9,9,9,5,4,3,1\nreparo=99999\nincw=99999\n";
+            Sim s = Sim.Load(SaveEnvelope.Wrap(payload, "x", 1));
+            Assert.IsFalse(s.SaveRefused);
+            Assert.AreEqual((0, -1, 3), (s.AeroportoAtual, s.ProximoAeroporto, s.RotasAbertas), "aeroporto e rota acima do marco nao valem");
+            Assert.AreEqual((0, 1), (s.Prog[0], s.Prog[1]));
+            Assert.IsNull(s.Inc);
+            Assert.AreEqual(0, s.Reparo);
+            Assert.AreEqual((0, 2), (s.Avioes[0].Rota, s.Avioes[0].VoltaOnda));
+            Voo v = s.Voos[0];
+            Assert.AreEqual((0, 499, s.T.Pax(0)), (v.Rota, v.Total, v.Grupo));
+            Assert.AreEqual((0, (int)(s.T.Fecha[0] * Sim.Hz)), (v.AbrePasso, v.FechaPasso));
+            s.Tick(1f);   // e o jogo anda
+
+            string inc = "t=5400\nemb=10\nonda=0\ninc=1,1,1,5000,5500,99999999,0\n";
+            Assert.IsNull(Sim.Load(SaveEnvelope.Wrap(inc, "x", 1)).Inc, "incidente fora do relogio: nenhum");
+        }
+
+        /// <summary>O save sem o hash, sem a media da renda e sem o estado das estacoes (2 s depois de reabrir ele e' o mesmo): o V02 foi gravado
+        /// no .NET e o Mono do Unity difere no ultimo digito do double. Em jogo o save e' lido pelo mesmo runtime que gravou (IdaEVolta cobre o ema).</summary>
         static string SemEma(string save) =>
-            string.Join("\n", save.Split('\n').Where(l => !l.StartsWith("ema=") && !l.StartsWith("sha256=")));
+            string.Join("\n", save.Split('\n').Where(l => !l.StartsWith("ema=") && !l.StartsWith("sha256=") && !l.StartsWith("stt.")));
 
         [Test]
         public void LixoDaFaseC2_ViraPadraoLimitado()

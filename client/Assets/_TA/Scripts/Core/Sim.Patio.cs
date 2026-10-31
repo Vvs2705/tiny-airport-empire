@@ -19,7 +19,7 @@ namespace TA.Core
         int Passos(float seg) => Math.Max(1, (int)Math.Round(seg * Hz));
         public int ServicoPassos(Servico s) => Math.Max(1, (int)Math.Round(T.ServicoSeg[(int)s] * Math.Pow(T.VelFator, PatioVel[(int)s]) * Hz));
         public int Veiculos(Servico s) => 1 + PatioCap[(int)s];
-        public bool MecanicoLivre { get { foreach (Aviao a in Avioes) if (a.Check > 0) return false; return true; } }
+        public bool MecanicoLivre { get { if (Reparo > 0) return false; foreach (Aviao a in Avioes) if (a.Check > 0) return false; return true; } }
 
         /// <summary>Voo da onda atual que o aviao vai fazer (null = nenhum aberto).</summary>
         public Voo VooDo(Aviao a) => a.VooId >= 0 && Voos[a.Id] != null && Voos[a.Id].Id == a.VooId ? Voos[a.Id] : null;
@@ -49,6 +49,7 @@ namespace TA.Core
         {
             Voo v = Voos[a.Id];
             a.VooId = v != null && !v.Partiu ? v.Id : -1;
+            if (a.VooId >= 0) a.Rota = v.Rota;
             a.FechouEm = -1; a.Checou = false; a.AvisouTrip = false;
         }
 
@@ -58,7 +59,7 @@ namespace TA.Core
             foreach (Aviao a in Avioes)
             {
                 if (a.Hangar > 0) { if (--a.Hangar == 0) { a.Desgaste = 0; Encosta(a, true); Emit(Ev.HangarFeito, a.Id); } }
-                else if (!a.NoPatio && a.Chega >= 0 && Steps >= a.Chega) Encosta(a, false);
+                else if (!a.NoPatio && a.Chega >= 0 && Steps >= a.Chega && !PistaFechada) Encosta(a, false);
             }
             EscalaAuto();
             Servicos();
@@ -117,6 +118,7 @@ namespace TA.Core
                 if (a.Check > 0 && --a.Check == 0)
                 {
                     a.Desgaste = Math.Max(0, a.Desgaste - (a.Inspecao ? T.InspecaoTira : T.CheckTira));
+                    a.Inspecao = false;
                     Emit(Ev.ChecagemFeita, a.Id, a.Desgaste);
                 }
             if (!T.RegraManutencao) return;
@@ -151,12 +153,13 @@ namespace TA.Core
         bool NoHorario(Voo v)
         {
             Aviao a = Avioes[v.Indice];
-            return !T.RegraPatio || a.VooId == v.Id && a.PatioPronto;
+            return !PistaFechada && (!T.RegraPatio || a.VooId == v.Id && a.PatioPronto);
         }
 
         /// <summary>Decola quando embarcou (portao fechado) e o patio terminou: conta o trecho da tripulacao e soma o desgaste.</summary>
         void Decolagens()
         {
+            if (PistaFechada) return;
             foreach (Aviao a in Avioes)
             {
                 if (!a.NoPatio || a.VooId < 0 || a.FechouEm < 0 || T.RegraPatio && !a.PatioPronto) continue;
@@ -165,13 +168,14 @@ namespace TA.Core
                 if (T.RegraManutencao)
                 {
                     int antes = a.Desgaste;
-                    a.Desgaste = Math.Min(100, a.Desgaste + T.DesgastePorTrecho);
+                    a.Desgaste = Math.Min(100, a.Desgaste + (int)Math.Round(T.DesgastePorTrecho * (double)Aero.Desgaste));
                     if (a.Desgaste >= 100 && antes < 100) Emit(Ev.ManutencaoPendente, a.Id, a.Desgaste);
                     else if (a.Desgaste >= T.DesgasteAviso && antes < T.DesgasteAviso) Emit(Ev.ManutencaoAviso, a.Id, a.Desgaste);
                 }
                 for (int s = 0; s < 4; s++) { a.Falta[s] = 0; a.Fazendo[s] = false; }
+                a.VoltaOnda = a.VooId / 2 + Efeito(a.Rota).Cada;
                 a.NoPatio = false; a.VooId = -1; a.FechouEm = -1;
-                a.Chega = Steps + Passos(T.Trecho);
+                a.Chega = Steps + Passos(TrechoSeg(a.Rota));
             }
         }
 
