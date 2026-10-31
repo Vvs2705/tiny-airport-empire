@@ -553,15 +553,16 @@ O padrão visual é o dos líderes do gênero (COMPETITIVO §g): tudo se mexe, e
 
 O aeroporto tem dia a dia: amanhece, tem hora de pico, muda de estação do ano, pega temporal, e um avião pode dar problema. Todos os números são hipótese e saem do bot no `CONTRATO_FASE_C4.md`.
 
-- **Relógio do jogo:** 1 onda = 3 horas de jogo, 1 dia = 8 ondas, 1 estação do ano = 2 dias. Tudo sai do relógio do quadro, nunca do aparelho. Com o jogo fechado nada anda.
+- **Relógio do jogo:** 1 onda = 3 horas de jogo, 1 dia = 8 ondas, 1 estação do ano = 1 dia de jogo. Tudo sai do relógio do quadro, nunca do aparelho. Com o jogo fechado nada anda.
 - **Dia a dia:** a tela mostra dia e noite. A demanda sobe de manhã e no fim da tarde e cai de madrugada.
-- **Estações do ano:** verão, outono, inverno e primavera mudam a demanda e a frequência de cada clima. Cada aeroporto tem seu perigo:
+- **Estações do ano:** verão, outono, inverno e primavera mudam a frequência de cada clima. A demanda por estação ficou só visual: o bot não encontrou decisão nela (D-21). Cada aeroporto tem seu perigo:
   - Vale Verde: temporal de verão;
-  - Costa Azul: vento forte e ressaca, com a maior alta de turismo no verão;
+  - Costa Azul: vento forte e ressaca;
   - Aurora Global: neve e degelo.
 - **Clima:** a frente fria do §5.8 vira um caso de um sistema com 5 tipos: frente fria, temporal, vento, neblina e neve. O quadro de partidas mostra a previsão da onda seguinte, e todo clima tem o aviso de 30 s do §5.8.
-  - **Temporal:** com raio perto, a pista fecha e o pátio para por tempo definido, como na regra real.
-  - **Vento e neblina:** a capacidade da pista cai: cada pouso e decolagem espera.
+  - **Temporal:** com raio perto, a pista fecha e o pátio para por tempo definido, como na regra real. Só quem adiantou continua embarcando, pela ponte.
+  - **Vento:** a rajada fecha a pista por pouco tempo, com o pátio funcionando.
+  - **Neblina:** a capacidade da pista cai: cada pouso e decolagem espera.
   - **Neve:** todo avião precisa de degelo antes de decolar.
 - **O jogador escolhe:** adiantar o embarque, atrasar o portão (perde o bônus de pontualidade) ou segurar o avião no solo (perde só quem não embarcou).
 - **Falhas de avião:** o risco nasce do desgaste do §5.12 e só existe a partir do aviso de 80%. Esse aviso é o aviso prévio, e voar assim é decisão do jogador.
@@ -578,7 +579,7 @@ O aeroporto tem dia a dia: amanhece, tem hora de pico, muda de estação do ano,
   - nenhum evento cria derrota inevitável nem apaga saldo ou compra;
   - o sorteio usa a semente do núcleo, então tudo é reproduzível.
 
-**Portão de design:** clima, estações do ano e falhas passam pelo portão do §5.13, um sistema por vez. O que não render ≥ 1,10 fica só visual.
+**Portão de design:** clima, estações do ano e falhas passam pelo portão do §5.13, um sistema por vez. O que não render ≥ 1,10 fica só visual. Medido em 31/10/2026: clima 1,161 e 1,147; falhas 1,134, 1,131 e 1,124; demanda por estação 1,000, só visual. Os picos do dia não têm escolha própria e ficam ligados porque não quebram os portões.
 
 ---
 
@@ -1719,7 +1720,7 @@ As de D-01 a D-14 travam o início ou uma fase; as outras podem esperar.
 | D-18 | Rota de arte híbrida: mundo e veículos em malha 3D em tempo real, pessoas em sprite (§0.4, §10.2) | aprovar: é o que as referências fazem, e mantém a regra do estúdio para personagens. O K3 ampliado, medido no aparelho, confirma | View da v0.1, que já está sendo feita assim |
 | D-19 | Tripulação, pátio e manutenção com regra no lançamento (§5.11, §5.12) | sim, na Fase C, com o portão de design do §5.13 | Fase C |
 | D-20 | Lote 3 do Tripo: comissária e comissário | aprovar hoje: ≈ 160 créditos, e os créditos vencem hoje (D-14). **Aprovada pelo Vinicius em 2026-10-29: "Aprovo o Lote 3"** | arte da tripulação |
-| D-21 | Clima, estações do ano e falhas de avião com regra no lançamento (§5.14) | sim, na Fase C, com o portão de design do §5.13 e sem acidente, morte, fogo ou queda. **Pedida pelo Vinicius em 2026-10-30: "aviões que podem quebrar, ou ter falhas ao decolar e precisar pousar"** | Fase C |
+| D-21 | Clima, estações do ano e falhas de avião com regra no lançamento (§5.14) | sim, na Fase C, com o portão de design do §5.13 e sem acidente, morte, fogo ou queda. **Pedida pelo Vinicius em 2026-10-30: "aviões que podem quebrar, ou ter falhas ao decolar e precisar pousar"**. Medido em 2026-10-31: clima e falhas com regra; a demanda por estação do ano fica só visual (`BALANCE.md` D-C4a) | Fase C |
 
 ---
 

@@ -87,7 +87,7 @@ namespace TA.Core
             double Nota(int a)
             {
                 double r = 0;
-                foreach (Rota x in s.T.Rotas) if (x.Aeroporto == a && s.RotaAberta(x.Id == null ? 0 : System.Array.IndexOf(s.T.Rotas, x))) r = Math.Max(r, x.Receita);
+                for (int i = 0; i < s.T.Rotas.Length; i++) if (s.T.Rotas[i].Aeroporto == a && s.RotaAberta(i)) r = Math.Max(r, s.T.Rotas[i].Receita);
                 return r * s.DemandaDe(a, w);
             }
             double nota = Nota(melhor) * 1.05;

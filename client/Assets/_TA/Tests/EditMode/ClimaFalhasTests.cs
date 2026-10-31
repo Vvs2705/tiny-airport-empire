@@ -55,6 +55,17 @@ namespace TA.Tests
 
         // ------------------------------------------------------------------ relogio e demanda
 
+        /// <summary>O diario guarda estes enums pelo indice: so crescem no fim (como o EnumsTests faz com os das fases anteriores).</summary>
+        [Test]
+        public void EnumsDaFaseC4_SoCrescemNoFim()
+        {
+            string[] ev = Enum.GetNames(typeof(Ev));
+            CollectionAssert.AreEqual(new[] { "Previsto", "Atrasado", "Degelou", "Pane", "PaneReparo", "PaneReparada", "Rejeicao", "RetornoPedido", "PousoSeguro", "Remarcados" },
+                ev.Skip(Array.IndexOf(ev, "Priorizado") + 1).Take(10).ToArray());
+            CollectionAssert.AreEqual(new[] { "Verao", "Outono", "Inverno", "Primavera" }, Enum.GetNames(typeof(Epoca)));
+            CollectionAssert.AreEqual(new[] { "Nenhuma", "Pane", "Rejeicao", "Retorno" }, Enum.GetNames(typeof(TipoFalha)));
+        }
+
         [Test]
         public void Relogio_1Onda3Horas_Dia8Ondas_Ano32Ondas()
         {
