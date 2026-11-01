@@ -59,8 +59,14 @@ OCA = {
     ],
 }
 
-# contato que e o servico: a barra do rebocador no nariz e a ponte na porta (a ponte e da frente ta-embarque)
-LIGADOS = (("rebocador", "aviao_regional.nariz"), ("aviao_regional", "ponte_embarque"))
+# contato que e o servico: a barra do rebocador no nariz, a ponte na porta e, no remoto, a passarela e a porta (so aparecem com a escada encostada)
+LIGADOS = (
+    ("rebocador", "aviao_regional.nariz"),
+    ("aviao_regional", "ponte_embarque"),
+    ("aviao_narrow", "PortaJato"),
+    ("aviao_narrow", "Passarela"),
+    ("escada_embarque", "Passarela"),
+)
 ESCADA = "escada_embarque"  # parada, a gente sobe nela: pessoa x escada so conta com ela andando
 
 
