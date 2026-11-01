@@ -49,7 +49,7 @@ namespace TA
         Tempo _tempo;
         float _forca, _clarao, _raioEm = RaioMin, _gramadoNeve;
         Renderer _gramado;
-        readonly SpriteRenderer[] _pistaX = new SpriteRenderer[2], _raioBalcao = new SpriteRenderer[4], _alertaPane = new SpriteRenderer[2];
+        readonly SpriteRenderer[] _pistaX = new SpriteRenderer[2], _raioBalcao = new SpriteRenderer[4];
         SpriteRenderer _totemFundo, _totemIcone, _reparoAnel, _bandeira, _bandeiraPau;
         Transform _totem;
         readonly Transform[] _conesSala = new Transform[2];
@@ -126,7 +126,7 @@ namespace TA
             for (int i = 0; i < _pistaX.Length; i++)
             {
                 _pistaX[i] = Art.NewSprite(_raiz, "PistaFechada", Art.Xis(), Art.Warn, -31900, Vector2.zero, new Vector2(3.2f, 3.2f));
-                _pistaX[i].transform.SetPositionAndRotation(new Vector3(2f + i * 18f, 0.02f, PistaZ), Quaternion.Euler(90f, 0f, 0f));
+                _pistaX[i].transform.SetPositionAndRotation(new Vector3(6f + i * 8f, 0.02f, PistaZ), Quaternion.Euler(90f, 0f, 0f));
                 _pistaX[i].enabled = false;
             }
             _totem = new GameObject("Totem").transform;
@@ -141,7 +141,6 @@ namespace TA
             for (int i = 0; i < _conesSala.Length; i++) _conesSala[i] = Cone();
             for (int k = 0; k < 2; k++)
             {
-                _alertaPane[k] = Billboard("AlertaPane" + k, Art.Alerta(), Art.Bad, 0.9f);
                 for (int i = 0; i < 4; i++)
                 {
                     _conesPane[k, i] = Cone();
@@ -353,13 +352,6 @@ namespace TA
                 TA.Core.Aviao c = s.Avioes[k];
                 bool pane = c.Pane && _avioes[k].Fase == Fase.NoPatio;
                 for (int i = 0; i < 4; i++) _conesPane[k, i].gameObject.SetActive(pane);
-                bool espera = pane && c.Check == 0;   // com o mecanico la, o selo do aviao ja mostra a chave e o anel
-                _alertaPane[k].enabled = espera;
-                if (!espera) continue;
-                Vector3 p = V(EstandeX[k] + 0.4f, NarizZ - 0.3f, 1.9f);   // no nariz: o centro do aviao fica atras do cartao do HUD
-                _alertaPane[k].transform.SetPositionAndRotation(p, _cam.transform.rotation);
-                _alertaPane[k].sortingOrder = Ordem(p) + 10;
-                _alertaPane[k].color = Art.A(Art.Bad, Pulso());
             }
         }
     }
