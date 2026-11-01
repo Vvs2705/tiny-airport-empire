@@ -126,7 +126,7 @@ namespace TA
             foreach (Vector2 v in new[] { new Vector2(-0.5f, 4.5f), new Vector2(-0.5f, -0.5f), new Vector2(8.5f, -0.5f), new Vector2(12.5f, 3.5f) })
                 Peca("vaso_planta", V3(v), 0f);
             // arvores so nas bordas (esquerda, direita e atras da pista, fora do alcance da asa): na frente das salas tampariam a fila
-            foreach (Vector2 v in new[] { new Vector2(-8f, 2f), new Vector2(-8.5f, 8f), new Vector2(-6f, 14.5f), new Vector2(15f, -2f), new Vector2(19f, 1f), new Vector2(0f, 36.5f), new Vector2(9f, 36.8f), new Vector2(18f, 36.5f) })
+            foreach (Vector2 v in new[] { new Vector2(-8f, 2f), new Vector2(-8.5f, 8f), new Vector2(-6f, 14.5f), new Vector2(15f, -2f), new Vector2(19f, 1f), new Vector2(0f, 38.6f), new Vector2(9f, 39.1f), new Vector2(18f, 39.3f) })
                 Peca("arvore", V3(v), v.x * 37f);
             foreach (Vector2 v in new[] { new Vector2(8.2f, 12.9f), new Vector2(46f, 7.2f) }) Peca("poste", V3(v), 45f, 0.75f);
             foreach (Vector2 v in new[] { new Vector2(7.3f, 15.6f) }) Peca("cone", V3(v), 0f);

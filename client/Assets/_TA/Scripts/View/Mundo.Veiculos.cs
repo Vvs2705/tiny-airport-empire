@@ -18,27 +18,30 @@ namespace TA
     /// </summary>
     public sealed partial class Mundo
     {
-        const float RuaOeste = 10.1f, RuaLeste = 8.7f;
+        /// <summary>RuaLeste: longe da parede o bastante para o bico do catering, na curva de 1,5 m. RuaOeste: a largura do onibus ao norte dela.</summary>
+        const float RuaOeste = 11.15f, RuaLeste = 9.65f;
         /// <summary>Garagem: a boca da malha fica em +z, dai o yaw 180. A escala da a altura livre do catering sob a verga (2,89 m) e o y poe o piso
         /// da malha no nivel do chao.</summary>
-        static readonly Vector3 GaragemEm = new Vector3(36.6f, -0.26f, 14.53f);
-        const float GaragemYaw = 180f, GaragemEscala = 1.75f, VagaZ = 13.45f, Ajuste = 1.5f;
+        static readonly Vector3 GaragemEm = new Vector3(36.6f, -0.26f, 15.63f);
+        const float GaragemYaw = 180f, GaragemEscala = 1.75f, VagaZ = 14.55f, Ajuste = 1.5f;
         /// <summary>x das vagas: o meio de cada vao da malha (a 1,75 de escala, de 1,9 a 2,5 m livres) e, depois, as 3 pintadas do +1 veiculo.</summary>
         static readonly float[] Vagas = { 30.74f, 33.58f, 36.56f, 39.62f, 42.68f, 46.4f, 48.1f, 49.8f };
 
         /// <summary>Cada tipo de veiculo: Servico, faixa e parada (pivo, com o nariz para a rua) em cada estande (-1 = nao vai) e vaga na garagem.</summary>
         sealed class Tipo
         {
-            public string Malha; public int Servico, Vaga, Extra; public float Vel, Eixo, Comp; public Color Cor; public float[] Faixa, Parada;
+            public string Malha; public int Servico, Vaga, Extra; public float Vel, Eixo, Comp, Rua = RuaOeste, Raio = RaioVeic; public Color Cor; public float[] Faixa, Parada;
         }
 
         static readonly Tipo[] Tipos =
         {
-            new Tipo { Malha = "caminhao_catering", Servico = 1, Vaga = 1, Extra = 5, Vel = 2.6f, Eixo = 0.75f, Comp = 2.8f, Cor = Art.Hex(0xF2F4F7), Faixa = new[] { 15.7f, 27.2f }, Parada = new[] { 13.4f, 13.55f } },
-            new Tipo { Malha = "caminhao_combustivel", Servico = 2, Vaga = 2, Extra = 6, Vel = 2.6f, Eixo = 0.75f, Comp = 2.6f, Cor = Art.Hex(0xE0533D), Faixa = new[] { 16.95f, 25.95f }, Parada = new[] { 13.4f, 13.4f } },
-            new Tipo { Malha = "carrinho_bagagem", Servico = 3, Vaga = 0, Extra = 7, Vel = 2.6f, Eixo = 0.6f, Comp = 2.6f, Cor = Art.Hex(0x5DADE2), Faixa = new[] { 14.5f, 24.8f }, Parada = new[] { 13.2f, 13.25f } },
-            new Tipo { Malha = "escada_embarque", Servico = 0, Vaga = 3, Vel = 2f, Eixo = 0.7f, Comp = 2.3f, Cor = Art.Hex(0xE5E8E8), Faixa = new[] { -1f, 20.8f }, Parada = new[] { 0f, 13.2f } },
-            new Tipo { Malha = "onibus_patio", Servico = 0, Vaga = 4, Vel = 2f, Eixo = 0.9f, Comp = 3.2f, Cor = Art.Hex(0x3FA7D6), Faixa = new[] { -1f, 18.75f }, Parada = new[] { 0f, 13.8f } },
+            new Tipo { Malha = "caminhao_catering", Servico = 1, Vaga = 1, Extra = 5, Vel = 2.6f, Eixo = 0.75f, Comp = 2.8f, Cor = Art.Hex(0xF2F4F7), Faixa = new[] { 16.1f, 27.3f }, Parada = new[] { 14.5f, 14.65f } },
+            new Tipo { Malha = "caminhao_combustivel", Servico = 2, Vaga = 2, Extra = 6, Vel = 2.6f, Eixo = 0.75f, Comp = 2.6f, Cor = Art.Hex(0xE0533D), Faixa = new[] { 17.4f, 25.95f }, Parada = new[] { 14.5f, 14.5f } },
+            // a bagagem passa da faixa ate perto do nariz do regional: anda pelo lado sul da rua, por baixo dele
+            new Tipo { Malha = "carrinho_bagagem", Servico = 3, Vaga = 0, Extra = 7, Vel = 2.6f, Eixo = 0.6f, Comp = 2.6f, Rua = 10.8f, Cor = Art.Hex(0x5DADE2), Faixa = new[] { 14.9f, 24.8f }, Parada = new[] { 14.3f, 14.35f } },
+            new Tipo { Malha = "escada_embarque", Servico = 0, Vaga = 3, Vel = 2f, Eixo = 0.7f, Comp = 2.3f, Cor = Art.Hex(0xE5E8E8), Faixa = new[] { -1f, 20.8f }, Parada = new[] { 0f, 14.3f } },
+            // o onibus abre a curva: e o mais comprido, e o bico passa logo depois da quina do terminal
+            new Tipo { Malha = "onibus_patio", Servico = 0, Vaga = 4, Vel = 2f, Eixo = 0.9f, Comp = 3.2f, Raio = 2.2f, Cor = Art.Hex(0x3FA7D6), Faixa = new[] { -1f, 18.75f }, Parada = new[] { 0f, 14.9f } },
         };
 
         sealed class Veiculo
@@ -150,10 +153,18 @@ namespace TA
         void ServicosPasso(Sim s)
         {
             foreach (Veiculo v in _veiculos)
-                if (v.Tipo != null && v.Lida == Lida.Servindo && !Precisa(v.Tipo, v.Aviao, s)) Libera(v, s);
+                if (v.Tipo != null && v.Lida == Lida.Servindo && !Precisa(v.Tipo, v.Aviao, s) && !VizinhoSaindo(v)) Libera(v, s);
             for (int k = 0; k < _avioes.Length; k++)
                 foreach (Tipo t in Tipos)
                     if (Precisa(t, k, s)) Chama(t, k, s);
+        }
+
+        /// <summary>Um por vez para fora das faixas: quem ainda esta entre a faixa e a rua leste, entrando ou saindo, segura a saida.</summary>
+        bool VizinhoSaindo(Veiculo v)
+        {
+            foreach (Veiculo o in _veiculos)
+                if ((o.Lida == Lida.Voltando || o.Lida == Lida.Indo) && Mathf.Abs(o.T.position.x - v.T.position.x) < 6f && o.T.position.z > RuaLeste + 0.4f) return true;
+            return false;
         }
 
         /// <summary>O aviao precisa do veiculo agora: parado no estande e, nos servicos, com o servico por fazer; escada e onibus ficam ate ele sair.</summary>
@@ -182,11 +193,11 @@ namespace TA
             Sai(livre, k);
         }
 
-        /// <summary>Um por vez na frente da garagem: quem ainda esta nas ruas do lado dela, entrando ou saindo, segura a proxima saida.</summary>
+        /// <summary>Um por vez na frente da garagem: quem ainda esta nas ruas do lado dela, entrando ou saindo, ou vem voltando, segura a proxima saida.</summary>
         bool ManobraOcupada()
         {
             foreach (Veiculo v in _veiculos)
-                if (v.Tipo != null && v.Lida != Lida.Parado && v.T.position.x > Vagas[0] - 3f && v.T.position.z < VagaZ + 0.1f) return true;
+                if (v.Tipo != null && v.Lida != Lida.Parado && v.T.position.x > Vagas[0] - (v.Lida == Lida.Voltando ? 9f : 3f) && v.T.position.z < VagaZ + 0.1f) return true;
             return false;
         }
 
@@ -195,9 +206,9 @@ namespace TA
         {
             Tipo t = v.Tipo;
             float f = t.Faixa[k];
-            var q = new List<Vector3>(p) { V(f - Ajuste, RuaOeste) };
-            v.Rotas.Enqueue(DeFrente(v, q.ToArray()));
-            Trecho re = Caminho(RaioVeic, 1.3f, V(f - Ajuste, RuaOeste), V(f, RuaOeste), V(f, t.Parada[k]));
+            var q = new List<Vector3>(p) { V(f - Ajuste, t.Rua) };
+            v.Rotas.Enqueue(DeFrente(v, RaioVeic, q.ToArray()));
+            Trecho re = Caminho(RaioVeic, 1.3f, V(f - Ajuste, t.Rua), V(f, t.Rua), V(f, t.Parada[k]));
             re.Re = re.Para = true; re.A = 0.7f; re.F = 0.9f;
             v.Rotas.Enqueue(re);
             v.Aviao = k; v.Lida = Lida.Indo;
@@ -207,7 +218,7 @@ namespace TA
         void Sai(Veiculo v, int k)
         {
             float x = Vagas[v.Vaga];
-            EntraDeRe(v, k, V(x, VagaZ), V(x, RuaOeste));
+            EntraDeRe(v, k, V(x, VagaZ), V(x, v.Tipo.Rua));
             v.S = 0f;
         }
 
@@ -221,10 +232,10 @@ namespace TA
             v.Aviao = -1;
             bool ocupado = false;
             foreach (Veiculo w in _veiculos) if (w.Tipo == t && w.Aviao == o) ocupado = true;
-            if (t.Servico > 0 && o == 0 && !ocupado && Precisa(t, o, s)) EntraDeRe(v, o, V(f, t.Parada[k]), V(f, RuaOeste));
+            if (t.Servico > 0 && o == 0 && !ocupado && Precisa(t, o, s)) EntraDeRe(v, o, V(f, t.Parada[k]), V(f, t.Rua));
             else
             {
-                v.Rotas.Enqueue(DeFrente(v, V(f, t.Parada[k]), V(f, RuaLeste), V(x + Ajuste, RuaLeste)));
+                v.Rotas.Enqueue(DeFrente(v, t.Raio, V(f, t.Parada[k]), V(f, RuaLeste), V(x + Ajuste, RuaLeste)));
                 Trecho re = Caminho(RaioVeic, 1.3f, V(x + Ajuste, RuaLeste), V(x, RuaLeste), V(x, VagaZ));
                 re.Re = re.Para = true; re.A = 0.7f; re.F = 0.9f;
                 v.Rotas.Enqueue(re);
@@ -233,15 +244,16 @@ namespace TA
             v.S = 0f;
         }
 
-        Trecho DeFrente(Veiculo v, params Vector3[] p)
+        Trecho DeFrente(Veiculo v, float raio, params Vector3[] p)
         {
-            Trecho t = Caminho(RaioVeic, v.Vel, p);
+            Trecho t = Caminho(raio, v.Vel, p);
             t.A = 0.8f; t.F = 1f; t.Para = true;
             return t;
         }
 
-        /// <summary>Quem vem atras espera (fila natural), e quem atravessa a rua tem a vez: conta a distancia de freada, para nao encostar. Depois de
-        /// 6 s parado atras de outro veiculo segue ate se soltar: e a saida de um cruzamento travado, que nao deve acontecer (diag_caixas.py acusaria).</summary>
+        /// <summary>Quem vem atras espera (fila natural), com folga para quem esta na frente entrar de re, e quem atravessa a rua tem a vez: conta a
+        /// distancia de freada, para nao encostar. Quem vira na rua oeste, de frente ou entrando de re na faixa, espera tambem a rua leste: o bico abre ate ela. Depois de 20 s parado atras de
+        /// outro veiculo segue ate se soltar: e a saida de um cruzamento travado, que nao deve acontecer (diag_caixas.py acusaria).</summary>
         bool FrenteLivre(Veiculo v, Trecho t, float dt)
         {
             Vector3 f = t.Re ? -v.T.forward : v.T.forward, c = Centro(v), lado = new Vector3(f.z, 0f, -f.x);
@@ -250,27 +262,38 @@ namespace TA
             {
                 Vector3 d = V(q.x, q.y) - c;
                 float frente = Vector3.Dot(d, f);
-                if (frente > 0f && frente < v.Comp * 0.5f + 0.5f + freada && Mathf.Abs(Vector3.Dot(d, lado)) < v.Larg * 0.5f + 0.45f) return false;
+                if (frente > 0f && frente < v.Comp * 0.5f + 0.5f + freada && Mathf.Abs(Vector3.Dot(d, lado)) < v.Larg * 0.5f + 0.25f) return false;
             }
             float oeste = Cruza(v, t, RuaOeste), leste = Cruza(v, t, RuaLeste);
+            if (oeste >= 0f && v.T.position.z > RuaOeste) leste = oeste;
+            else if (t.Re && v.S < 0.2f && Mathf.Abs(v.T.position.z - RuaOeste) < 0.6f) leste = v.T.position.x;
             foreach (Veiculo o in _veiculos)
             {
                 if (o == v) continue;
                 Vector3 d = Centro(o) - c;
                 float frente = Vector3.Dot(d, f);
-                if (NaRua(o, RuaOeste, oeste) || NaRua(o, RuaLeste, leste) || (frente > 0f && frente < (v.Comp + o.Comp) * 0.5f + 0.5f + freada && Mathf.Abs(Vector3.Dot(d, lado)) < 1.2f))
+                bool quieto = o.Tipo != null && (o.Lida == Lida.Parado || o.Lida == Lida.Servindo);   // na vaga ou na faixa: fora do caminho, mesmo com o bico apontado na curva
+                if (NaRua(o, RuaOeste, oeste) || NaRua(o, RuaLeste, leste) || (!quieto && frente > 0f && frente < (v.Comp + o.Comp) * 0.5f + (t.Re ? 0.5f : Folga(o)) + freada && Mathf.Abs(Vector3.Dot(d, lado)) < 1.1f))
                 {
                     v.Parado += dt;
-                    return v.Parado >= 6f;
+                    return v.Parado >= 20f;
                 }
             }
             v.Parado = 0f;
             return true;
         }
 
+        /// <summary>Distancia atras de `o`: maior se ele vai entrar de re, para nao voltar por cima de quem colou.</summary>
+        static float Folga(Veiculo o)
+        {
+            if (o.Rotas.Count == 0) return 0.5f;
+            Trecho t = o.Rotas.Peek();
+            return t.Re || (o.Rotas.Count == 2 && t.Total - o.S < 6f) ? 2.3f : 0.5f;
+        }
+
         /// <summary>`o` vem pela `rua`, perto do `x` em que outro quer cruzar (x negativo = nao cruza).</summary>
         static bool NaRua(Veiculo o, float rua, float x) =>
-            x >= 0f && o.Lida != Lida.Parado && Mathf.Abs(o.T.position.z - rua) < 0.4f && Mathf.Abs(o.T.forward.x) > 0.7f && Mathf.Abs(o.T.position.x - x) < 9f;
+            x >= 0f && o.Lida != Lida.Parado && Mathf.Abs(o.T.position.z - rua) < 0.5f && Mathf.Abs(o.T.forward.x) > 0.7f && Mathf.Abs(o.T.position.x - x) < 9f;
 
         /// <summary>O x em que o trajeto entra na `rua` nos proximos metros, vindo de fora dela (-1 = nao entra): no cruzamento, quem cruza espera quem
         /// ja vem pela rua, antes de o nariz chegar nela.</summary>

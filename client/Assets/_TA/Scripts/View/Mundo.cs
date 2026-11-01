@@ -256,9 +256,9 @@ namespace TA
             if (_vista == "perto") { _alvo += new Vector3(-1.5f, 0f, -1.2f); _tam *= 0.55f; }
             else if (_vista == "patio") { _alvo = new Vector3(10.5f, 0f, 10.5f); _tam = 9.5f; }
             else if (_vista == "geral") { _alvo = new Vector3(21f, 0f, 13f); _tam = 19f; }
-            else if (_vista == "garagem") { _alvo = new Vector3(33f, 0f, 12f); _tam = 9f; }
+            else if (_vista == "garagem") { _alvo = new Vector3(33f, 0f, 13f); _tam = 9f; }
             else if (_vista == "seguranca") { _alvo = new Vector3(6f, 0f, 2.4f); _tam = 2.4f; }
-            else if (_vista == "hangar") { _alvo = new Vector3(33f, 0f, 23f); _tam = 11f; }
+            else if (_vista == "hangar") { _alvo = new Vector3(33f, 0f, 24f); _tam = 11f; }
         }
 
         /// <summary>Game (-vista, so no -testsession): enquadramento das fotos e do -record (perto = zoom nas salas; hangar = o caminho ate ele; patio = salas, estandes
