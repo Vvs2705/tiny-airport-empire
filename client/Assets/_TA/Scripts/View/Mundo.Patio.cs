@@ -329,6 +329,7 @@ namespace TA
                 case Fase.NoPatio:
                     bool revisa = hangar > VoltaHangarSeg;
                     if (!revisa && !a.QuerPartir) break;
+                    if (GenteNoTrilho(a.Id)) return;   // o ultimo do trilho entra antes
                     foreach (Veiculo v in _veiculos) if (v.Aviao == a.Id) return;   // quem esta encostado sai antes
                     if (a.Id != 0 || _reboque == Reboque.Pronto)
                     {

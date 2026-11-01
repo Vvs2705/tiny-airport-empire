@@ -94,7 +94,7 @@ namespace TA
         static Sala Nova(float x, float z, Vector2 entra, Vector2 sai, Vector2 n) =>
             new Sala { Min = new Vector2(x, z), In = entra, Out = sai, N = n, T = new Vector2(n.y, n.x) };
 
-        static readonly Vector2 Calcada = new Vector2(-2.6f, 2f), PonteFim = new Vector2(10f, 12.1f);
+        static readonly Vector2 Calcada = new Vector2(-2.6f, 2f);
 
         /// <summary>Ponto da sala a `d` da parede de saida e `a` ao longo dela.</summary>
         static Vector2 Em(int e, float d, float a) => Salas[e].Out - Salas[e].N * d + Salas[e].T * a;
@@ -225,6 +225,7 @@ namespace TA
             Entrada();
             Posiciona();
             Sim s = S;
+            EmbarquePasso(s, dt);
             SincronizaPax(s, dt);
             Funcionarios(s, dt);
             Salas3D(s);
@@ -259,9 +260,12 @@ namespace TA
             else if (_vista == "garagem") { _alvo = new Vector3(27f, 0f, 12f); _tam = 10f; }
             else if (_vista == "seguranca") { _alvo = new Vector3(6f, 0f, 2.4f); _tam = 2.4f; }
             else if (_vista == "hangar") { _alvo = new Vector3(29f, 0f, 16f); _tam = 11f; }
+            else if (_vista == "ponte") { _alvo = new Vector3(10.2f, 0f, 11.6f); _tam = 4.6f; }
+            else if (_vista == "escada") { _alvo = new Vector3(21f, 0f, 13.1f); _tam = 4.2f; }
+            else if (_vista == "chegadas") { _alvo = new Vector3(4.6f, 0f, 10.2f); _tam = 3.6f; }
         }
 
-        /// <summary>Game (-vista, so no -testsession): enquadramento das fotos e do -record (perto = zoom nas salas; hangar = o caminho ate ele; patio = salas, estandes
+        /// <summary>Game (-vista, so no -testsession): enquadramento das fotos e do -record (perto = zoom nas salas; hangar = o caminho ate ele; ponte, escada e chegadas = o embarque de perto; patio = salas, estandes
         /// e a ponta da pista; geral = tudo).</summary>
         public void Vista(string v) { _vista = v; _enquadrado = false; }
 
