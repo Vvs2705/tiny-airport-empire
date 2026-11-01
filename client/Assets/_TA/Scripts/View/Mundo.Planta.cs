@@ -106,14 +106,7 @@ namespace TA
             Bloco("Saguao", PrimitiveType.Cube, new Vector3(6f, -0.08f, 4f), new Vector3(12.6f, 0.1f, 8.6f), Art.Hex(0xCFC7B5));
             Bloco("SaguaoLeste", PrimitiveType.Cube, new Vector3(16.1f, -0.08f, 6f), new Vector3(8f, 0.1f, 4.6f), Art.Hex(0xCFC7B5));
             for (int e = 0; e < Salas.Length; e++) Sala3D(e);
-            // ponte de embarque, da porta norte do portao ate a porta do aviao
-            Transform ponte = Peca("ponte_embarque", new Vector3(10f, 0f, 10.2f), 0f, 1.3f);
-            if (ponte == null)
-            {
-                Bloco("Ponte", PrimitiveType.Cube, new Vector3(10f, 0.04f, 10.05f), new Vector3(0.8f, 0.08f, 4.1f), Art.Hex(0x9AA6BC));
-                Bloco("PonteLadoE", PrimitiveType.Cube, new Vector3(9.58f, 0.3f, 10.05f), new Vector3(0.06f, 0.5f, 4.1f), Art.Hex(0x6E7A90));
-                Bloco("PonteLadoD", PrimitiveType.Cube, new Vector3(10.42f, 0.3f, 10.05f), new Vector3(0.06f, 0.5f, 4.1f), Art.Hex(0x6E7A90));
-            }
+            Ponte3D();
             // cenario (so com as malhas; sem elas o greybox da v0.1 nao tinha nada aqui)
             _terminal = Niveis("terminal_vale_verde", new Vector3(1.2f, 0f, 13.2f), 180f);
             _torre = Niveis("torre_controle", new Vector3(26.5f, 0f, 6.5f), 225f);
