@@ -125,14 +125,20 @@ namespace TA
         public static string PatioContratar(long c) => c < 0 ? L("Equipe completa") : L("Contratar\n") + Num(c);
         public static string AviaoLinha(int vooId, int d) => (vooId >= 0 ? Voo(vooId) + "\n" : "") + Desgaste(d);
         public static string VeiculosLinha(int n, int max, long c) => L("Veículos ") + n + "/" + max + "\n" + Custo(c);
-        public static string ServicoVel(int nivel, int max, float seg, float prox, long c) => Melhoria[0] + " " + nivel + "/" + max + "\n" + Seg(seg) + (c < 0 ? "" : " → " + Seg(prox) + " · " + Num(c));
+        public static string ServicoVel(int nivel, int max, float seg, float prox, long c) => Melhoria[0] + " " + nivel + "/" + max + "\n" + Seg(seg) + (c < 0 ? "" : " » " + Seg(prox) + " · " + Num(c));
         public static string ManutencaoAviso(int d) => L("Avião com ") + d + L("% de desgaste: toque no voo para decidir.");
         public static readonly string ManutencaoPendente = L("Manutenção pendente: inspeção ou hangar.");
         public static readonly string HangarFeito = L("Revisão pronta: desgaste zerado.");
         public static string EstacaoAberta(int e) => L("Nova estação: ") + Estacao[e] + L("! Veja a Equipe.");
-        public static string EmEstacao(int e, bool andando) => (andando ? L("A caminho: ") : L("Em ")) + Estacao[e];
-        public static string PerfilLinha(int p) => Funcionario[p] + " · " + Perfil[p];
+        public static readonly string[] EstacaoNo = { L("no check-in"), L("na segurança"), L("na loja"), L("no portão"), L("na bagagem"), L("na alimentação"), L("na oficina"), L("no despacho") };
+        public static readonly string[] EstacaoPara = { L("para o check-in"), L("para a segurança"), L("para a loja"), L("para o portão"), L("para a bagagem"), L("para a alimentação"), L("para a oficina"), L("para o despacho") };
+        public static string EmEstacao(int e, bool andando) => andando ? L("Indo ") + EstacaoPara[e] : L("Trabalhando ") + EstacaoNo[e];
         public static string PerfilInfo(int p) => L("Melhor em ") + PerfilCasa[p];
+        public static readonly string ContratarCurto = L("Contratar"), ContrateAntes = L("Contrate antes"), Contratados = L("Contratados"), CashNome = L("Cash"), TerminalNome = L("Terminal");
+        public static string Faltam(long c) => L("Faltam ") + Num(c);
+        public static string DeTotal(int a, int b) => a + L(" de ") + b;
+        public static string NivelNome(int nivel) => L("Nível ") + nivel;
+        public static string FaltamEmbarques(long n) => L("Embarque mais ") + Num(n) + (n == 1 ? L(" passageiro") : L(" passageiros"));
 
         // ---------- tutorial (GDD_ORIGEM "Onboarding", passos 1-9) ----------
         public static readonly string Lara = L("Lara, Chefe de Terminal");

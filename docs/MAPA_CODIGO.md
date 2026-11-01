@@ -41,6 +41,7 @@ Convenção de origem: `fs:` = Forge Street (`Vvs2705/forge-street`), `dc:` = Du
 | `Hud.Telas.cs` | telas modais que seguram o relógio: melhorias (efeito escrito antes de comprar), mover para (alternativa ao arrasto), cofre offline, anúncio simulado (3 s, só então o `Pagar`), pausa, álbum | `AbreTela(nome)`, `AbreCofre`, `AbreAnuncio` | — |
 | `Tour.cs` | tutorial dos passos 1–9 da Origem (véu com buraco, contorno, seta, cartão da Lara, dedo arrastando no passo 7), um por vez, pulável, gravado no PlayerPrefs `ta_tour` | `MostraPasso(n)` (flag `-tela passoN`), `ReverTour`, `PulaTour` | `dc:Scripts/View/Tour.cs` |
 | `Art.cs` | arte procedural (formas com antialias em cache) e helpers de uGUI (`Node`, `Img`, `NewText`, `Panel`, `NewButton`, `Toque`), `Aperta`, `Dp` e `AreaSegura` | `Art.*`, `Dp.Px`, `AreaSegura.AncorarDentro` | `dc:Scripts/View/Art.cs`, `Dp.cs`, `AreaSegura.cs` |
+| `Art.Kit.cs` | a linguagem visual das telas (PR dos menus): `Tipo` e `Escreve` (hierarquia de texto), `Folha` (modal ancorado ao pé), lista rolável, cartão de embarque, `Numero`, `BarraNivel` e `BotaoPreco` com os estados (preço, sem dinheiro, travado, máximo, secundário) | `NovaFolha`, `NovaLista`, `NovoCartao`, `NovaPlaca`, `NovoNumero`, `NovaBarraNivel`, `NovoBotaoPreco`, `DePara`, `Fixa`, `Margem` | — |
 | `Textos.cs` | todo texto de tela em pt-BR numa tabela `L(pt)`, pronta para as colunas en/es/id da D-08 | `Textos.*` | `dc:Scripts/View/Textos.cs` |
 | `Exportar.cs` | exportar o diário só quando o jogador manda (Android: MediaStore/ACTION_SEND; Windows: abre a pasta) | `Exportar.Diario` | cópia de `dc:Scripts/View/Exportar.cs` | leitura de flags de `dc:Scripts/View/Game.cs` |
 | `Audio.cs` | áudio do GDD §12: efeitos com variação e música por aeroporto com crossfade, volumes separados (`ta_som`, `ta_musica`), corte ao ir para o segundo plano e rampa de 2,5 s na volta, fallback silencioso e `AudioListener` garantido. **Ainda sem chamada no jogo:** ligar em `Game.cs`, `Mundo.cs` e na pausa | `Init(host)`, `Play(nome)`, `Music(faixa)`, `MusicaAeroporto(1..3)`, `SetVolumes(som, musica)` | `dc:Scripts/View/Audio.cs` |
@@ -80,6 +81,7 @@ Em `client/Assets/_TA/Tests/EditModeView/` (`TA.ViewTests`, só no Unity: o `dot
 |---|---|
 | `AudioTests.cs` | banco importado com o tipo de carga certo, clipe ausente em silêncio, volumes separados e limitados, volta do segundo plano sem pico de volume |
 | `PlantaTests.cs` | as 8 salas ligadas pelas portas: de qualquer sala a qualquer sala, sem atravessar parede |
+| `FontesTests.cs` | as 2 fontes OFL carregam e cobrem os nomes do jogo, as placas de chão têm material e os estados do `BotaoPreco` |
 
 ## Cena, recursos e pacotes
 

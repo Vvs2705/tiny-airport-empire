@@ -13,7 +13,7 @@ namespace TA
     /// </summary>
     public sealed partial class Hud
     {
-        sealed class Modal { public RectTransform Rt; public Text Titulo, Corpo; }
+        sealed class Modal { public RectTransform Rt; public Text Titulo, Corpo; public Folha F; }
 
         Modal _melhorias, _mover, _cofre, _anuncio, _pausa, _album;
         readonly List<Modal> _modais = new List<Modal>();
@@ -36,7 +36,22 @@ namespace TA
             m.Rt = veu.rectTransform;
             RectTransform p = Art.Panel(m.Rt, "Painel", Art.Painel, new Vector2(0.05f, y0), new Vector2(0.95f, y1)).rectTransform;
             m.Titulo = Art.Outlined(Art.NewText(p, "Titulo", 50, new Vector2(0.05f, 0.86f), new Vector2(0.95f, 0.98f)), 3f);
+            m.Titulo.font = Art.Titulo();
             m.Corpo = Art.NewText(p, "Corpo", 36, new Vector2(0.06f, 0.3f), new Vector2(0.94f, 0.85f), TextAnchor.UpperLeft);
+            m.Rt.gameObject.SetActive(false);
+            _modais.Add(m);
+            return m;
+        }
+
+        /// <summary>Modal na linguagem nova (Art.NovaFolha): o conteudo entra em m.F.Corpo; o X e o toque fora fecham.</summary>
+        Modal NovaFolhaModal(RectTransform canvas, string nome, string titulo, Sprite icone, float altura)
+        {
+            var m = new Modal();
+            Image veu = Art.Img(canvas, nome, Art.Square(), new Color(0f, 0f, 0f, 0.62f), Vector2.zero, Vector2.one);
+            veu.preserveAspect = false; veu.raycastTarget = true;   // segura o toque do jogo atras
+            m.Rt = veu.rectTransform;
+            m.F = Art.NovaFolha(m.Rt, titulo, icone, altura, () => Fecha(m));
+            m.Titulo = m.F.Titulo;
             m.Rt.gameObject.SetActive(false);
             _modais.Add(m);
             return m;
@@ -103,6 +118,7 @@ namespace TA
 
         static void Abre(Modal m)
         {
+            m.F?.Ajusta();
             m.Rt.gameObject.SetActive(true);
             m.Rt.SetAsLastSibling();
         }
@@ -163,8 +179,8 @@ namespace TA
                         int n = s.Nivel(e, mm);
                         float baseSeg = e == Estacao.Manutencao ? s.T.CheckSeg : s.T.Tempo[i];   // na oficina, a Velocidade encurta a checagem
                         string efeito = mm == Melhoria.Velocidade
-                            ? Textos.Seg((float)(baseSeg * Math.Pow(s.T.VelFator, n))) + (c < 0 ? "" : " → " + Textos.Seg((float)(baseSeg * Math.Pow(s.T.VelFator, n + 1))))
-                            : s.St(e).Postos + (c < 0 ? "" : " → " + (s.St(e).Postos + 1));
+                            ? Textos.Seg((float)(baseSeg * Math.Pow(s.T.VelFator, n))) + (c < 0 ? "" : " » " + Textos.Seg((float)(baseSeg * Math.Pow(s.T.VelFator, n + 1))))
+                            : s.St(e).Postos + (c < 0 ? "" : " » " + (s.St(e).Postos + 1));
                         Art.Rotulo(_melhoriaBtn[i, m]).text = Textos.MelhoriaLinha(mm, n, s.NivelMax(mm), efeito + " · " + Textos.Custo(c));
                         _melhoriaBtn[i, m].interactable = c >= 0 && s.Cash >= c;
                     }
