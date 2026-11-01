@@ -268,6 +268,7 @@ namespace TA
             else if (_vista == "escada") { _alvo = new Vector3(21f, 0f, 14f); _tam = 4.2f; }
             else if (_vista == "chegadas") { _alvo = new Vector3(4.6f, 0f, 10.2f); _tam = 3.6f; }
             else if (_vista == "calcada") { _alvo = new Vector3(-1.45f, 0f, 3.25f); _tam = 4.4f; }
+            else if (_vista == "pista") { _alvo = new Vector3(11f, 0f, 29f); _tam = 13f; }
         }
 
         /// <summary>Game (-vista, so no -testsession): enquadramento das fotos e do -record (perto = zoom nas salas; hangar = o caminho ate ele; ponte, escada e chegadas = o embarque de perto; patio = salas, estandes

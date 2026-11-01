@@ -137,7 +137,7 @@ namespace TA
             _totemFundo = Billboard("TotemFundo", Art.Disc(), Art.Dark, 0.66f);
             _totemIcone = Billboard("TotemIcone", Art.Alerta(), Art.Warn, 0.44f);
             _reparoAnel = Billboard("ReparoAnel", Art.Arc(0f), Art.Good, 0.5f);
-            for (int i = 0; i < _raioBalcao.Length; i++) _raioBalcao[i] = Billboard("RaioBalcao" + i, Art.Raio(), Art.Warn, 0.3f);
+            for (int i = 0; i < _raioBalcao.Length; i++) _raioBalcao[i] = Billboard("RaioBalcao" + i, Art.Raio(), Art.Warn, 0.45f);
             for (int i = 0; i < _conesSala.Length; i++) _conesSala[i] = Cone();
             for (int k = 0; k < 2; k++)
             {
