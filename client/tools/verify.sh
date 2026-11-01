@@ -24,6 +24,7 @@ repo() {
   log=$(python "$CLIENT/tools/checa_repo.py" 2>&1); rc=$?
   echo "$log" > "$OUT/checa_repo.log"
   [ $rc -eq 0 ] || { echo "$log" | grep -v '^AVISO' | head -20; fail "checa_repo (ver $OUT/checa_repo.log)"; }
+  python "$CLIENT/tools/diag_caixas.py" --selftest > /dev/null || fail "diag_caixas --selftest"
   ok "repo: $(echo "$log" | tail -1)"
 }
 

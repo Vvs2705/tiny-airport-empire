@@ -257,12 +257,12 @@ namespace TA
             if (_vista == "perto") { _alvo += new Vector3(-1.5f, 0f, -1.2f); _tam *= 0.55f; }
             else if (_vista == "patio") { _alvo = new Vector3(10.5f, 0f, 10.5f); _tam = 9.5f; }
             else if (_vista == "geral") { _alvo = new Vector3(21f, 0f, 13f); _tam = 19f; }
-            else if (_vista == "garagem") { _alvo = new Vector3(27f, 0f, 12f); _tam = 10f; }
+            else if (_vista == "garagem") { _alvo = new Vector3(33f, 0f, 13f); _tam = 9f; }
             else if (_vista == "seguranca") { _alvo = new Vector3(6f, 0f, 2.4f); _tam = 2.4f; }
-            else if (_vista == "hangar") { _alvo = new Vector3(29f, 0f, 16f); _tam = 11f; }
+            else if (_vista == "hangar") { _alvo = new Vector3(33f, 0f, 24f); _tam = 11f; }
             else if (_vista == "portao") { _alvo = V3(Centro(Portao)); _tam = 3.1f; }
             else if (_vista == "ponte") { _alvo = new Vector3(10.2f, 0f, 11.6f); _tam = 4.6f; }
-            else if (_vista == "escada") { _alvo = new Vector3(21f, 0f, 13.1f); _tam = 4.2f; }
+            else if (_vista == "escada") { _alvo = new Vector3(21f, 0f, 14f); _tam = 4.2f; }
             else if (_vista == "chegadas") { _alvo = new Vector3(4.6f, 0f, 10.2f); _tam = 3.6f; }
         }
 
