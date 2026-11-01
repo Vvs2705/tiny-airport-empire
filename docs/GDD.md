@@ -589,7 +589,7 @@ O aeroporto tem dia a dia: amanhece, tem hora de pico, muda de estação do ano,
 
 - **Cash:** moeda principal, obtida por voos, serviços e missões; usada em melhorias e contratação. É a única moeda da v0.1.
 - **Gems:** moeda premium, obtida por metas claras e comprada por IAP; não expira. **Só existe no lançamento se D-05 aprovar IAP com validação e D-07 aprovar a moeda.** O offline nunca dá Gems, e anúncio também não.
-  - Para que servem as Gems (a v1.0 não dizia). Proposta: cosméticos da loja, pacote de Cash dimensionado pela renda atual e booster de 2× receita por 30 min. Nenhum desses é necessário para a campanha, e não há ranking em que o booster conte.
+  - Para que servem as Gems (a v1.0 não dizia; D-07 aprovou): cosméticos da loja, pacote de Cash dimensionado pela renda atual e booster de 2× receita por 30 min. Nenhum desses é necessário para a campanha, e não há ranking em que o booster conte. Preços, a meta clara (fechar a cadeia de um aeroporto) e o que as Gems nunca compram: `CONTRATO_FASE_D1.md`.
 - **XP de gestão/reputação:** barra de progresso da conta e desbloqueio de conteúdo; não é uma moeda comprável nem gastável.
 - **Pontos de temporada:** barra de progresso obtida por missões da temporada; reinicia conforme as regras exibidas; não se compra.
 
@@ -1196,6 +1196,8 @@ Estes são os nomes oficiais. O diário de playtest da Origem e os kill criteria
 - `purchase_failed`
 - `purchase_restored`
 - `purchase_refunded`
+- `gems_earned`
+- `gems_spent`
 - `save_loaded`
 - `save_migration_failed`
 - `cloud_save_conflict`
@@ -1626,7 +1628,7 @@ Estado auditado em 29/10/2026 no commit `59f0bb9` (§0.3). A evidência comum a 
 | P-05 | Três aeroportos e campanha | Obrigatório | Checklist de conteúdo e testes | `NÃO INICIADO` | Fase B; `docs/CAMPANHA.md` |
 | P-06 | Rotas, aeronaves, incidentes e histórias | Obrigatório | Catálogo validado e testes | `NÃO INICIADO` | Fase B; D-13 |
 | P-07 | Passe de temporada completo | Obrigatório | Catálogo, progressão e sandbox | `NÃO INICIADO` | `docs/TEMPORADA_S1.md`; trilha premium depende de D-05 |
-| P-08 | Compras seguras e restore | Bloqueador | Validação sandbox/server-side | `BLOQUEADO` | D-05, D-06, Play Console (D-U-N-S, previsão 2026-11-25) |
+| P-08 | Compras seguras e restore | Bloqueador | Validação sandbox/server-side | `BLOQUEADO` | núcleo feito (`CONTRATO_FASE_D1.md`); servidor (D-06) e Play Console (D-U-N-S, previsão 2026-11-25) |
 | P-09 | Anúncios recompensados e limites | Bloqueador se monetização ativa | Modo de teste + teste de callback | `BLOQUEADO` | app no LevelPlay, que depende do nome e do appId (D-03) |
 | P-10 | Save/migração/offline | Bloqueador | Testes de corrupção, tempo e reload | `NÃO INICIADO` | P-01 |
 | P-11 | Privacidade e declarações de loja | Bloqueador | URLs e formulários revisados | `BLOQUEADO` | D-03, D-09, D-10, D-11, D-12; Play Console |

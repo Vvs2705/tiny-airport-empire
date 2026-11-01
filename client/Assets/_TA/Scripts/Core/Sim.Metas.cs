@@ -70,6 +70,7 @@ namespace TA.Core
                 int pago = T.RegraCampanha ? o.Recompensa : 0;
                 Cash += pago;
                 Emit(Ev.ObjetivoConcluido, a, _feitos[a]++, pago);
+                if (T.RegraCampanha && ObjetivoAtual(a) == null) GanhaGems(a);
             }
         }
 

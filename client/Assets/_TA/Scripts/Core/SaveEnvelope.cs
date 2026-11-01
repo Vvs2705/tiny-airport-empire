@@ -47,7 +47,7 @@ namespace TA.Core
 
         static string After(string line, string key) => line.StartsWith(key, StringComparison.Ordinal) ? line.Substring(key.Length) : null;
 
-        static string Hash(string s)
+        internal static string Hash(string s)
         {
             using (SHA256 sha = SHA256.Create())
                 return BitConverter.ToString(sha.ComputeHash(Encoding.UTF8.GetBytes(s))).Replace("-", "").ToLowerInvariant();

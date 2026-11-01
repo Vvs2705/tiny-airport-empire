@@ -1,6 +1,7 @@
 """Prova de mutacao das travas da Fase C (CONTRATO_FASE_C §7): tira cada trava do nucleo, roda o dotnet test e exige que algum teste caia.
 
 uso (da raiz do repo): python client/tools/mutacao.py [trecho do nome da trava ...]
+MUTACAO_TESTES = filtro do dotnet test, para rodar so os testes da trava (ex.: FullyQualifiedName~ComprasTests).
 Cada mutante e' aplicado, testado e desfeito (o arquivo volta byte a byte, mesmo com erro). Sai 1 se algum mutante sobreviver.
 """
 
@@ -470,6 +471,162 @@ MUTANTES = [
         "_marca[i] = (int)Math.Max(0, Math.Min(T.Conquistas[i].Alvo, c[i + 1]));",
         "_marca[i] = (int)c[i + 1];",
     ),
+    (
+        "compra: a mesma transacao rende uma so",
+        "Compras.cs",
+        "if (_tx.Contains(id)) return Credito.Repetido;",
+        "",
+    ),
+    (
+        "compra: o id da transacao vai no save",
+        "Sim.Save.cs",
+        'if (_tx.Count > 0) sb.Append("tx=").Append(string.Join(",", _tx)).Append(\'\\n\');',
+        "",
+    ),
+    (
+        "compra: o token nunca fica no save",
+        "Compras.cs",
+        "string id = SaveEnvelope.Hash(tx);",
+        "string id = tx;",
+    ),
+    (
+        "compra: nao consumivel paga uma vez",
+        "Compras.cs",
+        "if (unico && Tem(p.Id)) { _tx.Add(id); return Credito.JaTem; }",
+        "",
+    ),
+    (
+        "compra: id vazio nao credita",
+        "Compras.cs",
+        "if (string.IsNullOrWhiteSpace(tx) || p == null) return Credito.Invalido;",
+        'if (p == null) return Credito.Invalido; tx = tx ?? "";',
+    ),
+    (
+        "compra: save recusado nao credita",
+        "Compras.cs",
+        "if (SaveRefused) return Credito.SaveRecusado;",
+        "",
+    ),
+    (
+        "compra: teto nao engole",
+        "Compras.cs",
+        "if (p.Gems > T.GemsTeto - Gems) return Credito.Teto;",
+        "if (p.Gems > T.GemsTeto - Gems) { _tx.Add(id); return Credito.Teto; }",
+    ),
+    (
+        "compra: conteudo fixo, sem semente",
+        "Compras.cs",
+        "Gems += p.Gems;",
+        "Gems += p.Gems + Seed % 2;",
+    ),
+    (
+        "compra: Cash fora da media movel",
+        "Compras.cs",
+        "SomaCash(p.Cash);",
+        "SomaCash(p.Cash); _ganhoPasso += p.Cash;",
+    ),
+    (
+        "compra: pacote fora da media movel",
+        "Compras.cs",
+        "if (g.Tipo == TipoItem.PacoteCash) SomaCash(v);",
+        "if (g.Tipo == TipoItem.PacoteCash) { SomaCash(v); _ganhoPasso += v; }",
+    ),
+    (
+        "compra: pacote com teto",
+        "Compras.cs",
+        "Math.Min(T.PacoteTeto, Math.Floor(RateEma * T.PacoteSeg))",
+        "Math.Floor(RateEma * T.PacoteSeg)",
+    ),
+    (
+        "compra: pacote com piso",
+        "Compras.cs",
+        "(long)Math.Max(T.PacotePiso, Math.Min(T.PacoteTeto, Math.Floor(RateEma * T.PacoteSeg)))",
+        "(long)Math.Min(T.PacoteTeto, Math.Floor(RateEma * T.PacoteSeg))",
+    ),
+    (
+        "compra: booster nao acumula",
+        "Compras.cs",
+        "(g.Tipo == TipoItem.Booster ? BoostLeft == 0 : !Tem(g.Id))",
+        "(g.Tipo == TipoItem.Booster || !Tem(g.Id))",
+    ),
+    (
+        "compra: gasto so com saldo",
+        "Compras.cs",
+        "|| Gems < T.ItensGems[item].Preco) return false;",
+        ") return false;",
+    ),
+    (
+        "compra: saldo nao estoura",
+        "Compras.cs",
+        "Cash = Cash > long.MaxValue - v ? long.MaxValue : Cash + v;",
+        "Cash += v;",
+    ),
+    (
+        "compra: Gems nao repoem voo",
+        "Compras.cs",
+        "Gems -= g.Preco;",
+        "Gems -= g.Preco; TotalPerdidos = 0;",
+    ),
+    (
+        "compra: Gems nao andam a campanha",
+        "Compras.cs",
+        "Gems -= g.Preco;",
+        "Gems -= g.Preco; if (_feitos[0] < 10) _feitos[0]++;",
+    ),
+    (
+        "compra: Gems nao consertam aviao",
+        "Compras.cs",
+        "Gems -= g.Preco;",
+        "Gems -= g.Preco; foreach (Aviao av in Avioes) av.Desgaste = 0;",
+    ),
+    (
+        "compra: credito nao mexe no voo",
+        "Compras.cs",
+        "if (unico) _posse.Add(p.Id);",
+        "if (unico) _posse.Add(p.Id); TotalPerdidos = 0;",
+    ),
+    (
+        "compra: offline nao da Gems",
+        "Sim.Offline.cs",
+        "LastClaimCash = Math.Max(0, cash);",
+        "LastClaimCash = Math.Max(0, cash); Gems += 1;",
+    ),
+    (
+        "compra: anuncio nao da Gems",
+        "Anuncios.cs",
+        "_sim.Recompensa(a, v);",
+        "_sim.Gems += 1; _sim.Recompensa(a, v);",
+    ),
+    (
+        "compra: cadeia paga so ao fechar",
+        "Sim.Metas.cs",
+        "if (T.RegraCampanha && ObjetivoAtual(a) == null) GanhaGems(a);",
+        "if (T.RegraCampanha) GanhaGems(a);",
+    ),
+    (
+        "compra: campanha sem pagar nao da Gems",
+        "Sim.Metas.cs",
+        "if (T.RegraCampanha && ObjetivoAtual(a) == null) GanhaGems(a);",
+        "if (ObjetivoAtual(a) == null) GanhaGems(a);",
+    ),
+    (
+        "compra: saldo do save limitado",
+        "Sim.Save.cs",
+        'Gems = Math.Max(0, Math.Min(T.GemsTeto, Get(kv, "gems", 0)));',
+        'Gems = Get(kv, "gems", 0);',
+    ),
+    (
+        "compra: posse do save so de nao consumivel",
+        "Sim.Save.cs",
+        "if (p.Tipo == TipoProduto.NaoConsumivel && Array.IndexOf(posse, p.Id) >= 0) _posse.Add(p.Id);",
+        "if (Array.IndexOf(posse, p.Id) >= 0) _posse.Add(p.Id);",
+    ),
+    (
+        "compra: booster sobrevive a reabrir",
+        "Sim.Save.cs",
+        "Math.Min(Math.Max(s.T.BoostSegundos, s.T.BoosterSeg) * Hz,",
+        "Math.Min(s.T.BoostSegundos * Hz,",
+    ),
 ]
 
 
@@ -481,7 +638,8 @@ def testa():
             "test",
             os.path.join(RAIZ, "client", "tools", "coretests"),
             "-nologo",
-        ],
+        ]
+        + (["--filter", os.environ["MUTACAO_TESTES"]] if "MUTACAO_TESTES" in os.environ else []),
         capture_output=True,
         text=True,
         env=env,
