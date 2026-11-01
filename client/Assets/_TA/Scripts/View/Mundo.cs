@@ -180,6 +180,7 @@ namespace TA
         Vector3 _alvo;
         float _tam = 6f;
         bool _enquadrado;
+        int _salaNova = -1;
         string _vista;
         Rect _regiao;
         int _press = -2;
@@ -238,24 +239,42 @@ namespace TA
             AndaPatio(dt);
         }
 
-        /// <summary>Enquadramento inicial, de perto: as 4 salas e a boca da ponte na faixa entre o quadro e a barra de baixo (o patio e a
-        /// pista ficam a um pan; a pinca afasta).</summary>
-        void Enquadra()
+        /// <summary>Largura da tela em m no enquadramento: mais que isso, o adulto fica abaixo de 28 px na foto 540 x 960 (ART_BIBLE §3).</summary>
+        const float LarguraLeitura = 9.6f;
+
+        /// <summary>Metros por pixel e centro em que `pts` cabem na faixa entre o quadro e a barra de baixo.</summary>
+        float Quadro(List<Vector3> pts, out Vector3 centro)
         {
             Vector3 dir = _cam.transform.right, up = _cam.transform.up;
-            var pts = new List<Vector3> { new Vector3(-0.6f, 0f, 0f), new Vector3(8f, 0f, -0.6f), new Vector3(1.6f, 0f, -1.6f), new Vector3(12.4f, 0f, 4f), new Vector3(0f, 1f, 4.4f), new Vector3(4f, 1f, 8.4f), new Vector3(12f, 1f, 8f), new Vector3(10f, 1f, 10f) };
-            for (int e = 4; e < Salas.Length; e++)   // as salas abertas entram no quadro (a que abrir no meio do jogo pede de novo: Evento)
-                if (S.Desbloqueada((Estacao)e))
-                    foreach (Vector2 c in new[] { Vector2.zero, new Vector2(Lado, 0f), new Vector2(0f, Lado), new Vector2(Lado, Lado) }) pts.Add(V3(Salas[e].Min + c, 1f));
             float x0 = float.MaxValue, x1 = float.MinValue, y0 = float.MaxValue, y1 = float.MinValue;
             foreach (Vector3 p in pts)
             {
                 float x = Vector3.Dot(p, dir), y = Vector3.Dot(p, up);
                 x0 = Mathf.Min(x0, x); x1 = Mathf.Max(x1, x); y0 = Mathf.Min(y0, y); y1 = Mathf.Max(y1, y);
             }
-            float upp = Mathf.Max((x1 - x0) / _regiao.width, (y1 - y0) / _regiao.height);
+            centro = dir * ((x0 + x1) * 0.5f) + up * ((y0 + y1) * 0.5f);
+            return Mathf.Max((x1 - x0) / _regiao.width, (y1 - y0) / _regiao.height);
+        }
+
+        /// <summary>Enquadramento inicial, de perto: as 4 salas e a boca da ponte (o patio e a pista ficam a um pan; a pinca afasta). As salas
+        /// abertas entram no quadro enquanto a pessoa ainda se le; depois disso a camera fica no fluxo e a sala que abriu ganha um pan (Evento).</summary>
+        void Enquadra()
+        {
+            Vector3 dir = _cam.transform.right, up = _cam.transform.up;
+            var pts = new List<Vector3> { new Vector3(-0.6f, 0f, 0f), new Vector3(8f, 0f, -0.6f), new Vector3(1.6f, 0f, -1.6f), new Vector3(12.4f, 0f, 4f), new Vector3(0f, 1f, 4.4f), new Vector3(4f, 1f, 8.4f), new Vector3(12f, 1f, 8f), new Vector3(10f, 1f, 10f) };
+            float upp = Quadro(pts, out Vector3 centro), teto = LarguraLeitura / Screen.width;
+            for (int e = 4; e < Salas.Length; e++)
+                if (S.Desbloqueada((Estacao)e))
+                    foreach (Vector2 c in new[] { Vector2.zero, new Vector2(Lado, 0f), new Vector2(0f, Lado), new Vector2(Lado, Lado) }) pts.Add(V3(Salas[e].Min + c, 1f));
+            float uppTodas = Quadro(pts, out Vector3 centroTodas);
+            if (uppTodas <= teto || _vista == "todas") { upp = uppTodas; centro = centroTodas; }
+            else
+            {
+                upp = Mathf.Min(upp, teto);
+                if (_salaNova >= 0) { Vector3 n = V3(Centro(_salaNova)); centro = dir * Vector3.Dot(n, dir) + up * Vector3.Dot(n, up); }
+            }
+            _salaNova = -1;
             _tam = Screen.height * upp * 0.5f;
-            Vector3 centro = dir * ((x0 + x1) * 0.5f) + up * ((y0 + y1) * 0.5f);
             Vector2 off = _regiao.center - new Vector2(Screen.width * 0.5f, Screen.height * 0.5f);
             _alvo = NoChao(centro - dir * off.x * upp - up * off.y * upp);
             _enquadrado = true;
@@ -269,7 +288,7 @@ namespace TA
         }
 
         /// <summary>Game (-vista, so no -testsession): enquadramento das fotos e do -record (perto = zoom nas salas; hangar = o caminho ate ele; patio = salas, estandes
-        /// e a ponta da pista; geral = tudo; sala0 a sala7 = uma sala de perto).</summary>
+        /// e a ponta da pista; geral = tudo; todas = as salas abertas; sala0 a sala7 = uma sala de perto).</summary>
         public void Vista(string v) { _vista = v; _enquadrado = false; }
 
         /// <summary>Projeta um ponto no chao (Y = 0) ao longo da direcao da camera.</summary>
@@ -388,7 +407,7 @@ namespace TA
         public void Evento(Evento e)
         {
             if (e.Tipo == Ev.Embarcou) _embarcou.Add(e.A);
-            else if (e.Tipo == Ev.EstacaoAberta) _enquadrado = false;   // a sala nova entra no quadro
+            else if (e.Tipo == Ev.EstacaoAberta) { _enquadrado = false; _salaNova = e.A; }   // a sala nova entra no quadro
             EventoPatio(e);
         }
 

@@ -16,7 +16,8 @@ foto() {
 }
 
 for e in 0 1 2 3 4 5 6 7; do foto "sala$e" -onda 3 -bot -speed 6 -shotdelay 12 -cenario salas -vista "sala$e"; done
-foto salas_longe -onda 3 -bot -speed 6 -shotdelay 12 -cenario salas
+foto salas_jogo  -onda 3 -bot -speed 6 -shotdelay 12 -cenario salas
+foto salas_longe -onda 3 -bot -speed 6 -shotdelay 12 -cenario salas -vista todas
 foto inicio      -onda 1 -bot -speed 4 -shotdelay 6
 foto geral       -onda 3 -bot -speed 6 -shotdelay 14 -cenario salas -vista geral
 foto patio       -bot -speed 6 -shotdelay 12 -vista patio

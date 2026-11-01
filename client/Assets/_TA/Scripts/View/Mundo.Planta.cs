@@ -120,15 +120,15 @@ namespace TA
             _hangar = Niveis("hangar_manutencao", HangarEm, HangarYaw, HangarEscala);
             Peca("oficina_mecanico", new Vector3(19f, 0f, 6.9f), 180f, 0.6f);
             Peca("sala_tripulacao", new Vector3(6.2f, 0f, 9.9f), 90f, 0.85f);
-            Peca("cadeiras_espera", new Vector3(-1.9f, 0f, 4.6f), 90f);
-            Peca("cadeiras_espera", new Vector3(-1.9f, 0f, -0.6f), 90f);
+            Peca("cadeiras_espera", new Vector3(-1.9f, 0f, 4.6f), 90f, 0.5f);
+            Peca("cadeiras_espera", new Vector3(-1.9f, 0f, -0.6f), 90f, 0.5f);
             foreach (Vector2 v in new[] { new Vector2(-0.5f, 4.5f), new Vector2(-0.5f, -0.5f), new Vector2(8.5f, -0.5f), new Vector2(12.5f, 3.5f) })
-                Peca("vaso_planta", V3(v), 0f);
+                Peca("vaso_planta", V3(v), 0f, 0.7f);
             // arvores so nas bordas (esquerda, direita e atras da pista): na frente das salas tampariam a fila
             foreach (Vector2 v in new[] { new Vector2(-8f, 2f), new Vector2(-8.5f, 8f), new Vector2(-6f, 14.5f), new Vector2(15f, -2f), new Vector2(19f, 1f), new Vector2(0f, 27.5f), new Vector2(9f, 27.8f), new Vector2(18f, 27.5f) })
                 Peca("arvore", V3(v), v.x * 37f);
             foreach (Vector2 v in new[] { new Vector2(8.9f, 13.6f), new Vector2(45.4f, 8.4f) }) Peca("poste", V3(v), 45f, 0.75f);
-            foreach (Vector2 v in new[] { new Vector2(7.3f, 15.6f) }) Peca("cone", V3(v), 0f);
+            foreach (Vector2 v in new[] { new Vector2(7.3f, 15.6f) }) Peca("cone", V3(v), 0f, 0.7f);
             Peca("conteiner_bagagem", new Vector3(7f, 0f, 16.6f), 0f);
             Peca("conteiner_bagagem", new Vector3(8.3f, 0f, 16.6f), 0f);
             Peca("biruta", new Vector3(30f, 0f, 19.2f), 0f);
