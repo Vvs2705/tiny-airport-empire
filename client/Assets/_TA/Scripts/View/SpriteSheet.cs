@@ -96,6 +96,8 @@ namespace TA
             return -1;
         }
 
+        public int Quadros(int clip) => _clips[clip].frames;
+
         /// <summary>Quadro no tempo `t` (s): sempre em laco (andar, parado e atender sao lacos no jogo).</summary>
         public int FrameAt(int clip, float t)
         {
@@ -113,7 +115,8 @@ namespace TA
             if (arr[k] != null) return arr[k];
             Texture2D t = _tex[clip];
             float cw = t.width / (float)c.frames, alto = _mask ? t.height * 0.5f : t.height, ch = alto / Rows;
-            return arr[k] = Sprite.Create(t, new Rect(frame * cw, t.height - alto + (Rows - 1 - row) * ch, cw, ch), _pivot, _ppu * cw / _size, 0, SpriteMeshType.FullRect);
+            // 1 px a menos embaixo: o filtro bilinear puxava a mascara e riscava uma linha sob quem esta acima do chao (rampa, escada)
+            return arr[k] = Sprite.Create(t, new Rect(frame * cw, t.height - alto + (Rows - 1 - row) * ch + 1f, cw, ch - 1f), _pivot, _ppu * cw / _size, 0, SpriteMeshType.FullRect);
         }
     }
 }

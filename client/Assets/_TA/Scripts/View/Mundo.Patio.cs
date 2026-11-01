@@ -329,6 +329,7 @@ namespace TA
                 case Fase.NoPatio:
                     bool revisa = hangar > VoltaHangarSeg;
                     if (!revisa && !a.QuerPartir) break;
+                    if (GenteNoTrilho(a.Id)) return;   // o ultimo do trilho entra antes
                     foreach (Veiculo v in _veiculos) if (v.Aviao == a.Id) return;   // quem esta encostado sai antes
                     if (a.Id != 0 || _reboque == Reboque.Pronto)
                     {
@@ -483,6 +484,7 @@ namespace TA
                         Vector2 b = e == (int)Estacao.Seguranca ? Em(e, 1f, SegA[i] + BeltX) : Balcao(e, i);
                         _diag.WriteLine(string.Format(inv, "0,balcao#{0}.{1},{2:0.000},0,{3:0.000},0", e, i, b.x, b.y));
                     }
+            for (int i = 0; i < _cadeiras.Count; i++) _diag.WriteLine(string.Format(inv, "0,cadeira#{0},{1:0.000},0,{2:0.000},0", i, _cadeiras[i].x, _cadeiras[i].y));
         }
 
         public void DiagFim() { _diag?.Dispose(); _diag = null; }

@@ -22,6 +22,26 @@ namespace TA.Tests
         }
 
         [Test]
+        public void Portao_ChegaAoLugarPeloCorredorDaFileira()
+        {
+            var lugar = new Vector2(10.58f, 4.5f);   // no meio das fileiras do bloco leste
+            foreach (Vector2 de in new[] { new Vector2(10f, 4.1f), new Vector2(8.1f, 6f), new Vector2(9.2f, 6.6f) })   // porta sul, porta oeste, podio
+            {
+                var r = new List<Vector2>();
+                Vector2 p = de;
+                Mundo.RotaSala(r, ref p, lugar);
+                Assert.AreEqual(lugar, p);
+                Vector2 ant = de;
+                foreach (Vector2 q in r)
+                {
+                    Assert.IsTrue(Mathf.Approximately(ant.x, q.x) || Mathf.Approximately(ant.y, q.y), de + ": em diagonal");
+                    if (q.y < 5.6f) Assert.IsTrue(Mathf.Approximately(q.x, lugar.x) || Mathf.Approximately(q.x, de.x), de + ": cortou as cadeiras em " + q);
+                    ant = q;
+                }
+            }
+        }
+
+        [Test]
         public void Bagagem_FicaEntreOCheckInEASeguranca()
         {
             var r = new List<Vector2>();
