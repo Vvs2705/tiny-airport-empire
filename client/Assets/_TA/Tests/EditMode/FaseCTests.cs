@@ -172,7 +172,7 @@ namespace TA.Tests
         [Test]
         public void Manutencao_Desgaste_AvisoEm80_PendenteEm100_InspecaoAutomatica()
         {
-            Sim s = Pronta();
+            Sim s = Pronta(new Tuning { RegraFalhas = false });
             s.Avioes[0].Desgaste = 75; s.Avioes[1].Desgaste = 95;
             var ev = Coleta(s, 171f);
             Assert.AreEqual(1, ev.Count(e => e.Tipo == Ev.ManutencaoAviso && e.A == 0 && e.B == 90));

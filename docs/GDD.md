@@ -1,7 +1,7 @@
 # LITTLE TERMINAL
 ## GDD Mestre de Produção, Tecnologia, Segurança e Publicação
 
-**Versão:** 1.2 (padrão de mercado: tripulação, pátio, manutenção e mundo vivo), revisão de 29/10/2026 sobre a 1.1 e a 1.0 de 26/10/2026. O que mudou e por quê está no §26.
+**Versão:** 1.3 (dia a dia, estações do ano, clima e falhas de avião), revisão de 30/10/2026 sobre a 1.2 e a 1.1 de 29/10/2026 e a 1.0 de 26/10/2026. O que mudou e por quê está no §26.
 **Projeto:** Tiny Airport Empire (repositório `Vvs2705/tiny-airport-empire`).
 **GDD de origem:** [`GDD_ORIGEM.md`](GDD_ORIGEM.md), que reúne o produto, a revisão competitiva de 09/10/2026 e as lições do Dungeon Courier de 16/10/2026. Neste documento ele aparece citado como "Origem §N".
 **Nome comercial recomendado:** Little Terminal, provisório até a busca de marca no INPI, USPTO e EUIPO e a busca exata nas duas lojas (Origem §52).
@@ -252,6 +252,7 @@ Este é o conteúdo planejado para a versão de lançamento. Não é uma lista d
 - Tripulação contratada e escalada: pilotos e comissários (§5.11).
 - Operação de pátio visível em cada voo e manutenção das aeronaves, com desgaste, checagem no pátio e revisão no hangar (§5.12).
 - Mundo vivo no nível dos líderes do gênero: aviões pousando, taxiando e decolando, veículos de pátio, gente andando, terminal em corte e mapa que cresce por terrenos (§5.13; COMPETITIVO §g).
+- Dia a dia do aeroporto: dia e noite, picos de demanda, estações do ano, clima com previsão e falhas de avião que terminam sempre em pouso seguro (§5.14).
 - Quadro de partidas com horários e estados.
 - Fluxo de passageiros, filas, embarque, partida e perda de receita por voo perdido.
 - 4 incidentes operacionais com aviso prévio e solução compreensível.
@@ -443,7 +444,7 @@ Não usar marcas, logotipos, pinturas ou nomes de companhias reais sem licença.
 
 Quatro tipos no lançamento:
 
-1. **Frente fria:** aviso prévio; pista reduzida ou fechada por tempo definido. Número inicial do TA-4: pista fechada por 60 s, com aviso de 30 s.
+1. **Frente fria:** aviso prévio; pista reduzida ou fechada por tempo definido. Número inicial do TA-4: pista fechada por 60 s, com aviso de 30 s. Desde a v1.3 é um dos 5 climas do §5.14.
 2. **Falha de equipamento:** estação perde eficiência; enviar funcionário especializado ou pagar reparo **com Cash** (nunca com Gems nem com anúncio).
 3. **Pico de demanda:** chegada concentrada; reposicionar equipe.
 4. **Atraso de conexão:** grupo de passageiros precisa de prioridade dentro de uma janela.
@@ -547,6 +548,38 @@ O padrão visual é o dos líderes do gênero (COMPETITIVO §g): tudo se mexe, e
 - **Desempenho (K3 ampliado):** p10 ≥ 30 FPS num Android de entrada, com 60 pessoas, 2 aviões em movimento e 6 veículos de pátio na tela.
 
 **Portão de design (a mesma régua do TA-2):** tripulação e manutenção só ganham regra no núcleo se o bot mostrar que elas geram decisão. O bot que escala e manda ao hangar na hora certa precisa render ≥ 1,10 × o bot que deixa tudo no automático, com as mesmas sementes. Se não render, o sistema fica só visual (o avião é atendido e a tripulação embarca, sem regra), e o design volta para revisão (TA-8).
+
+## 5.14. Clima, estações do ano e falhas de avião
+
+O aeroporto tem dia a dia: amanhece, tem hora de pico, muda de estação do ano, pega temporal, e um avião pode dar problema. Todos os números são hipótese e saem do bot no `CONTRATO_FASE_C4.md`.
+
+- **Relógio do jogo:** 1 onda = 3 horas de jogo, 1 dia = 8 ondas, 1 estação do ano = 1 dia de jogo. Tudo sai do relógio do quadro, nunca do aparelho. Com o jogo fechado nada anda.
+- **Dia a dia:** a tela mostra dia e noite. A demanda sobe de manhã e no fim da tarde e cai de madrugada.
+- **Estações do ano:** verão, outono, inverno e primavera mudam a frequência de cada clima. A demanda por estação ficou só visual: o bot não encontrou decisão nela (D-21). Cada aeroporto tem seu perigo:
+  - Vale Verde: temporal de verão;
+  - Costa Azul: vento forte e ressaca;
+  - Aurora Global: neve e degelo.
+- **Clima:** a frente fria do §5.8 vira um caso de um sistema com 5 tipos: frente fria, temporal, vento, neblina e neve. O quadro de partidas mostra a previsão da onda seguinte, e todo clima tem o aviso de 30 s do §5.8.
+  - **Temporal:** com raio perto, a pista fecha e o pátio para por tempo definido, como na regra real. Só quem adiantou continua embarcando, pela ponte.
+  - **Vento:** a rajada fecha a pista por pouco tempo, com o pátio funcionando.
+  - **Neblina:** a capacidade da pista cai: cada pouso e decolagem espera.
+  - **Neve:** todo avião precisa de degelo antes de decolar.
+- **O jogador escolhe:** adiantar o embarque, atrasar o portão (perde o bônus de pontualidade) ou segurar o avião no solo (perde só quem não embarcou).
+- **Falhas de avião:** o risco nasce do desgaste do §5.12 e só existe a partir do aviso de 80%. Esse aviso é o aviso prévio, e voar assim é decisão do jogador.
+  - **Pane no solo:** o avião fica no portão até o reparo.
+  - **Rejeição de decolagem:** o avião aborta na pista, que fica bloqueada por pouco tempo.
+  - **Retorno ao aeroporto:** decola, pede para voltar e pousa com prioridade, com bombeiros e ambulância em prontidão.
+- **Reparo:** só com Cash (§5.8). Sem pagar, a inspeção obrigatória do §5.12 resolve de graça, mais devagar, para que falta de Cash nunca trave o jogo.
+- **Tom:** sem acidente, morte, fogo ou queda de avião. Falha sempre termina em pouso seguro e passageiros remarcados. O jogo continua aconchegante e a classificação indicativa continua baixa.
+- **Justiça (testes negativos no núcleo):**
+  - voo perdido custa só a própria receita;
+  - offline nunca perde voo, e nada que exija reação começa em segundo plano;
+  - nada pago é aleatório: não existe pagar para evitar ou sortear falha;
+  - todo perigo tem aviso prévio, causa, duração aproximada e opções (§5.8);
+  - nenhum evento cria derrota inevitável nem apaga saldo ou compra;
+  - o sorteio usa a semente do núcleo, então tudo é reproduzível.
+
+**Portão de design:** clima, estações do ano e falhas passam pelo portão do §5.13, um sistema por vez. O que não render ≥ 1,10 fica só visual. Medido em 31/10/2026: clima 1,161 e 1,147; falhas 1,134, 1,131 e 1,124; demanda por estação 1,000, só visual. Os picos do dia não têm escolha própria e ficam ligados porque não quebram os portões.
 
 ---
 
@@ -1142,6 +1175,15 @@ Estes são os nomes oficiais. O diário de playtest da Origem e os kill criteria
 - `season_xp_gained`
 - `season_reward_claimed`
 - `season_pass_purchased`
+- `weather_forecast`
+- `gate_delayed`
+- `deicing_done`
+- `aircraft_fault`
+- `aircraft_fault_repaired`
+- `takeoff_rejected`
+- `return_requested`
+- `safe_landing`
+- `pax_rebooked`
 - `offline_claim`
 - `rewarded_ad_offered`
 - `rewarded_ad_started`
@@ -1394,6 +1436,7 @@ Bloqueia a submissão:
 - Três aeroportos.
 - Rotas, aeronaves e funcionários.
 - Tripulação, pátio e manutenção (§5.11, §5.12), com o portão de design do §5.13.
+- Dia a dia, estações do ano, clima e falhas de avião (§5.14), com o mesmo portão.
 - Mapa que cresce por terrenos (§5.13).
 - Campanha de 30 objetivos.
 - Histórias, conquistas e missões.
@@ -1677,6 +1720,7 @@ As de D-01 a D-14 travam o início ou uma fase; as outras podem esperar.
 | D-18 | Rota de arte híbrida: mundo e veículos em malha 3D em tempo real, pessoas em sprite (§0.4, §10.2) | aprovar: é o que as referências fazem, e mantém a regra do estúdio para personagens. O K3 ampliado, medido no aparelho, confirma | View da v0.1, que já está sendo feita assim |
 | D-19 | Tripulação, pátio e manutenção com regra no lançamento (§5.11, §5.12) | sim, na Fase C, com o portão de design do §5.13 | Fase C |
 | D-20 | Lote 3 do Tripo: comissária e comissário | aprovar hoje: ≈ 160 créditos, e os créditos vencem hoje (D-14). **Aprovada pelo Vinicius em 2026-10-29: "Aprovo o Lote 3"** | arte da tripulação |
+| D-21 | Clima, estações do ano e falhas de avião com regra no lançamento (§5.14) | sim, na Fase C, com o portão de design do §5.13 e sem acidente, morte, fogo ou queda. **Pedida pelo Vinicius em 2026-10-30: "aviões que podem quebrar, ou ter falhas ao decolar e precisar pousar"**. Medido em 2026-10-31: clima e falhas com regra; a demanda por estação do ano fica só visual (`BALANCE.md` D-C4a) | Fase C |
 
 ---
 
@@ -1815,6 +1859,23 @@ Testes: os invariantes do §5.11 e do §5.12 entram como testes negativos no con
 | 7 | §17.2 | Fase C ganha tripulação, pátio, manutenção e mapa | — |
 | 8 | COMPETITIVO §g, TA-8 | benchmark dos prints e do trailer; novo diferencial | régua de qualidade e onde vencemos |
 | 9 | §23.2 (D-20) | Lote 3 aprovado pelo Vinicius (29/10/2026: "Aprovo o Lote 3"). Impacto: comissária e comissário gerados hoje pela sessão de arte, com registro em `docs/ASSETS.md` e `docs/PROVENIENCIA.md` | os créditos do Tripo vencem hoje |
+
+## v1.3 — 30/10/2026 (Claude; pedido do Vinicius, aprovação do texto: **pendente**)
+
+Motivo: o Vinicius pediu "aviões que podem quebrar, ou ter falhas ao decolar e precisar pousar. a ideia e realmente simular um dia a dia de um aeroporto, claro vai melhorando, mudando de estação tendo perigos de temporais entre outros".
+
+Impacto: nenhum em monetização, privacidade ou segurança. O save sobe de schema. A classificação indicativa não muda, porque não há acidente, morte, fogo ou queda.
+
+Testes: os invariantes do §5.14 entram como testes negativos no `CONTRATO_FASE_C4.md`, junto com o portão de design do §5.13 por sistema, a migração do save e o determinismo de cada evento.
+
+| # | Onde | Mudança | Motivo |
+|---|---|---|---|
+| 1 | §4.1, §17.2 | dia a dia, estações do ano, clima e falhas entram no lançamento, na Fase C | pedido do Vinicius |
+| 2 | §5.8 | a frente fria vira um dos 5 climas do §5.14 | um sistema só de clima, com previsão, em vez de um caso solto |
+| 3 | §5.14 (nova) | relógio do jogo, picos de demanda, estações do ano com o perigo de cada aeroporto, clima, falhas de avião, tom e justiça | "simular um dia a dia de um aeroporto" |
+| 4 | §15.1 | 9 eventos novos | diário e telemetria |
+| 5 | §23.2 (D-21) | decisão registrada, com a recomendação | a regra de um sistema novo passa pelo portão do §5.13 |
+| 6 | COMPETITIVO, TA-4 e TA-9 | o clima e as falhas com escolha viram diferencial | só um mid-core tem clima, e ninguém do gênero liga falha à manutenção do jogador |
 
 ---
 
