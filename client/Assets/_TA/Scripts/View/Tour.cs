@@ -112,7 +112,7 @@ namespace TA
         }
 
         RectTransform LinhaRt(int f) => (RectTransform)_linhas[f].Voo.transform.parent;
-        RectTransform TerminalRt => _terminal.rectTransform;
+        RectTransform TerminalRt => _onda.rectTransform;
         RectTransform CashRt => _cash.rectTransform;
 
         static int QuemArrasta(Sim s)

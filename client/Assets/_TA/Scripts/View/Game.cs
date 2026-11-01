@@ -24,7 +24,7 @@ namespace TA
     ///   -tela nome    jogo | melhorias | mover | cofre | anuncio | pausa | album | equipe | tripulacao | patio | voo | passoN (tutorial, passo N).
     ///   -onda K       comeca na onda K (1 = a 1a).   -passageiros N   estresse: N passageiros por onda (60 = o K3).
     ///   -tutorial     liga o tutorial no -testsession (sem gravar; com -bot o ENTENDI se aperta sozinho).
-    ///   -shot f.png [-shotdelay s]   espera s s reais (padrao 1), abre a -tela, fotografa e sai 0.
+    ///   -shot f.png [-shotdelay s] [-shotescala n]   espera s s reais (padrao 1), abre a -tela, fotografa em n x a janela e sai 0.
     ///   -record pasta [-recordseg s]  grava s s (padrao 10) de quadros PNG a 30 qps na pasta e sai 0. Com -recordini r [-recordspeed v]:
     ///                 anda r s reais na -speed e so entao grava, na velocidade v (padrao 1): o pushback e a decolagem no GIF.
     ///   -demo         contrata os 3 e, 1,5 s depois, manda a Ana do check-in para a loja (o -record da caminhada e da troca de uniforme).
@@ -343,7 +343,7 @@ namespace TA
             yield return null;
             yield return new WaitForEndOfFrame();
             Debug.Log(string.Format(Inv, "SHOT {0} t={1:0.0} onda={2} {3}x{4}", path, Sim.Time, Sim.Onda + 1, Screen.width, Screen.height));
-            ScreenCapture.CaptureScreenshot(path);
+            ScreenCapture.CaptureScreenshot(path, Mathf.Max(1, Mathf.RoundToInt(ArgF("-shotescala", 1f))));
             yield return null;
             yield return null;
             Application.Quit(0);
