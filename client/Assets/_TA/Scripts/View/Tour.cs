@@ -127,6 +127,7 @@ namespace TA
             if (n < 1 || n > _passos.Length) return;
             TourLigado = true;
             _forcado = true;   // a foto mostra o passo mesmo que a acao ja tenha acontecido
+            _tourT = 0f;
             _atual = n - 1;
             _tour.gameObject.SetActive(true);
             _tour.SetAsLastSibling();
@@ -197,7 +198,7 @@ namespace TA
             Passo a = _passos[_atual];
             _tourT += Time.unscaledDeltaTime;
             if (a.Feito != null && !_forcado && a.Feito()) { Conclui(true); return; }
-            if (a.Feito == null && TourAuto && _tourT > 2f) { Conclui(true); return; }
+            if (a.Feito == null && TourAuto && !_forcado && _tourT > 2f) { Conclui(true); return; }
             _tourTitulo.text = Textos.TourTitulo[_atual];
             _tourTexto.text = Textos.TourTexto[_atual];
             _tourConta.text = Textos.TourConta(_atual + 1, _passos.Length);

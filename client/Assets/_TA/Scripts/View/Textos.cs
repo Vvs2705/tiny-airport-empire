@@ -22,7 +22,7 @@ namespace TA
         public static readonly string[] AviaoNome = { L("Regional"), L("Jato") };
         /// <summary>Os nomes da Tabelas.Rotas, na mesma ordem: o destino tem um nome so, no quadro, na campanha e na tela do voo.</summary>
         public static readonly string[] Destino = System.Array.ConvertAll(Tabelas.Rotas, r => L(r.Nome));
-        public static readonly string[] Historia = { L("Dona Rosa vai ao casamento da neta") };
+        public static readonly string[] Historia = System.Array.ConvertAll(Historias.Texto, L);
         public static readonly string[] Melhoria = { L("Velocidade"), L("Capacidade") };
 
         public static string Num(long n) => n.ToString("#,0", Br);
@@ -48,7 +48,7 @@ namespace TA
             SaveRecusado = L("Este jogo salvo é de outra versão: não será apagado nem sobrescrito."),
             DiarioVazio = L("Ainda não há diário para exportar."), DiarioPasta = L("Diário aberto na pasta."), DiarioErro = L("Não deu para exportar o diário."),
             HistoriaEntregue = L("História entregue! Ela foi para o álbum."),
-            Equipe = L("Equipe"), Tripulacao = L("Tripulação"), Patio = L("Pátio"), MoverCurto = L("Mover"),
+            Equipe = L("Equipe"), CofreTitulo = L("Bem-vindo de volta"), Tripulacao = L("Tripulação"), Patio = L("Pátio"), MoverCurto = L("Mover"),
             Escala = L("ESCALA DO VOO"), Reparo = L("Reparo só com Cash e tempo. Nenhum avião se perde."),
             EscalaFechada = L("A escala fecha quando o embarque abre."), EscalaSemVoo = L("O avião ainda não encostou para este voo."),
             AvisoHangar = L("No hangar, este voo não embarca: você perde só o Cash dele."),
@@ -75,7 +75,7 @@ namespace TA
         public static string Bonus(long c) => L("Voo cheio! +") + Num(c) + L(" Cash de pontualidade");
         public static string Marco(int m) => L("O terminal cresceu! Nível ") + m + L(": tarifa maior");
         public static string Terminal(int m) => L("Terminal Vale Verde · nível ") + m;
-        public static string Cofre(long cash, long seg) => L("Enquanto você esteve fora (") + (seg / 60) + L(" min, limite de 2 h), o aeroporto rendeu +") + Num(cash)
+        public static string Cofre(long cash, long seg) => L("Enquanto você esteve fora (") + (seg / 60) + L("\u00A0min, limite de 2\u00A0h), o aeroporto rendeu +") + Num(cash)
             + L(" Cash. Nenhum voo foi perdido: o quadro esperou você.");
         public static string Dobrar(long c) => L("Dobrar (+") + Num(c) + L(") com anúncio");
         public static string Receita2x(int hoje, int max) => L("2x Cash 5 min\n(restam ") + (max - hoje) + L(" hoje)");
@@ -157,14 +157,14 @@ namespace TA
             L("Sem funcionário no balcão, cada toque atende um passageiro. Quando a equipe chegar, ela faz isso sozinha."),
             L("O passageiro passa por uma estação de cada vez. Depois do check-in vem a segurança: cada toque leva um pelo raio-x."),
             L("Cada voo fecha o portão na hora marcada. Quem não embarcar fica, e você perde só o Cash daquele assento: nada mais."),
-            L("O embarque abre 60 min antes da partida. Toque no portão: cada passageiro que embarca vira Cash."),
+            L("O embarque abre 60\u00A0min antes da partida. Toque no portão: cada passageiro que embarca vira Cash."),
             L("Toque em Contratar. A Ana assume o check-in e atende sozinha, sem o seu toque."),
-            L("Segure uma funcionária e solte sobre a segurança. Ela leva 2,5 s para chegar e não atende ninguém nesse tempo. Ou toque nela e escolha Mover."),
+            L("Segure uma funcionária e solte sobre a segurança. Ela leva 2,5\u00A0s para chegar e não atende ninguém nesse tempo. Ou toque nela e escolha Mover."),
             L("A estação vermelha não vai dar conta do voo marcado. Duas saídas: mover alguém para lá ou comprar uma melhoria."),
             L("Toque em Melhorias e compre Velocidade na segurança: a fila anda mais rápido. Capacidade põe mais gente atendendo ao mesmo tempo."),
             L("O coração vermelho marca um passageiro com história. Se ele embarcar a tempo, a história vai para o Álbum, no menu de pausa."),
             L("Cada passageiro embarcado faz o terminal subir de nível. Nível maior paga mais por passageiro e abre estações: veja a Equipe."),
-            L("Esse Cash veio do tempo em que você esteve fora. O limite é 2 h: o que passar disso não conta, então vale voltar antes."),
+            L("Esse Cash veio do tempo em que você esteve fora. O limite é 2\u00A0h: o que passar disso não conta, então vale voltar antes."),
         };
         public static string TourConta(int n, int total) => n + "/" + total;
     }
