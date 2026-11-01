@@ -82,6 +82,9 @@ namespace TA.Core
         Remarcados,         // A = aviao (os passageiros do voo foram remarcados)                 -> pax_rebooked
         // Fase C5 (CONTRATO_FASE_C5): campanha
         ObjetivoConcluido,  // A = aeroporto, B = indice na cadeia, C = Cash                      -> campaign_objective_completed
+        // Fase C6 (CONTRATO_FASE_C6): missoes e conquistas
+        MissaoConcluida,    // A = 0 diaria, 1 semanal, B = indice na tabela, C = Cash            -> daily_mission_completed, weekly_mission_completed
+        ConquistaFeita,     // A = indice na tabela                                               -> achievement_unlocked
         // Fase D1 (CONTRATO_FASE_D1): Gems e compras
         CompraCreditada,    // A = produto, B = Gems, C = Cash                                    -> purchase_succeeded_server_verified
         GemsGastas,         // A = item, B = preco, C = Cash do pacote, s do booster ou 1         -> gems_spent
@@ -352,6 +355,11 @@ namespace TA.Core
         public Objetivo[][] Objetivos = Tabelas.Objetivos;
         /// <summary>Voo lotado para a campanha: pelo menos esta parte dos passageiros a bordo, em %.</summary>
         public int LotadoPct = 90;
+
+        // ---- Fase C6 (CONTRATO_FASE_C6, hipoteses) ----
+        /// <summary>Portao de design do GDD §5.13 (false = so visual: conta e mostra, sem pagar) e as tabelas (Missoes.cs). Conquista nao paga Cash: nao tem chave.</summary>
+        public bool RegraMissoes = true;
+        public Objetivo[] Diarias = Tabelas.Diarias, Semanais = Tabelas.Semanais, Conquistas = Tabelas.Conquistas;
 
         // ---- Fase D1 (CONTRATO_FASE_D1, hipoteses) ----
         /// <summary>As tabelas (Compras.cs), o teto do saldo de Gems e o que fechar a cadeia de um aeroporto paga.</summary>

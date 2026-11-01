@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using NUnit.Framework;
 using TA.Core;
@@ -10,7 +11,7 @@ namespace TA.Tests
         const long T = 1700000000;
 
         /// <summary>Migrar nao paga a campanha: para comparar com jogar ate ali, os dois sem o Cash dela (CONTRATO_FASE_C5 §5).</summary>
-        static readonly Tuning SemC5 = new Tuning { RegraCampanha = false };
+        static readonly Tuning SemC5 = new Tuning { RegraCampanha = false, RegraMissoes = false };
 
         static Sim Jogado(float seg, int seed = 7, Tuning t = null)
         {
@@ -282,6 +283,94 @@ namespace TA.Tests
             Assert.AreEqual((cash, 1), (b.Cash, b.ObjetivosFeitos(1)), "reabrir nao paga de novo");
         }
 
+        /// <summary>Save real gravado pelo codigo do schema 6 (commit 804cfb7, 2026-11-01: semente 7, bot Bom, 2.790 s = onda 15 aos 90 s): na Costa
+        /// Azul, marco 2, com a equipe inteira, 6 objetivos em Vale Verde e 1 na Costa.</summary>
+        const string V06 = "sha256=0d4291c77816ae8db7db8266a3e076292f74b06fc585aca4c19ae5efea866aa0\nschema=6\ncontent=0.6.0\nat=1800000000\nt=83700\ncash=1894\nsee" +
+            "d=7\nonda=15\nemb=988\nperd=29\nalbum=1\nbst=0\nema=9.266758917094505\nsaved=1800000000\nclaim=0\nclaimcash=0\ndia=0\nest.0=5,2\nfila.0=15501;" +
+            "15502;15503;15504;15505;15506;15507;15508;15509;15510;15511;15512;15513;15514;15515;15516;15517;15518;15519;15520;15521;15522;1552" +
+            "3;15524;15525;15526;15527;15528;15529;15530;15531;15532;15533;15534\nat.0=15036:2;15500:62\nest.1=5,2\nfila.1=15027;15028;15029;15030" +
+            ";15031;15032;15033;15034;15035\nat.1=15026:48\nest.2=0,0\nest.3=5,2\nest.4=5,2\nest.5=5,2\nest.6=5,2\nest.7=0,0\nfunc.0=3,1,0,0\nfunc.1=3,1" +
+            ",0,1\nfunc.2=4,3,0,3\nfunc.3=5,0,0,2\nfunc.4=6,0,0,4\nfunc.5=7,0,0,5\nvoo.0=37,26,364,1,0\nvoo.1=35,0,0,0,0\naviao.0=50,81900,1,30,-1,0,0" +
+            ",1,0,0\nsrv.0=0:0,0:0,0:0,0:0\naviao.1=100,83700,0,-1,-1,0,0,1,0,0\nsrv.1=0:0,0:0,0:0,0:0\ntrip.0=0,1,3212,0\ntrip.1=0,1,5400,1\ntrip.2=" +
+            "0,3,1799,-1\ntrip.3=1,1,3182,0\ntrip.4=1,1,5400,1\ntrip.5=1,3,1799,-1\npatio=3\npatioatraso=8\naero=1,3,-1\nrotas=127\nprog=5,6\nvr.0=5,37," +
+            "0,0,0,0,1800,0\nvr.1=6,46,0,0,0,0,3300,0\nav.0=5,15\nav.1=5,15\nstt.0=1,31,5.666665818542242\nstt.1=1,30,6.0000005178153515\nreparo=0\nin" +
+            "cw=14\ncamp.0=6,10,0,0,3,0,1,0,1,3,0\ncamp.1=1,0,1,28,21,2,0,0,0,0,0\ncamp.2=0,0,0,0,0,0,0,0,0,0,0\n";
+
+        static readonly Tuning SemC6 = new Tuning { RegraMissoes = false };
+
+        /// <summary>CONTRATO_FASE_C6 §5: com as missoes sem pagar, migrar da o mesmo jogo que jogar ate ali com o codigo novo, e os dois seguem iguais.</summary>
+        [Test]
+        public void MigracaoDoSchema6_SaveReal_DaOMesmoJogoQueJogarComOCodigoNovo()
+        {
+            const long U = 1800000000;   // o instante gravado no save
+            Sim m = Sim.Load(V06, SemC6, 7);
+            Assert.IsFalse(m.SaveRefused, "schema 6 migra, nao e' recusado");
+            Assert.AreEqual((1894L, 83700L, 988L, 2, 1, 15), (m.Cash, m.Steps, m.TotalEmbarcados, m.Marco, m.AeroportoAtual, m.Onda));
+            Assert.AreEqual((6, 1, 0), (m.ObjetivosFeitos(0), m.ObjetivosFeitos(1), m.ObjetivosFeitos(2)), "a campanha continua");
+            Assert.IsNull(m.Diarias[0], "nada de missao ainda");
+            Assert.AreEqual(0, m.ConquistasFeitas);
+
+            Sim n = Jogado(2790f, 7, SemC6);
+            string texto = m.Save("0.7.0", U);
+            StringAssert.Contains("\nschema=" + Sim.Schema + "\n", texto);
+            StringAssert.Contains("\nmiss=-1,-1\n", texto);
+            Assert.AreEqual(SemEma(n.Save("0.7.0", U)), SemEma(texto), "migrar = jogar ate ali com o codigo novo");
+            Assert.AreEqual(texto, Sim.Load(texto, SemC6, 7).Save("0.7.0", U), "ida e volta estavel no schema 7");
+
+            var b1 = new Bot(BotProfile.Bom);
+            var b2 = new Bot(BotProfile.Bom);
+            for (int i = 0; i < 1800 * Sim.Hz; i++) { b1.Step(m); b2.Step(n); }
+            Assert.AreEqual(SemEma(n.Save("0.7.0", U + 1)), SemEma(m.Save("0.7.0", U + 1)));
+        }
+
+        /// <summary>Com as missoes pagando: a lista sai no 1o passo, contador comeca em zero e o que o estado prova conquista uma vez.</summary>
+        [Test]
+        public void MigracaoDoSchema6_ComAsMissoes_OQueOEstadoProvaConquista()
+        {
+            Sim m = Sim.Load(V06, null, 7);
+            m.Tick(Sim.Step);
+            Assert.IsTrue(m.Diarias.All(x => x != null && x.Conta == 0) && m.Semanais.All(x => x != null && x.Conta == 0), "lista nova, do marco atual");
+            Assert.IsTrue(m.Diarias.All(x => x.O.Marco == 2));
+            int equipe = Array.FindIndex(Tabelas.Conquistas, c => c.Id == "c_equipe"), mil = Array.FindIndex(Tabelas.Conquistas, c => c.Id == "c_passageiros_1");
+            Assert.AreEqual((true, false, 988), (m.ConquistaFeita(equipe), m.ConquistaFeita(mil), m.ProgressoConquista(mil)));
+            Assert.AreEqual(1, m.Events.Count(e => e.Tipo == Ev.ConquistaFeita));
+            Sim b = Sim.Load(m.Save("0.7.0", 1800000001));
+            b.Tick(Sim.Step);
+            Assert.AreEqual((1, 0), (b.ConquistasFeitas, b.Events.Count(e => e.Tipo == Ev.ConquistaFeita)), "reabrir nao conquista de novo");
+        }
+
+        [Test]
+        public void Missoes_IdaEVolta_RetomadaIgual()
+        {
+            Sim s = new Sim(null, 4);
+            var b = new Bot(BotProfile.Missionario);
+            for (int i = 0; i < 16 * s.OndaPassos + 100; i++) b.Step(s);
+            Assert.Greater(s.ConquistasFeitas, 2);
+            string a = s.Save("t", T);
+            Sim r = Sim.Load(a);
+            Assert.AreEqual(a, r.Save("t", T));
+            for (int i = 0; i < 3; i++) Assert.AreEqual((s.Diarias[i].O, s.Diarias[i].Conta, s.Diarias[i].Feita), (r.Diarias[i].O, r.Diarias[i].Conta, r.Diarias[i].Feita));
+            for (int i = 0; i < 5; i++) Assert.AreEqual((s.Semanais[i].O, s.Semanais[i].Conta, s.Semanais[i].ContaE), (r.Semanais[i].O, r.Semanais[i].Conta, r.Semanais[i].ContaE));
+            for (int i = 0; i < Tabelas.Conquistas.Length; i++) Assert.AreEqual(s.ProgressoConquista(i), r.ProgressoConquista(i));
+        }
+
+        [Test]
+        public void LixoDasMissoes_ViraPadraoLimitado()
+        {
+            Sim s = Sim.Load(SaveEnvelope.Wrap("t=90\nmiss=99,99\nmd.0=999,1,1,0\nmd.1=-1,0,0,0\nmd.2=0,99999,-5,1\nms.0=0,-5,99999,0\ncq=0,0,0,99999,-3\n", "x", 1));
+            Assert.IsTrue(s.Diarias[0] == null && s.Diarias[1] == null, "linha fora da tabela sai");
+            Assert.AreEqual((Tabelas.Diarias[0].Alvo, 0, true), (s.Diarias[2].Conta, s.Diarias[2].ContaE, s.Diarias[2].Feita), "contador no teto; diaria nao tem 2a parte");
+            Assert.AreEqual((0, Tabelas.Semanais[0].E.Alvo), (s.Semanais[0].Conta, s.Semanais[0].ContaE));
+            Assert.AreEqual((Tabelas.Conquistas[2].Alvo, 0), (s.ProgressoConquista(2), s.ProgressoConquista(3)), "contador de conquista no teto");
+            s.Tick(Sim.Step);
+            Assert.AreEqual(Tabelas.Diarias[0], s.Diarias[2].O, "dia gravado no futuro nao sorteia de novo");
+            Sim neg = Sim.Load(SaveEnvelope.Wrap("t=90\nmiss=-9,-9\ncq=-1\n", "x", 1));
+            Assert.AreEqual(Tabelas.Conquistas.Length, neg.ConquistasFeitas, "mascara limitada a tabela");
+            StringAssert.Contains("\ncq=" + ((1L << Tabelas.Conquistas.Length) - 1) + ",", neg.Save("t", T));
+            neg.Tick(Sim.Step);
+            Assert.IsNotNull(neg.Diarias[0], "dia invalido: lista nova");
+        }
+
         [Test]
         public void Campanha_IdaEVolta_RetomadaIgual()
         {
@@ -418,7 +507,7 @@ namespace TA.Tests
         /// (migrar comeca do zero, jogar nao): o V02 foi gravado
         /// no .NET e o Mono do Unity difere no ultimo digito do double. Em jogo o save e' lido pelo mesmo runtime que gravou (IdaEVolta cobre o ema).</summary>
         static string SemEma(string save) =>
-            string.Join("\n", save.Split('\n').Where(l => !l.StartsWith("ema=") && !l.StartsWith("sha256=") && !l.StartsWith("stt.") && !l.StartsWith("camp.")));
+            string.Join("\n", save.Split('\n').Where(l => !l.StartsWith("ema=") && !l.StartsWith("sha256=") && !l.StartsWith("stt.") && !l.StartsWith("camp.") && !l.StartsWith("miss=") && !l.StartsWith("md.") && !l.StartsWith("ms.") && !l.StartsWith("cq=")));
 
         [Test]
         public void LixoDaFaseC2_ViraPadraoLimitado()

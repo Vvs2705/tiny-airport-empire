@@ -47,6 +47,7 @@ namespace TA.Core
             SalvaFaseC3(sb);
             SalvaFaseC4(sb);
             SalvaCampanha(sb);
+            SalvaMissoes(sb);
             SalvaCompras(sb);
             return SaveEnvelope.Wrap(sb.ToString(), content, nowUnix);
         }
@@ -113,7 +114,7 @@ namespace TA.Core
                 sb.Append("camp.").Append(a).Append('=').Append(_feitos[a]).Append(',').Append(string.Join(",", _conta[a])).Append('\n');
         }
 
-        /// <summary>Schema 7 (CONTRATO_FASE_D1 §5): o saldo de Gems, os nao consumiveis e o hash de cada transacao creditada.</summary>
+        /// <summary>Schema 8 (CONTRATO_FASE_D1 §5): o saldo de Gems, os nao consumiveis e o hash de cada transacao creditada.</summary>
         void SalvaCompras(StringBuilder sb)
         {
             Kv(sb, "gems", Gems);
@@ -121,7 +122,7 @@ namespace TA.Core
             if (_tx.Count > 0) sb.Append("tx=").Append(string.Join(",", _tx)).Append('\n');
         }
 
-        /// <summary>Le o schema 7, com tudo limitado. O schema 6 nao tem as chaves: saldo 0 e nada comprado. A posse so vale para o Id que ainda e' nao consumivel.</summary>
+        /// <summary>Le o schema 8, com tudo limitado. O schema 7 nao tem as chaves: saldo 0 e nada comprado. A posse so vale para o Id que ainda e' nao consumivel.</summary>
         void CarregaCompras(Dictionary<string, string> kv)
         {
             Gems = Math.Max(0, Math.Min(T.GemsTeto, Get(kv, "gems", 0)));
@@ -338,6 +339,7 @@ namespace TA.Core
             s.CarregaFaseC(kv, r.Schema);
             s.CarregaFaseC4(kv);
             s.CarregaCampanha(kv);
+            s.CarregaMissoes(kv);
             s.CarregaCompras(kv);
             return s;
         }
