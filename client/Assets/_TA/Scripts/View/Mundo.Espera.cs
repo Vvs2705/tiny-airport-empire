@@ -242,6 +242,8 @@ namespace TA
             if (real && parou) _agente.T.gameObject.SetActive(false);
             if (parou) Olha(_agente, -Salas[Portao].N);
             _agente.Atende = !real && parou && st.Atendendo.Count > 0;
+            _agente.Gesto = -1;
+            if (_agente.Atende) GestoFunc(_agente, Portao, 0);
             Pinta(_agente);
             _porteiro.T.gameObject.SetActive(s.Presentes(Estacao.Portao) < 4);
             Olha(_porteiro, FrenteCadeira - Salas[Portao].N);

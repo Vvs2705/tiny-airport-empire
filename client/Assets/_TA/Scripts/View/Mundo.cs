@@ -88,8 +88,8 @@ namespace TA
 
         /// <summary>Malha de balcao de cada estacao e a escala dela (a loja e um quiosque grande: 0,6 cabe 1 por posto). A oficina tem a
         /// bancada aqui e o predio dela fica no mundo (Planta): o mecanico da Fase C mora la antes de a sala abrir.</summary>
-        static readonly string[] BalcaoMalha = { "balcao_checkin", "raio_x", "loja", "catraca_embarque", "esteira_bagagem", "alimentacao", "balcao_informacoes", "balcao_informacoes" };
-        static readonly float[] BalcaoEscala = { 0.9f, EscalaSeg, 0.6f, 0.55f, EscalaBalcaoMala, 0.6f, 0.75f, 0.75f };
+        static readonly string[] BalcaoMalha = { "guiche_checkin", "raio_x", "loja", "catraca_embarque", "esteira_bagagem", "alimentacao", "balcao_informacoes", "balcao_informacoes" };
+        static readonly float[] BalcaoEscala = { EscalaGuiche, EscalaSeg, 0.6f, 0.55f, EscalaBalcaoMala, 0.6f, 0.75f, 0.75f };
         /// <summary>Nivel de Velocidade a partir do qual o balcao troca pela malha `<malha>_n2` e `_n3` (Lotes 5 e 6): o upgrade muda o predio
         /// (GDD §5.13). Sem a malha daquele nivel, fica a do nivel abaixo.</summary>
         static readonly int[] NivelMalha = { 0, 2, 4 };
@@ -104,9 +104,9 @@ namespace TA
 
         /// <summary>Ponto da sala a `d` da parede de saida e `a` ao longo dela.</summary>
         static Vector2 Em(int e, float d, float a) => Salas[e].Out - Salas[e].N * (d + Corredor * 0.5f) + Salas[e].T * a;
-        static Vector2 Balcao(int e, int i) => Em(e, BalcaoD, Posto(e, i));
-        static Vector2 NoBalcao(int e, int i) => Em(e, e == Portao ? BalcaoD + PassoPodio : FrenteD, Posto(e, i));
-        static Vector2 AtrasBalcao(int e, int i) => e == (int)Estacao.Seguranca ? Em(e, SegAgenteD, SegA[i] + PassoX) : Em(e, e == Portao ? BalcaoD - PassoPodio : AtrasD, Posto(e, i));
+        static Vector2 Balcao(int e, int i) => Em(e, e == SalaCheckIn ? ChkBalcaoD : BalcaoD, Posto(e, i));
+        static Vector2 NoBalcao(int e, int i) => Em(e, e == SalaCheckIn ? ChkFrenteD : e == Portao ? BalcaoD + PassoPodio : FrenteD, Posto(e, i));
+        static Vector2 AtrasBalcao(int e, int i) => e == SalaSeg ? Agente(i) : Em(e, e == SalaCheckIn ? ChkAtrasD : e == Portao ? BalcaoD - PassoPodio : AtrasD, Posto(e, i));
         static Vector2 Centro(int e) => Salas[e].Min + new Vector2(Lado * 0.5f, Lado * 0.5f);
         /// <summary>Rumo (graus de yaw do Unity) da direcao `d` do chao: +z = 0.</summary>
         static float Rumo(Vector2 d) => Mathf.Atan2(d.x, d.y) * Mathf.Rad2Deg;
@@ -286,6 +286,7 @@ namespace TA
             else if (_vista == "geral") { _alvo = new Vector3(21f, 0f, 13f); _tam = 19f; }
             else if (_vista == "garagem") { _alvo = new Vector3(33f, 0f, 13f); _tam = 9f; }
             else if (_vista == "seguranca") { _alvo = new Vector3(6f, 0f, 2.4f); _tam = 2.4f; }
+            else if (_vista == "checkin") { _alvo = V3(Centro(SalaCheckIn)) + new Vector3(0.9f, 0f, 0f); _tam = 2.4f; }
             else if (_vista == "hangar") { _alvo = new Vector3(33f, 0f, 24f); _tam = 11f; }
             else if (_vista == "portao") { _alvo = V3(Centro(Portao)); _tam = 3.1f; }
             else if (_vista == "malas") { _alvo = V3(Centro(SalaMalas)) + new Vector3(0f, 0f, 1.2f); _tam = 3.8f; }
@@ -338,7 +339,7 @@ namespace TA
             MostraNivel(_hangar, NivelDe(s.St(Estacao.Manutencao).Vel));
             MostraNivel(_torre, Mathf.Min(s.Marco, 2));
             MostraNivel(_terminal, Mathf.Min(s.Marco, 2));
-            PorticoNivel(s);
+            LinhasAtivas(s);
             for (int e = 0; e < Salas.Length; e++)
             {
                 Station st = s.Estacoes[e];
@@ -373,6 +374,7 @@ namespace TA
                 {
                     bool vazio = i < st.Postos && i >= gente && !(e == Portao && i == 0);   // no 1o podio do portao ha sempre a agente
                     _vazio[e, i].enabled = vazio;
+                    EstadoPosto(s, st, e, i, vazio);
                     if (!vazio) continue;
                     Vector3 pv = V3(Balcao(e, i), 0.68f);
                     _vazio[e, i].transform.SetPositionAndRotation(pv, _cam.transform.rotation);

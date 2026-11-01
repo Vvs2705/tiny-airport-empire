@@ -219,6 +219,17 @@ Pedido: "até aquelas cabines de raio-x de corpo todo" e "espaço no hangar para
 
 Total do Lote 11: **110** créditos. Saldo: 16 440 → **16 330** (Max até 2026-11-29).
 
+### 2.11 Lote 12 — guichê de check-in (01/11, queixa do Vinicius sobre os balcões)
+
+Pedido: balcão de aeroporto de verdade, no lugar de `balcao_checkin`, que lia como miniatura. Créditos e saldo em `docs/PROVENIENCIA.md` §2.7.
+
+| Peça | Para quê |
+|---|---|
+| `guiche_checkin` | guichê com bancada, monitor, teclado e impressora de etiqueta; check-in, nível 1 |
+| `guiche_checkin_n2` | o mesmo, nível 2 |
+| `guiche_checkin_n3` | o mesmo, nível 3 |
+| `painel_guiche` | painel de número do guichê; **não usado**: o painel desenhado por `Mundo.Postos.cs` na parede lê melhor o número e dá massa ao posto |
+
 ## 5. Marca e arte de instalação (pedido do Vinicius, 2026-10-29)
 
 Feitas no gerador de imagem do Tripo (Nano Banana 2, 1024 px) e ampliadas para 4K (10 créditos cada). Entram no git (interface, não modelo pago), em `client/Assets/_TA/Art/Marca/`.

@@ -2,6 +2,7 @@
 # Folhas das pessoas (GDD §10.2, D-18): o .blend leve de cada personagem (elenco_ta.py, uma vez) -> render_sprites.py --preset <ator> --mask
 # -> client/Assets/_TA/Resources/Sprites/<ator>/ (entra no git: e render, nao o modelo). Conferencia em client/Builds/sprites_contact/.
 # uso: client/tools/elenco_sprites.sh [ator ...]   (sem argumento: o elenco todo, 15 atores). Um Blender por vez (PC de 7,7 GB). Git Bash no Windows.
+# Com GESTOS=Digita,Pega so soma esses gestos nas folhas que ja existem (render_sprites.py --gestos). Sem GESTOS, refaz tudo e depois: client/tools/elenco_gestos.sh
 # Arte crua no checkout principal (arte/tripo/_leve/*.blend, arte/mixamo/ta_pax e ta_func), fora do git.
 set -uo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
@@ -15,10 +16,10 @@ w() { cygpath -m "$1"; }
 ator() {
   local nome=$1 anims=$2 saida=${SAIDA:-$1}; shift 2
   [ -f "$ARTE/tripo/_leve/$nome.blend" ] || { echo "FALHOU $nome: falta $ARTE/tripo/_leve/$nome.blend (rode elenco_ta.py)"; return 1; }
-  rm -rf "$OUT/$saida"
+  [ -n "${GESTOS:-}" ] || rm -rf "$OUT/$saida"
   "$BLENDER" -b --factory-startup --python-exit-code 1 --python "$(w "$ROOT/client/tools/render_sprites.py")" -- \
     --model "$(w "$ARTE/tripo/_leve/$nome.blend")" --anims "$(w "$ARTE/mixamo/$anims")" --preset "$nome" --mask \
-    --out "$(w "$OUT/$saida")" --contact "$(w "$CONF/$saida.png")" "$@" > "$LOG/$saida.log" 2>&1
+    --out "$(w "$OUT/$saida")" --contact "$(w "$CONF/$saida.png")" ${GESTOS:+--gestos "$GESTOS"} "$@" > "$LOG/$saida.log" 2>&1
   if grep -q "SPRITES_OK" "$LOG/$saida.log"; then echo "OK   $saida: $(grep -c '^CLIP' "$LOG/$saida.log") clipes $(grep -E '^(AVISO|MASCARA)' "$LOG/$saida.log" | tr '\n' ' ' | cut -c1-200)"
   else echo "FALHOU $saida (ver $LOG/$saida.log)"; grep -E "ERRO|Error|Traceback" "$LOG/$saida.log" | head -5; return 1; fi
 }
