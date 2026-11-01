@@ -346,27 +346,36 @@ namespace TA.Tests
             var t = new Tuning { RegraCampanha = false };
             Linha bom = Rodar(BotProfile.Bom, t), lento = Rodar(BotProfile.Lento, t), parado = Rodar(BotProfile.Parado, t);
             Imprime("antes da Fase C5 (a main da Fase C4)", new[] { bom, lento, parado });
-            TestContext.Out.WriteLine(string.Format(CultureInfo.InvariantCulture, "receita {0:0}, {1:0}, {2:0}", bom.Receita, lento.Receita, parado.Receita));
+            Assert.AreEqual((6279, 3872, 4702), ((int)Math.Round(bom.Receita), (int)Math.Round(lento.Receita), (int)Math.Round(parado.Receita)), "sem pagar, a tabela da fase anterior");
         }
 
+        static double MedeCampanha(int ondas)
+        {
+            Linha pl = Rodar(BotProfile.Guiado, null, Sementes, ondas), au = Rodar(BotProfile.Bom, null, Sementes, ondas);
+            double ganho = (pl.Receita + pl.Recompensas) / (au.Receita + au.Recompensas);
+            TestContext.Out.WriteLine(string.Format(CultureInfo.InvariantCulture, "| Guiado | {0} | {1:0.0}% | {2:0} | {3:0} | {4:0.0} | {5:0.000} |", ondas, pl.Embarque * 100, pl.Receita, pl.Recompensas, pl.Objetivos, ganho));
+            TestContext.Out.WriteLine(string.Format(CultureInfo.InvariantCulture, "| Bom | {0} | {1:0.0}% | {2:0} | {3:0} | {4:0.0} | |", ondas, au.Embarque * 100, au.Receita, au.Recompensas, au.Objetivos));
+            return ganho;
+        }
+
+        const string CabecaCampanha = "| bot | ondas | embarque | receita | recompensas | objetivos | ganho |
+|---|---|---|---|---|---|---|";
+
         /// <summary>Portao do GDD §5.13 para a campanha (CONTRATO_FASE_C5 §6): quem joga pelo objetivo contra quem nunca olha a campanha, com a recompensa
-        /// valendo para os dois. O portao e' em 20 ondas: depois disso o catalogo acaba e o Cash nao compra mais nada (BALANCE.md D-C5c). Os outros horizontes
-        /// saem na tabela, sem portao.</summary>
+        /// valendo para os dois. Em 20 ondas: depois disso o catalogo acaba e o Cash nao compra mais nada (BALANCE.md D-C5c).</summary>
         [Test]
         public void Portao_FaseC5_Campanha()
         {
-            var ci = CultureInfo.InvariantCulture;
-            TestContext.Out.WriteLine("| bot | ondas | embarque | receita | recompensas | objetivos | ganho |\n|---|---|---|---|---|---|---|");
-            double portao = 0;
-            foreach (int ondas in new[] { 10, OndasFaseC, 30, 40, 64 })
-            {
-                Linha pl = Rodar(BotProfile.Guiado, null, Sementes, ondas), au = Rodar(BotProfile.Bom, null, Sementes, ondas);
-                double ganho = (pl.Receita + pl.Recompensas) / (au.Receita + au.Recompensas);
-                if (ondas == OndasFaseC) portao = ganho;
-                TestContext.Out.WriteLine(string.Format(ci, "| Guiado | {0} | {1:0.0}% | {2:0} | {3:0} | {4:0.0} | {5:0.000} |", ondas, pl.Embarque * 100, pl.Receita, pl.Recompensas, pl.Objetivos, ganho));
-                TestContext.Out.WriteLine(string.Format(ci, "| Bom | {0} | {1:0.0}% | {2:0} | {3:0} | {4:0.0} | |", ondas, au.Embarque * 100, au.Receita, au.Recompensas, au.Objetivos));
-            }
-            Assert.GreaterOrEqual(portao, 1.10, "GDD §5.13: Guiado / Bom");
+            TestContext.Out.WriteLine(CabecaCampanha);
+            Assert.GreaterOrEqual(MedeCampanha(OndasFaseC), 1.10, "GDD §5.13: Guiado / Bom");
+        }
+
+        /// <summary>Os outros horizontes, sem portao: 10 ondas e o que vem depois de o catalogo acabar.</summary>
+        [Test]
+        public void Medida_FaseC5()
+        {
+            TestContext.Out.WriteLine(CabecaCampanha);
+            foreach (int ondas in new[] { 10, 30, 40, 64 }) MedeCampanha(ondas);
         }
 
         /// <summary>Nenhum objetivo inalcancavel (CONTRATO_FASE_C5 §6): 200 sementes, onda media e p90 de cada objetivo, para ver onde a cadeia espera.</summary>
