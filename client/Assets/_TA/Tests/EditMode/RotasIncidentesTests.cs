@@ -88,7 +88,7 @@ namespace TA.Tests
         [Test]
         public void Viajar_PagaUmaVez_ChegaNaProximaOnda_EVoltarEGratis()
         {
-            var s = new Sim { Cash = 5000 };
+            var s = new Sim(new Tuning { RegraCampanha = false }, 1) { Cash = 5000 };
             RegrasTests.Run(s, 1f);
             Assert.AreEqual(-1, s.CustoViagem(1), "antes do marco 2");
             s.TotalEmbarcados = 600;

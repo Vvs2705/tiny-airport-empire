@@ -16,6 +16,8 @@ namespace TA.Core
         public bool Clima, Falhas;
         /// <summary>Segue = troca para o aeroporto com a melhor estacao do ano (CONTRATO_FASE_C4 §8).</summary>
         public bool Segue;
+        /// <summary>Objetivos = joga pelo objetivo ativo da campanha (CONTRATO_FASE_C5 §6). Sem ele o bot nunca olha a campanha.</summary>
+        public bool Objetivos;
 
         public static readonly BotProfile Bom = new BotProfile { Name = "Bom", Decide = 1f, Move = true, Planeja = true, Equipe = true, Rotas = true, Viaja = true, Incidentes = true, Clima = true, Falhas = true };
         public static readonly BotProfile Lento = new BotProfile { Name = "Lento", Decide = 2.5f, Move = true, Planeja = true, Equipe = true, Rotas = true, Viaja = true, Incidentes = true, Clima = true, Falhas = true };
@@ -26,6 +28,9 @@ namespace TA.Core
         /// <summary>Portao da Fase C2: o mesmo Bom com e sem o planejamento da equipe (as 4 estacoes novas e os perfis).</summary>
         public static readonly BotProfile EquipePlanejada = new BotProfile { Name = "EquipePlanejada", Decide = 1f, Move = true, Planeja = true, Equipe = true };
         public static readonly BotProfile EquipeAutomatica = new BotProfile { Name = "EquipeAutomatica", Decide = 1f, Move = true, Planeja = true };
+        /// <summary>Portao da Fase C5: o Bom e o Lento que jogam pela campanha.</summary>
+        public static readonly BotProfile Guiado = new BotProfile { Name = "Guiado", Decide = 1f, Move = true, Planeja = true, Equipe = true, Rotas = true, Viaja = true, Incidentes = true, Clima = true, Falhas = true, Objetivos = true };
+        public static readonly BotProfile LentoGuiado = new BotProfile { Name = "LentoGuiado", Decide = 2.5f, Move = true, Planeja = true, Equipe = true, Rotas = true, Viaja = true, Incidentes = true, Clima = true, Falhas = true, Objetivos = true };
         public static readonly BotProfile[] All = { Bom, Lento, Parado };
     }
 
@@ -62,14 +67,85 @@ namespace TA.Core
             _t = Math.Min(_t - P.Decide, P.Decide);   // le o estado das estacoes como a tela mostra (atualizado a cada 0,5 s)
             bool moveu = P.Move && Mover(s);
             if (!moveu && Tocar(s)) Taps++;
-            if (Comprar(s)) Buys++;
+            bool junta = P.Objetivos && Guia(s);
+            if (!junta && Comprar(s)) Buys++;
             if (P.Planeja) Planeja(s);
             if (!moveu && P.Move && P.Equipe) Equipe(s);
-            if (P.Rotas) Programa(s);
+            if (P.Rotas && !_rotaFixa) Programa(s);
             if (P.Incidentes) Reage(s);
             if (P.Clima && s.T.RegraClima) ReageClima(s);
             if (P.Segue) SegueEpoca(s);
             if (P.Falhas) foreach (Aviao a in s.Avioes) if (a.Pane && s.ReparaAviao(a.Id)) Reparos++;
+        }
+
+        bool _rotaFixa;
+
+        /// <summary>
+        /// Fase C5: faz o que o objetivo ativo pede; cadeia fechada, vai ao proximo aeroporto com cadeia aberta. O que o bot de sempre ja faz
+        /// (embarcar, mover, checar, reagir) nao pede nada aqui. true = esta juntando Cash para o objetivo: nada de outra compra no caminho.
+        /// </summary>
+        bool Guia(Sim s)
+        {
+            _rotaFixa = false;
+            Objetivo o = s.ObjetivoAtual(s.AeroportoAtual);
+            if (o == null)
+            {
+                for (int a = 0; a < s.T.Objetivos.Length; a++)
+                {
+                    int destino = a;
+                    if (s.ObjetivoAtual(a) != null) return Junta(s, s.CustoViagem(a), () => s.Viajar(destino));
+                }
+                return false;
+            }
+            switch (o.Meta)
+            {
+                case Meta.Equipe: return Junta(s, s.CustoContratar(), s.Hire);
+                case Meta.Velocidade: return Junta(s, s.Custo((Estacao)o.Arg, Melhoria.Velocidade), () => s.Buy((Estacao)o.Arg, Melhoria.Velocidade));
+                case Meta.Capacidade: return Junta(s, s.Custo((Estacao)o.Arg, Melhoria.Capacidade), () => s.Buy((Estacao)o.Arg, Melhoria.Capacidade));
+                case Meta.Cheios:
+                case Meta.Voos:
+                    if (!s.RotaAberta(o.Arg)) return Junta(s, s.CustoRota(o.Arg), () => s.AbreRota(o.Arg));
+                    Fixa(s, o.Arg);
+                    return false;
+                case Meta.Seguidos:
+                    Fixa(s, RotaLeve(s));
+                    return false;
+                case Meta.Atendidos:
+                    PoeGente(s, (Estacao)o.Arg);
+                    return false;
+                case Meta.Hangar:
+                    foreach (Aviao a in s.Avioes)
+                        if (a.Desgaste > 0 && s.PodeHangar(a.Id) && s.Hangar(a.Id)) { Hangares++; break; }
+                    return false;
+                default: return false;
+            }
+        }
+
+        static bool Junta(Sim s, long custo, Func<bool> compra) => custo >= 0 && (s.Cash < custo || !compra());
+
+        void Fixa(Sim s, int rota)
+        {
+            _rotaFixa = true;
+            for (int f = 0; f < 2; f++) if (s.Prog[f] != rota) s.Programa(f, rota);
+        }
+
+        /// <summary>A rota aberta do aeroporto com menos passageiros: a que a equipe aguenta sem perder ninguem.</summary>
+        static int RotaLeve(Sim s)
+        {
+            int leve = s.Prog[0];
+            for (int r = 0; r < s.T.Rotas.Length; r++)
+                if (s.T.Rotas[r].Aeroporto == s.AeroportoAtual && s.RotaAberta(r) && s.T.Rotas[r].Pax < s.T.Rotas[leve].Pax) leve = r;
+            return leve;
+        }
+
+        /// <summary>Estacao sem ninguem: vai quem esta com mais folga.</summary>
+        void PoeGente(Sim s, Estacao e)
+        {
+            if (s.Alocados(e) > 0) return;
+            Funcionario quem = null;
+            foreach (Funcionario f in s.Staff)
+                if (f.Andando == 0 && (quem == null || s.St(f.Em).Folga > s.St(quem.Em).Folga)) quem = f;
+            if (quem != null && s.Move(quem.Id, e)) Moves++;
         }
 
         /// <summary>Fase C4: adianta no aviso; quem perdeu o aviso ainda pode atrasar o portao.</summary>
@@ -278,7 +354,7 @@ namespace TA.Core
                     if (c >= 0 && (best < 0 || c < best)) { best = c; rota = r; hire = -3; }
                 }
             long v = s.CustoViagem(s.AeroportoAtual + 1);
-            if (P.Viaja && _embarque >= ViajaCom && v >= 0 && (best < 0 || v < best)) { best = v; hire = -4; }
+            if (P.Viaja && !P.Objetivos && _embarque >= ViajaCom && v >= 0 && (best < 0 || v < best)) { best = v; hire = -4; }
             if (best < 0 || s.Cash < best) return false;
             return hire == -2 ? s.Hire() : hire == -3 ? s.AbreRota(rota) : hire == -4 ? s.Viajar(s.AeroportoAtual + 1) : hire >= 0 ? s.Hire((Perfil)hire) : s.Buy(be, bm);
         }
@@ -299,6 +375,8 @@ namespace TA.Core
             public int Incidentes, Reacoes, Viagens; public int[] ChegouEm;
             /// <summary>Fase C4: climas, falhas de aviao e reparos pagos.</summary>
             public int Climas, Falhas, Reparos;
+            /// <summary>Fase C5: objetivos feitos, Cash pago por eles e a onda em que cada um fechou (aeroporto x 10 + indice; -1 = nao fechou).</summary>
+            public int Objetivos; public long Recompensas; public int[] ObjetivoEm;
         }
 
         /// <summary>Joga `ondas` ondas inteiras com o perfil `p` e a semente `seed`, sem render. `reabre` = fecha e reabre o jogo (Save ->
@@ -307,7 +385,8 @@ namespace TA.Core
         {
             var s = new Sim(t, seed);
             var bot = new Bot(p);
-            var r = new Resultado { MarcoEm = new[] { -1f, -1f, -1f }, ChegouEm = new[] { 0, -1, -1 } };
+            var r = new Resultado { MarcoEm = new[] { -1f, -1f, -1f }, ChegouEm = new[] { 0, -1, -1 }, ObjetivoEm = new int[30] };
+            for (int i = 0; i < 30; i++) r.ObjetivoEm[i] = -1;
             double soma = 0;
             long passos = (long)ondas * s.OndaPassos;
             while (s.Steps < passos)
@@ -328,6 +407,7 @@ namespace TA.Core
                         case Ev.IncidenteInicio: r.Incidentes++; if (s.ClimaDe((TipoIncidente)e.A) != null) r.Climas++; break;
                         case Ev.Pane: case Ev.Rejeicao: case Ev.RetornoPedido: r.Falhas++; break;
                         case Ev.AeroportoChegada: r.Viagens++; if (r.ChegouEm[e.A] < 0) r.ChegouEm[e.A] = s.Onda; break;
+                        case Ev.ObjetivoConcluido: r.Objetivos++; r.Recompensas += e.C; r.ObjetivoEm[e.A * 10 + e.B] = s.Onda; break;
                     }
             }
             r.Embarque = r.Voos > 0 ? soma / r.Voos : 0;
