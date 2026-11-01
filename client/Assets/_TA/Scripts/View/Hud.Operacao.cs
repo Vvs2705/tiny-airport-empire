@@ -16,17 +16,17 @@ namespace TA
 
         Modal _voo, _trip, _patio, _equipe;
         int _vooK;
-        Text _vooEstado, _vooDesgaste, _vooMotivo, _vooEscala;
-        Image _vooBarra;
-        Button _checar, _hangar;
-        readonly Button[,] _trocaBtn = new Button[2, MaxTrip - 1];
+        Faixa _vooFaixa, _tripFaixa, _patioFaixa;
+        BarraNivel _vooBarra;
+        Item _vooEstado, _checar, _hangar, _vooEscala, _patioHire;
+        readonly Item[,] _troca = new Item[2, MaxTrip - 1];
         readonly int[,] _trocaId = new int[2, MaxTrip - 1];
-        readonly Text[,] _tripLinha = new Text[2, MaxTrip];
-        readonly Button[] _tripHire = new Button[2];
-        Text _patioEquipe;
-        Button _patioHire;
-        readonly Button[] _patioAviao = new Button[2];
-        readonly Button[,] _patioBtn = new Button[4, 2];
+        readonly Item[,] _tripLinha = new Item[2, MaxTrip];
+        readonly BarraNivel[,] _tripTrechos = new BarraNivel[2, MaxTrip];
+        readonly Item[] _tripHire = new Item[2];
+        readonly Item[] _patioAviao = new Item[2];
+        readonly BarraNivel[] _patioDesgaste = new BarraNivel[2];
+        readonly Compra[,] _patioCompra = new Compra[4, 2];
         readonly Text[] _equipeNome = new Text[Sim.MaxEquipe], _equipeCargo = new Text[Sim.MaxEquipe], _equipeInfo = new Text[Sim.MaxEquipe];
         readonly Image[] _equipePlaca = new Image[Sim.MaxEquipe];
         readonly BotaoPreco[] _equipeBtn = new BotaoPreco[Sim.MaxEquipe];
@@ -35,73 +35,9 @@ namespace TA
 
         void BuildOperacao(RectTransform canvas)
         {
-            _voo = NovoModal(canvas, "Voo", 0.05f, 0.95f);
-            RectTransform pv = PainelDe(_voo);
-            _voo.Corpo.text = "";
-            _vooEstado = Art.NewText(pv, "Estado", 36, new Vector2(0.05f, 0.87f), new Vector2(0.95f, 0.91f), TextAnchor.MiddleLeft);
-            _vooDesgaste = Art.NewText(pv, "Desgaste", 36, new Vector2(0.05f, 0.83f), new Vector2(0.5f, 0.87f), TextAnchor.MiddleLeft);
-            Image fundo = Art.Img(pv, "BarraFundo", Art.Square(), Art.A(Art.Ink, 0.15f), new Vector2(0.5f, 0.84f), new Vector2(0.95f, 0.86f));
-            fundo.preserveAspect = false;
-            _vooBarra = Art.Img(fundo.transform, "Barra", Art.Square(), Art.Good, Vector2.zero, Vector2.one);
-            _vooBarra.preserveAspect = false;
-            _checar = Art.NewButton(pv, "", 30, Art.EstacaoCor[(int)Estacao.Manutencao], new Vector2(0.04f, 0.72f), new Vector2(0.49f, 0.82f), () => { int k = _vooK; Fecha(_voo); _g.Checagem(k); });
-            _hangar = Art.NewButton(pv, "", 30, Art.EstacaoCor[3], new Vector2(0.51f, 0.72f), new Vector2(0.96f, 0.82f), () => { int k = _vooK; Fecha(_voo); _g.Hangar(k); });
-            _vooMotivo = Art.NewText(pv, "Motivo", 28, new Vector2(0.05f, 0.63f), new Vector2(0.95f, 0.715f), TextAnchor.UpperLeft);
-            Text esc = Art.NewText(pv, "EscalaTitulo", 34, new Vector2(0.05f, 0.59f), new Vector2(0.95f, 0.63f), TextAnchor.MiddleLeft);
-            esc.text = Textos.Escala; esc.color = Art.Dim;
-            _vooEscala = Art.NewText(pv, "Escala", 30, new Vector2(0.05f, 0.545f), new Vector2(0.95f, 0.59f), TextAnchor.MiddleLeft);
-            for (int f = 0; f < 2; f++)
-                for (int i = 0; i < MaxTrip - 1; i++)
-                {
-                    int ff = f, ii = i;
-                    float y1 = 0.54f - i * 0.075f;
-                    _trocaBtn[f, i] = Art.NewButton(pv, "", 28, f == 0 ? Art.EstacaoCor[0] : Art.EstacaoCor[2], new Vector2(0.04f + f * 0.47f, y1 - 0.07f), new Vector2(0.49f + f * 0.47f, y1),
-                        () => { Voo v = S.Voos[_vooK]; if (v != null) _g.Escala(v.Id, _trocaId[ff, ii]); });
-                }
-            Art.NewButton(pv, Textos.Fechar, 40, Art.Off, new Vector2(0.3f, 0.03f), new Vector2(0.7f, 0.13f), () => Fecha(_voo));
-
-            _trip = NovoModal(canvas, "Tripulacao", 0.08f, 0.92f);
-            _trip.Titulo.text = Textos.Tripulacao;
-            _trip.Corpo.text = "";
-            RectTransform pt = PainelDe(_trip);
-            for (int f = 0; f < 2; f++)
-            {
-                float x0 = 0.03f + f * 0.48f, x1 = 0.49f + f * 0.48f;
-                Text t = Art.NewText(pt, "Funcao" + f, 34, new Vector2(x0, 0.8f), new Vector2(x1, 0.85f), TextAnchor.MiddleLeft);
-                t.text = Textos.Funcao[f]; t.color = Art.Dim;
-                for (int i = 0; i < MaxTrip; i++)
-                {
-                    float y1 = 0.8f - i * 0.085f;
-                    _tripLinha[f, i] = Art.NewText(pt, "Trip" + f + i, 28, new Vector2(x0, y1 - 0.08f), new Vector2(x1, y1), TextAnchor.MiddleLeft);
-                }
-                var ff = (Funcao)f;
-                _tripHire[f] = Art.NewButton(pt, "", 28, Art.Good, new Vector2(x0, 0.16f), new Vector2(x1, 0.27f), () => _g.HireTripulante(ff));
-            }
-            Art.NewButton(pt, Textos.Fechar, 40, Art.Off, new Vector2(0.3f, 0.03f), new Vector2(0.7f, 0.13f), () => Fecha(_trip));
-
-            _patio = NovoModal(canvas, "Patio", 0.08f, 0.92f);
-            _patio.Titulo.text = Textos.Patio;
-            _patio.Corpo.text = "";
-            RectTransform pp = PainelDe(_patio);
-            _patioEquipe = Art.NewText(pp, "Equipe", 36, new Vector2(0.05f, 0.76f), new Vector2(0.6f, 0.85f), TextAnchor.MiddleLeft);
-            _patioHire = Art.NewButton(pp, "", 30, Art.Good, new Vector2(0.62f, 0.75f), new Vector2(0.96f, 0.86f), () => _g.HirePatio());
-            for (int k = 0; k < 2; k++)
-            {
-                int kk = k;
-                _patioAviao[k] = Art.NewButton(pp, "", 30, Art.VooCor[k], new Vector2(0.04f + k * 0.47f, 0.63f), new Vector2(0.49f + k * 0.47f, 0.74f), () => { Fecha(_patio); AbreVoo(kk); });
-            }
-            for (int sv = 0; sv < 4; sv++)
-            {
-                float y1 = 0.62f - sv * 0.115f;
-                Text n = Art.NewText(pp, "Servico" + sv, 28, new Vector2(0.04f, y1 - 0.105f), new Vector2(0.27f, y1), TextAnchor.MiddleLeft);
-                n.text = Textos.Servico[sv];
-                for (int m = 0; m < 2; m++)
-                {
-                    var ss = (Servico)sv; var mm = (Melhoria)m;
-                    _patioBtn[sv, m] = Art.NewButton(pp, "", 28, m == 0 ? Art.EstacaoCor[1] : Art.EstacaoCor[2], new Vector2(0.28f + m * 0.35f, y1 - 0.105f), new Vector2(0.62f + m * 0.35f, y1), () => _g.BuyPatio(ss, mm));
-                }
-            }
-            Art.NewButton(pp, Textos.Fechar, 40, Art.Off, new Vector2(0.3f, 0.03f), new Vector2(0.7f, 0.13f), () => Fecha(_patio));
+            BuildVoo(canvas);
+            BuildTrip(canvas);
+            BuildPatio(canvas);
 
             _equipe = NovaFolhaModal(canvas, "Equipe", Textos.Equipe, Art.Pessoas(), 1600f);
             RectTransform pe = _equipe.F.Corpo;
@@ -127,6 +63,74 @@ namespace TA
                 foreach (Text t in new[] { _equipeNome[p], _equipeCargo[p], _equipeInfo[p] }) Art.Margem(t.rectTransform, 172f, 0f, 306f, 0f);
                 _equipeBtn[p] = Art.NovoBotaoPreco(c, Vector2.zero, Vector2.zero, () => EquipeAcao(pp2));
                 Art.Fixa((RectTransform)_equipeBtn[p].B.transform, new Vector2(1f, 0.5f), new Vector2(-24f, 0f), new Vector2(246f, 146f));
+            }
+        }
+
+        void BuildVoo(RectTransform canvas)
+        {
+            _voo = NovaFolhaModal(canvas, "Voo", "", Art.Aviao(), 1600f);
+            RectTransform lista = NovaFaixa(_voo, Textos.DesgasteNome, Art.Chave(), Art.Azul, out _vooFaixa);
+            _vooBarra = Art.NovaBarraNivel(_voo.F.Corpo, "Desgaste", 10, Vector2.up, Vector2.one);
+            var barra = (RectTransform)_vooBarra.Pai;
+            barra.offsetMin = new Vector2(36f, -196f); barra.offsetMax = new Vector2(-30f, -180f);
+            Art.Margem((RectTransform)lista.parent, 24f, 0f, 24f, 208f);
+            _vooEstado = NovoItem(lista, "Estado", Art.Aviao(), Art.VooCor[0], null, 136f, 18f);
+            _vooEstado.Linha.text = Textos.Reparo;
+            _checar = NovoItem(lista, "Checagem", Art.Chave(), Art.EstacaoCor[(int)Estacao.Manutencao], () => { int k = _vooK; Fecha(_voo); _g.Checagem(k); }, 236f);
+            _checar.Nome.text = Textos.ChecagemNome;
+            _hangar = NovoItem(lista, "Hangar", Art.Relogio(), Art.EstacaoCor[3], () => { int k = _vooK; Fecha(_voo); _g.Hangar(k); }, 236f);
+            _hangar.Nome.text = Textos.HangarNome;
+            _hangar.Info.text = Textos.AvisoHangar;
+            _vooEscala = NovoItem(lista, "Escala", Art.Pessoas(), Art.Azul, null, 136f, 18f);
+            _vooEscala.Nome.text = Textos.Escala;
+            for (int f = 0; f < 2; f++)
+                for (int i = 0; i < MaxTrip - 1; i++)
+                {
+                    int ff = f, ii = i;
+                    _troca[f, i] = NovoItem(lista, "Troca" + f + i, Art.Pessoa(), Art.EstacaoCor[f == 0 ? 0 : 2], () => { Voo v = S.Voos[_vooK]; if (v != null) _g.Escala(v.Id, _trocaId[ff, ii]); }, 168f, 34f);
+                }
+        }
+
+        void BuildTrip(RectTransform canvas)
+        {
+            _trip = NovaFolhaModal(canvas, "Tripulacao", Textos.Tripulacao, Art.Aviao(), 1600f);
+            RectTransform lista = NovaFaixa(_trip, Textos.Tripulacao, Art.Pessoas(), Art.Azul, out _tripFaixa);
+            for (int f = 0; f < 2; f++)
+            {
+                var ff = (Funcao)f;
+                _tripHire[f] = NovoItem(lista, "Funcao" + f, f == 0 ? Art.Aviao() : Art.Pessoa(), Art.EstacaoCor[f == 0 ? 0 : 2], () => _g.HireTripulante(ff));
+                _tripHire[f].Nome.text = Textos.Funcao[f];
+                for (int i = 0; i < MaxTrip; i++)
+                {
+                    _tripLinha[f, i] = NovoItem(lista, "Trip" + f + i, Art.Check(), Art.Compra, null, 124f, 12f, 216f);
+                    _tripTrechos[f, i] = Art.NovaBarraNivel(_tripLinha[f, i].Rt, "Trechos", S.T.TrechosAteDescanso, Vector2.zero, Vector2.zero);
+                    Art.Fixa((RectTransform)_tripTrechos[f, i].Pai, new Vector2(1f, 0.5f), new Vector2(-28f, 0f), new Vector2(200f, 22f));
+                }
+            }
+        }
+
+        void BuildPatio(RectTransform canvas)
+        {
+            _patio = NovaFolhaModal(canvas, "Patio", Textos.Patio, Art.Caminhao(), 1600f);
+            RectTransform lista = NovaFaixa(_patio, Textos.Equipe, Art.Pessoas(), Art.Azul, out _patioFaixa);
+            _patioHire = NovoItem(lista, "Equipe", Art.Pessoas(), Art.Azul, () => _g.HirePatio(), 168f, 34f);
+            _patioHire.Nome.text = Textos.EquipePatioNome;
+            _patioHire.Linha.text = Textos.UmServico;
+            for (int k = 0; k < 2; k++)
+            {
+                int kk = k;
+                _patioAviao[k] = NovoItem(lista, "Aviao" + k, Art.Aviao(), Art.VooCor[k], () => { Fecha(_patio); AbreVoo(kk); });
+                _patioAviao[k].Btn.Secundario(Textos.VerVoo);
+                _patioDesgaste[k] = Art.NovaBarraNivel(_patioAviao[k].Rt, "Desgaste", 10, Vector2.up, Vector2.one);
+                var barra = (RectTransform)_patioDesgaste[k].Pai;
+                barra.offsetMin = new Vector2(400f, -150f); barra.offsetMax = new Vector2(-306f, -130f);
+            }
+            for (int sv = 0; sv < 4; sv++)
+            {
+                var ss = (Servico)sv;
+                RectTransform c = NovoCartaoCompra(lista, "Servico" + sv, Textos.Servico[sv], Art.IconeServico(sv), Art.Azul);
+                _patioCompra[sv, 0] = NovaCompra(c, 0, Art.Raio(), S.T.PatioVelNiveis, () => _g.BuyPatio(ss, Melhoria.Velocidade));
+                _patioCompra[sv, 1] = NovaCompra(c, 1, Art.Caminhao(), S.T.PatioCapNiveis, () => _g.BuyPatio(ss, Melhoria.Capacidade));
             }
         }
 
@@ -161,22 +165,27 @@ namespace TA
             TA.Core.Aviao a = s.Avioes[_vooK];
             Voo v = s.Voos[_vooK];
             bool embarcando = v != null && v.Embarque && !v.Partiu;
+            int custo = s.T.CheckCusto;
             _voo.Titulo.text = v != null ? Textos.VooTitulo(v.Id) : Textos.AviaoNome[_vooK];
-            _vooEstado.text = Textos.AviaoEstado(_vooK, a, a.Hangar * Sim.Step);
-            _vooDesgaste.text = Textos.Desgaste(a.Desgaste);
-            _vooBarra.rectTransform.anchorMax = new Vector2(a.Desgaste / 100f, 1f);
-            _vooBarra.color = CorDesgaste(a, s);
-            Art.Rotulo(_checar).text = Textos.ChecagemBotao(s.T.CheckTira, s.T.CheckSeg, s.T.CheckCusto);
-            _checar.interactable = s.PodeChecagem(_vooK);
-            Art.Rotulo(_hangar).text = Textos.HangarBotao(s.T.HangarSeg, s.T.HangarCusto);
-            _hangar.interactable = s.PodeHangar(_vooK);
-            _vooMotivo.text = Textos.PorQueNaoChecar(a, embarcando, s.MecanicoLivre, s.Cash, s.T.CheckCusto) + "\n" + Textos.AvisoHangar + " " + Textos.Reparo;
+            _vooFaixa.Pinta(s, Textos.Porcento(a.Desgaste));
+            _vooBarra.Pinta(NivelDesgaste(a), CorDesgaste(a, s));
+            _vooEstado.Placa.color = Art.VooCor[_vooK];
+            _vooEstado.Nome.text = Textos.AviaoEstado(_vooK, a, a.Hangar * Sim.Step);
+
+            string trava = Textos.PorQueNaoChecar(a, embarcando, s.MecanicoLivre, custo, custo);   // cash = custo: a falta de Cash quem diz e o botao
+            _checar.Linha.text = Textos.ChecagemEfeito(s.T.CheckTira, s.T.CheckSeg);
+            _checar.Info.text = trava;
+            if (trava.Length > 0 || s.Cash >= custo && !s.PodeChecagem(_vooK)) _checar.Btn.Travado(Textos.AgoraNao, Textos.Num(custo));
+            else _checar.Btn.Preco(Textos.Checar, custo, s.Cash);
+            _hangar.Linha.text = Textos.HangarEfeito(s.T.HangarSeg);
+            if (s.Cash >= s.T.HangarCusto && !s.PodeHangar(_vooK)) _hangar.Btn.Travado(Textos.AgoraNao, Textos.Num(s.T.HangarCusto));
+            else _hangar.Btn.Preco(Textos.Revisar, s.T.HangarCusto, s.Cash);
 
             string piloto = "", comissario = "";
             foreach (Tripulante t in s.Tripulacao)
                 if (t.Aviao == _vooK) { if (t.Funcao == Funcao.Piloto) piloto = t.Nome; else comissario = t.Nome; }
             bool pode = s.PodeEscala(_vooK);
-            _vooEscala.text = !a.NoPatio ? Textos.EscalaSemVoo : !pode ? Textos.EscalaFechada : Textos.Equipagem(piloto, comissario);
+            _vooEscala.Linha.text = !a.NoPatio ? Textos.EscalaSemVoo : !pode ? Textos.EscalaFechada : Textos.Equipagem(piloto, comissario);
             for (int f = 0; f < 2; f++)
             {
                 int i = 0;
@@ -184,55 +193,83 @@ namespace TA
                 {
                     if ((int)t.Funcao != f || t.Aviao == _vooK || i >= MaxTrip - 1) continue;
                     _trocaId[f, i] = t.Id;
-                    _trocaBtn[f, i].gameObject.SetActive(pode);
-                    _trocaBtn[f, i].interactable = s.Livre(t);
-                    Art.Rotulo(_trocaBtn[f, i]).text = Textos.TripTroca(t, s.T.TrechosAteDescanso);
-                    i++;
+                    Item it = _troca[f, i++];
+                    it.Rt.gameObject.SetActive(pode);
+                    it.Nome.text = t.Nome;
+                    it.Linha.text = TripStatus(s, t);
+                    if (s.Livre(t)) it.Btn.Secundario(Textos.Escalar);
+                    else if (t.Aviao >= 0) it.Btn.Travado(Textos.ABordoCurto, s.Voos[t.Aviao] != null ? Textos.Voo(s.Voos[t.Aviao].Id) : "");
+                    else it.Btn.Travado(Textos.DescansaCurto, Textos.Tempo(s.DescansoFalta(t)));
                 }
-                for (; i < MaxTrip - 1; i++) _trocaBtn[f, i].gameObject.SetActive(false);
+                for (; i < MaxTrip - 1; i++) _troca[f, i].Rt.gameObject.SetActive(false);
             }
         }
 
         static Color CorDesgaste(TA.Core.Aviao a, Sim s) => a.Pendente ? Art.Bad : a.Desgaste >= s.T.DesgasteAviso ? Art.Warn : Art.Good;
+        static int NivelDesgaste(TA.Core.Aviao a) => (a.Desgaste + 9) / 10;   // 10 degraus: 1% ja acende o primeiro
+
+        static string TripStatus(Sim s, Tripulante t)
+        {
+            Voo v = t.Aviao >= 0 ? s.Voos[t.Aviao] : null;
+            return Textos.TripStatus(t, v != null ? v.Id : -1, s.DescansoFalta(t), s.T.TrechosAteDescanso);
+        }
 
         void PintaTrip(Sim s)
         {
+            int limite = s.T.TrechosAteDescanso, teto = s.TetoTripulacao;
+            _tripFaixa.Pinta(s, Textos.DeTotal(s.Tripulacao.Count, 2 * teto));
             for (int f = 0; f < 2; f++)
             {
                 int i = 0;
                 foreach (Tripulante t in s.Tripulacao)
                 {
                     if ((int)t.Funcao != f || i >= MaxTrip) continue;
-                    Voo v = t.Aviao >= 0 ? s.Voos[t.Aviao] : null;
-                    _tripLinha[f, i++].text = t.Nome + "\n" + Textos.TripStatus(t, v != null ? v.Id : -1, s.DescansoFalta(t), s.T.TrechosAteDescanso);
+                    bool bordo = t.Aviao >= 0, descansa = !bordo && !s.Livre(t);
+                    Item it = _tripLinha[f, i];
+                    it.Rt.gameObject.SetActive(true);
+                    it.Nome.text = t.Nome;
+                    it.Linha.text = TripStatus(s, t);
+                    it.Placa.color = bordo ? Art.Azul : descansa ? Art.Fraco : Art.Compra;
+                    it.Glifo.sprite = bordo ? Art.Aviao() : descansa ? Art.Relogio() : Art.Check();
+                    _tripTrechos[f, i++].Pinta(t.Trechos, t.Trechos >= limite ? Art.Warn : Art.Compra);
                 }
-                for (; i < MaxTrip; i++) _tripLinha[f, i].text = "";
+                for (; i < MaxTrip; i++) _tripLinha[f, i].Rt.gameObject.SetActive(false);
                 long c = s.CustoTripulante((Funcao)f);
-                Art.Rotulo(_tripHire[f]).text = Textos.TripContratar((Funcao)f, c, s.TetoTripulacao);
-                _tripHire[f].interactable = c >= 0 && s.Cash >= c;
+                bool sobe = c < 0 && s.Marco < s.T.Marcos.Length;
+                Item h = _tripHire[f];
+                h.Linha.text = Textos.DeTotal(s.Quantos((Funcao)f), teto);
+                h.Info.text = sobe ? Textos.TetoSobe : "";
+                if (c >= 0) h.Btn.Preco(Textos.ContratarCurto, c, s.Cash);
+                else if (sobe) h.Btn.Travado(Textos.TerminalNome, Textos.NivelNome(s.Marco + 2));
+                else h.Btn.Maximo(Textos.Completa);
             }
         }
 
         void PintaPatio(Sim s)
         {
-            _patioEquipe.text = Textos.PatioEquipe(s.EquipePatio);
+            _patioFaixa.Pinta(s, Textos.DeTotal(s.EquipePatio, s.T.PatioIniciais + s.T.PatioContratacao.Length));
             long c = s.CustoPatio();
-            Art.Rotulo(_patioHire).text = Textos.PatioContratar(c);
-            _patioHire.interactable = c >= 0 && s.Cash >= c;
+            if (c >= 0) _patioHire.Btn.Preco(Textos.ContratarCurto, c, s.Cash); else _patioHire.Btn.Maximo(Textos.Completa);
             for (int k = 0; k < 2; k++)
             {
+                TA.Core.Aviao a = s.Avioes[k];
                 Voo v = s.Voos[k];
-                Art.Rotulo(_patioAviao[k]).text = Textos.AviaoLinha(v != null ? v.Id : -1, s.Avioes[k].Desgaste);
+                Item it = _patioAviao[k];
+                it.Nome.text = v != null ? Textos.VooTitulo(v.Id) : Textos.AviaoNome[k];
+                it.Linha.text = Textos.AviaoEstado(k, a, a.Hangar * Sim.Step);
+                it.Info.text = Textos.Desgaste(a.Desgaste);
+                _patioDesgaste[k].Pinta(NivelDesgaste(a), CorDesgaste(a, s));
             }
             for (int sv = 0; sv < 4; sv++)
             {
                 var ss = (Servico)sv;
                 long cv = s.CustoPatio(ss, Melhoria.Velocidade), cc = s.CustoPatio(ss, Melhoria.Capacidade);
+                int nv = s.NivelPatio(ss, Melhoria.Velocidade), nc = s.NivelPatio(ss, Melhoria.Capacidade), veic = s.Veiculos(ss);
                 float seg = s.ServicoPassos(ss) * Sim.Step;
-                Art.Rotulo(_patioBtn[sv, 0]).text = Textos.ServicoVel(s.NivelPatio(ss, Melhoria.Velocidade), s.T.PatioVelNiveis, seg, seg * s.T.VelFator, cv);
-                Art.Rotulo(_patioBtn[sv, 1]).text = Textos.VeiculosLinha(s.Veiculos(ss), 1 + s.T.PatioCapNiveis, cc);
-                _patioBtn[sv, 0].interactable = cv >= 0 && s.Cash >= cv;
-                _patioBtn[sv, 1].interactable = cc >= 0 && s.Cash >= cc;
+                _patioCompra[sv, 0].Pinta(Textos.MelhoriaNome(Melhoria.Velocidade, nv, s.T.PatioVelNiveis),
+                    Textos.PorAviao(cv >= 0 ? Art.DePara(Textos.Seg(seg), Textos.Seg(seg * s.T.VelFator)) : Textos.Seg(seg)), nv, cv, s.Cash);
+                _patioCompra[sv, 1].Pinta(Textos.VeiculosNome(nc, s.T.PatioCapNiveis),
+                    Textos.VeiculosDe(cc >= 0 ? Art.DePara(veic.ToString(), (veic + 1).ToString()) : veic.ToString()), nc, cc, s.Cash);
             }
         }
 
