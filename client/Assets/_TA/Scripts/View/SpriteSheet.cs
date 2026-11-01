@@ -96,6 +96,8 @@ namespace TA
             return -1;
         }
 
+        public int Quadros(int clip) => _clips[clip].frames;
+
         /// <summary>Quadro no tempo `t` (s): sempre em laco (andar, parado e atender sao lacos no jogo).</summary>
         public int FrameAt(int clip, float t)
         {
