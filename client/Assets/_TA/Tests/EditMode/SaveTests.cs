@@ -9,9 +9,12 @@ namespace TA.Tests
     {
         const long T = 1700000000;
 
-        static Sim Jogado(float seg, int seed = 7)
+        /// <summary>Migrar nao paga a campanha: para comparar com jogar ate ali, os dois sem o Cash dela (CONTRATO_FASE_C5 §5).</summary>
+        static readonly Tuning SemC5 = new Tuning { RegraCampanha = false };
+
+        static Sim Jogado(float seg, int seed = 7, Tuning t = null)
         {
-            var s = new Sim(null, seed);
+            var s = new Sim(t, seed);
             var b = new Bot(BotProfile.Bom);
             for (int i = 0; i < (int)(seg * Sim.Hz); i++) b.Step(s);
             return s;
@@ -126,17 +129,17 @@ namespace TA.Tests
         [Test]
         public void MigracaoDoSchema2_SaveReal_DaOMesmoJogoQueJogarComOCodigoNovo()
         {
-            Sim m = Sim.Load(V02);
+            Sim m = Sim.Load(V02, SemC5, 7);
             Assert.IsFalse(m.SaveRefused, "schema 2 migra, nao e' recusado");
             Assert.AreEqual((11L, 21000L, 128L, 2, 2), (m.Cash, m.Steps, m.TotalEmbarcados, m.Staff.Count, m.EquipePatio));
             CollectionAssert.AreEqual(new[] { Perfil.Atendente, Perfil.Seguranca }, m.Staff.Select(f => f.Perfil), "os generalistas viram perfis pela ordem");
             Assert.AreEqual((40, false, 15, true, 7), (m.Avioes[0].Desgaste, m.Avioes[0].NoPatio, m.Avioes[1].Desgaste, m.Avioes[1].NoPatio, m.Avioes[1].VooId));
 
-            Sim n = Jogado(700f);   // o mesmo jogo, jogado do zero pelo codigo novo
+            Sim n = Jogado(700f, 7, SemC5);   // o mesmo jogo, jogado do zero pelo codigo novo
             string a = m.Save("0.3.0", T);
             StringAssert.Contains("\nschema=" + Sim.Schema + "\n", a);
             Assert.AreEqual(SemEma(n.Save("0.3.0", T)), SemEma(a), "migrar = jogar ate ali com o codigo novo");
-            Assert.AreEqual(a, Sim.Load(a).Save("0.3.0", T), "ida e volta estavel no schema 3");
+            Assert.AreEqual(a, Sim.Load(a, SemC5, 7).Save("0.3.0", T), "ida e volta estavel no schema 3");
 
             var b1 = new Bot(BotProfile.Bom); var b2 = new Bot(BotProfile.Bom);
             for (int i = 0; i < 300 * Sim.Hz; i++) { b1.Step(m); b2.Step(n); }
@@ -179,7 +182,7 @@ namespace TA.Tests
             Bot bn = SemC3();
             for (int i = 0; i < 1000 * Sim.Hz; i++) bn.Step(n);
             string a = m.Save("0.4.0", T);
-            StringAssert.Contains("\nschema=5\n", a);
+            StringAssert.Contains("\nschema=" + Sim.Schema + "\n", a);
             Assert.AreEqual(SemEma(n.Save("0.4.0", T)), SemEma(a), "migrar = jogar ate ali com o codigo novo");
             Assert.AreEqual(a, Sim.Load(a, t, 7).Save("0.4.0", T), "ida e volta estavel");
 
@@ -206,25 +209,102 @@ namespace TA.Tests
         public void MigracaoDoSchema4_SaveReal_DaOMesmoJogoQueJogarComOCodigoNovo()
         {
             const long U = 1800000000;   // o instante gravado no save
-            Sim m = Sim.Load(V04);
+            Sim m = Sim.Load(V04, SemC5, 7);
             Assert.IsFalse(m.SaveRefused, "schema 4 migra, nao e' recusado");
             Assert.AreEqual((11L, 21000L, 128L, 0, 3), (m.Cash, m.Steps, m.TotalEmbarcados, m.Marco, m.Onda));
             Assert.IsFalse(m.Avioes.Any(a => a.Pane || a.Retorno > 0 || a.SaiEm > 0 || a.Falhou >= 0), "nada em andamento");
             Assert.AreEqual((false, 0L), (m.Voos.Any(v => v.Atrasado), m.PistaAte));
 
-            Sim n = new Sim(null, 7);
-            var bn = new Bot(BotProfile.Bom);
-            for (int i = 0; i < 700 * Sim.Hz; i++) bn.Step(n);
+            Sim n = Jogado(700f, 7, SemC5);
             string texto = m.Save("0.5.0", U);
-            StringAssert.Contains("\nschema=5\n", texto);
+            StringAssert.Contains("\nschema=" + Sim.Schema + "\n", texto);
             Assert.AreEqual(SemEma(n.Save("0.5.0", U)), SemEma(texto), "migrar = jogar ate ali com o codigo novo");
-            Assert.AreEqual(texto, Sim.Load(texto).Save("0.5.0", U), "ida e volta estavel no schema 5");
+            Assert.AreEqual(texto, Sim.Load(texto, SemC5, 7).Save("0.5.0", U), "ida e volta estavel");
 
             var b1 = new Bot(BotProfile.Bom);
             var b2 = new Bot(BotProfile.Bom);
             for (int i = 0; i < 1800 * Sim.Hz; i++) { b1.Step(m); b2.Step(n); }
             Assert.GreaterOrEqual(m.Marco, 1, "passou do marco 1");
             Assert.AreEqual(SemEma(n.Save("0.5.0", U + 1)), SemEma(m.Save("0.5.0", U + 1)));
+        }
+
+        /// <summary>Save real gravado pelo codigo do schema 5 (commit 948458f, 2026-11-01: semente 7, bot Bom, 2.790 s = onda 15 aos 90 s): na Costa
+        /// Azul, marco 2, com a equipe inteira, 7 rotas abertas, filas cheias e os 2 voos da onda gravados.</summary>
+        const string V05 = "sha256=2c88bda8725ac7740f9b059488ee84165c7b48e1fb34b4ceec759aa9237400d4\nschema=5\ncontent=0.5.0\nat=1800000000\nt=83700\ncash=975\nseed=7\n" +
+            "onda=15\nemb=959\nperd=45\nalbum=1\nbst=0\nema=9.27154823570382\nsaved=1800000000\nclaim=0\nclaimcash=0\ndia=0\nest.0=5,2\nfila.0=15501;1550" +
+            "2;15503;15504;15505;15506;15507;15508;15509;15510;15511;15512;15513;15514;15515;15516;15517;15518;15519;15520;15521;15522;15523;15524;15525;" +
+            "15526;15527;15528;15529;15530;15531;15532;15533;15534\nat.0=15036:2;15500:62\nest.1=5,2\nfila.1=15027;15028;15029;15030;15031;15032;15033;15" +
+            "034;15035\nat.1=15026:48\nest.2=0,0\nest.3=5,2\nest.4=5,2\nest.5=5,2\nest.6=5,2\nest.7=0,0\nfunc.0=3,1,0,0\nfunc.1=3,1,0,1\nfunc.2=4,3,0,3\n" +
+            "func.3=5,0,0,2\nfunc.4=6,0,0,4\nfunc.5=7,0,0,5\nvoo.0=37,26,364,1,0\nvoo.1=35,0,0,0,0\naviao.0=50,81900,1,30,-1,0,0,1,0,0\nsrv.0=0:0,0:0,0:0" +
+            ",0:0\naviao.1=100,83700,0,-1,-1,0,0,1,0,0\nsrv.1=0:0,0:0,0:0,0:0\ntrip.0=0,1,3212,0\ntrip.1=0,1,5400,1\ntrip.2=0,3,1799,-1\ntrip.3=1,1,3182," +
+            "0\ntrip.4=1,1,5400,1\ntrip.5=1,3,1799,-1\npatio=3\npatioatraso=8\naero=1,3,-1\nrotas=127\nprog=5,6\nvr.0=5,37,0,0,0,0,1800,0\nvr.1=6,46,0,0," +
+            "0,0,3300,0\nav.0=5,15\nav.1=5,15\nstt.0=1,31,5.666665818542242\nstt.1=1,30,6.0000005178153515\nreparo=0\nincw=14\n";
+
+        /// <summary>CONTRATO_FASE_C5 §5: com a campanha sem pagar, migrar da o mesmo jogo que jogar ate ali com o codigo novo, e os dois seguem iguais.</summary>
+        [Test]
+        public void MigracaoDoSchema5_SaveReal_DaOMesmoJogoQueJogarComOCodigoNovo()
+        {
+            const long U = 1800000000;   // o instante gravado no save
+            Sim m = Sim.Load(V05, SemC5, 7);
+            Assert.IsFalse(m.SaveRefused, "schema 5 migra, nao e' recusado");
+            Assert.AreEqual((975L, 83700L, 959L, 2, 1, 15), (m.Cash, m.Steps, m.TotalEmbarcados, m.Marco, m.AeroportoAtual, m.Onda));
+            Assert.AreEqual((0, 0, 0), (m.ObjetivosFeitos(0), m.ObjetivosFeitos(1), m.ObjetivosFeitos(2)), "nada feito");
+
+            Sim n = Jogado(2790f, 7, SemC5);
+            string texto = m.Save("0.6.0", U);
+            StringAssert.Contains("\nschema=6\n", texto);
+            StringAssert.Contains("\ncamp.0=0,0,0,0,0,0,0,0,0,0,0\n", texto);
+            Assert.AreEqual(SemEma(n.Save("0.6.0", U)), SemEma(texto), "migrar = jogar ate ali com o codigo novo");
+            Assert.AreEqual(texto, Sim.Load(texto, SemC5, 7).Save("0.6.0", U), "ida e volta estavel no schema 6");
+
+            var b1 = new Bot(BotProfile.Bom);
+            var b2 = new Bot(BotProfile.Bom);
+            for (int i = 0; i < 1800 * Sim.Hz; i++) { b1.Step(m); b2.Step(n); }
+            Assert.AreEqual(SemEma(n.Save("0.6.0", U + 1)), SemEma(m.Save("0.6.0", U + 1)));
+        }
+
+        /// <summary>Com a campanha pagando: o que o estado prova conclui nos primeiros passos e paga uma vez. Contador comeca em zero.</summary>
+        [Test]
+        public void MigracaoDoSchema5_ComACampanha_OQueOEstadoProvaConclui()
+        {
+            Sim m = Sim.Load(V05, null, 7);
+            int pago = 0;
+            for (int i = 0; i < 3; i++)
+            {
+                m.Tick(Sim.Step);
+                pago += m.Events.Where(e => e.Tipo == Ev.ObjetivoConcluido).Sum(e => e.C);
+            }
+            Assert.AreEqual((0, 1, 0), (m.ObjetivosFeitos(0), m.ObjetivosFeitos(1), m.ObjetivosFeitos(2)), "ja esta na Costa Azul; o resto pede contador");
+            Assert.AreEqual(Tabelas.Objetivos[1][0].Recompensa, pago);
+            Assert.AreEqual(("vv_embarque", "ca_salvador", "ag_chegada"), (m.ObjetivoAtual(0).Id, m.ObjetivoAtual(1).Id, m.ObjetivoAtual(2).Id));
+            long cash = m.Cash;
+            Sim b = Sim.Load(m.Save("0.6.0", 1800000001));
+            Assert.AreEqual((cash, 1), (b.Cash, b.ObjetivosFeitos(1)), "reabrir nao paga de novo");
+        }
+
+        [Test]
+        public void Campanha_IdaEVolta_RetomadaIgual()
+        {
+            Sim s = new Sim(null, 4);
+            var b = new Bot(BotProfile.Guiado);
+            for (int i = 0; i < 16 * s.OndaPassos + 100; i++) b.Step(s);
+            Assert.Greater(s.ObjetivosFeitos(0), 3);
+            string a = s.Save("t", T);
+            Sim r = Sim.Load(a);
+            Assert.AreEqual(a, r.Save("t", T));
+            for (int e = 0; e < 3; e++) Assert.AreEqual((s.ObjetivosFeitos(e), s.Progresso(e)), (r.ObjetivosFeitos(e), r.Progresso(e)));
+        }
+
+        [Test]
+        public void LixoDaCampanha_ViraPadraoLimitado()
+        {
+            Sim s = Sim.Load(SaveEnvelope.Wrap("t=90\nemb=10\ncash=5\ncamp.0=99,99\ncamp.1=-3,-3,99999\ncamp.2=1,0,99999\n", "x", 1));
+            Assert.AreEqual((10, 0, 1), (s.ObjetivosFeitos(0), s.ObjetivosFeitos(1), s.ObjetivosFeitos(2)), "feitos no teto da cadeia");
+            Assert.IsNull(s.ObjetivoAtual(0));
+            Assert.AreEqual(Tabelas.Objetivos[2][1].Alvo, s.Progresso(2), "contador no alvo do objetivo");
+            Assert.AreEqual(5L, s.Cash, "ler o save nao paga");
+            Sim x = Sim.Load(SaveEnvelope.Wrap("camp.0=a,b,c\n", "x", 1));
+            Assert.AreEqual((0, 0, 0), (x.ObjetivosFeitos(0), x.ObjetivosFeitos(1), x.ObjetivosFeitos(2)));
         }
 
         /// <summary>Fechar e reabrir no meio de cada onda com clima, demanda e falhas em jogo: 40 ondas iguais a sem fechar.</summary>
@@ -334,10 +414,11 @@ namespace TA.Tests
             Assert.IsNull(Sim.Load(SaveEnvelope.Wrap(inc, "x", 1)).Inc, "incidente fora do relogio: nenhum");
         }
 
-        /// <summary>O save sem o hash, sem a media da renda e sem o estado das estacoes (2 s depois de reabrir ele e' o mesmo): o V02 foi gravado
+        /// <summary>O save sem o hash, sem a media da renda, sem o estado das estacoes (2 s depois de reabrir ele e' o mesmo) e sem a campanha
+        /// (migrar comeca do zero, jogar nao): o V02 foi gravado
         /// no .NET e o Mono do Unity difere no ultimo digito do double. Em jogo o save e' lido pelo mesmo runtime que gravou (IdaEVolta cobre o ema).</summary>
         static string SemEma(string save) =>
-            string.Join("\n", save.Split('\n').Where(l => !l.StartsWith("ema=") && !l.StartsWith("sha256=") && !l.StartsWith("stt.")));
+            string.Join("\n", save.Split('\n').Where(l => !l.StartsWith("ema=") && !l.StartsWith("sha256=") && !l.StartsWith("stt.") && !l.StartsWith("camp.")));
 
         [Test]
         public void LixoDaFaseC2_ViraPadraoLimitado()
