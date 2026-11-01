@@ -157,7 +157,7 @@ namespace TA
             SoMao(dono, p, naBandeja || dono.Despachou);
             Vector3 b = V3(RaiaMala(i, Mathf.Lerp(MesaIniD, MesaFimD, Mathf.InverseLerp(0.22f, 0.8f, f))), AltMesa);
             _bandeja[i].position = b;
-            Deita(_malaSeg[i], b + Vector3.up * 0.14f, Rumo(Salas[SalaSeg].T), 0.56f * (dono.Despachou ? 0.6f : 1f));
+            Deita(_malaSeg[i], b + Vector3.up * 0.14f, Rumo(Salas[SalaSeg].T), EscalaBandeja * (dono.Despachou ? 0.6f : 1f));
             Cor(_malaSeg[i].R, Art.VooCor[p.Voo]);
         }
     }

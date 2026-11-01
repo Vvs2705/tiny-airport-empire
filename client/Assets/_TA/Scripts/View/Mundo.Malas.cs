@@ -15,7 +15,7 @@ namespace TA
     public sealed partial class Mundo
     {
         const int SalaMalas = (int)Estacao.Bagagem, MaxMalas = 16, MaxPilha = 6;
-        const float EscalaMala = 0.5f, EscalaBalanca = 0.5f, EscalaBalcaoMala = 0.5f, EscalaBandeja = 0.35f, MeiaMala = 0.21f, MeiaEspessura = 0.07f;
+        const float EscalaMala = 0.5f, EscalaBalanca = 0.5f, EscalaBalcaoMala = 0.5f, EscalaBandeja = 0.56f, MeiaMala = 0.21f, MeiaEspessura = 0.07f;
         /// <summary>Esteira: velocidade (m/s de jogo), altura, largura, distância da parede, lado da balança a partir do posto, a fachada do
         /// terminal e o tempo da mala na balança (s de jogo).</summary>
         const float VelEsteira = 0.9f, AltEsteira = 0.12f, LargEsteira = 0.16f, DEsteira = 0.12f, LadoBalanca = 0.4f, TerminalZ = 10.75f, Pesando = 1.4f;
@@ -39,10 +39,10 @@ namespace TA
         readonly bool[] _pousado = new bool[2];
         int _malasCriadas;
 
-        /// <summary>Malha da mala (pai = `T`, pivô nas rodinhas) ou um bloco sem a pasta ArtLocal.</summary>
+        /// <summary>Malha da mala (pai = `T`, pivô nas rodinhas; o tamanho é a escala de `T`) ou um bloco sem a pasta ArtLocal.</summary>
         Mala NovaMala(string nome)
         {
-            var m = new Mala { T = Peca("mala_rodinha", Vector3.zero, 0f, EscalaMala) };
+            var m = new Mala { T = Peca("mala_rodinha", Vector3.zero, 0f) };
             if (m.T == null) { m.R = Bloco(nome, PrimitiveType.Cube, Vector3.zero, new Vector3(0.22f, 0.42f, 0.14f), Color.white); m.T = m.R.transform; }
             else m.R = m.T.GetComponentInChildren<Renderer>();
             m.T.gameObject.SetActive(false);
