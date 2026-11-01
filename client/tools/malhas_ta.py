@@ -75,6 +75,10 @@ PECAS = {
     "cabine_scanner_corpo": (2500, 512, -1.35),
     "portico_detector": (1500, 512, -1.3),
     "bandeja_seguranca": (600, 256, 0.42),
+    "placa_fora_de_servico": (800, 256, -1.0),
+    "guiche_checkin": (2000, 512, 1.0),
+    "guiche_checkin_n2": (2000, 512, 1.0),
+    "guiche_checkin_n3": (2000, 512, 1.0),
     "scanner_mao": (400, 128, 0.3),
     # a sala de espera do portao
     "catraca_embarque": (1200, 512, 0.7),

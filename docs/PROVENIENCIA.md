@@ -473,6 +473,17 @@ Mesma receita do §2.4 (HD 4K, 50 000 faces, Privado; objeto em "Blender 4K"). G
 | cabine_scanner_corpo | 12:36 | #1 de 2 | `2b8bc1df-eb43-4d28-9a35-70b8ca61c87c` | 55 | 16385 | `cabine_scanner_corpo_hd/cabine_scanner_corpo_hd.zip` | 9.7 MiB | `35948a330e6132986d176f4c2ffa7553728ffd7ecd6fcc4956cdc1875570a2a3` | `581945e6c8f8ea92b87d8e789b56de2b7ae9fd410df19676dad793497f41a138` |
 | garagem_patio | 12:42 | #1 de 2 | `25d555f9-4d96-4538-bf14-6d72c5aad68c` | 55 | 16330 | `garagem_patio_hd/garagem_patio_hd.zip` | 10.7 MiB | `fc4c637ee21746a7c6b3a269666234ff0e55c6a43e8f96f6d98f5ca837a790b7` | `af6d3350029dea6ab5bbd33230f57e3cbacce391439b373fc28af8ed0c8fa0c7` |
 
+### 2.7 Conta nova, 2026-11-01: Lote 12 (guichê de check-in)
+
+Mesma receita do §2.4, peça a peça pela interface. A hora é a do zip e o id é o do export, no nome do FBX. Esta frente recebeu só os zips e os SHA-256: imagem escolhida, créditos e saldo não foram informados a ela e ficam para quem gerou completar. Zips em `arte/tripo/`, cópia em `G:\Meu Drive\TinyAirport-BACKUP\arte\tripo\`, com o mesmo SHA.
+
+| Peça | Hora | Imagem | Task id | Créditos | Saldo depois | Arquivo (`arte/tripo/`) | Tamanho | SHA-256 do zip | SHA-256 do FBX |
+|---|---|---|---|---|---|---|---|---|---|
+| guiche_checkin | 15:03 | — | `9caca74c-015f-445d-9b53-6752f64eb44a` (export) | — | — | `guiche_checkin_hd/guiche_checkin_hd.zip` | 6.7 MiB | `4439e6d0187ea85dff99960d2682926a86ed4aecf066d2d9c46d33549edefd7c` | `c10d3ae4cd371ae18d2104162f363ee100b113abad3293122d4a061d2b6f6ce0` |
+| guiche_checkin_n2 | 15:13 | — | `27b1dc24-33a8-4687-9087-0e178452b0d3` (export) | — | — | `guiche_checkin_n2_hd/guiche_checkin_n2_hd.zip` | 8.1 MiB | `f3a29862ccc69c241532dae6a207a3e8bd4adec34188d85063fb235469eef592` | `7fb6607c80a0ac77f262c97594d3712f8f566149131d8cf51fd4aaa14d0f6702` |
+| guiche_checkin_n3 | 15:20 | — | `7c5c3133-2c3e-47cb-bc1c-170fe31d41c7` (export) | — | — | `guiche_checkin_n3_hd/guiche_checkin_n3_hd.zip` | 8.9 MiB | `2df31afd82ad845298e571f04a55f4e6bc7b3f1fe19c8ec358381ae3f56ec651` | `e00fd2d4637fa0002ecc9a203a0d4268e5f22fd83f2a9d583499814cc059bc2a` |
+| painel_guiche | 15:28 | — | `a1e5c2cc-0863-4d41-af8d-f933dae87012` (export) | — | — | `painel_guiche_hd/painel_guiche_hd.zip` | 6.6 MiB | `964cf71e3ac46185105ed78e9d30be4dffee1ccde08de476a2ca150ba7a1bbde` | `0ecd8a4490872b8ac3fb1985a7d19ac33be56482d7b9b88b622e2b51706deb91` |
+
 ## 3. Marca e arte de instalação (imagem, sem modelo 3D)
 
 Geradas no gerador de imagem do Tripo (Nano Banana 2, 1024 px; splash 9:16 em 768 × 1376) e ampliadas para 4K pelo botão "4K" (10 créditos cada, §1). Os originais 4K ficam em `arte/marca/` (fora do git, com backup). As versões do jogo, em `client/Assets/_TA/Art/Marca/`, saem do script `client/tools/marca.py` (determinístico; recorte do fundo azul-marinho por inundação a partir da borda, tolerância 38; conferido sobre xadrez).
@@ -563,11 +574,16 @@ Nada aqui gasta crédito: tudo sai dos arquivos HD do §2 por script, no Blender
 | `cone` | 46502 → 300 | 0.25 × 0.25 × 0.35 | 128 px | `d9f387b8f852dd64f9d3326d6924e40a63cabbddfc4e55e6c67892465c998d8c` |
 | `conteiner_bagagem` | 45570 → 1200 | 1.30 × 0.98 × 1.35 | 256 px | `8394597cc8914ee7c58a15f82796edb770c728cfe9786406a907ecc83a13f15b` |
 | `escada_embarque` | 45628 → 2000 | 1.17 × 2.30 × 1.78 | 512 px | `5fe94b04af154a3b9dc9a4af3f843ba3bd399cba9b08d907c3704d8956882be0` |
+| `guiche_checkin` | 41818 → 2000 | 1.00 × 0.47 × 0.62 | 512 px | `3cdfec92c3770c4d0ea202995a461f99bd19074f5cfaf2bfae801c4b9bd9d89f` |
+| `guiche_checkin_n2` | 42314 → 1998 | 1.00 × 0.33 × 0.54 | 512 px | `18a9c586a228dd183b125527c86d3bf0c35407b2ee1b2c8f1f248aa06e2a9771` |
+| `guiche_checkin_n3` | 40157 → 2000 | 1.00 × 0.41 × 0.63 | 512 px | `59f7f956d0f0182ff1efe1a7ce634305a031dd66164d4cc2fc64e110d39d3240` |
 | `hangar_manutencao` | 42370 → 4000 | 7.00 × 6.38 × 4.65 | 1024 px | `e1db8b4ba62ed7bb3e0563ce900cae48bdac5bb16da6938fbad8201e697f70f6` |
 | `loja` | 44868 → 2500 | 1.40 × 1.21 × 1.51 | 512 px | `378652bf695b96e9f8fa8bdc63309c2d0e99979a800df5f4cd982f03ade65c68` |
 | `loja_n2` | 44066 → 2499 | 1.40 × 1.17 × 0.99 | 512 px | `43ce27912c150027e4f086ef02724038cf6f072797cf0d0794c3a79b76f97439` |
 | `loja_n3` | 41970 → 2500 | 1.31 × 1.40 × 1.80 | 512 px | `7b3bcb40e25f72301dcf4371b436953324bf374b8cac3149701f01927dc62416` |
 | `onibus_patio` | 43737 → 2500 | 1.47 × 3.20 × 1.40 | 512 px | `458bb34fa56a39d2f380f6f30e0c332dd80cc59bef15243a7b398dc57865a8de` |
+| `painel_guiche` | 45714 → 800 | 0.41 × 0.40 × 1.00 | 256 px | `99b1e21f6cffaf79aeeec00ce1a3268e8dec26b9e0cd95016d792b5e29e23f06` |
+| `placa_fora_de_servico` | 47120 → 800 | 0.64 × 0.66 × 1.00 | 256 px | `4d84eeaa08c8318af91a1f253c76dca2dace76bf50fe8ca9f7916cd8cc41701d` |
 | `ponte_embarque` | 44185 → 2499 | 1.08 × 3.40 × 2.09 | 512 px | `7d4c4dc5cff0f3ed567421143342a37d017c5a735fc773a4d2e393ccc32247c9` |
 | `portao_embarque` | 45758 → 2000 | 0.75 × 0.56 × 0.53 | 512 px | `59054ac09343df15984d2dc0a22f4a010364c3e09547745fbba1231a76bf686a` |
 | `portao_embarque_n2` | 42813 → 1999 | 0.68 × 0.75 × 0.42 | 512 px | `7bfa72d5fc2dde20142afd80a486181395b1c815835b69be1341248a92a2a387` |
@@ -611,3 +627,5 @@ Nada aqui gasta crédito: tudo sai dos arquivos HD do §2 por script, no Blender
 | `vendedor` | Atende, Idle, Walk | 2496 × 832 px | `3cbaae40b9824d7f46f840f7bbfb6efe0a8fa741183558d7ad2b64d210f0bb3e` |
 
 Total das folhas: 14.4 MB em PNG. Máscara: `elenco_ta.py` (uniforme de Ana, Beto e Cida por cor e faixa de altura) e `--mask-attach` (a mala dos passageiros). Tripulação e técnicos ficam com a cor do modelo, sem máscara.
+
+Gestos do atendimento, 2026-11-01 (`client/tools/elenco_gestos.sh`, `render_sprites.py --gestos`): 50 folhas a mais, 8,5 MB, com a mesma câmera e o mesmo pivô. `Digita`, `Pega`, `Etiqueta`, `Bastao` e `Tela` na equipe; `Digita` e `Pega` nos agentes do portão; `Entrega` e `PoeMala` nos passageiros. Cada gesto é a pose do `Idle` com as mãos levadas a um alvo por IK no script: sem Mixamo e sem crédito.

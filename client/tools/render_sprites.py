@@ -9,6 +9,8 @@ Copia de dc:client/tools/render_sprites.py (2026-10-29). O que o TA acrescenta (
   --mask-attach      o prop do --attach (a mala) entra inteiro na mascara (a View pinta na cor do voo)
   --senta M          acrescenta, sem FBX nem credito, os clipes Senta (laco sentado) e Sentar (de pe ate sentado, a View toca nos 2
                      sentidos), montados no rig a partir do Idle: coxas a frente, assento a M metros do chao, mala em pe ao lado
+  --gestos a,b       so renderiza os gestos do atendimento (tabela GESTOS: poses no rig a partir do Idle, sem FBX nem credito) e soma no
+                     meta.json que ja esta em --out, com o mesmo pivo: as folhas antigas nao mudam
 O resto e o do DC:
 
 
@@ -106,6 +108,7 @@ def parse_args():
     p.add_argument("--mask", action="store_true", help="mascara do material TA_MASK empilhada embaixo da folha")
     p.add_argument("--mask-attach", action="store_true", help="o prop do --attach entra inteiro na mascara")
     p.add_argument("--senta", type=float, help="altura do assento em m: acrescenta os clipes Senta e Sentar")
+    p.add_argument("--gestos", help="nomes de GESTOS separados por virgula: so renderiza esses e soma no meta.json que ja esta em --out, com o mesmo pivo")
     p.add_argument("--hold", help="FBX de um clipe com as maos segurando a carga; os clipes Carry* levam os bracos dele")
     p.add_argument("--hold-frame", type=float, help="quadro do --hold (padrao: o primeiro)")
     p.add_argument("--contact", help="caminho do contact.png (padrao: <out>/contact.png)")
@@ -490,6 +493,118 @@ def senta(arm, idle, assento):
     return [("Senta", a2), ("Sentar", a1)]
 
 
+# Gestos do atendimento: poses montadas no rig a partir do Idle, sem FBX nem credito. Cada quadro diz onde cada mao vai, em bracos a partir do ombro:
+# (para fora, para a frente, para cima); None = a mao do Idle. tronco = (inclina, gira) e cabeca = (baixa, gira), em graus. A View amarra cada
+# quadro a etapa do atendimento (Mundo.Postos.cs): quem faz o quadro andar e o tempo do servico, nao um laco solto.
+TECLA_E, TECLA_D = (-0.14, 0.7, -0.28), (-0.14, 0.7, -0.4)
+
+
+def q(L=None, R=None, tronco=(0, 0), cabeca=(0, 0)):
+    return dict(L=L, R=R, tronco=tronco, cabeca=cabeca)
+
+
+GESTOS = {
+    # atendente no terminal: os dedos alternam no teclado, os olhos na tela
+    "Digita": [q(TECLA_E, TECLA_D, (7, 0), (16, 0)), q((-0.14, 0.7, -0.34), (-0.14, 0.7, -0.34), (7, 0), (18, 0)),
+               q(TECLA_D, TECLA_E, (7, 0), (16, 0)), q((-0.14, 0.7, -0.34), (-0.14, 0.7, -0.34), (7, 0), (14, 0))],
+    # estende o braco por cima do balcao para pegar ou devolver o documento (a View toca nos 2 sentidos)
+    "Pega": [q(TECLA_E, (0.02, 0.45, -0.45), (4, 0), (8, 0)), q(TECLA_E, (0.0, 0.72, -0.2), (8, 0), (4, 0)), q(TECLA_E, (-0.05, 1.0, -0.02), (12, 0), (2, 0)),
+             q(TECLA_E, (-0.05, 1.02, 0.02), (14, 0), (2, 0))],
+    # vira para a balanca, abaixa e cola a etiqueta na mala
+    "Etiqueta": [q(TECLA_E, (0.2, 0.6, -0.45), (8, 12), (14, 10)), q(TECLA_E, (0.32, 0.8, -0.72), (16, 18), (24, 14)), q(TECLA_E, (0.34, 0.86, -0.82), (20, 20), (28, 14)),
+                 q(TECLA_E, (0.32, 0.8, -0.68), (16, 18), (24, 14))],
+    # agente da seguranca: o scanner de mao sobe e desce pelo corpo do passageiro
+    "Bastao": [q(None, (-0.02, 0.86, 0.14), (6, 0), (6, 0)), q(None, (-0.02, 0.88, -0.14), (9, 0), (12, 0)), q(None, (-0.02, 0.86, -0.42), (13, 0), (18, 0)),
+               q(None, (-0.02, 0.8, -0.68), (18, 0), (24, 0))],
+    # olha a tela do raio-x de lado, com as maos no painel
+    "Tela": [q((-0.1, 0.6, -0.36), (-0.1, 0.6, -0.36), (6, 8), (12, 26)), q((-0.1, 0.62, -0.33), (-0.1, 0.6, -0.38), (6, 8), (15, 30)), q((-0.1, 0.6, -0.36), (-0.1, 0.62, -0.33), (6, 8), (12, 34))],
+    # passageiro: a mala fica na direita, o documento vai na esquerda (a View toca nos 2 sentidos: entrega e recebe de volta)
+    "Entrega": [q((0.05, 0.4, -0.5), None), q((0.0, 0.68, -0.22), None, (3, 0), (2, 0)), q((-0.04, 0.95, -0.04), None, (6, 0), (0, 0)), q((-0.04, 0.98, 0.0), None, (7, 0), (0, 0))],
+    # empurra a mala para a balanca (a View troca para a folha so com a mala de mao no ultimo quadro)
+    "PoeMala": [q(None, (0.0, 0.25, -0.86), (6, 0), (8, 0)), q(None, (-0.02, 0.5, -0.84), (14, 0), (14, 0)), q(None, (-0.04, 0.75, -0.8), (22, 0), (20, 0)), q(None, (-0.04, 0.92, -0.76), (26, 0), (24, 0))],
+}
+GESTO_PASSO = 4.0  # frames de 30 fps entre 2 quadros: 7,5 quadros por s no laco
+
+
+def gestos(arm, idle, nomes):
+    """Clipes de gesto a partir do Idle, por IK nos bracos (como o senta). Em eixos do mundo o ator olha -Y e a esquerda dele e +X."""
+    tb, W = arm.data.bones, arm.matrix_world
+    nome = {b.name.split(":")[-1]: b.name for b in tb}
+    order = bone_order(arm)
+    root = order[0]
+    qW, qWi, Wi = W.to_quaternion(), W.to_quaternion().inverted(), W.inverted()
+    for pb in arm.pose.bones:
+        pb.rotation_mode = "QUATERNION"
+    s = int(round(idle.frame_range[0]))
+    set_action(arm, idle)
+    bpy.context.scene.frame_set(s)
+    mundo = {n: W @ arm.pose.bones[nome[n]].head for n in ("LeftArm", "RightArm", "LeftForeArm", "RightForeArm", "LeftHand", "RightHand")}
+    braco = {k: (mundo[k + "ForeArm"] - mundo[k + "Arm"]).length + (mundo[k + "Hand"] - mundo[k + "ForeArm"]).length for k in ("Left", "Right")}
+    print("GESTOS bracos %.3f %.3f m, ombro a %.3f m" % (braco["Left"], braco["Right"], mundo["LeftArm"].z))
+
+    def alvo(k, m):
+        fora = 1.0 if k == "Left" else -1.0
+        return Wi @ (mundo[k + "Arm"] + Vector((fora * m[0], -m[1], m[2])) * braco[k]) if m else Wi @ mundo[k + "Hand"]
+
+    def eixo(graus_x, graus_z):
+        return qWi @ (Quaternion((0.0, 0.0, 1.0), math.radians(graus_z)) @ Quaternion((1.0, 0.0, 0.0), math.radians(graus_x))) @ qW
+
+    def quadro(c):
+        R = {n: arm.pose.bones[n].matrix.to_quaternion() for n in order}
+        H = arm.pose.bones[root].matrix.translation.copy()
+        pose, delta, base, punho = {}, {}, {}, {}
+        for n in order:
+            b = tb[n]
+            pai = b.parent.name if b.parent else None
+            encaixe = pose[pai] @ b.parent.matrix_local.inverted() @ b.matrix_local if pai else b.matrix_local.copy()
+            curto, d = n.split(":")[-1], delta.get(pai, Quaternion())
+            lado = "Left" if curto.startswith("Left") else "Right" if curto.startswith("Right") else ""
+            if curto == "Spine":
+                d = eixo(*c["tronco"])
+            elif curto == "Head":
+                d = eixo(*c["cabeca"]) @ d
+            elif lado and curto[len(lado):] in ("Arm", "ForeArm"):
+                filho = tb[nome[lado + ("ForeArm" if "Fore" not in curto else "Hand")]]
+                off = (b.matrix_local.inverted() @ filho.matrix_local).translation
+                if "Fore" not in curto:
+                    neto = tb[nome[lado + "Hand"]]
+                    l2 = (filho.matrix_local.inverted() @ neto.matrix_local).translation.length
+                    polo = qWi @ Vector((1.0 if lado == "Left" else -1.0, 0.5, -0.7))
+                    punho[lado] = ik_cotovelo(encaixe.translation, alvo(lado, c["L" if lado == "Left" else "R"]), off.length, l2, polo)
+                    rumo = punho[lado][0] - encaixe.translation
+                else:
+                    rumo = punho[lado][1] - encaixe.translation
+                d = (R[n] @ off).rotation_difference(rumo)
+            elif curto == "RightHand" and c["R"] is None:
+                d = Quaternion()  # a mala nao gira
+            delta[n] = d
+            head = encaixe.translation if pai else H
+            pose[n] = Matrix.Translation(head) @ (d @ R[n]).to_matrix().to_4x4()
+            base[n] = encaixe.inverted() @ pose[n]
+        return base
+
+    feitos = []
+    for clipe in nomes:
+        chaves = GESTOS[clipe]
+        bases = []
+        for c in chaves:
+            set_action(arm, idle)
+            bpy.context.scene.frame_set(s)
+            bases.append(quadro(c))
+        ad = arm.animation_data
+        ad.action = bpy.data.actions.new(clipe)
+        for i, base in enumerate(bases + bases[:1]):
+            f = 1.0 + i * GESTO_PASSO
+            for n in order:
+                pb = arm.pose.bones[n]
+                pb.matrix_basis = base[n]
+                pb.keyframe_insert("rotation_quaternion", frame=f)
+                if n == root:
+                    pb.keyframe_insert("location", frame=f)
+        feitos.append((clipe, ad.action, [1.0 + i * GESTO_PASSO for i in range(len(chaves))]))
+    return feitos
+
+
 def sample_frames(act, a, name):
     s, e = act.frame_range
     span = max(e - s, 1.0)  # em clipe em laco a pose do fim == inicio: amostra [s, e)
@@ -685,6 +800,11 @@ def main():
     if a.senta:
         lista += senta(arm, dict(lista)["Idle"], a.senta)
     clips = [(n, act, sample_frames(act, a, n)) for n, act in lista] if arm else [("Static", None, [0.0])]
+    velho = None
+    if a.gestos:
+        with open(os.path.join(out, "meta.json")) as f:
+            velho = json.load(f)
+        clips = gestos(arm, dict(lista)["Idle"], a.gestos.split(","))
     etapa("clipes")
     rows = DIRS[a.dirs][: a.dirs // 2 + 1] if (a.mirror and a.dirs > 1) else DIRS[a.dirs]
     if a.diag:  # yaw -45: a linha 0 olha SW (para baixo e a esquerda na tela) e a 1 olha NW
@@ -700,11 +820,11 @@ def main():
                               a.ground_cut)
     etapa("limites")
     extent = max(2 * half, vmax - vmin) * 1.1
-    ppu = a.scale or a.size / extent
+    ppu = velho["ppu"] if velho else a.scale or a.size / extent
     cell = a.size / ppu  # metros por celula
     if extent > cell:
         print("AVISO recorte: personagem ocupa %.2f m e a celula so %.2f m (--scale menor ou --size maior)" % (extent, cell))
-    vc = (vmin + vmax) / 2.0  # centro vertical do personagem na tela; o pivo (origem) fica abaixo dele
+    vc = (a.size / 2.0 - velho["pivot_px"][1]) / ppu if velho else (vmin + vmax) / 2.0  # centro vertical do personagem na tela; o pivo (origem) fica abaixo dele
     pivot_y = a.size / 2.0 - vc * ppu
 
     sc.render.engine, sc.render.film_transparent = "BLENDER_WORKBENCH", True
@@ -729,6 +849,9 @@ def main():
             "preset": a.preset or "", "model_scale": round(k_model, 4), "hold": os.path.basename(a.hold) if hold else "",
             "attach": [os.path.basename(s) for s in a.attach], "align_arms": bool(a.align_arms or ALIGN_SEEN), "escala": a.escala, "diag": bool(a.diag), "mask": bool(a.mask),
             "clips": []}  # listas planas: JsonUtility nao le lista de listas
+    if velho:
+        meta = velho
+        meta["clips"] = [c for c in velho["clips"] if c["name"] not in a.gestos.split(",")]
     keep = []
     for name, act, frames in clips:
         t0 = time.time()
@@ -759,7 +882,8 @@ def main():
         meta["clips"].append(clip)
         print("CLIP %-20s frames=%2d linhas=%d folha=%dx%d px loop=%s passada=%.2fm/s t=%.1fs" % (
             name, len(frames), len(rows), len(frames) * a.size, len(rows) * a.size, loop, stride, time.time() - t0))
-    for j, (name, act, frames) in enumerate(clips):  # contact.png: 1o frame de cada clipe, direcao S
+    for j, (name, act, frames) in enumerate(clips):  # contact.png: 1o frame de cada clipe, direcao S (nos gestos, o do meio)
+        frames = frames[len(frames) // 2 :]
         set_action(arm, act)
         place(meshes, frames[0], math.radians(a.yaw), right * ((j + 0.5 - len(clips) / 2.0) * cell) - up * vc, keep,
               name in a.ground_cut)
