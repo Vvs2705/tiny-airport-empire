@@ -469,7 +469,24 @@ Portão da Fase C com tudo ligado (200 sementes × 20 ondas): **1,159** (era 1,1
 
 ### Prova de mutação (`python client/tools/mutacao.py`)
 
-MUTACAO_AQUI
+As 12 travas novas entram no `mutacao.py`, que continua pegando as 22 das Fases C, C2 e C3. Resultado em 2026-11-01, sobre o código final: **34 de 34 mortos**.
+
+| trava retirada | testes que caíram |
+|---|---|
+| falha de avião só acima do aviso | 10, entre eles `Checagem_TiraDaFaixaDeRisco_EEvitaAFalha` |
+| uma falha por voo | 4, entre eles `Rejeicao_AbortaNaPista_BloqueiaPoucoTempo_ESaiDepois` |
+| reparo da pane só com Cash | `Invariante_C4_ReparoSoComCash_AnuncioNaoRepara` |
+| clima tem o aviso inteiro | 5, entre eles `Adianta_ValeParaOs5Climas_ForaDoAvisoNao` |
+| Cash não muda o clima | 4, entre eles `Determinismo_MesmaSemente_MesmosEventos_ComTodosOsEventosDaC4` |
+| anúncio não evita falha | `Invariante_C4_NadaPagoMudaOPerigo`, `Invariante_C4_ReparoSoComCash_AnuncioNaoRepara` |
+| pane não tira Cash | `Invariante_C4_VooPerdido_CustaSoAReceita_ComClimaEFalha` |
+| todo retorno pousa seguro | 5, entre eles `Determinismo_MesmaSemente_MesmosEventos_ComTodosOsEventosDaC4` |
+| retorno tem prioridade na pista | `Retorno_PassaNaFrenteDaPistaFechada` |
+| sem Cash a pane não trava o jogo | 3, entre eles `Pane_SeguraOEmbarque_ReparoPagoEmSegundos` |
+| com clima, a frente fria sai dos pesos | `Previsao_AcertaSempre_EAvisaAntes` |
+| atrasar custa o bônus | `Atrasa_ProPortaoDepoisDeReabrir_SemBonus` |
+
+A 1ª rodada deu 29 de 34 e mostrou duas falhas de teste. `Invariante_C2_Offline_NuncaPerdeVoo_NemAndaAsEstacoesNovas` media um instante sem ninguém em atendimento nas estações novas, e o teste do atraso não garantia que todos tinham embarcado. Os dois agora exigem esse estado antes de medir. Os outros 3 eram padrões vencidos no `mutacao.py`.
 
 ### Para medir com gente
 
