@@ -239,8 +239,8 @@ namespace TA
             AndaPatio(dt);
         }
 
-        /// <summary>Largura da tela em m no enquadramento: mais que isso, o adulto fica abaixo de 28 px na foto 540 x 960 (ART_BIBLE §3).</summary>
-        const float LarguraLeitura = 9.6f;
+        /// <summary>Largura da tela em m no enquadramento: mais que isso, o corpo do adulto (0,45 m na folha) fica abaixo de 28 px na foto 540 x 960 (ART_BIBLE §3).</summary>
+        const float LarguraLeitura = 8.6f;
 
         /// <summary>Metros por pixel e centro em que `pts` cabem na faixa entre o quadro e a barra de baixo.</summary>
         float Quadro(List<Vector3> pts, out Vector3 centro)
@@ -256,12 +256,12 @@ namespace TA
             return Mathf.Max((x1 - x0) / _regiao.width, (y1 - y0) / _regiao.height);
         }
 
-        /// <summary>Enquadramento inicial, de perto: as 4 salas e a boca da ponte (o patio e a pista ficam a um pan; a pinca afasta). As salas
+        /// <summary>Enquadramento inicial, de perto: as 4 salas do fluxo (o patio e a pista ficam a um pan; a pinca afasta). As salas
         /// abertas entram no quadro enquanto a pessoa ainda se le; depois disso a camera fica no fluxo e a sala que abriu ganha um pan (Evento).</summary>
         void Enquadra()
         {
             Vector3 dir = _cam.transform.right, up = _cam.transform.up;
-            var pts = new List<Vector3> { new Vector3(-0.6f, 0f, 0f), new Vector3(8f, 0f, -0.6f), new Vector3(1.6f, 0f, -1.6f), new Vector3(12.4f, 0f, 4f), new Vector3(0f, 1f, 4.4f), new Vector3(4f, 1f, 8.4f), new Vector3(12f, 1f, 8f), new Vector3(10f, 1f, 10f) };
+            var pts = new List<Vector3> { new Vector3(0.1f, 0f, 0.1f), new Vector3(0.1f, 0f, 3.9f), new Vector3(7.9f, 0f, 0.1f), new Vector3(4.1f, 0f, 7.9f), new Vector3(11.9f, 0f, 4.1f), new Vector3(11.9f, 0.6f, 7.9f) };
             float upp = Quadro(pts, out Vector3 centro), teto = LarguraLeitura / Screen.width;
             for (int e = 4; e < Salas.Length; e++)
                 if (S.Desbloqueada((Estacao)e))
