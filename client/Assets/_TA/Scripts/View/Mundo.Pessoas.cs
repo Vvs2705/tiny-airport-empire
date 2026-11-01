@@ -49,11 +49,13 @@ namespace TA
         /// <summary>Onde a pessoa de patio fica em cada servico: estande G, depois R (desembarque, limpeza, combustivel, bagagem).</summary>
         static readonly Vector2[,] PontoServico =
         {
-            { new Vector2(9.2f, 12.4f), new Vector2(12f, 12.6f), new Vector2(14.7f, 14.2f), new Vector2(13.4f, 15.2f) },
-            { new Vector2(21.4f, 11.6f), new Vector2(23.2f, 12.6f), new Vector2(25.9f, 14.2f), new Vector2(24.6f, 15.2f) },
+            { new Vector2(12.8f, 12.8f), new Vector2(12.8f, 13.5f), new Vector2(12.8f, 14.2f), new Vector2(12.8f, 14.9f) },
+            { new Vector2(23.95f, 12.6f), new Vector2(23.95f, 13.3f), new Vector2(23.95f, 14f), new Vector2(23.95f, 14.7f) },
         };
         static readonly Vector2 MecanicoCasa = new Vector2(17.9f, 7.4f), PortaOficina = new Vector2(18f, 8f);
-        static readonly Vector2[] MecanicoPonto = { new Vector2(12.2f, 10.9f), new Vector2(21.4f, 10.9f) };
+        static readonly Vector2[] MecanicoPonto = { new Vector2(12.8f, CalcadaZ), new Vector2(23.95f, CalcadaZ) };
+        /// <summary>z da calcada do patio: entre a rua oeste e os narizes dos veiculos nas faixas (Mundo.Veiculos.cs).</summary>
+        const float CalcadaZ = 12.15f;
         /// <summary>A sala da tripulacao e a porta do portao para o estande remoto. Dali em diante, Mundo.Embarque.</summary>
         static readonly Vector2 SalaTrip = new Vector2(7.6f, 8.6f), RemotoPorta = new Vector2(11.2f, 8f);
 
@@ -213,7 +215,9 @@ namespace TA
         /// trecho longo, nunca alem do que a folha acompanha sem o pe deslizar.</summary>
         void Anda(Boneco b, float vel, float dt)
         {
-            if (Segura(b)) { Movido(b, Vector2.zero, dt); return; }
+            bool patio = b.Pos.y > 7.6f && b.Pos.y < 15.2f && b.Pos.x > 10.8f;
+            if (patio) _naFaixa.Add(b.Pos);
+            if (Segura(b) || (patio && b.Caminho.Count > 0 && VeiculoNoPasso(b))) { b.VelAtual = 0f; Movido(b, Vector2.zero, dt); return; }
             Vector2 antes = b.Pos;
             float resta = 0f;
             Vector2 q = b.Pos;
@@ -373,7 +377,7 @@ namespace TA
 
         void GentePatio()
         {
-            NovoAtor("despachante", 3f, new Vector2(12.2f, 9.2f), new Vector2(12.7f, 9.2f));
+            NovoAtor("despachante", 3f, new Vector2(13f, 8.35f), new Vector2(13.6f, 8.35f));   // encostado na parede: fora das ruas
             if (_patio.Count > 0) _patio[0].B.Tinta = ColeteSinal;
             _mecanico = NovoBoneco("mecanico");
             _mecanico.Pos = MecanicoCasa;
@@ -442,11 +446,14 @@ namespace TA
             }
         }
 
-        static Vector2 Ocioso(int i) => new Vector2(14.4f + i * 0.5f, 9.8f);
+        /// <summary>A beira do patio: o corredor entre o regional e a primeira faixa.</summary>
+        static Vector2 Ocioso(int i) => new Vector2(13.7f, 12.6f + i * 0.45f);
 
+        /// <summary>Do corredor de um aviao para o do outro, pela calcada: ninguem corta as faixas.</summary>
         static void Vai(Boneco b, Vector2 p)
         {
             b.Caminho.Clear();
+            if (Mathf.Abs(p.x - b.Pos.x) > 1.5f) { b.Caminho.Add(new Vector2(b.Pos.x, CalcadaZ)); b.Caminho.Add(new Vector2(p.x, CalcadaZ)); }
             b.Caminho.Add(p);
         }
 
@@ -463,14 +470,12 @@ namespace TA
                 if (k >= 0)
                 {
                     if (b.Pos.y < PortaOficina.y) b.Caminho.Add(PortaOficina);
-                    b.Caminho.Add(new Vector2(PortaOficina.x, 9.5f));
-                    b.Caminho.Add(new Vector2(MecanicoPonto[k].x, 9.5f));
+                    b.Caminho.Add(new Vector2(PortaOficina.x, CalcadaZ));
                     b.Caminho.Add(MecanicoPonto[k]);
                 }
                 else
                 {
-                    b.Caminho.Add(new Vector2(b.Pos.x, 9.5f));
-                    b.Caminho.Add(new Vector2(PortaOficina.x, 9.5f));
+                    b.Caminho.Add(new Vector2(PortaOficina.x, CalcadaZ));
                     b.Caminho.Add(PortaOficina);
                     b.Caminho.Add(MecanicoCasa);
                 }

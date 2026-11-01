@@ -9,8 +9,8 @@ namespace TA
     /// Trilha + NoTrilho: passageiro, tripulacao, subindo ou descendo.
     ///  - Estande G: rampa da porta norte do portao ate a boca do tunel (a ponta em arco da malha, com a ponte em leve subida) e tunel ate o
     ///    lado da fuselagem. A pessoa ganha altura na rampa, entra na boca e fica escondida ate a porta do aviao.
-    ///  - Estande R: pelo patio ate o caminhao-escada, degraus, plataforma, passarela e a porta aberta do jato. Sem o caminhao estacionado,
-    ///    ninguem pisa na escada (Segura): espera no pe.
+    ///  - Estande R: cruza as ruas por um ponto so, segue a calcada ate o caminhao-escada e sobe degraus, plataforma, passarela e a porta aberta
+    ///    do jato. Sem o caminhao estacionado, ninguem entra na calcada das faixas (Segura): espera no comeco dela, fora do caminho dos veiculos.
     ///  - O sprite e um quad de frente para a camera, inclinado 45 graus: parado no chao da rampa, a cabeca dele ja esta dentro da boca e
     ///    corta em diagonal. Por isso cada ponto do trilho traz, alem da altura, quanto o quad vem para a frente (`Frente`: a camera e
     ///    ortografica, a imagem nao muda de lugar, so a profundidade) e o alfa: a pessoa nunca fura o telhado nem o piso e some no escuro da boca.
@@ -26,16 +26,17 @@ namespace TA
             public No(float x, float z, float alt, float frente, float alfa) { P = new Vector2(x, z); Alt = alt; Frente = frente; Alfa = alfa; }
         }
 
-        /// <summary>Do chao ate a porta do aviao, por estande. G: pe da rampa, boca, porta. R: pe, 1o degrau, topo, plataforma, passarela, porta.</summary>
+        /// <summary>Do chao ate a porta do aviao, por estande. G: pe da rampa, boca, porta. R: comeco da calcada, pe da escada, 1o degrau, topo, plataforma,
+        /// passarela, porta. A escada para com o bico antes do motor do jato, dai a porta logo atras da cabine (frente 2,95 m; o casco la tem 0,84 m de meia largura).</summary>
         static readonly No[][] Trilho =
         {
             new[] { new No(10f, 8.45f, 0f, 0.15f, 1f), new No(10f, 9.65f, 0.78f, 0.7f, 1f), new No(10f, 9.95f, 0.98f, 1.1f, 0f), new No(10f, 12.75f, 1.24f, 0f, 0f) },
-            new[] { new No(20.5f, 11.55f, 0f, 0.15f, 1f), new No(20.5f, 11.95f, 0.55f, 0.2f, 1f), new No(20.5f, 13.15f, 1.4f, 0.2f, 1f), new No(20.5f, 13.45f, 1.4f, 0.5f, 1f), new No(21.25f, 13.45f, 1.4f, 1.1f, 1f), new No(21.62f, 13.45f, 1.4f, 1.3f, 0f) },
+            new[] { new No(12.6f, CalcadaZ, 0f, 0f, 1f), new No(20.8f, CalcadaZ, 0f, 0.15f, 1f), new No(20.8f, 12.85f, 0.55f, 0.2f, 1f), new No(20.8f, 14.05f, 1.4f, 0.2f, 1f), new No(20.8f, 14.35f, 1.4f, 0.5f, 1f), new No(21.25f, 14.35f, 1.4f, 1.1f, 1f), new No(21.65f, 14.35f, 1.4f, 1.3f, 0f) },
         };
         /// <summary>Chegadas: quem desceu do aviao segue pelo passeio e some no arco de vidro do terminal, com o quad a frente para a fachada nao cortar a cabeca.</summary>
         static readonly No[] Terminal = { new No(4f, 8.2f, 0f, 0f, 1f), new No(4f, 9.9f, 0f, 0f, 1f), new No(4f, 10.5f, 0f, 1f, 1f), new No(4f, 10.9f, 0f, 1.2f, 0f) };
         const float Corredor = 8.2f;   // ao longo da parede norte das salas, por tras do pe da rampa
-        static readonly Vector2 Chegadas = new Vector2(4f, 10.9f), RemotoPatio = new Vector2(20.5f, 9.35f);
+        static readonly Vector2 Chegadas = new Vector2(4f, 10.9f);
 
         const float PonteGraus = 5f;
         public static readonly Vector3 PonteEm = new Vector3(9.95f, 0f, 11.55f), PonteEscala = new Vector3(1.15f, 1.1f, 0.9f);
@@ -94,8 +95,8 @@ namespace TA
             Chao("PasseioTerminal", new Vector3(4f, -0.04f, 9.6f), new Vector2(0.7f, 2.8f), PisoPasseio);
 
             // no remoto: passarela da plataforma do caminhao ate a fuselagem e a porta aberta do jato (aparecem com o caminhao parado)
-            _passarela = Bloco("Passarela", PrimitiveType.Cube, new Vector3(21.36f, 1.37f, 13.45f), new Vector3(0.62f, 0.05f, 0.66f), Metal).gameObject;
-            _portaJato = Bloco("PortaJato", PrimitiveType.Cube, new Vector3(21.63f, 1.82f, 13.45f), new Vector3(0.06f, 0.86f, 0.5f), Escuro).gameObject;
+            _passarela = Bloco("Passarela", PrimitiveType.Cube, new Vector3(21.42f, 1.37f, 14.35f), new Vector3(0.5f, 0.05f, 0.66f), Metal).gameObject;
+            _portaJato = Bloco("PortaJato", PrimitiveType.Cube, new Vector3(21.66f, 1.82f, 14.35f), new Vector3(0.06f, 0.86f, 0.5f), Escuro).gameObject;
             _passarela.SetActive(false);
             _portaJato.SetActive(false);
         }
@@ -117,7 +118,7 @@ namespace TA
         {
             float porta = k == 0 ? Salas[3].Out.x : RemotoPorta.x;
             if (p.x < porta - 0.1f) Eixos(r, ref p, new Vector2(porta, Corredor), true);
-            if (k == 1) Eixos(r, ref p, RemotoPatio, true);
+            if (k == 1) Eixos(r, ref p, Trilho[1][0].P, false);   // ao longo do corredor e depois reto para o norte, cruzando as ruas
             foreach (No n in Trilho[k]) { r.Add(n.P); p = n.P; }
         }
 
@@ -180,12 +181,12 @@ namespace TA
             return V3(b.Pos, alt) - _cam.transform.forward * frente;
         }
 
-        /// <summary>Segura quem chegou na escada sem o caminhao parado (no pe, ou escondido na porta, descendo). Sem o aviao ou com ele indo ao hangar, a escada nao vem: acaba ali.</summary>
+        /// <summary>Segura quem chegou ao trilho do R sem o caminhao parado (no comeco da calcada, ou escondido na porta, descendo). Sem o aviao ou com ele indo ao hangar, a escada nao vem: acaba ali.</summary>
         bool Segura(Boneco b)
         {
             if (b.Estande != 1 || _escada || b.Caminho.Count == 0) return false;
             Vector2 c = b.Caminho[0];
-            if (c != Trilho[1][1].P && c != Trilho[1][4].P) return false;
+            if (c != Trilho[1][1].P && c != Trilho[1][5].P) return false;
             if (_avioes[1].Fase != Fase.NoPatio || S.Avioes[1].Hangar > 0) b.Caminho.Clear();
             b.VelAtual = 0f;
             return true;
