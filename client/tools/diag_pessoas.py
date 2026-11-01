@@ -21,11 +21,11 @@ from collections import defaultdict
 # comprimento, largura e eixo (m do pivo ao centro da caixa) por malha, de malhas.json e do NovoVeiculo
 CAIXA = {
     "caminhao_catering": (2.8, 1.28, 0.75),
-    "caminhao_combustivel": (2.6, 1.05, 0.75),
-    "carrinho_bagagem": (2.6, 0.9, 0.6),
+    "caminhao_combustivel": (2.6, 1.13, 0.75),
+    "carrinho_bagagem": (2.6, 0.78, 0.6),
     "escada_embarque": (2.3, 1.17, 0.7),
     "onibus_patio": (3.2, 1.47, 0.9),
-    "rebocador": (1.5, 0.8, 0.35),
+    "rebocador": (1.5, 0.76, 0.35),
 }
 
 

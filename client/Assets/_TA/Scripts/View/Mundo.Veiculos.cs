@@ -236,14 +236,15 @@ namespace TA
         {
             Vector3 f = t.Re ? -v.T.forward : v.T.forward, c = Centro(v), lado = new Vector3(f.z, 0f, -f.x);
             float freada = v.V * v.V / (2f * t.F);
-            float cruza = Cruza(v, t);
+            bool cruza = Cruza(v, t, out float rua, out float cruzaX);
             foreach (Veiculo o in _veiculos)
             {
                 if (o == v) continue;
                 Vector3 d = Centro(o) - c;
                 float frente = Vector3.Dot(d, f);
-                bool naRua = cruza >= 0f && o.Lida != Lida.Parado && Mathf.Abs(o.T.position.z - RuaOeste) < 0.4f && Mathf.Abs(o.T.forward.x) > 0.7f && Mathf.Abs(o.T.position.x - cruza) < 9f;
-                if (naRua || (frente > 0f && frente < (v.Comp + o.Comp) * 0.5f + 0.15f + freada && Mathf.Abs(Vector3.Dot(d, lado)) < 1.2f))
+                bool naRua = cruza && o.Lida != Lida.Parado && Mathf.Abs(o.T.position.z - rua) < 0.4f && Mathf.Abs(o.T.forward.x) > 0.7f
+                    && Mathf.Abs(o.T.position.x - cruzaX) < (rua == RuaOeste ? 9f : 3.4f);
+                if (naRua || (frente > 0f && frente < (v.Comp + o.Comp) * 0.5f + 0.5f + freada && Mathf.Abs(Vector3.Dot(d, lado)) < 1.2f))
                 {
                     v.Parado += dt;
                     return v.Parado >= 6f;
@@ -253,15 +254,20 @@ namespace TA
             return true;
         }
 
-        /// <summary>O x em que o trajeto entra na rua oeste nos proximos metros, vindo de fora dela (-1 = nao entra): no cruzamento, quem cruza
+        /// <summary>O trajeto entra nos proximos metros na rua oeste ou na rua norte, vindo de fora dela: `rua` e o x do cruzamento. Quem cruza
         /// espera quem ja vem pela rua, antes de o nariz chegar nela.</summary>
-        static float Cruza(Veiculo v, Trecho t)
+        static bool Cruza(Veiculo v, Trecho t, out float rua, out float x)
         {
-            if (v.Tipo == null || Mathf.Abs(v.T.position.z - RuaOeste) < 0.5f) return -1f;
-            if (v.T.forward.z < -0.3f && v.T.position.z < RuaOeste) return -1f;   // acabou de cruzar: termina a curva antes de parar, com a cauda fora da rua
+            rua = x = 0f;
+            float z = v.T.position.z;
+            if (v.Tipo == null || (v.T.forward.z < -0.3f && z < RuaOeste)) return false;   // acabou de cruzar: termina a curva antes de parar, com a cauda fora da rua
             for (int i = Indice(t, v.S); i < t.P.Count && t.L[i] <= v.S + 5.5f; i += 3)
-                if (Mathf.Abs(t.P[i].z - RuaOeste) < 0.9f) return t.P[i].x;
-            return -1f;
+            {
+                float pz = t.P[i].z;
+                rua = Mathf.Abs(pz - RuaOeste) < Mathf.Abs(pz - RuaNorte) ? RuaOeste : RuaNorte;
+                if (Mathf.Abs(pz - rua) < 0.9f && Mathf.Abs(z - rua) >= 0.5f) { x = t.P[i].x; return true; }
+            }
+            return false;
         }
 
         static Vector3 Centro(Veiculo v) => v.T.position + v.T.forward * (v.Comp * 0.4f);
