@@ -7,6 +7,8 @@ Copia de dc:client/tools/render_sprites.py (2026-10-29). O que o TA acrescenta (
                      alphaIsTransparency nao borra) e o uniforme em cinza neutro de luminancia media 0,5; a View tinge
                      (shader TA/SpriteTinta: cor = 2 x cinza x tinta onde a mascara acende)
   --mask-attach      o prop do --attach (a mala) entra inteiro na mascara (a View pinta na cor do voo)
+  --senta M          acrescenta, sem FBX nem credito, os clipes Senta (laco sentado) e Sentar (de pe ate sentado, a View toca nos 2
+                     sentidos), montados no rig a partir do Idle: coxas a frente, assento a M metros do chao, mala em pe ao lado
 O resto e o do DC:
 
 
@@ -62,10 +64,11 @@ INK = (0x1B / 255.0, 0x17 / 255.0, 0x24 / 255.0)  # tinta do contorno, ART_BIBLE
 BASE = dict(elev=60.0, dirs=4, fps=12.0, size=128, scale=0.0, yaw=0.0, light="flat", aa="8", max_frames=32,
             height=0.0, width=0.0, mirror=False, outline=0, clips={}, align_arms=False, ground_cut=(), footprint=(),
             tilt=0.0, diag=False)
+SENTA_QUADROS, SENTAR_QUADROS = 6, 5  # Senta = 3 s de respiracao do Idle; Sentar = a View escolhe o quadro pelo progresso
 # TA: camera do jogo (Mundo.cs) ortografica a 45 graus de cima e azimute 45; 1 unidade = 1 m; o adulto mede ~1 m (os 3
 # tamanhos de cabeca do ART_BIBLE em salas de 4 x 4 m com 60 na fila). 180 px/m na textura = nitido no zoom de perto.
 TA = dict(scale=180.0, outline=3, max_frames=12, elev=45.0, dirs=4, yaw=-45.0, mirror=True, diag=True, size=208,
-          clips={"Idle": dict(range=(199, 289)), "Atende": dict(frames=8)})
+          clips={"Idle": dict(range=(199, 289)), "Atende": dict(frames=8), "Senta": dict(frames=SENTA_QUADROS), "Sentar": dict(frames=SENTAR_QUADROS)})
 # Idle = Breathing Idle do Forge na janela de laco 199-289 (3,0 s; ver BREATH no dc). Atende = Grab do dc (0,5 s, entrega o cartao).
 PRESETS = {
     "passageiro_a": dict(TA, height=1.00),
@@ -82,6 +85,8 @@ PRESETS = {
     "lara": dict(TA, height=1.00),
     "comissaria": dict(TA, height=1.00),
     "comissario": dict(TA, height=1.03),
+    "agente_portao": dict(TA, height=1.00),
+    "agente_portao_f": dict(TA, height=1.00),
 }
 
 
@@ -100,6 +105,7 @@ def parse_args():
     p.add_argument("--diag", action="store_true", default=None, help="4 diagonais: folha com SW e NW (NE/SE = espelho)")
     p.add_argument("--mask", action="store_true", help="mascara do material TA_MASK empilhada embaixo da folha")
     p.add_argument("--mask-attach", action="store_true", help="o prop do --attach entra inteiro na mascara")
+    p.add_argument("--senta", type=float, help="altura do assento em m: acrescenta os clipes Senta e Sentar")
     p.add_argument("--hold", help="FBX de um clipe com as maos segurando a carga; os clipes Carry* levam os bracos dele")
     p.add_argument("--hold-frame", type=float, help="quadro do --hold (padrao: o primeiro)")
     p.add_argument("--contact", help="caminho do contact.png (padrao: <out>/contact.png)")
@@ -381,6 +387,109 @@ def load_clips(a, arm, hold):
     return clips
 
 
+def ik_cotovelo(ombro, alvo, l1, l2, polo):
+    """Dois ossos: posicao do cotovelo e do punho (o alvo, puxado para dentro do alcance), com o cotovelo para o lado de `polo`."""
+    u = alvo - ombro
+    d = min(max(u.length, abs(l1 - l2) + 1e-4), l1 + l2 - 1e-4)
+    u.normalize()
+    a = (l1 * l1 - l2 * l2 + d * d) / (2.0 * d)
+    return ombro + u * a + (polo - u * polo.dot(u)).normalized() * math.sqrt(max(l1 * l1 - a * a, 0.0)), ombro + u * d
+
+
+def senta(arm, idle, assento):
+    """Clipes Senta e Sentar a partir do Idle (a respiracao fica). Em eixos do mundo o ator olha -Y: as coxas giram para a frente, a canela e o pe
+    voltam ao rumo do Idle, o corpo desce ate o assento e os bracos fecham por IK: a mao esquerda na coxa, a direita na alca da mala, que fica
+    em pe no chao, a frente do joelho. A origem continua sob o quadril: a View poe o boneco no centro do lugar."""
+    tb, W = arm.data.bones, arm.matrix_world
+    nome = {b.name.split(":")[-1]: b.name for b in tb}
+    order = bone_order(arm)
+    root = order[0]
+    qW, qWi, Wi = W.to_quaternion(), W.to_quaternion().inverted(), W.inverted()
+    for pb in arm.pose.bones:
+        pb.rotation_mode = "QUATERNION"
+    s, e = (int(round(x)) for x in idle.frame_range)
+    set_action(arm, idle)
+    bpy.context.scene.frame_set(s)
+    em = {n: W @ arm.pose.bones[nome[n]].head for n in ("LeftUpLeg", "RightUpLeg", "LeftLeg", "RightLeg", "LeftFoot", "RightHand")}
+    coxa = {"Left": Matrix.Rotation(math.radians(8), 4, "Z") @ Matrix.Rotation(math.radians(-85), 4, "X"),
+            "Right": Matrix.Rotation(math.radians(-8), 4, "Z") @ Matrix.Rotation(math.radians(-85), 4, "X")}
+    canela = (em["LeftFoot"] - em["LeftLeg"]).length
+    perna = (em["LeftLeg"] - em["LeftUpLeg"]).length
+    altura = max(assento + 0.05, em["LeftFoot"].z + canela + perna * math.cos(math.radians(85)))  # de pe no chao; crianca: o assento manda e o pe balanca
+    desce = Vector((0.0, 0.0, altura - em["LeftUpLeg"].z))
+    joelho = {k: em[k + "UpLeg"] + desce + m.to_3x3() @ (em[k + "Leg"] - em[k + "UpLeg"]) for k, m in coxa.items()}
+    alvo = {"Left": Wi @ (joelho["Left"].lerp(em["LeftUpLeg"] + desce, 0.4) + Vector((0.0, 0.0, 0.07))),
+            "Right": Wi @ (em["RightHand"] + Vector((-0.03, -0.3, 0.0)))}
+    print("SENTA quadril a %.3f m (desceu %.3f), joelho a %.3f m" % (altura, -desce.z, joelho["Left"].z))
+
+    def quadro(f):
+        """matrix_basis de cada osso no quadro `f` do Idle, com as pernas e os bracos da pose sentada."""
+        bpy.context.scene.frame_set(f)
+        R = {n: arm.pose.bones[n].matrix.to_quaternion() for n in order}
+        H = arm.pose.bones[root].matrix.translation.copy()
+        pose, delta, base, punho = {}, {}, {}, {}
+        for n in order:
+            b = tb[n]
+            pai = b.parent.name if b.parent else None
+            encaixe = pose[pai] @ b.parent.matrix_local.inverted() @ b.matrix_local if pai else b.matrix_local.copy()
+            curto, d = n.split(":")[-1], delta.get(pai, Quaternion())
+            lado = "Left" if curto.startswith("Left") else "Right" if curto.startswith("Right") else ""
+            if curto.endswith("UpLeg"):
+                d = qWi @ coxa[lado].to_quaternion() @ qW
+            elif curto.endswith("Leg"):
+                d = Quaternion()
+            elif lado and curto[len(lado):] in ("Arm", "ForeArm"):
+                filho = tb[nome[lado + ("ForeArm" if curto.endswith("Arm") and "Fore" not in curto else "Hand")]]
+                off = (b.matrix_local.inverted() @ filho.matrix_local).translation
+                if "Fore" not in curto:
+                    neto = tb[nome[lado + "Hand"]]
+                    l2 = (filho.matrix_local.inverted() @ neto.matrix_local).translation.length
+                    polo = qWi @ Vector((1.0 if lado == "Left" else -1.0, 0.6, -0.4))
+                    punho[lado] = ik_cotovelo(encaixe.translation, alvo[lado], off.length, l2, polo)
+                    rumo = punho[lado][0] - encaixe.translation
+                else:
+                    rumo = punho[lado][1] - encaixe.translation
+                d = (R[n] @ off).rotation_difference(rumo)
+            elif curto == "RightHand":
+                d = Quaternion()  # a mala nao gira
+            delta[n] = d
+            head = encaixe.translation if pai else H + Wi.to_3x3() @ desce
+            pose[n] = Matrix.Translation(head) @ (d @ R[n]).to_matrix().to_4x4()
+            base[n] = encaixe.inverted() @ pose[n]
+        return base
+
+    def grava(nome_clipe, chaves):
+        ad = arm.animation_data
+        ad.action = bpy.data.actions.new(nome_clipe)
+        for f, base in chaves:
+            for n in order:
+                pb = arm.pose.bones[n]
+                pb.matrix_basis = base[n]
+                pb.keyframe_insert("rotation_quaternion", frame=f)
+                if n == root:
+                    pb.keyframe_insert("location", frame=f)
+        return ad.action
+
+    passo = (e - s) / SENTA_QUADROS
+    laco = [quadro(int(round(s + i * passo))) for i in range(SENTA_QUADROS)]
+    bpy.context.scene.frame_set(s)
+    de_pe = {n: arm.pose.bones[n].matrix_basis.copy() for n in order}
+
+    def mistura(t):
+        t = t * t * (3.0 - 2.0 * t)
+        r = {}
+        for n in order:
+            l0, q0, _ = de_pe[n].decompose()
+            l1, q1, _ = laco[0][n].decompose()
+            r[n] = Matrix.Translation(l0.lerp(l1, t)) @ q0.slerp(q1, t).to_matrix().to_4x4()
+        return r
+
+    sentar = [(1 + i, mistura(i / (SENTAR_QUADROS - 1.0))) for i in range(SENTAR_QUADROS)]
+    a1 = grava("Sentar", sentar + [(1 + SENTAR_QUADROS, laco[0])])
+    a2 = grava("Senta", [(1 + i * passo, c) for i, c in enumerate(laco)] + [(1 + SENTA_QUADROS * passo, laco[0])])
+    return [("Senta", a2), ("Sentar", a1)]
+
+
 def sample_frames(act, a, name):
     s, e = act.frame_range
     span = max(e - s, 1.0)  # em clipe em laco a pose do fim == inicio: amostra [s, e)
@@ -572,7 +681,10 @@ def main():
         meshes += extra
     hold =hold_pose(os.path.abspath(a.hold), a.hold_frame) if (a.hold and arm and not a.self_) else None
     # sem armature = prop estatico: 1 quadro "Static", mesma camera e escala dos personagens
-    clips = [(n, act, sample_frames(act, a, n)) for n, act in load_clips(a, arm, hold)] if arm else [("Static", None, [0.0])]
+    lista = load_clips(a, arm, hold) if arm else []
+    if a.senta:
+        lista += senta(arm, dict(lista)["Idle"], a.senta)
+    clips = [(n, act, sample_frames(act, a, n)) for n, act in lista] if arm else [("Static", None, [0.0])]
     etapa("clipes")
     rows = DIRS[a.dirs][: a.dirs // 2 + 1] if (a.mirror and a.dirs > 1) else DIRS[a.dirs]
     if a.diag:  # yaw -45: a linha 0 olha SW (para baixo e a esquerda na tela) e a 1 olha NW

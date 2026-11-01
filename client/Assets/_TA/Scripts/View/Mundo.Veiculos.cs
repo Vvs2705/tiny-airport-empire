@@ -156,7 +156,8 @@ namespace TA
         {
             Aviao a = _avioes[k];
             TA.Core.Aviao c = s.Avioes[k];
-            if (t.Faixa[k] < 0f || a.Fase != Fase.NoPatio || a.QuerPartir || c.Hangar > 0) return false;
+            if (t.Faixa[k] < 0f || a.Fase != Fase.NoPatio || c.Hangar > 0) return false;
+            if (a.QuerPartir) return t.Servico == 0 && GenteNoTrilho(k);
             return t.Servico == 0 || c.Falta[t.Servico] > 0;
         }
 

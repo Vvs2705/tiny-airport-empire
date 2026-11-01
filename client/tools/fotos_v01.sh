@@ -22,6 +22,9 @@ foto critico_onda4    -onda 4 -speed 6 -shotdelay 12
 foto estresse_60      -passageiros 60 -speed 10 -shotdelay 11
 foto estresse_60_bot  -passageiros 60 -bot -speed 6 -shotdelay 12
 foto perto_onda2      -onda 2 -bot -speed 6 -shotdelay 10 -vista perto
+foto portao_espera    -onda 2 -bot -speed 6 -shotdelay 8 -vista portao
+foto portao_fila      -onda 2 -bot -speed 6 -shotdelay 20 -vista portao
+foto portao_estresse  -passageiros 60 -bot -speed 6 -shotdelay 12 -vista portao
 foto patio_pouso      -speed 2 -shotdelay 7 -vista patio
 foto patio_turnaround -bot -speed 6 -shotdelay 12 -vista patio
 foto geral            -bot -speed 6 -shotdelay 14 -vista geral

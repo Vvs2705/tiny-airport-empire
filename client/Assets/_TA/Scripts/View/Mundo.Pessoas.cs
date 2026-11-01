@@ -28,12 +28,13 @@ namespace TA
             public Transform T;
             public SpriteRenderer Sombra, Corpo, Coracao, Humor;
             public SpriteSheet Folha;
-            public int Andar, Parado, Atender, Clip = -1;
-            public float Tempo, Vel, VelAtual;
+            public int Andar, Parado, Atender, Sentado, Sentar, Clip = -1;
+            public float Tempo, Vel, VelAtual, Senta;
+            public int Cadeira = -1, Vaga = -1;   // Mundo.Espera.cs
             public Color Tinta = Color.white;
             public Vector2 Pos;
             public readonly List<Vector2> Caminho = new List<Vector2>();
-            public int Zona = -1;
+            public int Zona = -1, Estande = -1;   // Estande >= 0: indo ao aviao desse estande ou vindo dele (Mundo.Embarque)
             public bool Saindo, Andou, Cima, Atende, NoBalcao;
             public float Dir = 1f, Escala = 1f;
         }
@@ -41,20 +42,20 @@ namespace TA
         /// <summary>Gente do patio: pontos de uma volta curta e a pausa em cada um.</summary>
         sealed class Ator { public Boneco B; public Vector2[] Pontos; public float Pausa, Espera; public int I; }
 
-        /// <summary>Tripulante andando entre a sala e o aviao: volta para o pool quando chega.</summary>
-        sealed class Andante { public Boneco B; }
+        /// <summary>Tripulante, ou passageiro que desce, de passagem entre o aviao e o terminal: aparece depois de Atraso s e volta para o pool quando chega.</summary>
+        sealed class Andante { public Boneco B; public float Atraso; }
 
         static readonly Color ColetePatio = Art.Hex(0xF2A33A), MacacaoMecanico = Art.Hex(0x2A7A88), ColeteSinal = Art.Hex(0xE8D24A);
         /// <summary>Onde a pessoa de patio fica em cada servico: estande G, depois R (desembarque, limpeza, combustivel, bagagem).</summary>
         static readonly Vector2[,] PontoServico =
         {
-            { new Vector2(10.3f, 12.5f), new Vector2(12f, 12.6f), new Vector2(14.7f, 14.2f), new Vector2(13.4f, 15.2f) },
+            { new Vector2(9.2f, 12.4f), new Vector2(12f, 12.6f), new Vector2(14.7f, 14.2f), new Vector2(13.4f, 15.2f) },
             { new Vector2(21.4f, 11.6f), new Vector2(23.2f, 12.6f), new Vector2(25.9f, 14.2f), new Vector2(24.6f, 15.2f) },
         };
         static readonly Vector2 MecanicoCasa = new Vector2(17.9f, 7.4f), PortaOficina = new Vector2(18f, 8f);
         static readonly Vector2[] MecanicoPonto = { new Vector2(12.2f, 10.9f), new Vector2(21.4f, 10.9f) };
-        /// <summary>A sala da tripulacao, a porta do aviao em cada estande e o caminho do embarque remoto (porta do portao, patio e escada).</summary>
-        static readonly Vector2 SalaTrip = new Vector2(7.6f, 8.6f), PonteIni = new Vector2(10f, 8.4f), RemotoPorta = new Vector2(11.2f, 8f), RemotoPatio = new Vector2(18f, 8.6f), RemotoFim = new Vector2(18f, 12.1f);
+        /// <summary>A sala da tripulacao e a porta do portao para o estande remoto. Dali em diante, Mundo.Embarque.</summary>
+        static readonly Vector2 SalaTrip = new Vector2(7.6f, 8.6f), RemotoPorta = new Vector2(11.2f, 8f);
 
         readonly List<Vector2> _portas = new List<Vector2>();
         readonly List<Ator> _patio = new List<Ator>();
@@ -93,7 +94,7 @@ namespace TA
                 b.Corpo.transform.localScale = new Vector3(0.36f, 0.7f, 1f);
                 return;
             }
-            b.Andar = f.Pick("Walk"); b.Parado = f.Pick("Idle"); b.Atender = f.Pick("Atende", "Idle");
+            b.Andar = f.Pick("Walk"); b.Parado = f.Pick("Idle"); b.Atender = f.Pick("Atende", "Idle"); b.Sentado = f.Pick("Senta"); b.Sentar = f.Pick("Sentar");
         }
 
         /// <summary>Olhar na direcao `d` do chao: para cima/baixo e esquerda/direita na tela (a folha tem as 2 diagonais da esquerda).</summary>
@@ -113,7 +114,8 @@ namespace TA
             foreach (Station st in s.Estacoes)
             {
                 int e = (int)st.Tipo;
-                for (int k = 0; k < st.Fila.Count; k++) Liga(st.Fila[k], e, Fila(e, k), s, false, st.Estado == Estado.Critico && k < 3);
+                if (e == Portao) FilaPortao(s, st);
+                else for (int k = 0; k < st.Fila.Count; k++) Liga(st.Fila[k], e, Fila(e, k), s, false, st.Estado == Estado.Critico && k < 3);
                 bool seg = st.Tipo == Estacao.Seguranca;
                 int agentes = seg ? s.Presentes(st.Tipo) : 0;
                 for (int i = 0; i < 4; i++)
@@ -124,7 +126,7 @@ namespace TA
                     Pax p = st.Atendendo[i];
                     float f = 1f - p.Resto / (float)Mathf.Max(1, p.Total);
                     Vector2 alvo = seg ? PontoSeguranca(p, i, f, i < agentes) : NoBalcao(e, i);
-                    Liga(p, e, alvo, s, true, false);
+                    Liga(p, e, alvo, s, true, false, VagaPosto + i);
                     if (seg) BandejaPasso(i, p, f, i < agentes, _pax[p.Id].Pos);
                     _arco[e, i].sprite = Art.Arc(f);
                     Vector3 pa = V3(alvo, 1.35f);
@@ -138,7 +140,7 @@ namespace TA
             {
                 Boneco b = kv.Value;
                 if (!_vistos.Contains(kv.Key) && !b.Saindo) Sai(kv.Key, b);
-                Anda(b, VelPax, dt);
+                if (!Sentando(b, dt)) Anda(b, VelPax, dt);
                 Pinta(b);
                 if (b.Saindo && b.Caminho.Count == 0) _sair.Add(kv.Key);
             }
@@ -150,9 +152,10 @@ namespace TA
                 b.T.gameObject.SetActive(false);
                 _livres.Push(b);
             }
+            AgentesPortao(s, dt);
         }
 
-        void Liga(Pax p, int e, Vector2 alvo, Sim s, bool noBalcao, bool bravo)
+        void Liga(Pax p, int e, Vector2 alvo, Sim s, bool noBalcao, bool bravo, int vaga = -1)
         {
             _vistos.Add(p.Id);
             if (!_pax.TryGetValue(p.Id, out Boneco b))
@@ -161,7 +164,7 @@ namespace TA
                 if (_livres.Count > 0) { b = _livres.Pop(); Veste(b, ator); } else b = NovoBoneco(ator);
                 b.T.gameObject.SetActive(true);
                 b.Pos = Calcada + new Vector2(-0.4f * (p.Indice % 3), 0.3f * (p.Indice % 4) - 0.45f);
-                b.Zona = -1; b.Saindo = false; b.Caminho.Clear(); b.NoBalcao = false; b.VelAtual = 0f;
+                b.Zona = -1; b.Estande = -1; b.Saindo = false; b.Caminho.Clear(); b.NoBalcao = false; b.VelAtual = 0f; b.Senta = 0f; b.Cadeira = b.Vaga = -1;
                 b.Coracao.enabled = p.Historia;
                 _pax[p.Id] = b;
             }
@@ -170,7 +173,9 @@ namespace TA
                 b.Caminho.Clear();
                 RotaPessoa(b.Caminho, b.Pos, b.Zona, e, alvo, !noBalcao);
                 b.Zona = e;
+                b.Vaga = vaga;
             }
+            else if (e == Portao) MudaVaga(b, alvo, vaga);
             else if (b.NoBalcao != noBalcao)
             {
                 // da fila para o balcao: um passo a frente, ao longo do corredor livre entre a fila e os balcoes, e chega de frente
@@ -190,8 +195,8 @@ namespace TA
             b.Tinta = e == (int)Estacao.Portao && v != null && !v.Embarque && !noBalcao ? Color.Lerp(mala, Art.Hex(0x8A8F99), 0.5f) : mala;   // no portao, apagada ate abrir o embarque
         }
 
-        /// <summary>Saiu do nucleo: embarcou (Ev.Embarcou) = pela ponte ate o aviao do estande G, ou a pe pelo patio ate a escada do R; senao
-        /// perdeu o voo = sai pela porta por onde entrou.</summary>
+        /// <summary>Saiu do nucleo: embarcou (Ev.Embarcou) = vai ao aviao (Embarca: ponte no estande G, patio e escada no R); senao perdeu o voo =
+        /// sai pela porta por onde entrou.</summary>
         void Sai(int id, Boneco b)
         {
             b.Saindo = true;
@@ -199,15 +204,16 @@ namespace TA
             b.Caminho.Clear();
             int z = Mathf.Clamp(b.Zona, 0, 5);
             Vector2 p = b.Pos;
+            if (z == Portao) SaiDaFileira(b, ref p);
             if (!_embarcou.Contains(id)) PelaPorta(b.Caminho, ref p, Salas[z].In);   // um passo para fora da porta
-            else if (id / 500 % 2 == 0) { PelaPorta(b.Caminho, ref p, Salas[3].Out); b.Caminho.Add(PonteFim); }
-            else { PelaPorta(b.Caminho, ref p, RemotoPorta); Eixos(b.Caminho, ref p, RemotoPatio, false); Eixos(b.Caminho, ref p, RemotoFim, false); }
+            else Embarca(b, ref p, id / 500 % 2);
         }
 
         /// <summary>Anda pelo caminho a ate `vel` m/s, com partida e chegada suaves. O atraso sobre o nucleo se recupera acelerando um pouco no
         /// trecho longo, nunca alem do que a folha acompanha sem o pe deslizar.</summary>
         void Anda(Boneco b, float vel, float dt)
         {
+            if (Segura(b)) { Movido(b, Vector2.zero, dt); return; }
             Vector2 antes = b.Pos;
             float resta = 0f;
             Vector2 q = b.Pos;
@@ -235,20 +241,28 @@ namespace TA
         /// <summary>Billboard: o quadro do clipe (andar no ritmo da passada, parado, atendendo), o espelho e a ordem por profundidade.</summary>
         void Pinta(Boneco b)
         {
-            Vector3 p = V3(b.Pos);
-            b.T.position = p;
+            float alfa = 1f;
+            Vector3 p = b.Estande >= 0 ? NoTrilho(b, out alfa) : V3(b.Pos);
+            b.T.position = p - _cam.transform.forward * (b.Zona == Portao && b.Vaga >= VagaPosto ? FrentePodio : b.Senta * FrenteSentado);
             b.T.rotation = _cam.transform.rotation;
             b.T.localScale = new Vector3(b.Escala, b.Escala, 1f);
             if (b.Folha != null)
             {
-                int clip = b.Andou ? b.Andar : b.Atende ? b.Atender : b.Parado;
+                int clip = b.Senta >= 1f ? b.Sentado : b.Senta > 0f ? b.Sentar : b.Andou ? b.Andar : b.Atende ? b.Atender : b.Parado;
                 if (clip != b.Clip) { b.Clip = clip; b.Tempo = 0f; }
                 b.Tempo += _g.DtJogo * (b.Andou ? Mathf.Clamp(b.Vel / PassoNatural, 0.35f, 2.3f) : 1f);
-                b.Corpo.sprite = b.Folha.Frame(clip, b.Cima ? 1 : 0, b.Folha.FrameAt(clip, b.Tempo));
+                int quadro = clip == b.Sentar && b.Senta > 0f ? Mathf.RoundToInt(b.Senta * (b.Folha.Quadros(clip) - 1)) : b.Folha.FrameAt(clip, b.Tempo);
+                b.Corpo.sprite = b.Folha.Frame(clip, b.Cima ? 1 : 0, quadro);
                 b.Corpo.flipX = b.Dir > 0f;
             }
-            b.Corpo.color = b.Folha != null ? b.Tinta : Color.Lerp(b.Tinta, Art.Hex(0xD5DBDB), 0.3f);
+            Color cor = b.Folha != null ? b.Tinta : Color.Lerp(b.Tinta, Art.Hex(0xD5DBDB), 0.3f);
+            cor.a = alfa;
+            b.Corpo.color = cor;
+            b.Corpo.enabled = alfa > 0f;
+            b.Sombra.enabled = alfa > 0.5f;
+            if (alfa < 1f) b.Coracao.enabled = false;
             int o = Ordem(p);
+            b.Sombra.enabled = b.Senta <= 0f;
             b.Sombra.sortingOrder = o; b.Corpo.sortingOrder = o + 3; b.Coracao.sortingOrder = b.Humor.sortingOrder = o + 8;
         }
 
@@ -344,6 +358,7 @@ namespace TA
             if (de < 0) { _portas.Add(Salas[0].In); de = 0; }
             PelasPortas(de, para, _portas);
             foreach (Vector2 porta in _portas) PelaPorta(r, ref p, porta);
+            if (para == Portao) { RotaSala(r, ref p, alvo); return; }
             Sala s = Salas[para];
             bool normalX = Mathf.Abs(s.N.x) > 0.5f;
             if (fila)
@@ -470,18 +485,26 @@ namespace TA
         /// cada um ja no lugar.</summary>
         void TripulacaoPasso(Sim s, float dt)
         {
+            float atraso = 0f;
             for (int i = 0; i < s.Tripulacao.Count; i++)
             {
                 Tripulante t = s.Tripulacao[i];
                 if (i >= _tripEm.Count) _tripEm.Add(t.Aviao);
                 if (_tripEm[i] == t.Aviao) continue;
-                if (_tripEm[i] >= 0) Caminha(t, _tripEm[i], true);
-                if (t.Aviao >= 0) Caminha(t, t.Aviao, false);
+                if (_tripEm[i] >= 0) { Caminha(t, _tripEm[i], true, atraso); atraso += TripCada; }
+                if (t.Aviao >= 0) { Caminha(t, t.Aviao, false, atraso); atraso += TripCada; }
                 _tripEm[i] = t.Aviao;
             }
             for (int i = _andantes.Count - 1; i >= 0; i--)
             {
-                Boneco b = _andantes[i].B;
+                Andante a = _andantes[i];
+                Boneco b = a.B;
+                if (a.Atraso > 0f)
+                {
+                    a.Atraso -= dt;
+                    if (a.Atraso > 0f) continue;
+                    b.T.gameObject.SetActive(true);
+                }
                 Anda(b, 1.7f, dt);
                 Pinta(b);
                 if (b.Caminho.Count > 0) continue;
@@ -491,23 +514,10 @@ namespace TA
             }
         }
 
-        void Caminha(Tripulante t, int aviao, bool desce)
+        void Caminha(Tripulante t, int aviao, bool desce, float atraso)
         {
             string ator = t.Funcao == Funcao.Piloto ? "piloto" : t.Indice % 2 == 0 ? "comissaria" : "comissario";
-            Boneco b;
-            if (_livres.Count > 0) { b = _livres.Pop(); Veste(b, ator); } else b = NovoBoneco(ator);
-            b.T.gameObject.SetActive(true);
-            b.Tinta = Color.white;
-            b.Coracao.enabled = b.Humor.enabled = false;
-            b.Saindo = false; b.Zona = -1;
-            b.Caminho.Clear();
-            var r = new List<Vector2> { SalaTrip, PonteIni };
-            if (aviao == 0) r.Add(PonteFim);
-            else { r.Add(RemotoPatio); r.Add(RemotoFim); }
-            if (desce) r.Reverse();
-            b.Pos = r[0];
-            for (int i = 1; i < r.Count; i++) b.Caminho.Add(r[i]);
-            _andantes.Add(new Andante { B = b });
+            Trilha(NovoAndante(ator, Color.white, atraso), SalaTrip, aviao, desce);
         }
     }
 }

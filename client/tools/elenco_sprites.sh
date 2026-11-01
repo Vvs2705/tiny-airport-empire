@@ -1,7 +1,7 @@
 #!/bin/bash
 # Folhas das pessoas (GDD §10.2, D-18): o .blend leve de cada personagem (elenco_ta.py, uma vez) -> render_sprites.py --preset <ator> --mask
 # -> client/Assets/_TA/Resources/Sprites/<ator>/ (entra no git: e render, nao o modelo). Conferencia em client/Builds/sprites_contact/.
-# uso: client/tools/elenco_sprites.sh [ator ...]   (sem argumento: o elenco todo, 13 atores). Um Blender por vez (PC de 7,7 GB). Git Bash no Windows.
+# uso: client/tools/elenco_sprites.sh [ator ...]   (sem argumento: o elenco todo, 15 atores). Um Blender por vez (PC de 7,7 GB). Git Bash no Windows.
 # Arte crua no checkout principal (arte/tripo/_leve/*.blend, arte/mixamo/ta_pax e ta_func), fora do git.
 set -uo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
@@ -23,17 +23,19 @@ ator() {
   else echo "FALHOU $nome (ver $LOG/$nome.log)"; grep -E "ERRO|Error|Traceback" "$LOG/$nome.log" | head -5; return 1; fi
 }
 
+ASSENTO=0.27   # altura do assento da cadeiras_espera em m (render_sprites.py --senta)
 # passageiros: a mala de rodinha na mao direita (no repouso em T o braco direito aponta para -x; a alca vai para a mao) e tingida na cor do voo
 mala() { echo "$(w "$MALA"):RightHand:-0.24,0,0:0,90,0:$1"; }
-pax() { ator "$1" ta_pax --attach "$(mala "$2")" --mask-attach; }
+pax() { ator "$1" ta_pax --attach "$(mala "$2")" --mask-attach --senta "$ASSENTO"; }
 
-lista=("$@"); [ ${#lista[@]} -eq 0 ] && lista=(passageiro_a passageira_b passageiro_idoso crianca atendente seguranca vendedor piloto comissaria comissario despachante bagageiro mecanico)
+lista=("$@"); [ ${#lista[@]} -eq 0 ] && lista=(passageiro_a passageira_b passageiro_idoso crianca atendente seguranca vendedor piloto comissaria comissario despachante bagageiro mecanico agente_portao agente_portao_f)
 falhas=0
 for a in "${lista[@]}"; do
   case $a in
     crianca) pax "$a" 0.30 ;;
     passageiro_*|passageira_*) pax "$a" 0.40 ;;
     atendente|seguranca|vendedor|bagageiro|mecanico|despachante) ator "$a" ta_func ;;   # o uniforme (elenco_ta.py, material TA_MASK) tinge na cor do setor
+    agente_portao*) ator "$a" ta_func ;;   # uniforme fixo, com o clipe de atender
     *) ator "$a" ta_pax ;;   # tripulacao: uniforme fixo da funcao, sem mascara
   esac || falhas=$((falhas + 1))
 done

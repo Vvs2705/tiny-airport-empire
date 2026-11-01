@@ -82,24 +82,24 @@ namespace TA
 
         /// <summary>Malha de balcao de cada estacao e a escala dela (a loja e um quiosque grande: 0,6 cabe 1 por posto). A oficina tem a
         /// bancada aqui e o predio dela fica no mundo (Planta): o mecanico da Fase C mora la antes de a sala abrir.</summary>
-        static readonly string[] BalcaoMalha = { "balcao_checkin", "raio_x", "loja", "portao_embarque", "esteira_bagagem", "alimentacao", "balcao_informacoes", "balcao_informacoes" };
+        static readonly string[] BalcaoMalha = { "balcao_checkin", "raio_x", "loja", "catraca_embarque", "esteira_bagagem", "alimentacao", "balcao_informacoes", "balcao_informacoes" };
         static readonly float[] BalcaoEscala = { 1f, EscalaSeg, 0.6f, 1f, 1f, 0.6f, 1f, 1f };
         /// <summary>Nivel de Velocidade a partir do qual o balcao troca pela malha `<malha>_n2` e `_n3` (Lotes 5 e 6): o upgrade muda o predio
         /// (GDD §5.13). Sem a malha daquele nivel, fica a do nivel abaixo.</summary>
         static readonly int[] NivelMalha = { 0, 2, 4 };
         static readonly Color ReservaCor = new Color(1f, 0.93f, 0.78f);
         /// <summary>Placa no chao, do lado de fora da parede mais perto da camera (onde nao ha outra sala).</summary>
-        static readonly Vector2[] PlacaEm = { new Vector2(2.2f, -0.9f), new Vector2(5.5f, -0.85f), new Vector2(5f, 5f), new Vector2(9f, 5f), new Vector2(-0.95f, 5.6f), new Vector2(9.9f, -0.85f), new Vector2(17.7f, 3.2f), new Vector2(13.9f, 3.2f) };
+        static readonly Vector2[] PlacaEm = { new Vector2(2.2f, -0.9f), new Vector2(5.5f, -0.85f), new Vector2(5f, 5f), new Vector2(8.7f, 8.75f), new Vector2(-0.95f, 5.6f), new Vector2(9.9f, -0.85f), new Vector2(17.7f, 3.2f), new Vector2(13.9f, 3.2f) };
 
         static Sala Nova(float x, float z, Vector2 entra, Vector2 sai, Vector2 n) =>
             new Sala { Min = new Vector2(x, z), In = entra, Out = sai, N = n, T = new Vector2(n.y, n.x) };
 
-        static readonly Vector2 Calcada = new Vector2(-2.6f, 2f), PonteFim = new Vector2(10f, 12.1f);
+        static readonly Vector2 Calcada = new Vector2(-2.6f, 2f);
 
         /// <summary>Ponto da sala a `d` da parede de saida e `a` ao longo dela.</summary>
         static Vector2 Em(int e, float d, float a) => Salas[e].Out - Salas[e].N * d + Salas[e].T * a;
         static Vector2 Balcao(int e, int i) => Em(e, 1.0f, Posto(e, i));
-        static Vector2 NoBalcao(int e, int i) => Em(e, 1.55f, Posto(e, i));
+        static Vector2 NoBalcao(int e, int i) => Em(e, e == Portao ? 1.4f : 1.55f, Posto(e, i));
         static Vector2 AtrasBalcao(int e, int i) => e == (int)Estacao.Seguranca ? Em(e, 0.62f, SegA[i] + 0.44f) : Em(e, 0.45f, Posto(e, i));
         static Vector2 Centro(int e) => Salas[e].Min + new Vector2(Lado * 0.5f, Lado * 0.5f);
         /// <summary>Rumo (graus de yaw do Unity) da direcao `d` do chao: +z = 0.</summary>
@@ -225,6 +225,7 @@ namespace TA
             Entrada();
             Posiciona();
             Sim s = S;
+            EmbarquePasso(s, dt);
             SincronizaPax(s, dt);
             Funcionarios(s, dt);
             Salas3D(s);
@@ -259,9 +260,13 @@ namespace TA
             else if (_vista == "garagem") { _alvo = new Vector3(27f, 0f, 12f); _tam = 10f; }
             else if (_vista == "seguranca") { _alvo = new Vector3(6f, 0f, 2.4f); _tam = 2.4f; }
             else if (_vista == "hangar") { _alvo = new Vector3(29f, 0f, 16f); _tam = 11f; }
+            else if (_vista == "portao") { _alvo = V3(Centro(Portao)); _tam = 3.1f; }
+            else if (_vista == "ponte") { _alvo = new Vector3(10.2f, 0f, 11.6f); _tam = 4.6f; }
+            else if (_vista == "escada") { _alvo = new Vector3(21f, 0f, 13.1f); _tam = 4.2f; }
+            else if (_vista == "chegadas") { _alvo = new Vector3(4.6f, 0f, 10.2f); _tam = 3.6f; }
         }
 
-        /// <summary>Game (-vista, so no -testsession): enquadramento das fotos e do -record (perto = zoom nas salas; hangar = o caminho ate ele; patio = salas, estandes
+        /// <summary>Game (-vista, so no -testsession): enquadramento das fotos e do -record (perto = zoom nas salas; hangar = o caminho ate ele; ponte, escada e chegadas = o embarque de perto; patio = salas, estandes
         /// e a ponta da pista; geral = tudo).</summary>
         public void Vista(string v) { _vista = v; _enquadrado = false; }
 
@@ -335,7 +340,7 @@ namespace TA
                 int gente = s.Presentes(st.Tipo);
                 for (int i = 0; i < 4; i++)   // posto sem ninguem: um X em cima do balcao
                 {
-                    bool vazio = i < st.Postos && i >= gente;
+                    bool vazio = i < st.Postos && i >= gente && !(e == Portao && i == 0);   // no 1o podio do portao ha sempre a agente
                     _vazio[e, i].enabled = vazio;
                     if (!vazio) continue;
                     Vector3 pv = V3(Balcao(e, i), 1.05f);
