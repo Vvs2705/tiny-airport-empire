@@ -1,7 +1,7 @@
 {
     "name": "TA.ViewTests",
     "rootNamespace": "TA.Tests",
-    "references": ["TA", "UnityEngine.TestRunner", "UnityEditor.TestRunner"],
+    "references": ["TA", "TA.Core", "UnityEngine.TestRunner", "UnityEditor.TestRunner"],
     "includePlatforms": ["Editor"],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

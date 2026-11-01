@@ -41,6 +41,7 @@ Convenção de origem: `fs:` = Forge Street (`Vvs2705/forge-street`), `dc:` = Du
 | `Mundo.Veiculos.cs` | garagem a leste com pátio de manobra, ruas de mão única e uma faixa por veículo: o avião encosta e os veículos dos serviços que faltam vão até ele, esperam e saem quando o serviço acaba (ou vão direto ao outro avião); rebocador; fila natural com a distância de freada | `Veiculos3D`, `ServicosPasso`, `Precisa`, `Chama`, `Sai`, `Libera`, `FrenteLivre`, `VeiculoPasso` | — |
 | `Mundo.Seguranca.cs` | a segurança com etapas na tela, só apresentação: bandeja, raio-x, pórtico (cabine no nível alto, troca pelo nome do arquivo), mala de volta e vistoria com o scanner de mão | `Seguranca3D`, `PontoSeguranca`, `BandejaPasso`, `PorticoNivel` | — |
 | `Mundo.Espera.cs` | a sala de espera do portão, só apresentação: fileiras de cadeiras, quem espera senta, os chamados levantam e formam a serpentina diante do pódio, excedente em pé na mesma fila, cordas que acompanham a fila, zona de atendimento no chão, agente de embarque de tela sem funcionário no posto; folhas `Senta` e `Sentar` de `render_sprites.py --senta` | `Espera3D`, `Perna`, `FilaPortao`, `Cadeira`, `MudaVaga`, `RotaSala`, `Sentando`, `AgentesPortao` | — |
+| `Mundo.Clima.cs` | o que a Fase C4 simula aparece no cenário, só tela: veu e riscos em movimento do clima (`Tempos`), pista fechada, totem na sala do incidente (`SalaDo`), falha de equipamento com técnico, ônibus e guia no pico e na conexão, avião em pane com cones. `Ensaia` força o incidente no `-cenario` | `Clima3D`, `ClimaPasso`, `Forca`, `SalaDo`, `Ensaia` | `Mundo.cs` |
 | `SpriteSheet.cs` | folha de uma pessoa (`Resources/Sprites/<ator>/meta.json` + 1 PNG por clipe, cor em cima e máscara embaixo); `Material` com o shader `TA/SpriteTinta` | `Get`, `Pick`, `FrameAt`, `Frame` | cópia enxuta de `dc:Scripts/View/SpriteSheet.cs` |
 | `Hud.Operacao.cs` | telas da operação (modais): o voo (toque no quadro ou no avião: manutenção e escala), a tripulação, o pátio e a equipe | `AbreVoo`, `PintaOperacao` | — |
 | `Hud.Telas.cs` | telas modais que seguram o relógio: melhorias (efeito escrito antes de comprar), mover para (alternativa ao arrasto), cofre offline, anúncio simulado (3 s, só então o `Pagar`), pausa, álbum | `AbreTela(nome)`, `AbreCofre`, `AbreAnuncio` | — |
@@ -88,6 +89,7 @@ Em `client/Assets/_TA/Tests/EditModeView/` (`TA.ViewTests`, só no Unity: o `dot
 |---|---|
 | `AudioTests.cs` | banco importado com o tipo de carga certo, clipe ausente em silêncio, volumes separados e limitados, volta do segundo plano sem pico de volume |
 | `EmbarqueTests.cs` | rampa e escada sobem sem degrau, a pessoa some na boca do túnel e não volta até a porta, a ponte encosta na fuselagem sem atravessar |
+| `ClimaTests.cs` | o céu só fecha depois do aviso, todo clima da tabela tem como aparecer e cada incidente cai na sala onde acontece |
 | `PlantaTests.cs` | as 8 salas ligadas pelas portas: de qualquer sala a qualquer sala, sem atravessar parede |
 | `FontesTests.cs` | as 2 fontes OFL carregam e cobrem os nomes do jogo, as placas de chão têm material e os estados do `BotaoPreco` |
 

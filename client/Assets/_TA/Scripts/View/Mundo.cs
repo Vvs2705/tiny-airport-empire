@@ -213,6 +213,7 @@ namespace TA
                 _nome[k].text = Textos.Funcionario[k];
             }
             GentePatio();
+            Clima3D();
         }
 
         // ------------------------------------------------------------------ quadro a quadro
@@ -231,6 +232,7 @@ namespace TA
             Salas3D(s);
             Patio(s, dt);
             AndaPatio(dt);
+            ClimaPasso(s, dt);
         }
 
         /// <summary>Enquadramento inicial, de perto: as 4 salas e a boca da ponte na faixa entre o quadro e a barra de baixo (o patio e a
@@ -264,6 +266,7 @@ namespace TA
             else if (_vista == "ponte") { _alvo = new Vector3(10.2f, 0f, 11.6f); _tam = 4.6f; }
             else if (_vista == "escada") { _alvo = new Vector3(21f, 0f, 13.1f); _tam = 4.2f; }
             else if (_vista == "chegadas") { _alvo = new Vector3(4.6f, 0f, 10.2f); _tam = 3.6f; }
+            else if (_vista == "calcada") { _alvo = new Vector3(-1.45f, 0f, 3.25f); _tam = 4.4f; }
         }
 
         /// <summary>Game (-vista, so no -testsession): enquadramento das fotos e do -record (perto = zoom nas salas; hangar = o caminho ate ele; ponte, escada e chegadas = o embarque de perto; patio = salas, estandes
