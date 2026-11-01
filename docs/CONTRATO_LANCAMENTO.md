@@ -50,11 +50,11 @@ Estados: **feito** (com evidência) · **parcial** · **falta** · **depende** (
 | Decisão | Trava |
 |---|---|
 | D-03 nome e appId | **decidida em 2026-11-01:** "Little Terminal", `br.com.vstack.littleterminal` (`docs/NOME.md`); libera app no LevelPlay, chave de upload (feita), logo, ícone e loja |
-| D-05/D-06/D-07 compras, backend e Gems | linha 15 e o premium da linha 14 |
-| D-08 idiomas | textos já entram numa tabela (padrão do `Textos.cs` do DC); a tradução espera a decisão |
+| D-05/D-06/D-07 compras, backend e Gems | decididas em 2026-11-01: opção (b), com Gems; falta a Play Console para a linha 15 e o premium da linha 14 |
+| D-08 idiomas | decidida em 2026-11-01: pt-BR e en |
 | D-13 nomes de companhias e aeroportos | **decidida em 2026-11-01** (`docs/NOME.md`): 5 companhias novas, aeroportos mantidos; arte de marca e textos das rotas já podem usar |
-| D-14 lotes do Tripo | toda a arte além do greybox |
-| D-02 nova data-alvo | decidida no portão da Fase B, com a velocidade real |
+| D-14 lotes do Tripo | saldo livre até o plano vencer, em 2026-11-29 (Vinicius, 2026-11-01) |
+| D-02 nova data-alvo | decidida em 2026-11-01: assim que a Play Console sair e a regressão fechar |
 
 ## 3. Como esta matriz anda
 
