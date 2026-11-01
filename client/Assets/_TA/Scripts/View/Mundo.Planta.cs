@@ -115,12 +115,12 @@ namespace TA
             Peca("oficina_mecanico", new Vector3(19f, 0f, 6.9f), 180f, 0.6f);
             Peca("sala_tripulacao", new Vector3(6.2f, 0f, 9.9f), 90f, 0.85f);
             foreach (Vector2 v in new[] { new Vector2(-0.5f, 4.5f), new Vector2(-0.5f, -0.5f), new Vector2(8.5f, -0.5f), new Vector2(12.5f, 3.5f) })
-                Peca("vaso_planta", V3(v), 0f);
+                Peca("vaso_planta", V3(v), 0f, 0.7f);
             // arvores so nas bordas (esquerda, direita e atras da pista, fora do alcance da asa): na frente das salas tampariam a fila
             foreach (Vector2 v in new[] { new Vector2(-8f, 2f), new Vector2(-8.5f, 8f), new Vector2(-6f, 14.5f), new Vector2(15f, -2f), new Vector2(19f, 1f), new Vector2(0f, 38.6f), new Vector2(9f, 39.1f), new Vector2(18f, 39.3f) })
                 Peca("arvore", V3(v), v.x * 37f);
             foreach (Vector2 v in new[] { new Vector2(8.2f, 12.9f), new Vector2(46f, 7.2f) }) Peca("poste", V3(v), 45f, 0.75f);
-            foreach (Vector2 v in new[] { new Vector2(7.3f, 15.6f) }) Peca("cone", V3(v), 0f);
+            foreach (Vector2 v in new[] { new Vector2(7.3f, 15.6f) }) Peca("cone", V3(v), 0f, 0.7f);
             Peca("conteiner_bagagem", new Vector3(7f, 0f, 16.6f), 0f);
             Peca("conteiner_bagagem", new Vector3(8.3f, 0f, 16.6f), 0f);
             Peca("biruta", new Vector3(30f, 0f, 19.2f), 0f);
@@ -132,7 +132,7 @@ namespace TA
         {
             Sala s = Salas[e];
             Vector2 c = Centro(e);
-            _piso[e] = Bloco("Piso" + e, PrimitiveType.Cube, new Vector3(c.x, -0.05f, c.y), new Vector3(Lado - 0.04f, 0.1f, Lado - 0.04f), Color.white);
+            _piso[e] = Bloco("Piso" + e, PrimitiveType.Cube, new Vector3(c.x, -0.05f, c.y), new Vector3(Interno, 0.1f, Interno), Color.white);
             Placa(e);
             _sala[e] = _cont = new GameObject("Sala" + e).transform;
             _cont.SetParent(_raiz, false);
@@ -141,19 +141,19 @@ namespace TA
             for (int i = 0; i < 4; i++)
             {
                 bool hor = i < 2;
-                float off = (i % 2 == 0 ? -1f : 1f) * (Lado * 0.5f - 0.08f);
+                float off = (i % 2 == 0 ? -1f : 1f) * (Interno * 0.5f - 0.08f);
                 Vector3 p = hor ? new Vector3(c.x, 0.01f, c.y + off) : new Vector3(c.x + off, 0.01f, c.y);
-                _moldura[e][i] = Bloco("Moldura" + e + i, PrimitiveType.Cube, p, hor ? new Vector3(Lado - 0.1f, 0.02f, 0.12f) : new Vector3(0.12f, 0.02f, Lado - 0.1f), Art.Good);
+                _moldura[e][i] = Bloco("Moldura" + e + i, PrimitiveType.Cube, p, hor ? new Vector3(Interno - 0.1f, 0.02f, 0.12f) : new Vector3(0.12f, 0.02f, Interno - 0.1f), Art.Good);
             }
-            // paredes baixas (corte) com as portas de entrada e de saida
-            Vector2 m = s.Min;
-            Parede(new Vector2(m.x, m.y), new Vector2(m.x + Lado, m.y));                 // sul
-            Parede(new Vector2(m.x, m.y + Lado), new Vector2(m.x + Lado, m.y + Lado));   // norte
-            Parede(new Vector2(m.x, m.y), new Vector2(m.x, m.y + Lado));                 // oeste
-            Parede(new Vector2(m.x + Lado, m.y), new Vector2(m.x + Lado, m.y + Lado));   // leste
+            // paredes baixas (corte) com as portas de entrada e de saida, recuadas do corredor
+            Vector2 m = s.Min + Vector2.one * (Corredor * 0.5f);
+            Parede(new Vector2(m.x, m.y), new Vector2(m.x + Interno, m.y));                       // sul
+            Parede(new Vector2(m.x, m.y + Interno), new Vector2(m.x + Interno, m.y + Interno));   // norte
+            Parede(new Vector2(m.x, m.y), new Vector2(m.x, m.y + Interno));                       // oeste
+            Parede(new Vector2(m.x + Interno, m.y), new Vector2(m.x + Interno, m.y + Interno));   // leste
             for (int i = 0; i < 4; i++)
             {
-                Vector2 b = e == (int)Estacao.Seguranca ? Em(e, 1f, SegA[i] + BeltX) : Balcao(e, i);
+                Vector2 b = e == (int)Estacao.Seguranca ? Em(e, SegMaquinaD, SegA[i] + BeltX) : Balcao(e, i);
                 Transform t = Peca(BalcaoMalha[e], V3(b), Rumo(-s.N), BalcaoEscala[e]);   // de frente para a fila
                 if (t != null)
                 {
@@ -172,9 +172,9 @@ namespace TA
                 else
                 {
                     bool longoX = Mathf.Abs(s.N.y) > 0.5f;
-                    _mesa[e, i, 0] = Bloco("Balcao" + e + i, PrimitiveType.Cube, new Vector3(b.x, 0.25f, b.y), longoX ? new Vector3(0.55f, 0.5f, 0.3f) : new Vector3(0.3f, 0.5f, 0.55f), Art.Paper).gameObject;
+                    _mesa[e, i, 0] = Bloco("Balcao" + e + i, PrimitiveType.Cube, new Vector3(b.x, 0.25f, b.y), longoX ? new Vector3(0.65f, 0.4f, 0.4f) : new Vector3(0.4f, 0.4f, 0.65f), Art.Paper).gameObject;
                 }
-                _arco[e, i] = Billboard("Arco" + e + i, Art.Arc(0f), Art.Good, 0.32f);
+                _arco[e, i] = Billboard("Arco" + e + i, Art.Arc(0f), Art.Good, 0.24f);
                 _vazio[e, i] = Billboard("Vazio" + e + i, Art.Xis(), Art.A(Art.Off, 0.85f), 0.22f);
                 if (e == (int)Estacao.Seguranca) Seguranca3D(i);
                 if (e == SalaMalas) Balanca3D(i);
@@ -187,14 +187,14 @@ namespace TA
                 for (int r = 0; r < 5; r++)
                     for (int lado = -1; lado <= 1; lado += 2)
                     {
-                        Vector2 p = Em(e, 2.05f + r * 0.42f + 0.21f, lado * 1.85f);
-                        Bloco("Poste", PrimitiveType.Cylinder, new Vector3(p.x, 0.2f, p.y), new Vector3(0.05f, 0.2f, 0.05f), Fita);
+                        Vector2 p = Em(e, FilaD + (r + 0.5f) * FilaLinha, lado * 1.62f);
+                        Bloco("Poste", PrimitiveType.Cylinder, new Vector3(p.x, 0.12f, p.y), new Vector3(0.03f, 0.12f, 0.03f), Fita);
                     }
                 for (int r = 0; r < 4; r++)
                 {
-                    Vector2 p = Em(e, 2.05f + r * 0.42f + 0.21f, (r % 2 == 0 ? 0.25f : -0.25f));
+                    Vector2 p = Em(e, FilaD + (r + 0.5f) * FilaLinha, (r % 2 == 0 ? 0.16f : -0.16f));
                     bool longoX = Mathf.Abs(s.T.x) > 0.5f;
-                    _fita[e, r] = Bloco("Fita", PrimitiveType.Cube, new Vector3(p.x, 0.32f, p.y), longoX ? new Vector3(3.2f, 0.03f, 0.02f) : new Vector3(0.02f, 0.03f, 3.2f), Fita).gameObject;
+                    _fita[e, r] = Bloco("Fita", PrimitiveType.Cube, new Vector3(p.x, 0.2f, p.y), longoX ? new Vector3(2.92f, 0.03f, 0.02f) : new Vector3(0.02f, 0.03f, 2.92f), Fita).gameObject;
                 }
             }
             _cont = null;
@@ -210,7 +210,7 @@ namespace TA
             foreach (Porta porta in Portas)
             {
                 float t = Vector2.Dot(porta.P - a, d);
-                if (t > 0f && t < len && Vector2.Distance(a + d * t, porta.P) < 0.01f) cortes.Add(t);
+                if (t > 0f && t < len && Vector2.Distance(a + d * t, porta.P) < Corredor * 0.5f + 0.01f) cortes.Add(t);   // a porta fica no meio do corredor
             }
             cortes.Sort();
             float ini = 0f;

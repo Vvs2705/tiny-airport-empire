@@ -35,7 +35,7 @@ namespace TA
         };
         /// <summary>Chegadas: quem desceu do aviao segue pelo passeio e some no arco de vidro do terminal, com o quad a frente para a fachada nao cortar a cabeca.</summary>
         static readonly No[] Terminal = { new No(4f, 8.2f, 0f, 0f, 1f), new No(4f, 9.9f, 0f, 0f, 1f), new No(4f, 10.5f, 0f, 1f, 1f), new No(4f, 10.9f, 0f, 1.2f, 0f) };
-        const float Corredor = 8.2f;   // ao longo da parede norte das salas, por tras do pe da rampa
+        const float PasseioZ = 8.2f;   // ao longo da parede norte das salas, por tras do pe da rampa
         static readonly Vector2 Chegadas = new Vector2(4f, 10.9f);
 
         const float PonteGraus = 5f;
@@ -76,22 +76,23 @@ namespace TA
             }
 
             No pe = Trilho[0][0], boca = Trilho[0][2];
-            Bloco("Soleira", PrimitiveType.Cube, new Vector3(10f, 0.005f, (Salas[3].Out.y + pe.P.y) * 0.5f), new Vector3(0.86f, 0.03f, pe.P.y - Salas[3].Out.y), PisoRampa);
+            float parede = Salas[3].Out.y - Corredor * 0.5f;
+            Bloco("Soleira", PrimitiveType.Cube, new Vector3(10f, 0.005f, (parede + pe.P.y) * 0.5f), new Vector3(Corredor, 0.03f, pe.P.y - parede), PisoRampa);
             Viga("Rampa", V3(pe.P, -0.04f), V3(boca.P, boca.Alt - 0.04f), 0.86f, 0.08f, PisoRampa);
             for (int lado = -1; lado <= 1; lado += 2)
             {
                 var d = new Vector3(lado * 0.43f, 0f, 0f);
-                Viga("Corrimao", V3(pe.P, 0.36f) + d, V3(boca.P, boca.Alt + 0.36f) + d, 0.05f, 0.05f, Corrimao);
+                Viga("Corrimao", V3(pe.P, 0.2f) + d, V3(boca.P, boca.Alt + 0.2f) + d, 0.04f, 0.04f, Corrimao);
                 for (int i = 0; i < 4; i++)
                 {
                     Vector3 c = Vector3.Lerp(V3(pe.P, 0f), V3(boca.P, boca.Alt), (i + 0.3f) / 3.3f) + d;
-                    Bloco("Balaustre", PrimitiveType.Cube, c + Vector3.up * 0.18f, new Vector3(0.04f, 0.36f, 0.04f), Metal);
+                    Bloco("Balaustre", PrimitiveType.Cube, c + Vector3.up * 0.1f, new Vector3(0.03f, 0.2f, 0.03f), Metal);
                 }
                 Bloco("Pilar", PrimitiveType.Cylinder, new Vector3(10f + d.x, boca.Alt * 0.5f, boca.P.y - 0.1f), new Vector3(0.1f, boca.Alt * 0.5f, 0.1f), Metal);
             }
 
             // o passeio de quem anda a pe do lado de fora: a parede norte das salas e o gramado ate o terminal
-            Chao("PasseioNorte", new Vector3(6.85f, -0.04f, Corredor), new Vector2(6.3f, 0.6f), PisoPasseio);
+            Chao("PasseioNorte", new Vector3(6.85f, -0.04f, PasseioZ), new Vector2(6.3f, 0.6f), PisoPasseio);
             Chao("PasseioTerminal", new Vector3(4f, -0.04f, 9.6f), new Vector2(0.7f, 2.8f), PisoPasseio);
 
             // no remoto: passarela da plataforma do caminhao ate a fuselagem e a porta aberta do jato (aparecem com o caminhao parado)
@@ -117,7 +118,7 @@ namespace TA
         public static void RotaAviao(List<Vector2> r, ref Vector2 p, int k)
         {
             float porta = k == 0 ? Salas[3].Out.x : RemotoPorta.x;
-            if (p.x < porta - 0.1f) Eixos(r, ref p, new Vector2(porta, Corredor), true);
+            if (p.x < porta - 0.1f) Eixos(r, ref p, new Vector2(porta, PasseioZ), true);
             if (k == 1) Eixos(r, ref p, Trilho[1][0].P, false);   // ao longo do corredor e depois reto para o norte, cruzando as ruas
             foreach (No n in Trilho[k]) { r.Add(n.P); p = n.P; }
         }
