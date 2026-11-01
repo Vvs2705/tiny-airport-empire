@@ -47,6 +47,7 @@ namespace TA.Core
             SalvaFaseC3(sb);
             SalvaFaseC4(sb);
             SalvaCampanha(sb);
+            SalvaMissoes(sb);
             return SaveEnvelope.Wrap(sb.ToString(), content, nowUnix);
         }
 
@@ -319,6 +320,7 @@ namespace TA.Core
             s.CarregaFaseC(kv, r.Schema);
             s.CarregaFaseC4(kv);
             s.CarregaCampanha(kv);
+            s.CarregaMissoes(kv);
             return s;
         }
 

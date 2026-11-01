@@ -581,3 +581,110 @@ As 16 travas novas entram no `mutacao.py`. Resultado em 2026-11-01: **16 de 16 m
 - **O Bom para em `vv_loja`** porque o bot nunca põe gente na loja. Gente vai ler o objetivo na tela. A pergunta real é se a pessoa entende o que fazer, e isso só o playtest diz.
 - **Cadeia em ordem:** o jogador vê um objetivo só. Se perguntar "por que não conta?" num objetivo atrás do ativo, pensar em mostrar os seguintes.
 - O bot resolve todo perigo em 1 s. Com gente, `Climas` e `Incidentes` vão demorar mais, porque segurar não conta.
+
+## 10. Fase C6: missões e conquistas (2026-11-01, `CONTRATO_FASE_C6.md`)
+
+Três diárias e 5 semanais escolhidas de 63 linhas, mais 20 conquistas. **Missionário** é o Bom que joga pelas missões abertas. **Bom** é o mesmo bot, que nunca olha para elas e recebe o que cumprir sem querer. O pagamento vale para os dois.
+
+### D-C6a. O dia é o do jogo
+
+O GDD §6.5 pede a virada às 04:00 no fuso gravado. A frente pediu nada de hora de parede dentro da simulação, e o núcleo usa `DiaJogo`: 8 ondas, 24 min jogados. O bot mede a coisa real, adiantar o relógio do aparelho não dá lista nova e faltar um dia não existe. O custo: a missão não chama o jogador de volta amanhã, e quem joga 1 h por dia vê 2,5 listas. **A conta do passe no GDD §6.4 supõe 3 diárias por dia de calendário** e precisa ser refeita na frente do passe.
+
+### D-C6b. A primeira tabela pagava sem decisão
+
+A 1ª tabela deu **1,077**. O Bom fechava 4,1 das 5 semanais em 20 ondas sem olhar para elas: quem joga normalmente já embarca, voa e sobe de nível. As semanais do marco 0 agora pedem uma parte que o Bom não faz, a loja com gente; ele caiu para 1,6.
+
+### D-C6c. Quem persegue missão não pode largar o fluxo
+
+A 2ª medida deu **1,034**, com embarque de 88,5%, e o Lento que jogava pelas missões caiu a **16%**. O bot tirava gente do fluxo e a devolvia a cada decisão, e quem anda não atende. Agora a parada opcional leva só quem está fora do fluxo, quem está numa parada pedida fica, e há um reforço a cada 30 s. Medido: embarque de 93,4% contra 93,6% do Bom, e **1,147**. É a mesma escolha que o jogador vai fazer, e a tela precisa mostrar isso.
+
+### D-C6d. Conquista não paga Cash
+
+Conquista fecha tarde (a mais lenta na onda 149), quando o Cash já não compra nada. Sem Cash, ela fica fora do balanço e não precisa de portão nem de chave.
+
+### D-C6e. Quatro alvos baixaram depois da medida
+
+Decolagens de 500 para 200: não cabiam em 240 ondas. Hangar de 5 para 3, sequência de 12 para 8, loja de 200 para 80 e missões de 100 para 50: ficavam presos em algumas sementes. Todas as 20 fecham em 200 de 200, com os 2 bots.
+
+### Portão do §5.13 (200 sementes)
+
+| ondas | Missionário: receita + campanha + missões | Bom: receita + campanha + missões | diárias | semanais | ganho |
+|---|---|---|---|---|---|
+| 10 | 6 928 + 857 + 1 760 | 6 740 + 390 + 389 | 4,5 / 3,7 | 2,0 / 0,0 | 1,269 |
+| **20** | **25 742 + 2 688 + 4 350** | **25 986 + 741 + 1 845** | **7,9 / 6,2** | **4,7 / 1,6** | **1,147** |
+| 30 | 60 896 + 4 287 + 6 402 | 61 189 + 1 905 + 3 182 | 10,9 / 8,4 | 5,0 / 1,7 | 1,080 |
+| 40 | 97 055 + 6 485 + 8 532 | 99 676 + 2 218 + 4 860 | 13,7 / 10,8 | 5,0 / 1,7 | 1,050 |
+| 64 | 181 412 + 11 452 + 14 852 | 194 589 + 2 965 + 10 007 | 20,6 / 16,0 | 5,3 / 2,1 | 1,001 |
+
+O Lento que joga pelas missões contra o Lento: 1,149 em 20 ondas e 1,055 em 64, com embarque de 77,0% contra 78,1%.
+
+**O que este portão não prova:**
+
+- **Boa parte do ganho vem da campanha.** Pôr gente na loja destrava `vv_loja`, onde o Bom para: campanha 2 688 contra 741. Só com as missões, a razão seria 1,079.
+- **Para quem já joga pela campanha, as missões rendem menos que 1,10.** `Completo` (campanha e missões) contra `Guiado` (só campanha): **1,080** em 20 ondas (25 779 + 4 558 + 4 058 contra 25 297 + 4 487 + 2 077) e **0,964** em 64. Perseguir tudo no fim do jogo custa mais do que paga.
+- **A receita de jogo empata.** O ganho é recompensa, como na campanha (D-C5c). Depois do catálogo, perto da onda 20, o Cash não compra mais nada.
+
+### TA-1 e TA-2 (200 sementes × 10 ondas)
+
+| | antes (a Fase C5) | depois (missões pagando) |
+|---|---|---|
+| Bom | 94,9%, receita 6 586 | 95,0%, receita 6 740 |
+| Lento | 73,2%, receita 3 534 | 78,8%, receita 4 219 |
+| Parado | 88,4%, receita 4 660 | 88,5%, receita 4 709 |
+| TA-2 (Bom/Parado) | 1,413 | 1,431 |
+
+**Passa.** Com as missões sem pagar, a tabela é a da coluna "antes", número a número (`Antes_FaseC6`). O Lento sobe 5,6 pontos: o Cash extra compra equipe antes, e ele é quem mais precisa dela.
+
+Os portões anteriores seguem verdes com as missões ligadas: Fase C 1,152; Fase C2 1,371; Fase C3 1,221, 1,124, 1,273, 1,151, 1,146 e 1,170; Fase C4 1,161, 1,147, 1,134, 1,131 e 1,124; TA-6 verde. **A campanha caiu de 1,140 para 1,114:** o dinheiro das missões entra nos 2 lados e dilui a recompensa dela. Ainda passa, com pouca folga.
+
+### Alcance (200 sementes, até 240 ondas)
+
+| | Completo | LentoCompleto |
+|---|---|---|
+| conquistas | 20 de 20, em 200 de 200 | 20 de 20, em 200 de 200 |
+| primeira (`c_seguidos`, `c_movidos`) | onda 3,3 | onda 13,8 |
+| última (`c_passageiros_2`) | onda 148,5 (p90 153) | onda 172,8 (p90 182) |
+| diárias feitas | 73,9 de 90 | 65,3 de 90 |
+| semanais feitas | 20,5 de 25 | 18,3 de 25 |
+
+Em tempo de jogo, as 20 fecham em cerca de 7,4 h e 8,6 h. A sobra das diárias é normal: a missão que não fecha sai sem custo.
+
+### Prova de mutação (`python client/tools/mutacao.py missao conquista`)
+
+As 26 travas novas entram no `mutacao.py`. Resultado em 2026-11-01: **26 de 26 mortos**. Rodei só as 26 novas, e as 76 travas ainda acham o trecho delas no núcleo. A 1ª rodada, só com `MissoesTests`, `ExploitTests` e `SaveTests`, deu 24 de 26: um mutante não mudava nada, porque multiplicava todas as notas pelo mesmo número, e o outro só aparecia no texto do save. Troquei o 1º, apertei o teste do 2º e repeti esses 2, mais o da rota, com o `dotnet test` inteiro.
+
+| trava retirada | testes que caíram |
+|---|---|
+| recompensa fixa, sem semente | 5, entre eles `Invariante_C6_RecompensaFixa_SemSorteioNem2x` |
+| recompensa fora do 2× e do cofre | `Invariante_C6_RecompensaFixa_SemSorteioNem2x`, `Invariante_C6_RecompensaForaDoCofre` |
+| regra desligada não paga | 8, entre eles `RegraDesligada_ContaEMostra_NaoPaga` |
+| paga uma vez | `Conclui_NoPassoFixo_PagaFixoEFicaFeita` e mais 2 |
+| semanal pede as 2 partes | `Semanal_PedeAsDuasPartes` |
+| fechar e abrir não paga de novo | 8, entre eles `Invariante_C6_PagaUmaVez_FecharEAbrirNaoPagaDeNovo` |
+| contador do save limitado | `LixoDasMissoes_ViraPadraoLimitado` |
+| dia do jogo, nunca o do aparelho | `Invariante_C6_RelogioDoAparelhoNaoViraODia_FaltarNaoCustaNada` |
+| dia do save limitado | `LixoDasMissoes_ViraPadraoLimitado` |
+| virada não tira Cash | 21, entre eles `Invariante_C6_ViradaNaoTiraNada` |
+| a lista sai só da semente | `Invariante_C6_ListaNaoDependeDeCashNemDeAnuncio` |
+| só a linha do marco | `Lista_EmTodoMarco_EncheSemRepetirMeta` e mais 1 |
+| nada que o jogo não tem | `Lista_SoEntraOQueDaParaFazerAqui` |
+| rota aberta, no aeroporto atual | `Lista_SoEntraOQueDaParaFazerAqui` |
+| catálogo no fim sai da lista | `Lista_SoEntraOQueDaParaFazerAqui` |
+| sem repetir a meta | `Lista_EmTodoMarco_EncheSemRepetirMeta` |
+| offline não conclui | `Invariante_C6_Offline_NaoAndaAsMissoes` |
+| offline não conta | `Invariante_C6_Offline_NaoAndaAsMissoes` |
+| anúncio não anda missão | `Invariante_C6_NenhumaMissaoExigeAnuncioOuCompra` |
+| só a rota ou a estação pedida | `SoARotaPedidaConta` e mais 2 |
+| conquista não paga Cash | `Invariante_C6_ConquistaNaoPagaEFicaFeita` |
+| conquista feita fica no alvo | `Conquista_Seguidos_FicaFeitaDepoisDeQuebrar` e mais 1 |
+| conquista uma vez | 4, entre eles `Conquista_DeEstado_LeOJogo_DeContador_ContaSempre` |
+| conquista fica feita ao reabrir | 6, entre eles `Invariante_C6_ConquistaNaoPagaEFicaFeita` |
+| máscara presa à tabela | `LixoDasMissoes_ViraPadraoLimitado` |
+| contador de conquista limitado | `LixoDasMissoes_ViraPadraoLimitado` |
+
+### Para medir com gente
+
+- **O dia do jogo funciona?** A pergunta central da D-C6a: sem "volte amanhã", a missão ainda dá motivo para abrir o jogo? Se não der, trocar `DiaJogo` por `Dia` é uma linha, e o portão precisa ser medido de novo.
+- **A loja aparece demais.** Quatro das 6 semanais do marco 0 pedem a loja, porque é a decisão que o jogo tem nesse marco. Pode parecer repetitivo. Se parecer, a saída é uma decisão nova no marco 0, não pagar mais.
+- **Cash sem destino continua.** Missão no marco 3 paga até 4 000 num jogo com 100 mil parados. Nenhum sumidouro entrou aqui: o passe e o mapa que cresce continuam devendo isso (§9).
+- **A lista fica como saiu.** Quem viaja no meio do dia pode ficar com uma rota do aeroporto anterior até a virada. Voltar é grátis, mas vale ver se confunde.
