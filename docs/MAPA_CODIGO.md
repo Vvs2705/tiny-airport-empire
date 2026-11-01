@@ -66,7 +66,7 @@ Convenção de origem: `fs:` = Forge Street (`Vvs2705/forge-street`), `dc:` = Du
 
 | Arquivo | Para quê | Funções-chave | Origem |
 |---|---|---|---|
-| `Setup.cs` | settings, cena gerada e builds por script, idempotente | `Apply` (appId e nome **provisórios** de dev, D-03; retrato; Android ARM64 IL2CPP API 26+, targetSdk 36 fixo; janela 540×960), `BuildWindows` → `Builds/win/TinyAirport.exe`, `BuildAndroidDev`, `VersionCode`; `SemIdDePublicidade` tira o `AD_ID` do manifesto Android | cópia de `dc:Editor/Setup.cs`, sem release, AAB, chave de upload e ícones |
+| `Setup.cs` | settings, cena gerada e builds por script, idempotente | `Apply` (appId `br.com.vstack.littleterminal` e nome "Little Terminal", D-03; retrato; Android ARM64 IL2CPP API 26+, targetSdk 36 fixo; janela 540×960), `BuildWindows` → `Builds/win/TinyAirport.exe`, `BuildAndroidDev`, `VersionCode`; `SemIdDePublicidade` tira o `AD_ID` do manifesto Android | cópia de `dc:Editor/Setup.cs`, sem release, AAB, chave de upload e ícones |
 | `SpriteImport.cs` | import das folhas (`Resources/Sprites`) e da arte de interface (`Resources/UI`): DXT5 no PC, ASTC no Android | `OnPreprocessTexture` | cópia de `dc:Editor/SpriteImport.cs` |
 | `MalhaImport.cs` | import das malhas da `ArtLocal`: só a malha (sem material, animação, câmera, luz ou colisor), compressão média | `OnPreprocessModel` | — |
 
