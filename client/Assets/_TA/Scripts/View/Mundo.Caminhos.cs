@@ -27,23 +27,26 @@ namespace TA
         static readonly int[] _grade = new int[GradeN * GradeN], _busca = new int[GradeN * GradeN];   // _grade: -1 = peça, 0 = livre, n = n passos desde a saída
         static readonly List<Vector2> _curvas = new List<Vector2>();
 
-        /// <summary>Na carga: a caixa de cada peça com altura de corpo, na sala em que o centro dela está. Lê a malha, como o DiagCaixas.</summary>
+        /// <summary>Na carga: a caixa de cada peça da sala com altura de corpo. Lê a malha, como o DiagCaixas, e só os filhos da sala: veículo e avião
+        /// nascem na origem, dentro do check-in, antes de irem para o pátio.</summary>
         void LePecas()
         {
-            for (int e = 0; e < _barreiras.Length; e++) _barreiras[e] = new List<Barreira>();
             var vistas = new HashSet<Transform>();
-            foreach (MeshFilter f in _raiz.GetComponentsInChildren<MeshFilter>(true))
+            for (int e = 0; e < _barreiras.Length; e++)
             {
-                Transform t = f.name == "malha" ? f.transform.parent : f.transform;
-                if (!vistas.Add(t) || t.name.StartsWith("Sombra") || SemCorpo.Contains(t.name)) continue;
-                Bounds b = Caixa(t);
-                if (b.max.y + t.position.y < 0.1f || b.min.y + t.position.y > Gente) continue;
-                Quaternion q = Quaternion.Euler(0f, t.eulerAngles.y, 0f);
-                Vector3 c = t.position + q * b.center, u = q * Vector3.forward;
-                var p = new Barreira { Go = t.gameObject, C = new Vector2(c.x, c.z), U = new Vector2(u.x, u.z), L = b.extents.z, W = b.extents.x };
-                if (t.name == "cordao_fila") p.L = 0.01f;   // a caixa é a da diagonal da malha, mais larga que o corredor da fila; a corda é um fio
-                int e2 = SalaEm(p.C);
-                if (e2 >= 0) _barreiras[e2].Add(p);
+                _barreiras[e] = new List<Barreira>();
+                foreach (MeshFilter f in _sala[e].GetComponentsInChildren<MeshFilter>(true))
+                {
+                    Transform t = f.name == "malha" ? f.transform.parent : f.transform;
+                    if (!vistas.Add(t) || SemCorpo.Contains(t.name)) continue;
+                    Bounds b = Caixa(t);
+                    if (b.max.y + t.position.y < 0.1f || b.min.y + t.position.y > Gente) continue;
+                    Quaternion q = Quaternion.Euler(0f, t.eulerAngles.y, 0f);
+                    Vector3 c = t.position + q * b.center, u = q * Vector3.forward;
+                    var p = new Barreira { Go = t.gameObject, C = new Vector2(c.x, c.z), U = new Vector2(u.x, u.z), L = b.extents.z, W = b.extents.x };
+                    if (t.name == "cordao_fila") p.L = 0.01f;   // a caixa é a da diagonal da malha, mais larga que o corredor da fila; a corda é um fio
+                    _barreiras[e].Add(p);
+                }
             }
         }
 
@@ -165,10 +168,10 @@ namespace TA
                 passo += d;
             }
             int n = _curvas.Count - 1;
-            if (perto && n >= 0) _curvas[0] = Reto(_curvas[0], q, primeiro);   // as pontas retas, na linha de p e de q, não na da célula
+            if (perto && n >= 0 && Livre(e, Reto(_curvas[0], q, primeiro), q, f)) _curvas[0] = Reto(_curvas[0], q, primeiro);   // as pontas retas, na linha de p e de q, não na da célula
             Vector2 saida = Ponto(e, ini);
             if (Vector2.Distance(saida, p) >= Celula) r.Add(saida);
-            else if (n >= 0) _curvas[n] = Reto(_curvas[n], p, rumo);
+            else if (n >= 0 && Livre(e, p, Reto(_curvas[n], p, rumo), f)) _curvas[n] = Reto(_curvas[n], p, rumo);
             for (int i = _curvas.Count - 1; i >= 0; i--) r.Add(_curvas[i]);
             p = perto ? q : chegou;
             r.Add(p);
@@ -194,14 +197,17 @@ namespace TA
             return melhor;
         }
 
-        /// <summary>O alvo de quem já está no lugar mudou (a fila andou, o posto trocou de etapa): troca só a última perna, sem cortar a fita da fileira nem a máquina.</summary>
-        static void Segue(Boneco b, Vector2 alvo, bool xPorUltimo)
+        /// <summary>O alvo de quem já está no lugar mudou (a fila andou, o posto trocou de etapa): troca só a última perna, sem cortar a fita da fileira nem a
+        /// máquina. A tela anda atrás do núcleo: se a pessoa ainda está em outra sala, vai pelas portas.</summary>
+        void Segue(Boneco b, Vector2 alvo, bool xPorUltimo)
         {
             int n = b.Caminho.Count;
             if (alvo == b.Alvo || (n == 0 && (alvo - b.Pos).sqrMagnitude <= 4e-4f)) return;
             b.Alvo = alvo;
             Vector2 p = n > 1 ? b.Caminho[n - 2] : b.Pos;
             if (n > 0) b.Caminho.RemoveAt(n - 1);
+            int e = SalaEm(alvo);
+            if (e >= 0) AteASala(b.Caminho, ref p, e, e);
             Contorna(b.Caminho, ref p, alvo, xPorUltimo);
         }
     }

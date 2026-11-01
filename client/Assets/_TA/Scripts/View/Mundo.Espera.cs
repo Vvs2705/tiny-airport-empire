@@ -131,6 +131,9 @@ namespace TA
         {
             bool critico = st.Estado == Estado.Critico;
             int k = 0;
+            for (int i = 0; i < st.Fila.Count; i++) if (Aberto(s, st.Fila[i])) k++;
+            Cordoes(Mathf.Min(k, Chamados));   // antes das rotas: quem levanta ao abrir o embarque já vê a corda
+            k = 0;
             for (int i = 0; i < st.Fila.Count && k < Chamados; i++)
                 if (Aberto(s, st.Fila[i])) { Liga(st.Fila[i], Portao, Lugar(k), s, false, critico && k < 3, VagaFila + k); k++; }
             int chamados = 0;
@@ -144,8 +147,13 @@ namespace TA
                 else { Liga(p, Portao, Lugar(k), s, false, false, VagaFila + k); k++; }
             }
             for (int c = 0; c < _dono.Count; c++) if (_dono[c] >= 0 && !_sentados.Contains(_dono[c])) _dono[c] = -1;
-            for (int i = 0; i < _cordao.Count; i++) _cordao[i].SetActive(k > _cordaoDe[i]);
+            Cordoes(k);
             for (int i = 0; i < 4; i++) _zona[i].SetActive(i < st.Postos);
+        }
+
+        void Cordoes(int fila)
+        {
+            for (int i = 0; i < _cordao.Count; i++) _cordao[i].SetActive(fila > _cordaoDe[i]);
         }
 
         Vector2 Lugar(int k) => _serpente[Mathf.Min(k, _serpente.Count - 1)];
@@ -179,6 +187,7 @@ namespace TA
             }
             b.Caminho.Clear();
             Vector2 p = b.Cadeira >= 0 ? _assentos[b.Cadeira].Pe : b.Pos;
+            AteASala(b.Caminho, ref p, Portao, Portao);
             RotaSala(b.Caminho, ref p, alvo);
         }
 

@@ -255,6 +255,7 @@ def mede(arquivo, conta, cobertura):
     casa, longe, em_casa = {}, defaultdict(int), {}
     antes, parada = {}, set()
     pecas = defaultdict(list)  # sala -> pecas ligadas que barram gente
+    acesas = set()  # as caixas ligadas agora: cone de incidente, nivel de predio e sala fechada nao batem em ninguem
     obstaculos = {
         i: [c for c in cs if c.y0 < CORPO_ALTURA and c.y1 > TOLERANCIA and c.nome.split(".")[0] not in SEM_CORPO]
         for i, cs in por_id.items()
@@ -266,6 +267,7 @@ def mede(arquivo, conta, cobertura):
         while prox < len(liga) and liga[prox][0] <= t:
             _, ident, ligou = liga[prox]
             prox += 1
+            (acesas.update if ligou else acesas.difference_update)(por_id.get(ident, ()))
             for c in obstaculos.get(ident, ()):
                 for e, (x0, z0, lado) in salas.items():
                     if x0 - c.r <= c.cx <= x0 + lado + c.r and z0 - c.r <= c.cz <= z0 + lado + c.r:
@@ -304,7 +306,7 @@ def mede(arquivo, conta, cobertura):
             aviao = ba in AVIAO
             conta.x, conta.z = ca[0].cx, ca[0].cz
             for c in ca:
-                for f in fixas:
+                for f in acesas:
                     if ligado(c.nome, f.nome):
                         continue
                     p = penetra(c, f)

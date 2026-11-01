@@ -611,11 +611,11 @@ namespace TA
         }
 
         /// <summary>Pessoa no -diag (client/tools/diag_pessoas.py e diag_caixas.py): y = 1 andando; yaw = o rumo da folha, que e sempre um eixo do
-        /// mundo; sx = 1 sentando ou sentada; sy = 1 parada no posto (no balcao ou atras dele), onde encostar na peca e o servico.</summary>
+        /// mundo; sx = 1 sentando ou sentada; sy = 1 no posto (no balcao ou atras dele) ou na ultima perna ate ele, onde encostar na peca e o servico.</summary>
         void DiagBoneco(System.IFormatProvider inv, string nome, Boneco b)
         {
             float yaw = b.Dir > 0f ? (b.Cima ? 90f : 180f) : (b.Cima ? 0f : 270f);
-            bool posto = b.Caminho.Count == 0 && (b.NoBalcao || !nome.StartsWith("pax"));
+            bool posto = b.Caminho.Count <= 1 && (b.NoBalcao || !nome.StartsWith("pax"));
             _diag.WriteLine(string.Format(inv, "{0:0.00},{1},{2:0.000},{3},{4:0.000},{5:0},{6},{7}", _diagT, nome, b.Pos.x, b.Andou ? 1 : 0, b.Pos.y, yaw, b.Senta > 0f ? 1 : 0, posto ? 1 : 0));
         }
 

@@ -193,7 +193,8 @@ namespace TA
                 // da fila para o balcao: um passo a frente, ao longo do corredor livre entre a fila e os balcoes, e chega de frente
                 b.Caminho.Clear();
                 Vector2 q = b.Pos;
-                Contorna(b.Caminho, ref q, Em(e, FaixaD, Vector2.Dot(b.Pos - sala.Out, sala.T)), normalX);
+                AteASala(b.Caminho, ref q, e, e);
+                Contorna(b.Caminho, ref q, Em(e, FaixaD, Vector2.Dot(q - sala.Out, sala.T)), normalX);
                 Contorna(b.Caminho, ref q, alvo, normalX);
                 b.Alvo = alvo;
             }
@@ -216,7 +217,7 @@ namespace TA
             int z = Mathf.Clamp(b.Zona, 0, 5);
             Vector2 p = b.Pos;
             if (z == Portao) SaiDaFileira(b, ref p);
-            Portas(b.Caminho, ref p, z, z);
+            AteASala(b.Caminho, ref p, z, z);
             if (!_embarcou.Contains(id)) PelaPorta(b.Caminho, ref p, Salas[z].In);   // um passo para fora da porta
             else Embarca(b, ref p, id / 500 % 2);
         }
@@ -369,7 +370,7 @@ namespace TA
         /// entra no fim dela: nao passa pelo meio de quem espera.</summary>
         void RotaPessoa(List<Vector2> r, Vector2 p, int de, int para, Vector2 alvo, bool fila)
         {
-            Portas(r, ref p, de, para);
+            AteASala(r, ref p, de, para);
             if (para == Portao) { RotaSala(r, ref p, alvo); return; }
             Sala s = Salas[para];
             bool normalX = Mathf.Abs(s.N.x) > 0.5f;
@@ -383,7 +384,7 @@ namespace TA
 
         /// <summary>Porta a porta ate a sala `para`, a partir da sala em que a pessoa esta. A tela anda atras do nucleo: a sala do nucleo (`de`, que so vale fora
         /// das salas) pode ja ser outra, e partir dela leva a pessoa em linha reta pela parede.</summary>
-        void Portas(List<Vector2> r, ref Vector2 p, int de, int para)
+        void AteASala(List<Vector2> r, ref Vector2 p, int de, int para)
         {
             int aqui = SalaEm(p);
             if (aqui >= 0) de = aqui;
