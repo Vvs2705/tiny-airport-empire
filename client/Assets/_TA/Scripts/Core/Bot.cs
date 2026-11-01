@@ -18,6 +18,8 @@ namespace TA.Core
         public bool Segue;
         /// <summary>Objetivos = joga pelo objetivo ativo da campanha (CONTRATO_FASE_C5 §6). Sem ele o bot nunca olha a campanha.</summary>
         public bool Objetivos;
+        /// <summary>Missoes = joga pelas missoes abertas (CONTRATO_FASE_C6 §6). Sem ele o bot nunca olha as missoes, e recebe o que cumprir sem querer.</summary>
+        public bool Missoes;
 
         public static readonly BotProfile Bom = new BotProfile { Name = "Bom", Decide = 1f, Move = true, Planeja = true, Equipe = true, Rotas = true, Viaja = true, Incidentes = true, Clima = true, Falhas = true };
         public static readonly BotProfile Lento = new BotProfile { Name = "Lento", Decide = 2.5f, Move = true, Planeja = true, Equipe = true, Rotas = true, Viaja = true, Incidentes = true, Clima = true, Falhas = true };
@@ -31,6 +33,11 @@ namespace TA.Core
         /// <summary>Portao da Fase C5: o Bom e o Lento que jogam pela campanha.</summary>
         public static readonly BotProfile Guiado = new BotProfile { Name = "Guiado", Decide = 1f, Move = true, Planeja = true, Equipe = true, Rotas = true, Viaja = true, Incidentes = true, Clima = true, Falhas = true, Objetivos = true };
         public static readonly BotProfile LentoGuiado = new BotProfile { Name = "LentoGuiado", Decide = 2.5f, Move = true, Planeja = true, Equipe = true, Rotas = true, Viaja = true, Incidentes = true, Clima = true, Falhas = true, Objetivos = true };
+        /// <summary>Portao da Fase C6: o Bom e o Lento que jogam pelas missoes, e quem joga pela campanha e pelas missoes (o alcance das conquistas).</summary>
+        public static readonly BotProfile Missionario = new BotProfile { Name = "Missionario", Decide = 1f, Move = true, Planeja = true, Equipe = true, Rotas = true, Viaja = true, Incidentes = true, Clima = true, Falhas = true, Missoes = true };
+        public static readonly BotProfile LentoMissionario = new BotProfile { Name = "LentoMissionario", Decide = 2.5f, Move = true, Planeja = true, Equipe = true, Rotas = true, Viaja = true, Incidentes = true, Clima = true, Falhas = true, Missoes = true };
+        public static readonly BotProfile Completo = new BotProfile { Name = "Completo", Decide = 1f, Move = true, Planeja = true, Equipe = true, Rotas = true, Viaja = true, Incidentes = true, Clima = true, Falhas = true, Objetivos = true, Missoes = true };
+        public static readonly BotProfile LentoCompleto = new BotProfile { Name = "LentoCompleto", Decide = 2.5f, Move = true, Planeja = true, Equipe = true, Rotas = true, Viaja = true, Incidentes = true, Clima = true, Falhas = true, Objetivos = true, Missoes = true };
         public static readonly BotProfile[] All = { Bom, Lento, Parado };
     }
 
@@ -67,7 +74,9 @@ namespace TA.Core
             _t = Math.Min(_t - P.Decide, P.Decide);   // le o estado das estacoes como a tela mostra (atualizado a cada 0,5 s)
             bool moveu = P.Move && Mover(s);
             if (!moveu && Tocar(s)) Taps++;
+            _rotaFixa = false;
             bool junta = P.Objetivos && Guia(s);
+            if (P.Missoes) Missoes(s);
             if (!junta && Comprar(s)) Buys++;
             if (P.Planeja) Planeja(s);
             if (!moveu && P.Move && P.Equipe) Equipe(s);
@@ -86,7 +95,6 @@ namespace TA.Core
         /// </summary>
         bool Guia(Sim s)
         {
-            _rotaFixa = false;
             Objetivo o = s.ObjetivoAtual(s.AeroportoAtual);
             if (o == null)
             {
@@ -97,6 +105,62 @@ namespace TA.Core
                 }
                 return false;
             }
+            return Faz(s, o);
+        }
+
+        /// <summary>Fase C6: faz o que as missoes abertas pedem, das diarias para as semanais. A campanha vem antes: a rota que ela fixou fica.</summary>
+        void Missoes(Sim s)
+        {
+            if (P.Objetivos && s.CampanhaCompleta)
+                for (int r = 0; r < s.T.Rotas.Length; r++)
+                    if (s.CustoRota(r) >= 0 && s.Cash >= s.CustoRota(r)) s.AbreRota(r);
+            void Vagas(Missao[] vagas)
+            {
+                foreach (Missao m in vagas)
+                {
+                    if (m == null || m.Feita) continue;
+                    if (m.Conta < m.O.Alvo) Parte(s, m.O);
+                    if (m.O.E != null && m.ContaE < m.O.E.Alvo) Parte(s, m.O.E);
+                }
+            }
+            Vagas(s.Diarias);
+            Vagas(s.Semanais);
+        }
+
+        /// <summary>O fluxo vem antes: a parada opcional leva quem esta fora dele, e um reforco a cada MoverCada s (quem anda nao atende).</summary>
+        void Parte(Sim s, Objetivo o)
+        {
+            switch (o.Meta)
+            {
+                case Meta.Movidos:
+                    if (!P.Move || s.Steps < _reforco || !Mover(s, Estado.Atencao)) return;
+                    _reforco = s.Steps + MoverCada * Sim.Hz;
+                    return;
+                case Meta.Atendidos:
+                    PoeGente(s, (Estacao)o.Arg, true);
+                    return;
+                case Meta.Cheios:
+                case Meta.Voos:
+                    if (!_rotaFixa) Faz(s, o);
+                    return;
+                default:
+                    Faz(s, o);
+                    return;
+            }
+        }
+
+        const int MoverCada = 30;
+        long _reforco;
+
+        /// <summary>Uma missao aberta pede atendimento nesta estacao: quem esta la fica.</summary>
+        static bool Pedida(Sim s, Estacao e)
+        {
+            bool Pede(Missao m) => m != null && !m.Feita && (m.O.Meta == Meta.Atendidos && m.O.Arg == (int)e && m.Conta < m.O.Alvo || m.O.E?.Meta == Meta.Atendidos && m.O.E.Arg == (int)e && m.ContaE < m.O.E.Alvo);
+            return Array.Exists(s.Diarias, Pede) || Array.Exists(s.Semanais, Pede);
+        }
+
+        bool Faz(Sim s, Objetivo o)
+        {
             switch (o.Meta)
             {
                 case Meta.Equipe: return Junta(s, s.CustoContratar(), s.Hire);
@@ -104,6 +168,7 @@ namespace TA.Core
                 case Meta.Capacidade: return Junta(s, s.Custo((Estacao)o.Arg, Melhoria.Capacidade), () => s.Buy((Estacao)o.Arg, Melhoria.Capacidade));
                 case Meta.Cheios:
                 case Meta.Voos:
+                    if (o.Arg < 0) return false;
                     if (!s.RotaAberta(o.Arg)) return Junta(s, s.CustoRota(o.Arg), () => s.AbreRota(o.Arg));
                     Fixa(s, o.Arg);
                     return false;
@@ -139,12 +204,12 @@ namespace TA.Core
         }
 
         /// <summary>Estacao sem ninguem: vai quem esta com mais folga.</summary>
-        void PoeGente(Sim s, Estacao e)
+        void PoeGente(Sim s, Estacao e, bool foraDoFluxo = false)
         {
             if (s.Alocados(e) > 0) return;
             Funcionario quem = null;
             foreach (Funcionario f in s.Staff)
-                if (f.Andando == 0 && (quem == null || s.St(f.Em).Folga > s.St(quem.Em).Folga)) quem = f;
+                if (f.Andando == 0 && !(foraDoFluxo && (Fluxo(f.Em) || Pedida(s, f.Em))) && (quem == null || s.St(f.Em).Folga > s.St(quem.Em).Folga)) quem = f;
             if (quem != null && s.Move(quem.Id, e)) Moves++;
         }
 
@@ -237,7 +302,7 @@ namespace TA.Core
             {
                 Estacao casa = Funcionario.Casa(f.Perfil);
                 // Ana e Beto so voltam pela especializacao; o Caio vai a alimentacao (estacao nova) quando ela abre
-                if (f.Andando > 0 || f.Perfil == Perfil.Mecanico || !s.Especializa && (int)casa < 4) continue;
+                if (f.Andando > 0 || f.Perfil == Perfil.Mecanico || !s.Especializa && (int)casa < 4 || P.Missoes && Pedida(s, f.Em)) continue;
                 if (!s.Ativa(casa) || Funcionario.Especialidade(f.Perfil, f.Em) || s.St(f.Em).Estado != Estado.Normal || s.Alocados(casa) >= s.St(casa).Postos) continue;
                 if (f.Em == Estacao.Manutencao && OficinaPrecisa(s)) continue;
                 if (s.Move(f.Id, casa)) { Moves++; return; }
@@ -287,11 +352,11 @@ namespace TA.Core
             return ea != eb ? ea < eb : a.Sala < b.Sala;
         }
 
-        bool Mover(Sim s)
+        bool Mover(Sim s, Estado minimo = Estado.Critico)
         {
             Station alvo = null;
             foreach (Station st in s.Estacoes)
-                if (Fluxo(st.Tipo) && st.Estado == Estado.Critico && s.Alocados(st.Tipo) < st.Postos && (alvo == null || st.Folga < alvo.Folga)) alvo = st;
+                if (Fluxo(st.Tipo) && st.Estado >= minimo && s.Alocados(st.Tipo) < st.Postos && (alvo == null || st.Folga < alvo.Folga)) alvo = st;
             if (alvo == null) return false;
             // com Equipe: prefere o especialista da estacao critica e nao tira ninguem da oficina enquanto um aviao precisa dela
             // e so tira alguem de uma estacao nova (a casa dele) se nao houver outro
@@ -377,6 +442,8 @@ namespace TA.Core
             public int Climas, Falhas, Reparos;
             /// <summary>Fase C5: objetivos feitos, Cash pago por eles e a onda em que cada um fechou (aeroporto x 10 + indice; -1 = nao fechou).</summary>
             public int Objetivos; public long Recompensas; public int[] ObjetivoEm;
+            /// <summary>Fase C6: diarias e semanais feitas, Cash pago por elas, conquistas e a onda em que cada uma fechou (-1 = nao fechou).</summary>
+            public int Diarias, Semanais, Conquistas; public long PagoMissoes; public int[] ConquistaEm;
         }
 
         /// <summary>Joga `ondas` ondas inteiras com o perfil `p` e a semente `seed`, sem render. `reabre` = fecha e reabre o jogo (Save ->
@@ -385,8 +452,9 @@ namespace TA.Core
         {
             var s = new Sim(t, seed);
             var bot = new Bot(p);
-            var r = new Resultado { MarcoEm = new[] { -1f, -1f, -1f }, ChegouEm = new[] { 0, -1, -1 }, ObjetivoEm = new int[30] };
+            var r = new Resultado { MarcoEm = new[] { -1f, -1f, -1f }, ChegouEm = new[] { 0, -1, -1 }, ObjetivoEm = new int[30], ConquistaEm = new int[s.T.Conquistas.Length] };
             for (int i = 0; i < 30; i++) r.ObjetivoEm[i] = -1;
+            for (int i = 0; i < r.ConquistaEm.Length; i++) r.ConquistaEm[i] = -1;
             double soma = 0;
             long passos = (long)ondas * s.OndaPassos;
             while (s.Steps < passos)
@@ -408,6 +476,8 @@ namespace TA.Core
                         case Ev.Pane: case Ev.Rejeicao: case Ev.RetornoPedido: r.Falhas++; break;
                         case Ev.AeroportoChegada: r.Viagens++; if (r.ChegouEm[e.A] < 0) r.ChegouEm[e.A] = s.Onda; break;
                         case Ev.ObjetivoConcluido: r.Objetivos++; r.Recompensas += e.C; r.ObjetivoEm[e.A * 10 + e.B] = s.Onda; break;
+                        case Ev.MissaoConcluida: if (e.A == 0) r.Diarias++; else r.Semanais++; r.PagoMissoes += e.C; break;
+                        case Ev.ConquistaFeita: r.Conquistas++; r.ConquistaEm[e.A] = s.Onda; break;
                     }
             }
             r.Embarque = r.Voos > 0 ? soma / r.Voos : 0;

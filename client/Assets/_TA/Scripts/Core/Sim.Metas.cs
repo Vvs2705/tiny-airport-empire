@@ -33,6 +33,13 @@ namespace TA.Core
         {
             Objetivo o = ObjetivoAtual(aeroporto);
             if (o == null) return 0;
+            int n = Mede(o);
+            return n >= 0 ? n : _conta[aeroporto][_feitos[aeroporto]];
+        }
+
+        /// <summary>O valor de uma meta de estado (-1 = meta de contador).</summary>
+        int Mede(Objetivo o)
+        {
             switch (o.Meta)
             {
                 case Meta.Marco: return Marco;
@@ -40,7 +47,16 @@ namespace TA.Core
                 case Meta.Velocidade: return St((Estacao)o.Arg).Vel;
                 case Meta.Capacidade: return St((Estacao)o.Arg).Cap;
                 case Meta.Chegou: return Pago(o.Arg) && ProximoAeroporto != o.Arg ? 1 : 0;
-                default: return _conta[aeroporto][_feitos[aeroporto]];
+                case Meta.Passageiros: return (int)Math.Min(int.MaxValue, TotalEmbarcados);
+                case Meta.Rotas:
+                    int rotas = 0;
+                    for (int r = 0; r < T.Rotas.Length; r++) if (RotaAberta(r)) rotas++;
+                    return rotas;
+                case Meta.Campanha:
+                    int feitos = 0;
+                    foreach (int f in _feitos) feitos += f;
+                    return feitos;
+                default: return -1;
             }
         }
 
@@ -60,6 +76,7 @@ namespace TA.Core
         /// <summary>Soma nos objetivos ainda abertos deste aeroporto (zera = a sequencia de Seguidos quebrou).</summary>
         void Conta(Meta m, int arg = -1, bool zera = false)
         {
+            ContaMissoes(m, arg, zera);
             int a = AeroportoAtual;
             Objetivo[] c = T.Objetivos[a];
             for (int i = _feitos[a]; i < c.Length; i++)
@@ -74,6 +91,8 @@ namespace TA.Core
                 case Ev.Embarcou: Conta(Meta.Embarcados); break;
                 case Ev.Historia: Conta(Meta.Historias); break;
                 case Ev.Bonus: Conta(Meta.Pontuais); break;
+                case Ev.Melhorou: Conta(Meta.Melhorias); break;
+                case Ev.MissaoConcluida: Conta(Meta.Missoes); break;
                 case Ev.HangarFeito: Conta(Meta.Hangar); break;
                 case Ev.ChecagemIniciada: if (c == 0) Conta(Meta.Checagens); break;
                 case Ev.Movido: if (St((Estacao)c).Estado != Estado.Normal) Conta(Meta.Movidos); break;
