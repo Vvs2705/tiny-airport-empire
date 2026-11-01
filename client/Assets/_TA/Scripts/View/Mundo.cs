@@ -259,10 +259,11 @@ namespace TA
             else if (_vista == "garagem") { _alvo = new Vector3(27f, 0f, 12f); _tam = 10f; }
             else if (_vista == "seguranca") { _alvo = new Vector3(6f, 0f, 2.4f); _tam = 2.4f; }
             else if (_vista == "hangar") { _alvo = new Vector3(29f, 0f, 16f); _tam = 11f; }
+            else if (_vista != null && _vista.Length == 5 && _vista.StartsWith("sala")) { _alvo = V3(Centro(_vista[4] - '0')); _tam = 3.4f; }
         }
 
         /// <summary>Game (-vista, so no -testsession): enquadramento das fotos e do -record (perto = zoom nas salas; hangar = o caminho ate ele; patio = salas, estandes
-        /// e a ponta da pista; geral = tudo).</summary>
+        /// e a ponta da pista; geral = tudo; sala0 a sala7 = uma sala de perto).</summary>
         public void Vista(string v) { _vista = v; _enquadrado = false; }
 
         /// <summary>Projeta um ponto no chao (Y = 0) ao longo da direcao da camera.</summary>
