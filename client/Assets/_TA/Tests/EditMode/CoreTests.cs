@@ -7,6 +7,15 @@ namespace TA.Tests
     public class CoreTests
     {
         [Test]
+        public void Bot_em_paralelo_da_o_mesmo_que_uma_semente_por_vez()
+        {
+            BalanceTests.Linha a = BalanceTests.Rodar(BotProfile.Bom, null, 8, 8, 1), b = BalanceTests.Rodar(BotProfile.Bom, null, 8, 8);
+            Assert.AreEqual(BalanceTests.Tabela(new[] { a }), BalanceTests.Tabela(new[] { b }));
+            Assert.AreEqual((a.Embarque, a.EmbarqueP10, a.Receita), (b.Embarque, b.EmbarqueP10, b.Receita));
+            Assert.AreEqual(a.Marco, b.Marco);
+        }
+
+        [Test]
         public void Tick_AvancaEmPassosFixos()
         {
             var s = new Sim();

@@ -45,6 +45,7 @@ namespace TA.Core
             Anuncios.Save(sb);
             SalvaFaseC(sb);
             SalvaFaseC3(sb);
+            SalvaFaseC4(sb);
             return SaveEnvelope.Wrap(sb.ToString(), content, nowUnix);
         }
 
@@ -90,6 +91,36 @@ namespace TA.Core
             Kv(sb, "reparo", Reparo); Kv(sb, "incw", UltimoIncidente);
         }
 
+        /// <summary>Schema 5 (CONTRATO_FASE_C4 §7): o que esta em andamento. Clima e falha saem da semente: so grava o que ja aconteceu. O portao
+        /// atrasado vai por voo; o padrao fica de fora.</summary>
+        void SalvaFaseC4(StringBuilder sb)
+        {
+            foreach (Voo v in Voos)
+                if (v != null && v.Atrasado) sb.Append("va.").Append(v.Indice).Append('=').Append(v.FechaPasso).Append('\n');
+            foreach (Aviao a in Avioes)
+                if (a.Pane || a.Falhou >= 0 || a.SaiEm > 0 || a.Retorno > 0)
+                    sb.Append("falha.").Append(a.Id).Append('=').Append(a.Pane ? 1 : 0).Append(',').Append(a.Falhou).Append(',').Append(a.SaiEm.ToString(Ci))
+                      .Append(',').Append(a.Retorno.ToString(Ci)).Append('\n');
+            if (PistaAte > Steps) Kv(sb, "pista", PistaAte);
+        }
+
+        /// <summary>Le o schema 5 depois dos avioes, com tudo limitado. O schema 4 nao tem estas chaves: nada em andamento.</summary>
+        void CarregaFaseC4(Dictionary<string, string> kv)
+        {
+            foreach (Voo v in Voos)
+                if (v != null && Ints(kv, "va." + v.Indice) is int[] x && x.Length >= 1) { v.FechaPasso = Math.Max(v.FechaPasso, Math.Min(OndaPassos - 1, x[0])); v.Atrasado = true; }
+            foreach (Aviao a in Avioes)
+            {
+                long[] n = Longs(kv, "falha." + a.Id);
+                if (n.Length < 4) continue;
+                a.Pane = n[0] != 0 && a.NoPatio;
+                a.Falhou = (int)Math.Max(-1, Math.Min(int.MaxValue, n[1]));
+                a.SaiEm = a.FechouEm >= 0 ? Math.Max(0, Math.Min(Steps + Passos(T.RejeicaoSeg), n[2])) : 0;
+                a.Retorno = !a.NoPatio && a.Hangar == 0 ? Math.Max(0, Math.Min(Steps + Passos(T.RetornoPede), n[3])) : 0;
+            }
+            PistaAte = Math.Max(0, Math.Min(Steps + Passos(T.PistaBloqueioSeg), Get(kv, "pista", 0)));
+        }
+
         /// <summary>Le o schema 4 antes da onda (a falha pesa no teto do atendimento), com tudo limitado. O schema 3 nao tem estas chaves: fica
         /// o jogo novo, Vale Verde com as rotas iniciais e nenhum incidente.</summary>
         void CarregaFaseC3(Dictionary<string, string> kv)
@@ -125,7 +156,7 @@ namespace TA.Core
             }
             long[] c = Longs(kv, "inc");
             // incidente coerente com o relogio; lixo = nenhum
-            if (c.Length >= 7 && c[0] >= 0 && c[0] < 4 && c[3] <= c[4] && c[4] <= c[5] && c[5] >= Steps && c[5] <= Steps + 2L * OndaPassos)
+            if (c.Length >= 7 && c[0] >= 0 && c[0] <= (long)TipoIncidente.Neve && c[3] <= c[4] && c[4] <= c[5] && c[5] >= Steps && c[5] <= Steps + 2L * OndaPassos)
                 _inc = new Incidente { Tipo = (TipoIncidente)c[0], Vaga = c[1] == 1 ? 1 : 0, Estacao = Est((int)c[2]), Aviso = c[3], Inicio = c[4], Fim = c[5], Resolvido = c[6] != 0 };
             Reparo = _inc != null ? (int)Math.Max(0, Math.Min(Passos(T.ReparoSeg), Get(kv, "reparo", 0))) : 0;
             UltimoIncidente = (int)Math.Max(-99, Math.Min(Onda, Get(kv, "incw", -99)));
@@ -266,6 +297,7 @@ namespace TA.Core
             foreach (KeyValuePair<string, string> p in kv)
                 if (p.Key.StartsWith("ad.", StringComparison.Ordinal)) s.Anuncios.Load(p.Key.Substring(3), p.Value);
             s.CarregaFaseC(kv, r.Schema);
+            s.CarregaFaseC4(kv);
             return s;
         }
 
