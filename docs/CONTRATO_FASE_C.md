@@ -115,7 +115,7 @@ A decisão do jogador seria a escala: quem voa agora e quem fica na sala para de
 - **Segurança:** bandeja, raio-x, pórtico, mala de volta e, em 1 de cada 4 passageiros (fixo pelo id), vistoria com o scanner de mão. No nível 2 de malha, a cabine de corpo inteiro (`PorticoMalha`).
 - **Andar das pessoas:** caminho nos eixos do mundo (os 4 rumos da folha), passando reto pelas portas, chegada à fila pela fileira de trás, fitas que abrem conforme a fila cresce, partida e chegada suaves e cadência ligada à velocidade. O funcionário anda pelas portas e chega depois da `Tuning.Caminhada` quando a sala é longe: a tela não teleporta, e o núcleo continua igual.
 
-| Medida (`diag_pessoas.py`, onda 3, 8 salas; antes 220 s de jogo, depois 350 s) | Antes | Depois |
+| Medida (`diag_pessoas.py`, onda 3, 8 salas; antes 165 s de jogo, depois 350 s) | Antes | Depois |
 |---|---|---|
 | Andando de lado | 28,6% | 5,6% |
 | Teletransporte (saltos acima de 6 m/s) | 24 | 0 |
