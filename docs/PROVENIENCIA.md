@@ -473,6 +473,17 @@ Mesma receita do §2.4 (HD 4K, 50 000 faces, Privado; objeto em "Blender 4K"). G
 | cabine_scanner_corpo | 12:36 | #1 de 2 | `2b8bc1df-eb43-4d28-9a35-70b8ca61c87c` | 55 | 16385 | `cabine_scanner_corpo_hd/cabine_scanner_corpo_hd.zip` | 9.7 MiB | `35948a330e6132986d176f4c2ffa7553728ffd7ecd6fcc4956cdc1875570a2a3` | `581945e6c8f8ea92b87d8e789b56de2b7ae9fd410df19676dad793497f41a138` |
 | garagem_patio | 12:42 | #1 de 2 | `25d555f9-4d96-4538-bf14-6d72c5aad68c` | 55 | 16330 | `garagem_patio_hd/garagem_patio_hd.zip` | 10.7 MiB | `fc4c637ee21746a7c6b3a269666234ff0e55c6a43e8f96f6d98f5ca837a790b7` | `af6d3350029dea6ab5bbd33230f57e3cbacce391439b373fc28af8ed0c8fa0c7` |
 
+### 2.7 Conta nova, 2026-11-01: postos da loja, da oficina e do despacho
+
+Peças pedidas pela frente `ta-planta` e geradas pelo coordenador. SHA-256 informados por ele na entrega.
+
+| Peça | Arquivo | Tamanho | SHA-256 do zip | SHA-256 do FBX |
+|---|---|---|---|---|
+| balcao_loja | `balcao_loja_hd/balcao_loja_hd.zip` | 10.3 MiB | `9cfbcf16e5dd68e8bfd98bb2dc276ab32fdfcfaf8cfccf7176875037d0acdbc8` | `5fbd29119cfc7a56ea80902e5b63479b53d758fa3a62f08e92f08e59ae7eb7f2` |
+| bancada_oficina | `bancada_oficina_hd/bancada_oficina_hd.zip` | 9.2 MiB | `adc0867bb97845eb2a1584385eb1367fd92f2a4d2e6b6b147e680b7388f61ae6` | `cec02b3c3a45200d32aed1ce94d8920b9ef491abb37bab925aa1657d6ad4f71c` |
+| mesa_despacho | `mesa_despacho_hd/mesa_despacho_hd.zip` | 10.0 MiB | `402cafb189731cfd519a3a332021b9623741ecf5e8dca5f80dcfda835ae378df` | `929d2bd0e774a27365f27b0f583cd743f541a1ba203870913764e727d65cf61c` |
+| pneus_empilhados | `pneus_empilhados_hd/pneus_empilhados_hd.zip` | 9.8 MiB | `2d525322696d9b7585480be5f3029d6ade88bb555013f97800ce10eb567e0270` | `3261279f234943f1862af9243ed1f131432ead8d356cc9df7966110f8222a65f` |
+
 ## 3. Marca e arte de instalação (imagem, sem modelo 3D)
 
 Geradas no gerador de imagem do Tripo (Nano Banana 2, 1024 px; splash 9:16 em 768 × 1376) e ampliadas para 4K pelo botão "4K" (10 créditos cada, §1). Os originais 4K ficam em `arte/marca/` (fora do git, com backup). As versões do jogo, em `client/Assets/_TA/Art/Marca/`, saem do script `client/tools/marca.py` (determinístico; recorte do fundo azul-marinho por inundação a partir da borda, tolerância 38; conferido sobre xadrez).
@@ -580,7 +591,31 @@ Nada aqui gasta crédito: tudo sai dos arquivos HD do §2 por script, no Blender
 | `rebocador` | 43078 → 2000 | 1.50 × 0.76 × 0.79 | 512 px | `5941014382cd1cdd35ceaaa3c9abc2839e64394b1a9fc2ab4300925ea9caea4f` |
 | `terminal_vale_verde` | 43119 → 5999 | 9.00 × 7.17 × 6.71 | 1024 px | `4e5a6f2aee8620d8a0a8fba87fdc849323cd2f6c5e46d81e5769435f3ee4a7fe` |
 | `torre_controle` | 42898 → 3000 | 2.18 × 2.20 × 5.43 | 512 px | `7f1bd1163cd61974528253ce82c32cf16c7fc58e8a9d48dd3a7b9c92447fc27a` |
-| `vaso_planta` | 47330 → 800 | 0.50 × 0.47 × 0.60 | 256 px | `a2d5c2cc7572ec013bc73e89e2822d331160d6f97dc39247e367eba9d3d009f1` |
+| `vaso_planta` | 47330 → 800 | 0.50 × 0.47 × 0.60 | 256 px | `a2d5c2cc7572ec013bc73e89e2822d331160d6f97dc39247e367eba9d3d009f1` |
+| `balcao_loja` | 44489 → 1498 | 0.68 × 0.30 × 0.44 | 512 px | `0b0951734d56e01fcb196ac5a8da08205525917fb7043231e859766c68c68952` |
+| `bancada_oficina` | 42541 → 1500 | 0.68 × 0.22 × 0.34 | 512 px | `fa4e2456f3388be4a06b389ac3e185163459c781be083e5fbfaca59801f820b1` |
+| `mesa_despacho` | 42402 → 1498 | 0.68 × 0.30 × 0.39 | 512 px | `39e617247a098492f4e21db801cba5c887fb48081d26c643e891261902753f02` |
+| `pneus_empilhados` | 47528 → 800 | 0.40 × 0.25 × 0.34 | 256 px | `3934e3fe5919883dfe12bdadc3abcbd408b00af24323f243ad7043650650fafa` |
+| `vitrine_loja` | 42835 → 1499 | 0.68 × 0.68 × 0.59 | 512 px | `2d6be993ee1640c7627b871436d08617151f545ee699cdb8e70bb0263e93a9ea` |
+| `vitrine_cafe` | 45444 → 1500 | 0.68 × 0.55 × 0.82 | 512 px | `943b4aa1ce274f434cd01e51d4ba4646150211e1bee9a0ccb73b9a9e9c4e18de` |
+| `bar_lounge` | 44946 → 1999 | 0.68 × 0.72 × 0.64 | 512 px | `52b5de8a5352b122d2ce161e6aebfa2207fca59af8aaf29a24fee4105548e873` |
+| `prateleiras_loja` | 43383 → 2000 | 0.56 × 0.23 × 0.62 | 512 px | `0215e29277b980b849fd315ceed7422c997f405c36b10d08f322316fd354a11b` |
+| `maquina_venda` | 45629 → 1200 | 0.40 × 0.23 × 0.62 | 512 px | `d12ddd2a91a1228f7cc00ca97a40102e327217d19809e94601d45f26bd6c1e57` |
+| `mesas_alimentacao` | 47801 → 1800 | 0.75 × 0.62 × 0.36 | 512 px | `74843c8e59f67e335995f0b25086e58008d77776971080a7e1f0778ad696e96e` |
+| `barreira_obra` | 46200 → 600 | 0.70 × 0.35 × 0.61 | 256 px | `11680b353197b52987b92c49fb60120ba47bc7111da624c832702b778a32c538` |
+| `banco` | 45326 → 798 | 0.80 × 0.45 × 0.48 | 256 px | `6835a3ed326bdfe93f1722c04066356c664656f3df289771415dfe34dde605b1` |
+| `bebedouro` | 47883 → 600 | 0.32 × 0.33 × 0.42 | 256 px | `70ccc09c0580e7423f087a4a1dae948f56cd548c522808149835975670201e34` |
+| `lixeira_terminal` | 46786 → 498 | 0.37 × 0.66 × 0.30 | 256 px | `290d6b4f78c85ee3a43babeea7dce5c09dd6864309350464b0d436cfd87770d9` |
+| `caixa_registradora` | 42826 → 500 | 0.16 × 0.09 × 0.12 | 256 px | `c63866ba03ccb9c59fb3ab6221dc598a32cf0ab5d18b936fa2e788cae2492701` |
+| `carrinho_cafe` | 47024 → 1200 | 0.50 × 0.43 × 0.56 | 512 px | `aac342d889c641349ff13a159cbddd27e4b710f32021c25ef806677c446ed1d0` |
+| `carrinho_limpeza` | 42012 → 1000 | 0.30 × 0.19 × 0.36 | 256 px | `0ac67331948394ed7a85d04f3aa7b09bffa1a1f58df9682144f39e9126c225dc` |
+| `caixa_ferramentas` | 46836 → 600 | 0.25 × 0.16 × 0.20 | 256 px | `968ec3ff9f3c6d6ce583816d39866474073251ee638fa5ffd1dd5012395aa79f` |
+| `cavalete_manutencao` | 47996 → 800 | 0.50 × 0.32 × 0.50 | 256 px | `30995e354f555165b04a34323a4cf1624b8a6236ad0765e70613577925da6a31` |
+| `escada_manutencao` | 44714 → 800 | 0.28 × 0.41 × 0.60 | 256 px | `52de90ea4801495f97c199a6525d10f820dbc13d3f725eeca8d4c9721f453595` |
+| `gerador_solo` | 45911 → 1200 | 0.55 × 0.70 × 0.51 | 256 px | `c554de70160b7906e13b48a1e4dbdca5e116ed7acf3fa55cbd6ac5ded551f5ef` |
+| `sofa_lounge` | 47131 → 1200 | 0.80 × 0.45 × 0.48 | 512 px | `db4b8ceb45598917aed1d245dc260f8f1c9180135d7edb159a0fdf79bc532618` |
+| `mesa_lounge` | 48158 → 800 | 0.35 × 0.35 × 0.30 | 256 px | `6c8180011f2086134c39411003ec06e81dfefab514a6f48b9d7363b071c6db6e` |
+| `placa_direcao` | 45815 → 600 | 0.38 × 0.13 × 0.60 | 256 px | `2f10c62dda5a6e9489bd64e4ed91b894b4506bb90c3b756040bb431599a58b35` |
 
 ### 5.2 Clipes de animação (fora do git, `arte/mixamo/ta_pax` e `ta_func`)
 

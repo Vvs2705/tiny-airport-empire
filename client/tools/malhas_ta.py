@@ -104,6 +104,11 @@ PECAS = {
     "arbusto": (800, 256, 0.4),
     "canteiro_flores": (800, 256, 0.6),
     "arco_entrada": (1500, 512, 1.0),
+    # postos da loja, da oficina e do despacho, e a decoracao da oficina
+    "balcao_loja": (1500, 512, 0.68),
+    "bancada_oficina": (1500, 512, 0.68),
+    "mesa_despacho": (1500, 512, 0.68),
+    "pneus_empilhados": (800, 256, 0.4),
     # canteiro da sala trancada
     "barreira_obra": (600, 256, 0.7),
     # a sala de espera do portao

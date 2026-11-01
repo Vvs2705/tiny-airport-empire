@@ -88,8 +88,8 @@ namespace TA
 
         /// <summary>Malha de balcao de cada estacao e a escala dela (a loja e um quiosque grande: 0,6 cabe 1 por posto). A oficina tem a
         /// bancada aqui e o predio dela fica no mundo (Planta): o mecanico da Fase C mora la antes de a sala abrir.</summary>
-        static readonly string[] BalcaoMalha = { "balcao_checkin", "raio_x", "vitrine_loja", "catraca_embarque", "esteira_bagagem", "vitrine_cafe", "balcao_informacoes", "balcao_informacoes" };
-        static readonly float[] BalcaoEscala = { 0.9f, EscalaSeg, 1f, 0.55f, EscalaBalcaoMala, 1f, 0.75f, 0.75f };
+        static readonly string[] BalcaoMalha = { "balcao_checkin", "raio_x", "balcao_loja", "catraca_embarque", "esteira_bagagem", "vitrine_cafe", "bancada_oficina", "mesa_despacho" };
+        static readonly float[] BalcaoEscala = { 0.9f, EscalaSeg, 1f, 0.55f, EscalaBalcaoMala, 1f, 1f, 1f };
         /// <summary>Nivel de Velocidade a partir do qual o balcao troca pela malha `<malha>_n2` e `_n3` (Lotes 5 e 6): o upgrade muda o predio
         /// (GDD §5.13). Sem a malha daquele nivel, fica a do nivel abaixo.</summary>
         static readonly int[] NivelMalha = { 0, 2, 4 };

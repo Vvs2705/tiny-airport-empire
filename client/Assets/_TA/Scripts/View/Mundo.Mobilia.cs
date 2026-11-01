@@ -55,7 +55,8 @@ namespace TA
             new Mov(SalaComida, "vaso_planta", 3.2f, -1.52f, 1f, 0f, 0.7f),
 
             new Mov(SalaOficina, "escada_manutencao", 1.3f, 1.5f, 0f, -1f),
-            new Mov(SalaOficina, "caixa_ferramentas", 1.85f, 1.52f, 0f, -1f),
+            new Mov(SalaOficina, "caixa_ferramentas", 1.8f, 1.52f, 0f, -1f),
+            new Mov(SalaOficina, "pneus_empilhados", 2.25f, 1.44f, 0f, -1f),
             new Mov(SalaOficina, "gerador_solo", 2.55f, -0.2f, 0f, -1f),
             new Mov(SalaOficina, "cavalete_manutencao", 3.0f, -0.8f, 1f, 0f),
             new Mov(SalaOficina, "carrinho_limpeza", 2.75f, 1.5f, 0f, -1f),
@@ -185,19 +186,20 @@ namespace TA
                 Fixo(PrimitiveType.Cube, V3(p - Salas[e].T * 0.012f, 0.32f + i * 0.08f), tam(larg - 0.1f, 0.03f), linha);
         }
 
-        /// <summary>Nivel `n` do posto da loja e da alimentacao: as malhas loja e alimentacao sao miniaturas de sala com moveis menores que o passageiro.
-        /// Aqui o movel e sempre da regua, e o upgrade acrescenta o caixa no nivel 2 e o telao atras do balcao no nivel 3.</summary>
+        /// <summary>Nivel `n` do posto que nao tem uma malha por nivel: o movel e sempre da regua (as malhas loja e alimentacao sao miniaturas de sala, com
+        /// moveis menores que o passageiro) e o upgrade acrescenta equipamento e o telao atras do balcao; loja e alimentacao trocam o movel no nivel 3.</summary>
         Transform MesaNivel(int e, int n, Vector2 b)
         {
-            if (e != SalaLoja && e != SalaComida) return null;
-            bool bar = e == SalaComida && n == 2;
-            Transform t = Peca(bar ? "bar_lounge" : BalcaoMalha[e], V3(b), Rumo(-Salas[e].N), bar ? 1f : BalcaoEscala[e]);
+            if (e != SalaLoja && e != SalaComida && e != SalaOficina && e != SalaDespacho) return null;
+            string malha = n < 2 ? BalcaoMalha[e] : e == SalaComida ? "bar_lounge" : e == SalaLoja ? "vitrine_loja" : BalcaoMalha[e];
+            Transform t = Peca(malha, V3(b), Rumo(-Salas[e].N));
             if (t == null) return null;
             Transform cont = _cont;
             _cont = t;
-            Peca("caixa_registradora", new Vector3(0.18f, 0.45f, 0.1f), 0f);
+            if (e == SalaComida && n == 1) Peca("caixa_registradora", new Vector3(0.18f, 0.45f, 0.1f), 0f);
+            if (e == SalaOficina) Peca("caixa_ferramentas", new Vector3(0.16f, 0.3f, 0f), 0f, 0.7f);
             _cont = cont;
-            if (n == 2) Bloco("Telao", PrimitiveType.Cube, new Vector3(0f, 0.42f, 0.06f - BalcaoD), new Vector3(0.46f, 0.2f, 0.03f), Art.EstacaoCor[e], t);
+            if (n == 2 || e == SalaDespacho) Bloco("Telao", PrimitiveType.Cube, new Vector3(0f, 0.42f, 0.06f - BalcaoD), new Vector3(0.46f, 0.2f, 0.03f), Art.EstacaoCor[e], t);
             return t;
         }
     }
