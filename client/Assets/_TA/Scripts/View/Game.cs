@@ -27,6 +27,7 @@ namespace TA
     ///   -shot f.png [-shotdelay s] [-shotescala n] [-rola f]   espera s s reais (padrao 1), abre a -tela, fotografa em n x a janela (loga PISO: menor texto e menor alvo da tela; -rola 0 = fim da lista, 1 = topo) e sai 0.
     ///   -record pasta [-recordseg s]  grava s s (padrao 10) de quadros PNG a 30 qps na pasta e sai 0. Com -recordini r [-recordspeed v]:
     ///                 anda r s reais na -speed e so entao grava, na velocidade v (padrao 1): o pushback e a decolagem no GIF.
+    ///                 Com -recordinc, os r s contam do aviso do incidente ou da pane.
     ///   -demo         contrata os 3 e, 1,5 s depois, manda a Ana do check-in para a loja (o -record da caminhada e da troca de uniforme).
     ///   -cenario nome postos = 4 postos no check-in e na seguranca, 1 e 2 deles com gente; oficina = abre tudo, cada um na sua sala (salas = o mesmo, para medir; frota = o mesmo, com o +1 veiculo); desgaste = o aviao do 1o voo pousa com 85%; hangar = o mesmo, e o manda ao
     ///                 hangar assim que encostar (o -record da manutencao).
@@ -444,6 +445,7 @@ namespace TA
         IEnumerator Record(string pasta)
         {
             Directory.CreateDirectory(pasta);
+            if (Arg("-recordinc") != null) while (Sim.Inc == null && !Sim.Avioes[0].Pane && !Sim.Avioes[1].Pane) yield return null;   // o -cenario de incidente: conta do aviso
             float ini = ArgF("-recordini", 0f);
             if (ini > 0f) { yield return new WaitForSecondsRealtime(ini); _speed = ArgF("-recordspeed", 1f); }
             Time.captureFramerate = 30;
