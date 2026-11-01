@@ -486,7 +486,7 @@ Geradas no gerador de imagem do Tripo (Nano Banana 2, 1024 px; splash 9:16 em 76
 
 **Reservas (só em `arte/marca/`, fora do jogo):** `logo_a_4k.jpeg` (`e8bec7c95400847eca6ec1ad59171f4a77cd71cbfd6c326eaeaf3e7e1ad9bdcb`), outra composição da mesma logo. **Descartadas:** `splash_a_4k.jpeg` (`d16c066fe0a78eb2fc53a5e9eeeb5cdf9d2fdc58d9610a8966d2ca247fb83b88`), porque escreveu "AIRPORT" no prédio, e `icone_app_b_4k.jpeg` (`7434ce86daadd76e58ef7def9f278f6fcd4f6a8395ae81e7096e21a261bd6333`), um avião com olhos no para-brisa e boca, convenção visual muito associada a uma franquia de animação conhecida (GDD §10.5: não imitar identidade de terceiros).
 
-O nome "Little Terminal" é provisório (D-03): se mudar, só a logo se refaz (1 rodada de imagem + 1 ampliação). Ícone, emblema e splash não têm texto.
+O nome "Little Terminal" foi decidido em 2026-11-01 (D-03, busca em `docs/NOME.md`): se mudar um dia, só a logo se refaz (1 rodada de imagem + 1 ampliação). Ícone, emblema e splash não têm texto.
 
 ## 3.1. Áudio sintetizado (0 crédito, sem asset de terceiros)
 
@@ -537,7 +537,7 @@ Cópias do Dungeon Courier (`client/Assets/_DC/Resources/Fonts/`), sem download 
   - **Automação (§3.2):** proíbe extrair dados ou conteúdo do serviço sem autorização, citando raspagem e "automated tools". As filas de script de página usadas nos Lotes 3 a 10 são risco a considerar: geramos e baixamos peças próprias, mas o texto não abre exceção.
 - **Imagens do Nano Banana 2 dentro do Tripo:** mesmos termos do Tripo para o conteúdo gerado na conta. Logo, emblema, ícone e splash entram no git como arte de interface do jogo (prompt mestre §3.8).
 - **Mixamo:** nenhum clipe baixado hoje. Os clipes que virão do disco seguem o registro de origem de cada jogo (prompt mestre §4.1).
-- **Marca registrada:** "Little Terminal" ainda não passou pela busca no INPI, USPTO, EUIPO e nas lojas (D-03). A logo não vai para a loja antes disso.
+- **Marca registrada:** a busca de "Little Terminal" no INPI, USPTO, EUIPO e nas lojas deu limpa em 2026-11-01 (`docs/NOME.md`, com os limites). O pedido de registro (classes 9 e 41) ainda não foi feito, e a busca não é parecer jurídico.
 
 ## 5. Derivados para o jogo (troca do greybox, 2026-10-29)
 
