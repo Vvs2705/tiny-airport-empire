@@ -197,7 +197,7 @@ namespace TA
             _cont = t;
             Peca("caixa_registradora", new Vector3(0.18f, 0.45f, 0.1f), 0f);
             _cont = cont;
-            if (n == 2) Bloco("Telao", PrimitiveType.Cube, new Vector3(0f, 0.42f, BalcaoD - 0.03f - 2f * BalcaoD), new Vector3(0.46f, 0.2f, 0.03f), Art.EstacaoCor[e], t);
+            if (n == 2) Bloco("Telao", PrimitiveType.Cube, new Vector3(0f, 0.42f, 0.06f - BalcaoD), new Vector3(0.46f, 0.2f, 0.03f), Art.EstacaoCor[e], t);
             return t;
         }
     }

@@ -402,6 +402,7 @@ namespace TA
                 for (int p = Sim.MaxFuncionarios; p < Sim.MaxEquipe; p++) Sim.Hire((Perfil)p);
                 yield return null;
                 for (int i = 0; i < Sim.Staff.Count; i++) Sim.Move(i, Funcionario.Casa(Sim.Staff[i].Perfil));
+                if (int.TryParse(Arg("-velposto"), out int vel)) foreach (Station st in Sim.Estacoes) st.Vel = vel;   // foto dos postos por nivel
                 yield break;
             }
             Sim.Avioes[0].Desgaste = 85;
