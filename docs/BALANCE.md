@@ -688,3 +688,90 @@ As 26 travas novas entram no `mutacao.py`. Resultado em 2026-11-01: **26 de 26 m
 - **A loja aparece demais.** Quatro das 6 semanais do marco 0 pedem a loja, porque é a decisão que o jogo tem nesse marco. Pode parecer repetitivo. Se parecer, a saída é uma decisão nova no marco 0, não pagar mais.
 - **Cash sem destino continua.** Missão no marco 3 paga até 4 000 num jogo com 100 mil parados. Nenhum sumidouro entrou aqui: o passe e o mapa que cresce continuam devendo isso (§9).
 - **A lista fica como saiu.** Quem viaja no meio do dia pode ficar com uma rota do aeroporto anterior até a virada. Voltar é grátis, mas vale ver se confunde.
+
+## 11. Fase D1: Gems e compras (2026-11-01, `CONTRATO_FASE_D1.md`)
+
+Primeira parte das compras, só no núcleo. **Guiado** nunca compra. **GastaGanho** gasta só as Gems que ganhou. **BoasVindas** compra o pacote de boas-vindas. **PacoteGrande** compra 1 pacote grande. **Baleia** compra 200. Os 4 que gastam deixam o booster sempre ligado e, enquanto houver Gems, nunca ficam com menos de 5 000 Cash.
+
+### Portão de compras (200 sementes, até 120 ondas, para quando a campanha fecha)
+
+| bot | fecham os 30 | Vale Verde | Costa Azul | campanha | p90 | pior | embarque |
+|---|---|---|---|---|---|---|---|
+| Guiado | 200 de 200 | onda 10,8 | 22,9 | **51,6** | 56 | 66 | 90,8% |
+| LentoGuiado | 200 de 200 | 14,2 | 32,1 | **62,8** | 70 | 99 | 77,3% |
+| GastaGanho | 200 de 200 | 10,8 | 22,5 | 51,2 | 55 | 66 | 91,0% |
+| BoasVindas | 200 de 200 | 10,6 | 22,3 | 51,1 | 55 | 66 | 91,6% |
+| PacoteGrande | 200 de 200 | 10,6 | 22,3 | 51,1 | 55 | 66 | 91,3% |
+| Baleia | 200 de 200 | 10,6 | 22,3 | **51,1** | 55 | 66 | 91,3% |
+
+**Passa.** Sem compra, os 30 fecham em 200 de 200 sementes. A Baleia fecha em **0,990** do tempo do Guiado, acima do chão de 0,85.
+
+### D-D1a. Comprar quase não acelera a campanha
+
+A Baleia ganha meia onda em 51. O tempo da campanha sai de marcos e de 2 000 embarques em Aurora (`ag_hub`), e nada disso se compra. Um pacote grande já dá o mesmo resultado que 200.
+
+Para o guardrail, é o melhor resultado possível: compra não é poder. Para a receita, é um alerta: o pacote de Cash vende pouco progresso, e depois do catálogo (27 670 Cash, perto da onda 20) o Cash comprado não tem destino. O GDD §7.3 recusa vender benefício inexistente. O núcleo não bloqueia a compra nesse ponto: `MaisBaratoTravado` não olha rotas, viagens nem tripulação, e um sumidouro novo pode chegar com o passe ou o mapa que cresce. **Decidir na tela da loja.** Nada foi escondido do jogador: a prévia mostra o Cash, e o catálogo restante é visível.
+
+### D-D1b. O pacote caiu de 30 para 10 min de renda
+
+A 1ª versão dava 30 min de renda por 100 Gems: 5 727 Cash na onda 5 e 12 919 na onda 10, quase o dobro da receita do Bom nas 10 primeiras ondas (6 740). Agora são 10 min por 50 Gems, com o mesmo valor por Gem do booster: 12 s de renda. O pacote entrega na hora; o booster pede 30 min jogando.
+
+| onda | pacote de Cash (média de 40 sementes) |
+|---|---|
+| 5 | 1 908 |
+| 10 | 4 251 |
+| 20 | 6 507 |
+| 30 | 9 118 |
+| 50 | 9 659 (teto de 10 000 em parte das sementes) |
+
+### D-D1c. Fechar a cadeia dá 100 Gems
+
+O GDD §6.1 diz que Gems vêm de "metas claras". Sem isso, quem não compra nunca veria a moeda. São 300 Gems na campanha: 1 cosmético, ou 2 boosters, ou 6 pacotes. Gastar tudo no que ganhou tira 0,4 onda da campanha (GastaGanho).
+
+### D-D1d. O chão de 0,85 veio depois da medida
+
+Fixei o chão depois da 1ª rodada, que deu 0,99. Ele não prova que 0,85 é o número certo. É um alarme: se uma frente futura fizer o Cash comprar progresso, o portão cai. O portão roda no CI com o Guiado, o LentoGuiado e a Baleia; os outros 3 bots ficam em `Medida_FaseD1`, à mão.
+
+### TA-1 e TA-2 (200 sementes × 10 ondas)
+
+Nenhum bot de sempre gasta Gems: Bom 95,0% e receita 6 740, Lento 78,8% e 4 219, Parado 88,5% e 4 709, TA-2 1,431. É a tabela da Fase C6, número a número (`Antes_FaseD1`). Portão da Fase C5: 1,114. Portão da Fase C6: 1,147.
+
+### Prova de mutação (`MUTACAO_TESTES="FullyQualifiedName~ComprasTests|FullyQualifiedName~SaveTests" python client/tools/mutacao.py compra:`)
+
+As 26 travas novas entram no `mutacao.py`. Resultado em 2026-11-01: **26 de 26 mortos**. Rodei só as 26, contra `ComprasTests` e `SaveTests`. Das travas anteriores (76), conferi que os trechos ainda existem no núcleo, sem rodar de novo.
+
+| trava retirada | testes que caíram |
+|---|---|
+| a mesma transacao rende uma so | 4, entre eles `Credito_AMesmaTransacaoRendeUmaSo` |
+| o id da transacao vai no save | 2, entre eles `Credito_ReabrirOJogoNaoPagaDeNovo` |
+| o token nunca fica no save | `Credito_TokenNuncaFicaNoSave` |
+| nao consumivel paga uma vez | `Credito_NaoConsumivel_UmaVezSo` |
+| id vazio nao credita | `Credito_Invalido_NaoMudaNada` |
+| save recusado nao credita | `Credito_ComSaveRecusado_NaoCredita` |
+| teto nao engole | `Credito_AcimaDoTeto_NaoEngoleACompra` |
+| conteudo fixo, sem semente | 4, entre eles `Credito_AcimaDoTeto_NaoEngoleACompra` |
+| Cash fora da media movel | `Invariante_D1_CompraForaDoCofre` |
+| pacote fora da media movel | `Invariante_D1_CompraForaDoCofre` |
+| pacote com teto | `Pacote_AcompanhaARenda_ComPisoETeto` |
+| pacote com piso | `Pacote_AcompanhaARenda_ComPisoETeto` |
+| booster nao acumula | `Booster_2xPor30Min_SemAcumular` |
+| gasto so com saldo | 2, entre eles `Gastar_SemSaldoOuForaDaTabela_NaoMudaNada` |
+| saldo nao estoura | `Invariante_D1_SaldoNuncaEstoura` |
+| Gems nao repoem voo | `Invariante_D1_ComprarNaoTocaNoJogo` |
+| Gems nao andam a campanha | `Invariante_D1_ComprarNaoTocaNoJogo` |
+| Gems nao consertam aviao | `Invariante_D1_ComprarNaoTocaNoJogo` |
+| credito nao mexe no voo | `Invariante_D1_ComprarNaoTocaNoJogo` |
+| offline nao da Gems | 2, entre eles `Invariante_D1_AnuncioNaoDaGems` |
+| anuncio nao da Gems | 2, entre eles `Booster_2xPor30Min_SemAcumular` |
+| cadeia paga so ao fechar | 3, entre eles `CadeiaFechada_PagaGemsUmaVez` |
+| campanha sem pagar nao da Gems | `CampanhaSemPagar_NaoDaGems` |
+| saldo do save limitado | `LixoDoSave_ViraPadraoLimitado` |
+| posse do save so de nao consumivel | `LixoDoSave_ViraPadraoLimitado` |
+| booster sobrevive a reabrir | 4, entre eles `Booster_2xPor30Min_SemAcumular` |
+
+### Para medir com gente
+
+- **Valor das Gems:** preço real vem da loja, e as quantidades dos pacotes são hipótese. Se o preço não acompanhar a proporção 100, 550 e 1 200, não anunciar bônus: desconto fictício é proibido (GDD §7.5).
+- **O 2× por 30 min vale a pena?** Sem destino para o Cash, o booster só importa antes do fim do catálogo. A tela precisa deixar isso claro.
+- **Cosméticos:** só há 2 à venda, mais a pintura do pacote de boas-vindas. Todos pedem arte, e a loja precisa mostrar a imagem real (GDD §7.5).
+- **Pacote de boas-vindas:** 1 000 Cash no começo adiantam 0,2 onda em Vale Verde. Ver se a pessoa sente esse empurrão.
