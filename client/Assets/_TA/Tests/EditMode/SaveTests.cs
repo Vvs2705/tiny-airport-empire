@@ -67,7 +67,7 @@ namespace TA.Tests
             Sim s = Sim.Load(SaveEnvelope.Wrap(payload, "x", 1));
             Assert.IsFalse(s.SaveRefused);
             Assert.AreEqual((0L, 0L, 0, 0.0), (s.Cash, s.TotalEmbarcados, s.Album, s.RateEma));
-            Assert.AreEqual(s.T.BoostSegundos * Sim.Hz, s.BoostLeft);
+            Assert.AreEqual(s.T.BoosterSeg * Sim.Hz, s.BoostLeft);
             Assert.AreEqual((5, 2, 4), (s.St(Estacao.CheckIn).Vel, s.St(Estacao.CheckIn).Cap, s.St(Estacao.CheckIn).Postos));
             Assert.AreEqual(Sim.MaxFuncionarios, s.Staff.Count);
             Assert.AreEqual((Estacao.Portao, 75), (s.Staff[0].Em, s.Staff[0].Andando));
@@ -369,6 +369,47 @@ namespace TA.Tests
             StringAssert.Contains("\ncq=" + ((1L << Tabelas.Conquistas.Length) - 1) + ",", neg.Save("t", T));
             neg.Tick(Sim.Step);
             Assert.IsNotNull(neg.Diarias[0], "dia invalido: lista nova");
+        }
+
+        /// <summary>Save real gravado pelo codigo do schema 7 (commit 2c0f1ae, 2026-11-01: semente 7, bot Bom, 2.790 s): sem Gems, sem compra.</summary>
+        const string V07 = "sha256=37b8df9432b63f2c8a3bde5bb012587f5039fd05eb527fbd735fa24713712bf2\nschema=7\ncontent=0.7.0\nat=1800000000\nt=83700\ncash=6108\nseed=7\nonda=15\n" +
+            "emb=988\nperd=26\nalbum=1\nbst=0\nema=9.377462242256783\nsaved=1800000000\nclaim=0\nclaimcash=0\ndia=0\nest.0=5,2\nfila.0=15501;15502;15503;15504;1550" +
+            "5;15506;15507;15508;15509;15510;15511;15512;15513;15514;15515;15516;15517;15518;15519;15520;15521;15522;15523;15524;15525;15526;15527;15528;15529;1553" +
+            "0;15531;15532;15533;15534\nat.0=15044:2;15045:32;15500:62\nest.1=5,2\nat.1=15042:21;15043:51\nest.2=0,0\nest.3=5,2\nfila.3=15007;15017;15011;15020;150" +
+            "18;15022;15015;15023;15014;15024;15019;15026;15028;15021;15029;15025;15031;15027;15033;15030;15036;15032;15035;15034;15037;15038;15039;15040;15041\nes" +
+            "t.4=5,2\nest.5=5,2\nest.6=0,0\nest.7=0,0\nfunc.0=1,3,0,0\nfunc.1=1,3,0,1\nfunc.2=4,1,0,3\nfunc.3=5,3,0,2\nfunc.4=1,3,0,4\nfunc.5=7,3,0,5\nvoo.0=46,13," +
+            "182,1,0\nvoo.1=35,0,0,0,0\naviao.0=89,82200,1,30,-1,0,0,1,0,0\nsrv.0=0:0,0:0,0:0,0:0\naviao.1=99,83700,0,-1,-1,0,0,1,0,0\nsrv.1=0:0,0:0,0:0,0:0\ntrip." +
+            "0=0,1,3872,0\ntrip.1=0,1,5400,1\ntrip.2=0,3,1499,-1\ntrip.3=1,1,3842,0\ntrip.4=1,1,5400,1\ntrip.5=1,3,1499,-1\npatio=3\npatioatraso=8\naero=1,3,-1\nro" +
+            "tas=127\nprog=6,6\nvr.0=6,46,0,0,0,0,1800,0\nvr.1=6,46,0,0,0,0,3300,0\nav.0=6,15\nav.1=6,15\nstt.0=1,31,5.666665818542242\nstt.1=0,-1,27.5333347395062" +
+            "45\nstt.3=1,30,8.099999587982893\nreparo=0\nincw=13\ncamp.0=6,10,0,0,3,0,1,0,1,3,0\ncamp.1=1,0,1,40,40,3,0,0,0,0,0\ncamp.2=0,0,0,0,0,0,0,0,0,0,0\nmiss" +
+            "=1,0\nmd.0=14,4,0,1\nmd.1=12,30,0,1\nmd.2=6,300,0,1\nms.0=4,30,1,0\nms.1=2,10,0,0\nms.2=3,20,0,0\nms.3=1,0,5,0\nms.4=0,988,0,0\ncq=34848,0,0,30,30,27," +
+            "0,24,55,0,203,241,25,0,1,1,0,0,0,0,6\n";
+
+        /// <summary>CONTRATO_FASE_D1 §5: o schema 7 nao tem as chaves: saldo 0, nada comprado, e o jogo e' o mesmo de jogar ate ali com o codigo novo.</summary>
+        [Test]
+        public void MigracaoDoSchema7_SaveReal_DaOMesmoJogoQueJogarComOCodigoNovo()
+        {
+            const long U = 1800000000;
+            Sim m = Sim.Load(V07, null, 7);
+            Assert.IsFalse(m.SaveRefused, "schema 7 migra, nao e' recusado");
+            Assert.AreEqual((6108L, 83700L, 988L, 0L, false), (m.Cash, m.Steps, m.TotalEmbarcados, m.Gems, m.Tem("welcome_bundle_01")));
+
+            Sim n = Jogado(2790f);
+            string texto = m.Save("0.8.0", U);
+            StringAssert.Contains("\nschema=" + Sim.Schema + "\n", texto);
+            StringAssert.Contains("\ngems=0\n", texto);
+            Assert.AreEqual(SemEma(n.Save("0.8.0", U)), SemEma(texto), "migrar = jogar ate ali com o codigo novo");
+            Assert.AreEqual(texto, Sim.Load(texto, null, 7).Save("0.8.0", U), "ida e volta estavel no schema 8");
+
+            Sim c = Sim.Load(V07, null, 7);
+            Assert.AreEqual(Credito.Creditado, c.Creditar("GPA.1", "gems_pack_small"));
+            Sim r = Sim.Load(c.Save("0.8.0", U), null, 7);
+            Assert.AreEqual((100L, Credito.Repetido), (r.Gems, r.Creditar("GPA.1", "gems_pack_small")), "o save migrado compra e nao paga 2 vezes");
+
+            var b1 = new Bot(BotProfile.Bom);
+            var b2 = new Bot(BotProfile.Bom);
+            for (int i = 0; i < 1800 * Sim.Hz; i++) { b1.Step(m); b2.Step(n); }
+            Assert.AreEqual(SemEma(n.Save("0.8.0", U + 1)), SemEma(m.Save("0.8.0", U + 1)));
         }
 
         [Test]

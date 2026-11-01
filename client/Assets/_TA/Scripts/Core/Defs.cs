@@ -85,6 +85,10 @@ namespace TA.Core
         // Fase C6 (CONTRATO_FASE_C6): missoes e conquistas
         MissaoConcluida,    // A = 0 diaria, 1 semanal, B = indice na tabela, C = Cash            -> daily_mission_completed, weekly_mission_completed
         ConquistaFeita,     // A = indice na tabela                                               -> achievement_unlocked
+        // Fase D1 (CONTRATO_FASE_D1): Gems e compras
+        CompraCreditada,    // A = produto, B = Gems, C = Cash                                    -> purchase_succeeded_server_verified
+        GemsGastas,         // A = item, B = preco, C = Cash do pacote, s do booster ou 1         -> gems_spent
+        GemsGanhas,         // A = aeroporto, B = Gems (cadeia fechada)                           -> gems_earned
     }
 
     /// <summary>Funcoes da tripulacao (GDD §5.11). Indice vai no save.</summary>
@@ -356,6 +360,17 @@ namespace TA.Core
         /// <summary>Portao de design do GDD §5.13 (false = so visual: conta e mostra, sem pagar) e as tabelas (Missoes.cs). Conquista nao paga Cash: nao tem chave.</summary>
         public bool RegraMissoes = true;
         public Objetivo[] Diarias = Tabelas.Diarias, Semanais = Tabelas.Semanais, Conquistas = Tabelas.Conquistas;
+
+        // ---- Fase D1 (CONTRATO_FASE_D1, hipoteses) ----
+        /// <summary>As tabelas (Compras.cs), o teto do saldo de Gems e o que fechar a cadeia de um aeroporto paga.</summary>
+        public Produto[] Produtos = Tabelas.Produtos;
+        public ItemGems[] ItensGems = Tabelas.ItensGems;
+        public long GemsTeto = 9999999;
+        public int GemsPorCadeia = 100;
+        /// <summary>Pacote de Cash: PacoteSeg s da renda media atual, entre PacotePiso e PacoteTeto. Ate 3 600 s: acima de 1 h de renda e' recompensa de alto valor (GDD §7.2).</summary>
+        public int PacoteSeg = 600, PacotePiso = 200, PacoteTeto = 10000;
+        /// <summary>Booster: 2x renda por BoosterSeg s de jogo (so anda com o jogo aberto).</summary>
+        public int BoosterSeg = 1800;
     }
 
     /// <summary>Historias do TA-3 (GDD §5.9). A v0.1 tem 1. Id = indice (vai no album do save): so cresce no fim.</summary>
