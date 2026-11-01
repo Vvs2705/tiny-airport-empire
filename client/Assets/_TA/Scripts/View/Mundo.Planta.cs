@@ -35,7 +35,7 @@ namespace TA
         /// escorregando 90 graus (medido em 30/10 com -diag; a frente de cada uma foi conferida na vista de cima e de ponta no Blender).</summary>
         static readonly Dictionary<string, float> Frente = new Dictionary<string, float>
         {
-            { "aviao_narrow", -90f }, { "rebocador", -90f }, { "carrinho_bagagem", -90f }, { "caminhao_combustivel", -90f }, { "caminhao_catering", -90f }, { "escada_embarque", 180f },
+            { "aviao_narrow", -90f }, { "rebocador", -90f }, { "carrinho_bagagem", -90f }, { "caminhao_combustivel", -90f }, { "caminhao_catering", -90f }, { "escada_embarque", 180f }, { "catraca_embarque", 90f },
         };
 
         /// <summary>Malha do Tripo (Resources/Malhas/nome.fbx + nome.png, pivo no chao, de frente para +z) num pai que gira em yaw; null se a
@@ -120,8 +120,6 @@ namespace TA
             _hangar = Niveis("hangar_manutencao", HangarEm, HangarYaw, HangarEscala);
             Peca("oficina_mecanico", new Vector3(19f, 0f, 6.9f), 180f, 0.6f);
             Peca("sala_tripulacao", new Vector3(6.2f, 0f, 9.9f), 90f, 0.85f);
-            Peca("cadeiras_espera", new Vector3(-1.9f, 0f, 4.6f), 90f);
-            Peca("cadeiras_espera", new Vector3(-1.9f, 0f, -0.6f), 90f);
             foreach (Vector2 v in new[] { new Vector2(-0.5f, 4.5f), new Vector2(-0.5f, -0.5f), new Vector2(8.5f, -0.5f), new Vector2(12.5f, 3.5f) })
                 Peca("vaso_planta", V3(v), 0f);
             // arvores so nas bordas (esquerda, direita e atras da pista): na frente das salas tampariam a fila
@@ -186,7 +184,8 @@ namespace TA
                 _vazio[e, i] = Billboard("Vazio" + e + i, Art.Xis(), Art.A(Art.Off, 0.85f), 0.22f);
                 if (e == (int)Estacao.Seguranca) Seguranca3D(i);
             }
-            if (e != (int)Estacao.Manutencao && e != (int)Estacao.Despacho)   // oficina e despacho nao tem fila de passageiros
+            if (e == Portao) Espera3D();
+            else if (e != (int)Estacao.Manutencao && e != (int)Estacao.Despacho)   // oficina e despacho nao tem fila de passageiros
             {
                 // fitas da fila: postes nas pontas das fileiras
                 for (int r = 0; r < 5; r++)
