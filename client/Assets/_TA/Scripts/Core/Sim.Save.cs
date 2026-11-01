@@ -47,6 +47,7 @@ namespace TA.Core
             SalvaFaseC3(sb);
             SalvaFaseC4(sb);
             SalvaCampanha(sb);
+            SalvaCompras(sb);
             return SaveEnvelope.Wrap(sb.ToString(), content, nowUnix);
         }
 
@@ -110,6 +111,24 @@ namespace TA.Core
         {
             for (int a = 0; a < _feitos.Length; a++)
                 sb.Append("camp.").Append(a).Append('=').Append(_feitos[a]).Append(',').Append(string.Join(",", _conta[a])).Append('\n');
+        }
+
+        /// <summary>Schema 7 (CONTRATO_FASE_D1 §5): o saldo de Gems, os nao consumiveis e o hash de cada transacao creditada.</summary>
+        void SalvaCompras(StringBuilder sb)
+        {
+            Kv(sb, "gems", Gems);
+            if (_posse.Count > 0) sb.Append("posse=").Append(string.Join(",", _posse)).Append('\n');
+            if (_tx.Count > 0) sb.Append("tx=").Append(string.Join(",", _tx)).Append('\n');
+        }
+
+        /// <summary>Le o schema 7, com tudo limitado. O schema 6 nao tem as chaves: saldo 0 e nada comprado. A posse so vale para o Id que ainda e' nao consumivel.</summary>
+        void CarregaCompras(Dictionary<string, string> kv)
+        {
+            Gems = Math.Max(0, Math.Min(T.GemsTeto, Get(kv, "gems", 0)));
+            if (kv.TryGetValue("tx", out string tx)) _tx.UnionWith(tx.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries));
+            string[] posse = kv.TryGetValue("posse", out string x) ? x.Split(',') : new string[0];
+            foreach (Produto p in T.Produtos)
+                if (p.Tipo == TipoProduto.NaoConsumivel && Array.IndexOf(posse, p.Id) >= 0) _posse.Add(p.Id);
         }
 
         /// <summary>Le o schema 6, com tudo limitado. O schema 5 nao tem a chave: nada feito, e o que o estado ja prova conclui nos primeiros passos.</summary>
@@ -289,7 +308,7 @@ namespace TA.Core
             s.TotalEmbarcados = Math.Max(0, Get(kv, "emb", 0));
             s.TotalPerdidos = Math.Max(0, Get(kv, "perd", 0));
             s.Album = (int)Math.Max(0, Math.Min(int.MaxValue, Get(kv, "album", 0)));
-            s.BoostLeft = (int)Math.Max(0, Math.Min(s.T.BoostSegundos * Hz, Get(kv, "bst", 0)));
+            s.BoostLeft = (int)Math.Max(0, Math.Min(Math.Max(s.T.BoostSegundos, s.T.BoosterSeg) * Hz, Get(kv, "bst", 0)));
             s.RateEma = kv.TryGetValue("ema", out string ema) && double.TryParse(ema, NumberStyles.Float, Ci, out double e) && e > 0 && !double.IsInfinity(e) ? e : 0;
             s.SavedAt = Get(kv, "saved", 0); s.LastClaim = Get(kv, "claim", 0); s.LastClaimCash = Math.Max(0, Get(kv, "claimcash", 0));
             s.Dia = Get(kv, "dia", 0);
@@ -319,6 +338,7 @@ namespace TA.Core
             s.CarregaFaseC(kv, r.Schema);
             s.CarregaFaseC4(kv);
             s.CarregaCampanha(kv);
+            s.CarregaCompras(kv);
             return s;
         }
 

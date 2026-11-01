@@ -66,7 +66,7 @@ namespace TA.Tests
             Sim s = Sim.Load(SaveEnvelope.Wrap(payload, "x", 1));
             Assert.IsFalse(s.SaveRefused);
             Assert.AreEqual((0L, 0L, 0, 0.0), (s.Cash, s.TotalEmbarcados, s.Album, s.RateEma));
-            Assert.AreEqual(s.T.BoostSegundos * Sim.Hz, s.BoostLeft);
+            Assert.AreEqual(s.T.BoosterSeg * Sim.Hz, s.BoostLeft);
             Assert.AreEqual((5, 2, 4), (s.St(Estacao.CheckIn).Vel, s.St(Estacao.CheckIn).Cap, s.St(Estacao.CheckIn).Postos));
             Assert.AreEqual(Sim.MaxFuncionarios, s.Staff.Count);
             Assert.AreEqual((Estacao.Portao, 75), (s.Staff[0].Em, s.Staff[0].Andando));
@@ -252,7 +252,7 @@ namespace TA.Tests
 
             Sim n = Jogado(2790f, 7, SemC5);
             string texto = m.Save("0.6.0", U);
-            StringAssert.Contains("\nschema=6\n", texto);
+            StringAssert.Contains("\nschema=" + Sim.Schema + "\n", texto);
             StringAssert.Contains("\ncamp.0=0,0,0,0,0,0,0,0,0,0,0\n", texto);
             Assert.AreEqual(SemEma(n.Save("0.6.0", U)), SemEma(texto), "migrar = jogar ate ali com o codigo novo");
             Assert.AreEqual(texto, Sim.Load(texto, SemC5, 7).Save("0.6.0", U), "ida e volta estavel no schema 6");

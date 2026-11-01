@@ -82,6 +82,10 @@ namespace TA.Core
         Remarcados,         // A = aviao (os passageiros do voo foram remarcados)                 -> pax_rebooked
         // Fase C5 (CONTRATO_FASE_C5): campanha
         ObjetivoConcluido,  // A = aeroporto, B = indice na cadeia, C = Cash                      -> campaign_objective_completed
+        // Fase D1 (CONTRATO_FASE_D1): Gems e compras
+        CompraCreditada,    // A = produto, B = Gems, C = Cash                                    -> purchase_succeeded_server_verified
+        GemsGastas,         // A = item, B = preco, C = Cash do pacote, s do booster ou 1         -> gems_spent
+        GemsGanhas,         // A = aeroporto, B = Gems (cadeia fechada)                           -> gems_earned
     }
 
     /// <summary>Funcoes da tripulacao (GDD §5.11). Indice vai no save.</summary>
@@ -348,6 +352,17 @@ namespace TA.Core
         public Objetivo[][] Objetivos = Tabelas.Objetivos;
         /// <summary>Voo lotado para a campanha: pelo menos esta parte dos passageiros a bordo, em %.</summary>
         public int LotadoPct = 90;
+
+        // ---- Fase D1 (CONTRATO_FASE_D1, hipoteses) ----
+        /// <summary>As tabelas (Compras.cs), o teto do saldo de Gems e o que fechar a cadeia de um aeroporto paga.</summary>
+        public Produto[] Produtos = Tabelas.Produtos;
+        public ItemGems[] ItensGems = Tabelas.ItensGems;
+        public long GemsTeto = 9999999;
+        public int GemsPorCadeia = 100;
+        /// <summary>Pacote de Cash: PacoteSeg s da renda media atual, entre PacotePiso e PacoteTeto. Ate 3 600 s: acima de 1 h de renda e' recompensa de alto valor (GDD §7.2).</summary>
+        public int PacoteSeg = 600, PacotePiso = 200, PacoteTeto = 10000;
+        /// <summary>Booster: 2x renda por BoosterSeg s de jogo (so anda com o jogo aberto).</summary>
+        public int BoosterSeg = 1800;
     }
 
     /// <summary>Historias do TA-3 (GDD §5.9). A v0.1 tem 1. Id = indice (vai no album do save): so cresce no fim.</summary>

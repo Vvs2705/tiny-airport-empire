@@ -401,6 +401,60 @@ namespace TA.Tests
             Assert.IsEmpty(falta, "nenhum objetivo inalcancavel");
         }
 
+        /// <summary>Sementes do portao de compras no CI (o job tem teto de 20 min). As 200 sementes estao na Medida_FaseD1.</summary>
+        public const int SementesD1 = 40;
+        /// <summary>Dinheiro sem limite fecha a campanha, no minimo, nesta parte do tempo de quem nao compra (CONTRATO_FASE_D1 §7).</summary>
+        public const double ChaoBaleia = 0.85;
+
+        /// <summary>Onda em que cada semente fecha os 30, por ordem. Para quando fecha: o resto da partida nao entra na conta.</summary>
+        static int[] FechaEm(BotProfile p, int sementes)
+        {
+            var rs = new Bot.Resultado[sementes];
+            Parallel.For(0, sementes, new ParallelOptions { MaxDegreeOfParallelism = Threads }, i => rs[i] = Bot.Medir(p, i + 1, OndasAlcance, null, false, true));
+            int[] fim = rs.Where(r => r.Objetivos == 30).Select(r => r.ObjetivoEm.Max()).OrderBy(o => o).ToArray();
+            string Cadeia(int a) => rs.Average(r => r.ObjetivoEm[a * 10 + 9]).ToString("0.0", CultureInfo.InvariantCulture);
+            TestContext.Out.WriteLine(string.Format(CultureInfo.InvariantCulture, "| {0} | {1}/{2} | {3} | {4} | {5:0.0} | {6} | {7} | {8:0.0}% |", p.Name, fim.Length, sementes, Cadeia(0), Cadeia(1),
+                fim.DefaultIfEmpty(-1).Average(), fim.Length > 0 ? fim[fim.Length * 9 / 10] : -1, fim.Length > 0 ? fim[fim.Length - 1] : -1, rs.Average(r => r.Embarque) * 100));
+            return fim;
+        }
+
+        const string CabecaCompras = "| bot | fecham os 30 | Vale Verde | Costa Azul | campanha | p90 | pior | embarque |\n|---|---|---|---|---|---|---|---|";
+
+        /// <summary>Portao de compras (CONTRATO_FASE_D1 §7): sem compra fecha os 30, e dinheiro sem limite acelera pouco, porque campanha pede embarque, nao Cash.</summary>
+        [Test]
+        public void Portao_FaseD1_Compras()
+        {
+            TestContext.Out.WriteLine(CabecaCompras);
+            int[] sem = FechaEm(BotProfile.Guiado, SementesD1), lento = FechaEm(BotProfile.LentoGuiado, SementesD1), baleia = FechaEm(BotProfile.Baleia, SementesD1);
+            Assert.AreEqual((SementesD1, SementesD1, SementesD1), (sem.Length, lento.Length, baleia.Length), "todos fecham os 30");
+            double razao = baleia.Average() / sem.Average();
+            TestContext.Out.WriteLine(string.Format(CultureInfo.InvariantCulture, "ganho da baleia: fecha em {0:0.000} do tempo", razao));
+            Assert.GreaterOrEqual(razao, ChaoBaleia, "comprar nao troca o jogo");
+        }
+
+        /// <summary>A tabela inteira (200 sementes) e o tamanho do pacote de Cash ao longo da campanha.</summary>
+        [Test]
+        public void Medida_FaseD1()
+        {
+            TestContext.Out.WriteLine(CabecaCompras);
+            foreach (BotProfile p in new[] { BotProfile.Guiado, BotProfile.LentoGuiado, BotProfile.GastaGanho, BotProfile.BoasVindas, BotProfile.PacoteGrande, BotProfile.Baleia }) FechaEm(p, Sementes);
+            int[] marcas = { 5, 10, 20, 30, 50 };
+            var pacote = new long[SementesD1, marcas.Length];
+            Parallel.For(0, SementesD1, new ParallelOptions { MaxDegreeOfParallelism = Threads }, i =>
+            {
+                var s = new Sim(null, i + 1);
+                var b = new Bot(BotProfile.Guiado);
+                for (int m = 0; m < marcas.Length; m++)
+                {
+                    while (s.Steps < (long)marcas[m] * s.OndaPassos) b.Step(s);
+                    pacote[i, m] = s.PreviaGasto(0);
+                }
+            });
+            TestContext.Out.WriteLine("| onda | pacote de Cash (media) |\n|---|---|");
+            for (int m = 0; m < marcas.Length; m++)
+                TestContext.Out.WriteLine("| " + marcas[m] + " | " + Math.Round(Enumerable.Range(0, SementesD1).Average(i => (double)pacote[i, m])) + " |");
+        }
+
         /// <summary>TA-6 (GDD §5.7): nenhuma rota domina. As 2 vagas presas em cada rota, sem incidente, no mesmo aeroporto: a melhor rende no
         /// maximo 1,20 x a segunda.</summary>
         [Test]
