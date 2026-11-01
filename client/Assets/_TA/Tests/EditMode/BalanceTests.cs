@@ -24,7 +24,7 @@ namespace TA.Tests
         public struct Linha
         {
             public BotProfile P; public double Embarque, EmbarqueP10, Receita, Moves, Taps; public double[] Marco;
-            public double SemTrip, Inspecoes, Hangares, Checagens, Trocas, Incidentes, Reacoes, Climas, Falhas, Reparos, Objetivos, Recompensas;
+            public double SemTrip, Inspecoes, Hangares, Checagens, Trocas, Incidentes, Reacoes, Climas, Falhas, Reparos, Objetivos, Recompensas, Diarias, Semanais, PagoMissoes, Conquistas;
         }
 
         public static Linha Rodar(BotProfile p, Tuning t = null, int sementes = Sementes, int ondas = Ondas, int threads = Threads)
@@ -44,6 +44,7 @@ namespace TA.Tests
                 l.SemTrip += r.SemTrip * k; l.Inspecoes += r.Inspecoes * k; l.Hangares += r.Hangares * k; l.Checagens += r.Checagens * k; l.Trocas += r.Trocas * k;
                 l.Incidentes += r.Incidentes * k; l.Reacoes += r.Reacoes * k; l.Climas += r.Climas * k; l.Falhas += r.Falhas * k; l.Reparos += r.Reparos * k;
                 l.Objetivos += r.Objetivos * k; l.Recompensas += r.Recompensas * k;
+                l.Diarias += r.Diarias * k; l.Semanais += r.Semanais * k; l.PagoMissoes += r.PagoMissoes * k; l.Conquistas += r.Conquistas * k;
                 for (int m = 0; m < 3; m++) if (r.MarcoEm[m] >= 0) { l.Marco[m] += r.MarcoEm[m]; marcos[m]++; }
             }
             for (int m = 0; m < 3; m++) l.Marco[m] = marcos[m] > 0 ? l.Marco[m] / marcos[m] : -1;
@@ -194,7 +195,7 @@ namespace TA.Tests
         public static Tuning SemFaseC4(Tuning t = null)
         {
             t = t ?? new Tuning();
-            t.RegraClima = t.RegraEpocas = t.RegraPicos = t.RegraFalhas = t.RegraCampanha = false;
+            t.RegraClima = t.RegraEpocas = t.RegraPicos = t.RegraFalhas = t.RegraCampanha = t.RegraMissoes = false;
             return t;
         }
 
@@ -343,7 +344,7 @@ namespace TA.Tests
         [Test]
         public void Antes_FaseC5()
         {
-            var t = new Tuning { RegraCampanha = false };
+            var t = new Tuning { RegraCampanha = false, RegraMissoes = false };
             Linha bom = Rodar(BotProfile.Bom, t), lento = Rodar(BotProfile.Lento, t), parado = Rodar(BotProfile.Parado, t);
             Imprime("antes da Fase C5 (a main da Fase C4)", new[] { bom, lento, parado });
             Assert.AreEqual((6279, 3872, 4702), ((int)Math.Round(bom.Receita), (int)Math.Round(lento.Receita), (int)Math.Round(parado.Receita)), "sem pagar, a tabela da fase anterior");
@@ -399,6 +400,73 @@ namespace TA.Tests
                 TestContext.Out.WriteLine(string.Format(ci, "campanha inteira: onda media {0:0.0}, p90 {1}, pior {2}", fim.Average(), fim[Sementes * 9 / 10], fim[Sementes - 1]));
             }
             Assert.IsEmpty(falta, "nenhum objetivo inalcancavel");
+        }
+
+        /// <summary>Teto da medida de alcance das conquistas (CONTRATO_FASE_C6 §6).</summary>
+        public const int OndasConquistas = 240;
+
+        /// <summary>As missoes sem pagar tem de ser a tabela da fase anterior, numero a numero.</summary>
+        [Test]
+        public void Antes_FaseC6()
+        {
+            var t = new Tuning { RegraMissoes = false };
+            Linha bom = Rodar(BotProfile.Bom, t), lento = Rodar(BotProfile.Lento, t), parado = Rodar(BotProfile.Parado, t);
+            Imprime("antes da Fase C6 (a main da Fase C5)", new[] { bom, lento, parado });
+            Assert.AreEqual((6586, 3534, 4660), ((int)Math.Round(bom.Receita), (int)Math.Round(lento.Receita), (int)Math.Round(parado.Receita)), "sem pagar, a tabela da fase anterior");
+        }
+
+        const string CabecaMissoes = "| bot | ondas | embarque | receita | campanha | missoes | diarias | semanais | ganho |\n|---|---|---|---|---|---|---|---|---|";
+
+        static string LinhaMissoes(Linha l, int ondas, string ganho) => string.Format(CultureInfo.InvariantCulture, "| {0} | {1} | {2:0.0}% | {3:0} | {4:0} | {5:0} | {6:0.0} | {7:0.0} | {8} |", l.P.Name, ondas, l.Embarque * 100, l.Receita, l.Recompensas, l.PagoMissoes, l.Diarias, l.Semanais, ganho);
+
+        static double MedeMissoes(BotProfile p, BotProfile base_, int ondas)
+        {
+            Linha pl = Rodar(p, null, Sementes, ondas), au = Rodar(base_, null, Sementes, ondas);
+            double Total(Linha l) => l.Receita + l.Recompensas + l.PagoMissoes;
+            double ganho = Total(pl) / Total(au);
+            TestContext.Out.WriteLine(LinhaMissoes(pl, ondas, ganho.ToString("0.000", CultureInfo.InvariantCulture)));
+            TestContext.Out.WriteLine(LinhaMissoes(au, ondas, ""));
+            return ganho;
+        }
+
+        /// <summary>Portao do GDD §5.13 para as missoes (CONTRATO_FASE_C6 §6): quem joga por elas contra quem nunca olha, com o pagamento valendo para os dois.</summary>
+        [Test]
+        public void Portao_FaseC6_Missoes()
+        {
+            TestContext.Out.WriteLine(CabecaMissoes);
+            Assert.GreaterOrEqual(MedeMissoes(BotProfile.Missionario, BotProfile.Bom, OndasFaseC), 1.10, "GDD §5.13: Missionario / Bom");
+        }
+
+        /// <summary>Os outros horizontes e o Lento, sem portao.</summary>
+        [Test]
+        public void Medida_FaseC6()
+        {
+            TestContext.Out.WriteLine(CabecaMissoes);
+            foreach (int ondas in new[] { 10, 30, 40, 64 }) MedeMissoes(BotProfile.Missionario, BotProfile.Bom, ondas);
+            foreach (int ondas in new[] { 20, 64 }) MedeMissoes(BotProfile.LentoMissionario, BotProfile.Lento, ondas);
+        }
+
+        /// <summary>Nenhuma conquista inalcancavel (CONTRATO_FASE_C6 §6): 200 sementes, onda media e p90 de cada uma; quanto das missoes o bot fecha.</summary>
+        [Test]
+        public void Alcance_FaseC6()
+        {
+            var ci = CultureInfo.InvariantCulture;
+            string falta = "";
+            foreach (BotProfile p in new[] { BotProfile.Completo, BotProfile.LentoCompleto })
+            {
+                var rs = new Bot.Resultado[Sementes];
+                Parallel.For(0, Sementes, new ParallelOptions { MaxDegreeOfParallelism = Threads }, i => rs[i] = Bot.Medir(p, i + 1, OndasConquistas));
+                TestContext.Out.WriteLine(p.Name + "\n| conquista | fechou | onda media | p90 |\n|---|---|---|---|");
+                for (int i = 0; i < Tabelas.Conquistas.Length; i++)
+                {
+                    int[] ondas = rs.Select(r => r.ConquistaEm[i]).Where(o => o >= 0).OrderBy(o => o).ToArray();
+                    string id = Tabelas.Conquistas[i].Id;
+                    TestContext.Out.WriteLine(string.Format(ci, "| {0} | {1}/200 | {2:0.0} | {3} |", id, ondas.Length, ondas.Length > 0 ? ondas.Average() : -1, ondas.Length > 0 ? ondas[ondas.Length * 9 / 10] : -1));
+                    if (ondas.Length < Sementes) falta += " " + p.Name + ":" + id + "=" + ondas.Length;
+                }
+                TestContext.Out.WriteLine(string.Format(ci, "em {0} ondas: {1:0.0} de {2} diarias e {3:0.0} de {4} semanais", OndasConquistas, rs.Average(r => r.Diarias), 3 * OndasConquistas / 8, rs.Average(r => r.Semanais), 5 * (OndasConquistas / 56 + 1)));
+            }
+            Assert.IsEmpty(falta, "nenhuma conquista inalcancavel");
         }
 
         /// <summary>TA-6 (GDD §5.7): nenhuma rota domina. As 2 vagas presas em cada rota, sem incidente, no mesmo aeroporto: a melhor rende no
