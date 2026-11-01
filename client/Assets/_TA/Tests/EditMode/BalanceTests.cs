@@ -444,6 +444,7 @@ namespace TA.Tests
             TestContext.Out.WriteLine(CabecaMissoes);
             foreach (int ondas in new[] { 10, 30, 40, 64 }) MedeMissoes(BotProfile.Missionario, BotProfile.Bom, ondas);
             foreach (int ondas in new[] { 20, 64 }) MedeMissoes(BotProfile.LentoMissionario, BotProfile.Lento, ondas);
+            foreach (int ondas in new[] { 20, 64 }) MedeMissoes(BotProfile.Completo, BotProfile.Guiado, ondas);
         }
 
         /// <summary>Nenhuma conquista inalcancavel (CONTRATO_FASE_C6 §6): 200 sementes, onda media e p90 de cada uma; quanto das missoes o bot fecha.</summary>

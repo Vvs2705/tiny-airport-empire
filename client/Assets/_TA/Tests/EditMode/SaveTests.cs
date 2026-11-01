@@ -366,6 +366,7 @@ namespace TA.Tests
             Assert.AreEqual(Tabelas.Diarias[0], s.Diarias[2].O, "dia gravado no futuro nao sorteia de novo");
             Sim neg = Sim.Load(SaveEnvelope.Wrap("t=90\nmiss=-9,-9\ncq=-1\n", "x", 1));
             Assert.AreEqual(Tabelas.Conquistas.Length, neg.ConquistasFeitas, "mascara limitada a tabela");
+            StringAssert.Contains("\ncq=" + ((1L << Tabelas.Conquistas.Length) - 1) + ",", neg.Save("t", T));
             neg.Tick(Sim.Step);
             Assert.IsNotNull(neg.Diarias[0], "dia invalido: lista nova");
         }

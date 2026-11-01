@@ -4,6 +4,7 @@ Formato: [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/); versões e
 
 ## [Unreleased]
 ### Adicionado
+- Missões e conquistas no núcleo (Fase C6), 2026-11-01 (`Sim.Missoes.cs`, `Missoes.cs`, `docs/MISSOES.md`), sem tela: 3 diárias e 5 semanais de 63 linhas, pelo dia do jogo, com Cash fixo, e 20 conquistas permanentes sem Cash; save schema 7 com migração; portão do §5.13 em 20 ondas 1,147; as 20 fecham em 200 de 200 sementes.
 - HUD fixo na linguagem visual nova, 2026-11-01: barra de cima, quadro de partidas de aeroporto (voo, destino, hora de fechamento e situação com ícone) e barra de baixo com ícones, em faixas de altura fixa. O mundo ganha 208 px em 1080×2400 e 52 px em 16:9; menor texto de 32 px e alvo de toque de 144 px. Só apresentação: nenhuma regra mudou.
 - Física do pátio, 2026-11-01: `client/tools/diag_caixas.py` conta os cruzamentos por caixas no CSV do `-diag`, de 469 para 0 em 5 cenários. Garagem e hangar com a boca para o lado certo, veículos pelo vão da malha, 2 ruas e calçada, pista e estande R mais ao norte, avião para na frente da porta do hangar e vez entre aviões e entre veículos; `-cenario frota`.
 - Textos e tutorial, 2026-11-01 (`Textos.cs`, `Tour.cs`): revisão em pt-BR (um nome por coisa: Cash, limite, segurança; botões em Título, quadro em MAIÚSCULAS; sem "save" e "catering"), destinos iguais aos da `Tabelas.Rotas`, e os passos 10 a 12 do tutorial (passageiro com história, terminal que cresceu, cofre offline), de evento.

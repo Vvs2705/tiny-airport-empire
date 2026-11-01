@@ -4,7 +4,7 @@ Fonte da verdade: `GDD.md` §4.1, §5.13 (portão de design), §6.1 e §6.5, com
 
 Todo número é **hipótese**: o bot mede e o `BALANCE.md` registra.
 
-**Medido em 2026-11-01 (`BALANCE.md` §10):** MEDIDA_RESUMO Mudou regra ou número? Atualize aqui e no `BALANCE.md` no mesmo commit.
+**Medido em 2026-11-01 (`BALANCE.md` §10):** Portão do §5.13 em 20 ondas: **1,147**, com ressalva: para quem já joga pela campanha, somar as missões dá 1,080 (`BALANCE.md` §10). TA-1: Bom 95,0%, Lento 78,8%. TA-2: 1,431. As 20 conquistas fecham em 200 de 200 sementes, com o `Completo` e o `LentoCompleto`. Com as missões sem pagar, a tabela do bot é a da fase anterior, número a número. **A primeira tabela deu 1,077 e a segunda 1,034:** o §2 e o §6 já estão na versão final, e o BALANCE conta por quê. Mudou regra ou número? Atualize aqui e no `BALANCE.md` no mesmo commit.
 
 ## 1. O que entra
 

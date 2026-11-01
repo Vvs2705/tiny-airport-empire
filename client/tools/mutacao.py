@@ -378,7 +378,7 @@ MUTANTES = [
         "missao: sorteio so da semente",
         "Sim.Missoes.cs",
         "double nota = U(periodo, 0, i, sal);",
-        "double nota = U(periodo, 0, i, sal) * (BoostLeft > 0 || Cash > 50 ? 0.5 : 1);",
+        "double nota = U(periodo, 0, i, sal) + (Cash > 50 && i % 2 == 0 ? 0.5 : 0);",
     ),
     (
         "missao: so a linha do marco",

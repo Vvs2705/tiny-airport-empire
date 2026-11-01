@@ -255,6 +255,20 @@ namespace TA.Tests
             Confere(Meta.Melhorias, e => e.Tipo == Ev.Melhorou, 28);
         }
 
+        /// <summary>Com Arg, so aquela rota conta: as 2 vagas em Campinas nao andam a missao nem a conquista de Ribeirao Preto.</summary>
+        [Test]
+        public void SoARotaPedidaConta()
+        {
+            var s = new Sim(Com(new[] { Obj(Meta.Voos, 999, 1) }, null, new[] { Obj(Meta.Voos, 999, 0), Obj(Meta.Voos, 999, 1) }), 1);
+            Assert.IsTrue(s.Programa(1, 0));
+            BotProfile p = BotProfile.Bom;
+            p.Rotas = p.Viaja = false;
+            Joga(s, p, 3);
+            Assert.AreEqual(0, s.Diarias[0].Conta, "missao de outra rota");
+            Assert.AreEqual(0, s.ProgressoConquista(1), "conquista de outra rota");
+            Assert.Greater(s.ProgressoConquista(0), 2);
+        }
+
         [Test]
         public void RegraDesligada_ContaEMostra_NaoPaga()
         {
