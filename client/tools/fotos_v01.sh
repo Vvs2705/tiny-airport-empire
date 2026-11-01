@@ -45,7 +45,13 @@ foto garagem          -onda 3 -bot -speed 4 -shotdelay 3 -vista garagem
 foto patio_salas      -onda 3 -bot -speed 6 -shotdelay 14 -vista geral -cenario salas
 foto seguranca        -onda 4 -bot -speed 2 -shotdelay 14 -vista seguranca
 foto seguranca_cabine -onda 4 -bot -speed 2 -shotdelay 14 -vista seguranca -cenario salas
+foto malas_despacho  -onda 3 -bot -speed 2 -shotdelay 22 -vista malas -cenario salas
+foto malas_carrinho  -onda 3 -bot -speed 4 -shotdelay 30 -vista patio -cenario salas
 for n in 1 2 3 4 5 6 7 8 9; do foto "passo$n" -tutorial -bot -speed 8 -shotdelay 12 -tela "passo$n"; done
+# passos 10 a 12 (evento): a historia nasce na 2a onda; o terminal em nivel 3 vem do cenario; o cofre nao precisa de estado
+foto passo10 -tutorial -onda 2 -bot -speed 4 -shotdelay 22 -tela passo10
+foto passo11 -tutorial -speed 4 -shotdelay 4 -tela passo11 -cenario oficina
+foto passo12 -tutorial -speed 4 -shotdelay 4 -tela passo12
 
 # tutorial jogavel: o bot joga com o tutorial ligado (ENTENDI sozinho em 2 s); o log diz quais passos apareceram e terminaram
 foto tutorial_bot -tutorial -bot -speed 10 -shotdelay 120

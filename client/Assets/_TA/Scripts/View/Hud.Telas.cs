@@ -150,7 +150,7 @@ namespace TA
         /// <summary>Game: cofre ao abrir ou ao voltar da pausa (so com >= 60 s fora e Cash > 0).</summary>
         public void AbreCofre(long cash, long seg)
         {
-            _cofre.Titulo.text = Textos.Coletar;
+            _cofre.Titulo.text = Textos.CofreTitulo;
             _cofre.Corpo.text = Textos.Cofre(cash, seg);
             Abre(_cofre);
         }

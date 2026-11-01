@@ -83,7 +83,7 @@ namespace TA
         /// <summary>Malha de balcao de cada estacao e a escala dela (a loja e um quiosque grande: 0,6 cabe 1 por posto). A oficina tem a
         /// bancada aqui e o predio dela fica no mundo (Planta): o mecanico da Fase C mora la antes de a sala abrir.</summary>
         static readonly string[] BalcaoMalha = { "balcao_checkin", "raio_x", "loja", "catraca_embarque", "esteira_bagagem", "alimentacao", "balcao_informacoes", "balcao_informacoes" };
-        static readonly float[] BalcaoEscala = { 1f, EscalaSeg, 0.6f, 1f, 1f, 0.6f, 1f, 1f };
+        static readonly float[] BalcaoEscala = { 1f, EscalaSeg, 0.6f, 1f, EscalaBalcaoMala, 0.6f, 1f, 1f };
         /// <summary>Nivel de Velocidade a partir do qual o balcao troca pela malha `<malha>_n2` e `_n3` (Lotes 5 e 6): o upgrade muda o predio
         /// (GDD §5.13). Sem a malha daquele nivel, fica a do nivel abaixo.</summary>
         static readonly int[] NivelMalha = { 0, 2, 4 };
@@ -259,12 +259,13 @@ namespace TA
             if (_vista == "perto") { _alvo += new Vector3(-1.5f, 0f, -1.2f); _tam *= 0.55f; }
             else if (_vista == "patio") { _alvo = new Vector3(10.5f, 0f, 10.5f); _tam = 9.5f; }
             else if (_vista == "geral") { _alvo = new Vector3(21f, 0f, 13f); _tam = 19f; }
-            else if (_vista == "garagem") { _alvo = new Vector3(27f, 0f, 12f); _tam = 10f; }
+            else if (_vista == "garagem") { _alvo = new Vector3(33f, 0f, 13f); _tam = 9f; }
             else if (_vista == "seguranca") { _alvo = new Vector3(6f, 0f, 2.4f); _tam = 2.4f; }
-            else if (_vista == "hangar") { _alvo = new Vector3(29f, 0f, 16f); _tam = 11f; }
+            else if (_vista == "hangar") { _alvo = new Vector3(33f, 0f, 24f); _tam = 11f; }
             else if (_vista == "portao") { _alvo = V3(Centro(Portao)); _tam = 3.1f; }
+            else if (_vista == "malas") { _alvo = V3(Centro(SalaMalas)) + new Vector3(0f, 0f, 1.2f); _tam = 3.8f; }
             else if (_vista == "ponte") { _alvo = new Vector3(10.2f, 0f, 11.6f); _tam = 4.6f; }
-            else if (_vista == "escada") { _alvo = new Vector3(21f, 0f, 13.1f); _tam = 4.2f; }
+            else if (_vista == "escada") { _alvo = new Vector3(21f, 0f, 14f); _tam = 4.2f; }
             else if (_vista == "chegadas") { _alvo = new Vector3(4.6f, 0f, 10.2f); _tam = 3.6f; }
             else if (_vista == "calcada") { _alvo = new Vector3(-1.45f, 0f, 3.25f); _tam = 4.4f; }
         }
@@ -430,6 +431,9 @@ namespace TA
             }
             return Rect.MinMaxRect(x0, y0, x1, y1);
         }
+
+        /// <summary>Leva a sala para o meio da faixa do mundo, sem mudar o zoom (toque no aviso de perigo).</summary>
+        public void Foca(Estacao e) => _alvo += V3(Chao(ZonaTela(e).center) - Chao(_regiao.center));
 
         /// <summary>Retangulo do funcionario na tela (px), com o alvo minimo de toque; vazio se ainda nao foi contratado.</summary>
         public Rect FuncTela(int k)

@@ -44,8 +44,18 @@ def main():
     dados = defaultdict(list)
     with open(a.csv) as f:
         for r in csv.DictReader(f):
-            if r["peca"].split("#")[0] in ("pax", "func", "balcao"):
-                continue  # pessoas: client/tools/diag_pessoas.py
+            if r["peca"].split("#")[0] in (
+                "pax",
+                "func",
+                "equipe",
+                "ator",
+                "trip",
+                "mec",
+                "balcao",
+                "fixa",
+                "movel",
+            ):
+                continue  # pessoas: client/tools/diag_pessoas.py; caixas: diag_caixas.py
             dados[r["peca"]].append(
                 (
                     float(r["t"]),

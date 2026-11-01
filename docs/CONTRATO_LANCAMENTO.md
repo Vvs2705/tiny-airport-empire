@@ -37,7 +37,7 @@ Estados: **feito** (com evidência) · **parcial** · **falta** · **depende** (
 | 17 | Sem interstitial forçado | sim | **feito** no núcleo: não existe código de interstitial; `Anuncios` só tem os 2 rewarded | B | P-09 |
 | 18 | Save local, migração de schema, restauração de compras, nuvem se configurada | save + envelope | **parcial**: save em disco com escrita atômica, autosave de 5 s e na pausa, retomada no meio da onda, schema futuro recusado; migração feita nos schemas 2 (Fase C), 3 (Fase C2) e 4 (Fase C3), testadas com saves reais gravados pelo código anterior; falta restaurar compras (D) | B (save), C (migração), D (restaurar compras), C/D (nuvem, se houver) | P-10 |
 | 19 | Progressão offline limitada a 2 h | sim | **feito**: `ApplyOffline` com as travas (`ExploitTests`) e a tela do cofre com o tempo e o cálculo, ao abrir e ao voltar da pausa | B | P-10 |
-| 20 | Tutorial contextual (12 passos da Origem) | passos 1–9 | **parcial**: passos 1–9 feitos (fotos de cada passo e rodada `-tutorial -bot`); 10–12 na C | B (1–9), C (10–12) | P-02 |
+| 20 | Tutorial contextual (12 passos da Origem) | passos 1–9 | **feito**: passos 1–12 (fotos de cada passo e rodada `-tutorial -bot`); 10–12 são de evento, com 20 s de folga entre eles | B (1–9), C (10–12) | P-02 |
 | 21 | Configurações, áudio, acessibilidade básica, política de privacidade, suporte e exclusão de dados | — | depende | C (telas e áudio); política e suporte dependem de D-09, D-10 e D-12 | P-11 |
 | 22 | Telemetria de eventos, crash reporting e painel mínimo de saúde | diário CSV | **parcial**: diário CSV com os eventos do §15.1 e `diario_report.py` (K2 e embarque médio); produção **depende** de D-11 | B (diário), D (SDK de D-11); crash pelo Android vitals | P-16 |
 | 23 | Arte final, UI, ícone, screenshots e materiais de loja sem placeholder | greybox | depende | C e E; Tripo depende de D-14; logo e ícone dependem de D-03 | P-12, P-15 |
@@ -50,11 +50,11 @@ Estados: **feito** (com evidência) · **parcial** · **falta** · **depende** (
 | Decisão | Trava |
 |---|---|
 | D-03 nome e appId | o `Setup.cs` usa `br.com.vstack.tinyairport.dev` só para build de desenvolvimento; trava app no LevelPlay, chave de upload, logo, ícone e loja |
-| D-05/D-06/D-07 compras, backend e Gems | linha 15 e o premium da linha 14 |
-| D-08 idiomas | textos já entram numa tabela (padrão do `Textos.cs` do DC); a tradução espera a decisão |
+| D-05/D-06/D-07 compras, backend e Gems | decididas em 2026-11-01: opção (b), com Gems; falta a Play Console para a linha 15 e o premium da linha 14 |
+| D-08 idiomas | decidida em 2026-11-01: pt-BR e en |
 | D-13 nomes de companhias e aeroportos | arte de marca e textos das rotas |
-| D-14 lotes do Tripo | toda a arte além do greybox |
-| D-02 nova data-alvo | decidida no portão da Fase B, com a velocidade real |
+| D-14 lotes do Tripo | saldo livre até o plano vencer, em 2026-11-29 (Vinicius, 2026-11-01) |
+| D-02 nova data-alvo | decidida em 2026-11-01: assim que a Play Console sair e a regressão fechar |
 
 ## 3. Como esta matriz anda
 
