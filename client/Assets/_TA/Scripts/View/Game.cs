@@ -31,6 +31,7 @@ namespace TA
     ///   -cenario nome oficina = abre tudo, cada um na sua sala (salas = o mesmo, para medir; frota = o mesmo, com o +1 veiculo); desgaste = o aviao do 1o voo pousa com 85%; hangar = o mesmo, e o manda ao
     ///                 hangar assim que encostar (o -record da manutencao).
     ///   -vista nome   perto | patio | geral: enquadramento das fotos e do -record (Mundo.Vista).
+    ///   -perigo k     o perigo k em toda onda (PoePerigo), para fotografar o aviso.
     ///   -diag arq.csv [-diagseg s]  grava a pose dos avioes e veiculos (client/tools/diag_patio.py mede o escorregamento) e sai 0.
     ///   -perf s       K3 (GDD §5.13): depois de 5 s de aquecimento, mede s s de quadros, loga PERF p10=.. media=.. com as pessoas, os
     ///                 avioes e os veiculos na tela e sai 0. Usar com -passageiros 60.
@@ -82,6 +83,7 @@ namespace TA
             {
                 var t = new Tuning();
                 if (int.TryParse(Arg("-passageiros"), NumberStyles.Integer, Inv, out int n) && n > 0) t.PaxFixo = Mathf.Max(1, n / 2);
+                if (int.TryParse(Arg("-perigo"), NumberStyles.Integer, Inv, out int perigo)) PoePerigo(t, perigo);
                 Sim = new Sim(t, 1);
                 if (int.TryParse(Arg("-onda"), NumberStyles.Integer, Inv, out int k) && k > 1) Sim.IrParaOnda(k - 1);
                 if (Arg("-bot") != null) _bot = new Bot(BotProfile.Bom);
@@ -167,6 +169,11 @@ namespace TA
         public void BuyPatio(Servico s, Melhoria m) => Sim.BuyPatio(s, m);
         public void Checagem(int aviao) => Sim.Checagem(aviao);
         public void Hangar(int aviao) => Sim.Hangar(aviao);
+        public bool Adianta() => Sim.Adianta();
+        public bool Atrasa() => Sim.Atrasa();
+        public bool Repara() => Sim.Repara();
+        public bool Prioriza() => Sim.Prioriza();
+        public bool ReparaAviao(int aviao) => Sim.ReparaAviao(aviao);
 
         /// <summary>Botao de rewarded: pede o id de transacao ao nucleo e abre o anuncio simulado. Nunca durante arrasto (o botao some no
         /// tutorial e nas telas modais, Hud).</summary>
@@ -241,6 +248,7 @@ namespace TA
                 case Ev.HangarIniciado: Diario("hangar_started", e.A, e.B); break;
                 case Ev.HangarFeito: Diario("hangar_done", e.A); _hud.Toast(Textos.HangarFeito); break;
                 case Ev.EstacaoAberta: Diario("station_unlocked", e.A); _hud.Toast(Textos.EstacaoAberta(e.A)); break;
+                case Ev.PousoSeguro: Diario("safe_landing", e.A); _hud.Toast(Textos.PousoSeguro); break;
             }
         }
 
@@ -333,6 +341,28 @@ namespace TA
                 return;
             }
             _hud.AbreTela(tela);
+        }
+
+        /// <summary>-perigo k (so no -testsession, para as fotos): o TipoIncidente k em toda onda; 8, 9 e 10 = pane, rejeicao e retorno em todo voo no aviso de desgaste.</summary>
+        static void PoePerigo(Tuning t, int k)
+        {
+            t.ClimaMarco = 0; t.IncidenteFolga = 0; t.IncidenteTeto = 1f;
+            if (k >= 8)
+            {
+                t.RegraClima = t.RegraIncidentes = false; t.FalhaAviaoChance = 1f; t.DesgasteAviso = 0;
+                t.FalhaAviaoPesos = new int[3]; t.FalhaAviaoPesos[k - 8] = 1;
+                return;
+            }
+            Aeroporto a = t.Aeroportos[0].Copia();
+            int col = Array.FindIndex(Tabelas.Climas, c => c.Tipo == (TipoIncidente)k);
+            if (col >= 0)
+            {
+                a.Clima = new float[4][];
+                for (int e = 0; e < 4; e++) { a.Clima[e] = new float[Tabelas.Climas.Length]; a.Clima[e][col] = 1f; }
+            }
+            else { t.RegraClima = false; a.Incidentes = 1f; a.Pesos = new int[4]; a.Pesos[k] = 1; }
+            t.Aeroportos = (Aeroporto[])t.Aeroportos.Clone();
+            t.Aeroportos[0] = a;
         }
 
         IEnumerator Shot(string path, string tela)

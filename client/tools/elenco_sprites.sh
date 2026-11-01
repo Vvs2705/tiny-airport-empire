@@ -13,25 +13,29 @@ MALA="$(ls "$ARTE"/tripo/mala_rodinha_hd/*.fbx | head -1)"
 w() { cygpath -m "$1"; }
 
 ator() {
-  local nome=$1 anims=$2; shift 2
+  local nome=$1 anims=$2 saida=${SAIDA:-$1}; shift 2
   [ -f "$ARTE/tripo/_leve/$nome.blend" ] || { echo "FALHOU $nome: falta $ARTE/tripo/_leve/$nome.blend (rode elenco_ta.py)"; return 1; }
-  rm -rf "$OUT/$nome"
+  rm -rf "$OUT/$saida"
   "$BLENDER" -b --factory-startup --python-exit-code 1 --python "$(w "$ROOT/client/tools/render_sprites.py")" -- \
     --model "$(w "$ARTE/tripo/_leve/$nome.blend")" --anims "$(w "$ARTE/mixamo/$anims")" --preset "$nome" --mask \
-    --out "$(w "$OUT/$nome")" --contact "$(w "$CONF/$nome.png")" "$@" > "$LOG/$nome.log" 2>&1
-  if grep -q "SPRITES_OK" "$LOG/$nome.log"; then echo "OK   $nome: $(grep -c '^CLIP' "$LOG/$nome.log") clipes $(grep -E '^(AVISO|MASCARA)' "$LOG/$nome.log" | tr '\n' ' ' | cut -c1-200)"
-  else echo "FALHOU $nome (ver $LOG/$nome.log)"; grep -E "ERRO|Error|Traceback" "$LOG/$nome.log" | head -5; return 1; fi
+    --out "$(w "$OUT/$saida")" --contact "$(w "$CONF/$saida.png")" "$@" > "$LOG/$saida.log" 2>&1
+  if grep -q "SPRITES_OK" "$LOG/$saida.log"; then echo "OK   $saida: $(grep -c '^CLIP' "$LOG/$saida.log") clipes $(grep -E '^(AVISO|MASCARA)' "$LOG/$saida.log" | tr '\n' ' ' | cut -c1-200)"
+  else echo "FALHOU $saida (ver $LOG/$saida.log)"; grep -E "ERRO|Error|Traceback" "$LOG/$saida.log" | head -5; return 1; fi
 }
 
 ASSENTO=0.27   # altura do assento da cadeiras_espera em m (render_sprites.py --senta)
 # passageiros: a mala de rodinha na mao direita (no repouso em T o braco direito aponta para -x; a alca vai para a mao) e tingida na cor do voo
-mala() { echo "$(w "$MALA"):RightHand:-0.24,0,0:0,90,0:$1"; }
-pax() { ator "$1" ta_pax --attach "$(mala "$2")" --mask-attach --senta "$ASSENTO"; }
+mala() { echo "$(w "$MALA"):RightHand:$2,0,0:0,90,0:$1"; }
+pax() { ator "$1" ta_pax --attach "$(mala "$2" -0.24)" --mask-attach --senta "$ASSENTO"; }
+# <ator>_mao: a mesma pessoa so com a mala de mao, depois do despacho (Mundo.Malas.cs); a cor do voo continua na mao
+mao() { SAIDA="$1_mao" ator "$1" ta_pax --attach "$(mala "$2" -0.13)" --mask-attach --senta "$ASSENTO"; }
 
-lista=("$@"); [ ${#lista[@]} -eq 0 ] && lista=(passageiro_a passageira_b passageiro_idoso crianca atendente seguranca vendedor piloto comissaria comissario despachante bagageiro mecanico agente_portao agente_portao_f)
+lista=("$@"); [ ${#lista[@]} -eq 0 ] && lista=(passageiro_a passageira_b passageiro_idoso crianca passageiro_a_mao passageira_b_mao passageiro_idoso_mao crianca_mao atendente seguranca vendedor piloto comissaria comissario despachante bagageiro mecanico agente_portao agente_portao_f)
 falhas=0
 for a in "${lista[@]}"; do
   case $a in
+    crianca_mao) mao crianca 0.16 ;;
+    *_mao) mao "${a%_mao}" 0.2 ;;
     crianca) pax "$a" 0.30 ;;
     passageiro_*|passageira_*) pax "$a" 0.40 ;;
     atendente|seguranca|vendedor|bagageiro|mecanico|despachante) ator "$a" ta_func ;;   # o uniforme (elenco_ta.py, material TA_MASK) tinge na cor do setor
