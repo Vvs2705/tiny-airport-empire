@@ -358,8 +358,7 @@ namespace TA.Tests
             return ganho;
         }
 
-        const string CabecaCampanha = "| bot | ondas | embarque | receita | recompensas | objetivos | ganho |
-|---|---|---|---|---|---|---|";
+        const string CabecaCampanha = "| bot | ondas | embarque | receita | recompensas | objetivos | ganho |\n|---|---|---|---|---|---|---|";
 
         /// <summary>Portao do GDD §5.13 para a campanha (CONTRATO_FASE_C5 §6): quem joga pelo objetivo contra quem nunca olha a campanha, com a recompensa
         /// valendo para os dois. Em 20 ondas: depois disso o catalogo acaba e o Cash nao compra mais nada (BALANCE.md D-C5c).</summary>
