@@ -48,13 +48,15 @@ namespace TA
         /// <summary>Onde a pessoa de patio fica em cada servico: estande G, depois R (desembarque, limpeza, combustivel, bagagem).</summary>
         static readonly Vector2[,] PontoServico =
         {
-            { new Vector2(10.3f, 12.5f), new Vector2(12f, 12.6f), new Vector2(14.7f, 14.2f), new Vector2(13.4f, 15.2f) },
-            { new Vector2(21.4f, 11.6f), new Vector2(23.2f, 12.6f), new Vector2(25.9f, 14.2f), new Vector2(24.6f, 15.2f) },
+            { new Vector2(12.8f, 11.7f), new Vector2(12.8f, 12.4f), new Vector2(12.8f, 13.1f), new Vector2(12.8f, 13.8f) },
+            { new Vector2(23.95f, 11.5f), new Vector2(23.95f, 12.2f), new Vector2(23.95f, 12.9f), new Vector2(23.95f, 13.6f) },
         };
         static readonly Vector2 MecanicoCasa = new Vector2(17.9f, 7.4f), PortaOficina = new Vector2(18f, 8f);
-        static readonly Vector2[] MecanicoPonto = { new Vector2(12.2f, 10.9f), new Vector2(21.4f, 10.9f) };
+        static readonly Vector2[] MecanicoPonto = { new Vector2(12.8f, 11.05f), new Vector2(23.95f, 11.05f) };
+        /// <summary>z da calcada do patio: entre a rua oeste e os narizes dos veiculos nas faixas (Mundo.Veiculos.cs).</summary>
+        const float CalcadaZ = 11.05f;
         /// <summary>A sala da tripulacao, a porta do aviao em cada estande e o caminho do embarque remoto (porta do portao, patio e escada).</summary>
-        static readonly Vector2 SalaTrip = new Vector2(7.6f, 8.6f), PonteIni = new Vector2(10f, 8.4f), RemotoPorta = new Vector2(11.2f, 8f), RemotoPatio = new Vector2(18f, 8.6f), RemotoFim = new Vector2(18f, 12.1f);
+        static readonly Vector2 SalaTrip = new Vector2(7.6f, 8.6f), PonteIni = new Vector2(10f, 8.4f), RemotoPorta = new Vector2(11.2f, 8f), RemotoPatio = new Vector2(12.2f, CalcadaZ), RemotoFim = new Vector2(20.8f, CalcadaZ);
 
         readonly List<Vector2> _portas = new List<Vector2>();
         readonly List<Ator> _patio = new List<Ator>();
@@ -208,6 +210,11 @@ namespace TA
         /// trecho longo, nunca alem do que a folha acompanha sem o pe deslizar.</summary>
         void Anda(Boneco b, float vel, float dt)
         {
+            if (b.Pos.y > 7.6f && b.Pos.y < 14.6f && b.Pos.x > 10.8f)
+            {
+                _naFaixa.Add(b.Pos);
+                if (b.Caminho.Count > 0 && VeiculoNoPasso(b)) { b.VelAtual = 0f; Movido(b, Vector2.zero, dt); return; }
+            }
             Vector2 antes = b.Pos;
             float resta = 0f;
             Vector2 q = b.Pos;
@@ -358,7 +365,7 @@ namespace TA
 
         void GentePatio()
         {
-            NovoAtor("despachante", 3f, new Vector2(12.2f, 9.2f), new Vector2(12.7f, 9.2f));
+            NovoAtor("despachante", 3f, new Vector2(12.9f, 9.2f), new Vector2(13.4f, 9.2f));
             if (_patio.Count > 0) _patio[0].B.Tinta = ColeteSinal;
             _mecanico = NovoBoneco("mecanico");
             _mecanico.Pos = MecanicoCasa;
@@ -427,11 +434,14 @@ namespace TA
             }
         }
 
-        static Vector2 Ocioso(int i) => new Vector2(14.4f + i * 0.5f, 9.8f);
+        /// <summary>A beira do patio: o corredor entre o regional e a primeira faixa.</summary>
+        static Vector2 Ocioso(int i) => new Vector2(13.6f, 11.5f + i * 0.45f);
 
+        /// <summary>Do corredor de um aviao para o do outro, pela calcada: ninguem corta as faixas.</summary>
         static void Vai(Boneco b, Vector2 p)
         {
             b.Caminho.Clear();
+            if (Mathf.Abs(p.x - b.Pos.x) > 1.5f) { b.Caminho.Add(new Vector2(b.Pos.x, CalcadaZ)); b.Caminho.Add(new Vector2(p.x, CalcadaZ)); }
             b.Caminho.Add(p);
         }
 
@@ -448,14 +458,12 @@ namespace TA
                 if (k >= 0)
                 {
                     if (b.Pos.y < PortaOficina.y) b.Caminho.Add(PortaOficina);
-                    b.Caminho.Add(new Vector2(PortaOficina.x, 9.5f));
-                    b.Caminho.Add(new Vector2(MecanicoPonto[k].x, 9.5f));
+                    b.Caminho.Add(new Vector2(PortaOficina.x, CalcadaZ));
                     b.Caminho.Add(MecanicoPonto[k]);
                 }
                 else
                 {
-                    b.Caminho.Add(new Vector2(b.Pos.x, 9.5f));
-                    b.Caminho.Add(new Vector2(PortaOficina.x, 9.5f));
+                    b.Caminho.Add(new Vector2(PortaOficina.x, CalcadaZ));
                     b.Caminho.Add(PortaOficina);
                     b.Caminho.Add(MecanicoCasa);
                 }
@@ -503,7 +511,7 @@ namespace TA
             b.Caminho.Clear();
             var r = new List<Vector2> { SalaTrip, PonteIni };
             if (aviao == 0) r.Add(PonteFim);
-            else { r.Add(RemotoPatio); r.Add(RemotoFim); }
+            else { r.Add(RemotoPorta); r.Add(new Vector2(RemotoPatio.x, RemotoPorta.y)); r.Add(RemotoPatio); r.Add(RemotoFim); }
             if (desce) r.Reverse();
             b.Pos = r[0];
             for (int i = 1; i < r.Count; i++) b.Caminho.Add(r[i]);
