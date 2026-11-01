@@ -1,10 +1,10 @@
 # Contrato da Fase C5: campanha principal no núcleo (2026-11-01)
 
-Fonte da verdade: `GDD.md` §4.1, §5.10, §5.13 (portão de design), §6.1, §6.5 e §14.2 (migração). A lista dos 30 objetivos está em `CAMPANHA.md`. Continua os contratos das Fases C a C4: nada de lá muda de regra.
+Fonte da verdade: `GDD.md` §4.1, §5.10, §5.13 (portão de design), §6.1, §6.5 e §14.2 (migração), sem mudar nenhum deles. A lista dos 30 objetivos está em `CAMPANHA.md`. Continua os contratos das Fases C a C4: nada de lá muda de regra.
 
 Todo número é **hipótese**: o bot mede e o `BALANCE.md` registra.
 
-**Medido em 2026-11-01 (`BALANCE.md`, D-C5a a D-C5d):** os 30 fecham em 200 de 200 sementes, com o Bom e com o Lento que jogam pelo objetivo. Portão do §5.13 em 20 ondas: **1,140**. TA-1: Bom XXTA1BOM%, Lento XXTA1LENTO%. TA-2: XXTA2. Com a campanha sem pagar, a tabela do bot é a da fase anterior, número a número. O desenho mudou com a medida: **a primeira versão deste contrato contava só o objetivo ativo e media o portão em 64 ondas**. O §2 e o §6 já estão na versão final, e o BALANCE conta por quê. Mudou regra ou número? Atualize aqui e no `BALANCE.md` no mesmo commit.
+**Medido em 2026-11-01 (`BALANCE.md` §9, D-C5a a D-C5d):** os 30 fecham em 200 de 200 sementes, com o Bom e com o Lento que jogam pelo objetivo. Portão do §5.13 em 20 ondas: **1,140**. TA-1: Bom 94,9%, Lento 73,2%. TA-2: 1,413. Com a campanha sem pagar, a tabela do bot é a da fase anterior, número a número. O desenho mudou com a medida: **a primeira versão deste contrato contava só o objetivo ativo e media o portão em 64 ondas**. O §2 e o §6 já estão na versão final, e o BALANCE conta por quê. Mudou regra ou número? Atualize aqui e no `BALANCE.md` no mesmo commit.
 
 ## 1. O que entra
 
