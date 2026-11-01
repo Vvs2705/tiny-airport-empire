@@ -54,6 +54,7 @@ namespace TA
             public Tipo Tipo;   // null = o rebocador
             public int Aviao = -1, Vaga;
             public float S, V, Vel, Eixo, Comp, Larg, Pitch, Roll, Parado;
+            public bool EsperaGente;   // parou por causa de uma pessoa: ela tem a vez (VeiculoNoPasso)
             public Lida Lida;
             public readonly Queue<Trecho> Rotas = new Queue<Trecho>();
         }
@@ -275,8 +276,9 @@ namespace TA
             {
                 Vector3 d = V(q.x, q.y) - c;
                 float frente = Vector3.Dot(d, f);
-                if (frente > 0f && frente < v.Comp * 0.5f + 0.5f + freada && Mathf.Abs(Vector3.Dot(d, lado)) < v.Larg * 0.5f + 0.25f) return false;
+                if (frente > 0f && frente < v.Comp * 0.5f + 0.5f + freada && Mathf.Abs(Vector3.Dot(d, lado)) < v.Larg * 0.5f + 0.25f) { v.EsperaGente = true; return false; }
             }
+            v.EsperaGente = false;
             float oeste = Cruza(v, t, RuaOeste), leste = Cruza(v, t, RuaLeste);
             if (oeste >= 0f && v.T.position.z > RuaOeste) leste = oeste;
             else if (t.Re && v.S < 0.2f && Mathf.Abs(v.T.position.z - RuaOeste) < 0.6f) leste = v.T.position.x;
@@ -322,13 +324,14 @@ namespace TA
 
         static Vector3 Centro(Veiculo v) => v.T.position + v.T.forward * v.Eixo;
 
-        /// <summary>A pessoa espera: o proximo passo entra na caixa de um veiculo (com folga maior se ele esta andando) e chega mais perto dele.</summary>
+        /// <summary>A pessoa espera: o proximo passo entra na caixa de um veiculo (com folga maior se ele esta andando) e chega mais perto dele.
+        /// Quem ja parou por causa de gente nao conta: se os 2 esperassem, ninguem saia dali.</summary>
         bool VeiculoNoPasso(Boneco b)
         {
             Vector2 prox = b.Pos + (b.Caminho[0] - b.Pos).normalized * 0.4f;
             foreach (Veiculo v in _veiculos)
             {
-                if (_escada && b.Estande == 1 && v.Tipo?.Encosta == true) continue;   // sobe nela
+                if (v.EsperaGente || (_escada && b.Estande == 1 && v.Tipo?.Encosta == true)) continue;   // sobe nela
                 Vector3 c = Centro(v), f = v.T.forward;
                 Vector2 eixo = new Vector2(f.x, f.z), lado = new Vector2(f.z, -f.x), a = prox - new Vector2(c.x, c.z), n = b.Pos - new Vector2(c.x, c.z);
                 float folga = v.V > 0.1f ? 0.45f : 0.25f, ax = Mathf.Abs(Vector2.Dot(a, eixo)), ay = Mathf.Abs(Vector2.Dot(a, lado));

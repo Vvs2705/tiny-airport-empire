@@ -456,6 +456,9 @@ namespace TA
             return Rect.MinMaxRect(x0, y0, x1, y1);
         }
 
+        /// <summary>Leva a sala para o meio da faixa do mundo, sem mudar o zoom (toque no aviso de perigo).</summary>
+        public void Foca(Estacao e) => _alvo += V3(Chao(ZonaTela(e).center) - Chao(_regiao.center));
+
         /// <summary>Retangulo do funcionario na tela (px), com o alvo minimo de toque; vazio se ainda nao foi contratado.</summary>
         public Rect FuncTela(int k)
         {
