@@ -12,8 +12,8 @@ namespace TA
     public sealed partial class Mundo
     {
         /// <summary>Linha de cada posto ao longo da parede (a linha cheia cabe 4 na sala) e a escala do raio-x e do pórtico.</summary>
-        static readonly float[] SegA = { -0.48f, 0.48f, -1.43f, 1.43f };
-        const float EscalaSeg = 0.62f, PassoX = -0.2f, BeltX = 0.2f;
+        static readonly float[] SegA = { -0.43f, 0.43f, -1.26f, 1.26f };
+        const float EscalaSeg = 0.5f, PassoX = -0.22f, BeltX = 0.2f, SegMaquinaD = 0.72f, SegAntesD = 1.18f, SegDepoisD = 0.36f, SegMalaD = 0.28f, SegAgenteD = 0.16f;
         /// <summary>Troca por nome de arquivo: sem a malha do nível, fica a de baixo. Nível 2 = Velocidade 4 (NivelMalha).</summary>
         static readonly string[] PorticoMalha = { "portico_detector", "portico_detector", "cabine_scanner_corpo" };
         readonly GameObject[,] _portico = new GameObject[4, 3];
@@ -26,21 +26,21 @@ namespace TA
         void Seguranca3D(int i)
         {
             const int e = (int)Estacao.Seguranca;
-            Vector2 p = Em(e, 1.05f, SegA[i] + PassoX);
+            Vector2 p = Em(e, SegMaquinaD, SegA[i] + PassoX);
             Transform ant = null;
             for (int n = 0; n < PorticoMalha.Length; n++)
             {
-                Transform t = Peca(PorticoMalha[n], V3(p), 0f, n == 2 ? 0.7f : EscalaSeg);
+                Transform t = Peca(PorticoMalha[n], V3(p), 0f, n == 2 ? 0.55f : EscalaSeg);
                 if (t == null) t = ant;
                 else t.gameObject.SetActive(false);
                 ant = t;
                 _portico[i, n] = t != null ? t.gameObject : null;
             }
-            _bandeja[i] = Peca("bandeja_seguranca", V3(Em(e, 1.55f, SegA[i] + BeltX), 0.32f), 0f);
-            if (_bandeja[i] == null) _bandeja[i] = Bloco("Bandeja", PrimitiveType.Cube, V3(Em(e, 1.55f, SegA[i] + BeltX), 0.32f), new Vector3(0.3f, 0.04f, 0.3f), Art.Hex(0x8A94A6)).transform;
+            _bandeja[i] = Peca("bandeja_seguranca", V3(Em(e, SegAntesD, SegA[i] + BeltX), 0.2f), 0f, 0.5f);
+            if (_bandeja[i] == null) _bandeja[i] = Bloco("Bandeja", PrimitiveType.Cube, V3(Em(e, SegAntesD, SegA[i] + BeltX), 0.2f), new Vector3(0.15f, 0.03f, 0.15f), Art.Hex(0x8A94A6)).transform;
             _bandeja[i].gameObject.SetActive(false);
-            _malaSeg[i] = Billboard("MalaSeg" + i, Art.Mala(), Color.white, 0.22f);
-            _scanner[i] = Peca("scanner_mao", Vector3.zero, 0f, 1.2f);
+            _malaSeg[i] = Billboard("MalaSeg" + i, Art.Mala(), Color.white, 0.12f);
+            _scanner[i] = Peca("scanner_mao", Vector3.zero, 0f, 0.6f);
             if (_scanner[i] != null) _scanner[i].gameObject.SetActive(false);
         }
 
@@ -60,9 +60,9 @@ namespace TA
         static Vector2 PontoSeguranca(Pax p, int i, float f, bool agente)
         {
             const int e = (int)Estacao.Seguranca;
-            if (f < 0.28f) return Em(e, 1.62f, SegA[i] + PassoX);   // põe a mala na bandeja
-            if (f < 0.62f || (Vistoria(p) && agente && f < 0.88f)) return Em(e, 0.72f, SegA[i] + PassoX);   // atravessou o pórtico; vistoria
-            return Em(e, 0.5f, SegA[i] + BeltX);   // pega a mala
+            if (f < 0.28f) return Em(e, SegAntesD, SegA[i] + PassoX);   // põe a mala na bandeja
+            if (f < 0.62f || (Vistoria(p) && agente && f < 0.88f)) return Em(e, SegDepoisD, SegA[i] + PassoX);   // atravessou o pórtico; vistoria
+            return Em(e, SegMalaD, SegA[i] + BeltX);   // pega a mala
         }
 
         /// <summary>A bandeja anda pelo raio-x no tempo do atendimento; a mala em cima, na cor do voo; o scanner sobe e desce na vistoria.</summary>
@@ -75,12 +75,12 @@ namespace TA
             bool scan = p != null && agente && Vistoria(p) && f >= 0.62f && f < 0.88f;
             if (_scanner[i] != null) _scanner[i].gameObject.SetActive(scan);
             if (!ve) return;
-            Vector3 b = V3(Em(e, Mathf.Lerp(1.55f, 0.5f, Mathf.InverseLerp(0.22f, 0.82f, f)), SegA[i] + BeltX), 0.3f);
+            Vector3 b = V3(Em(e, Mathf.Lerp(SegAntesD, SegMalaD, Mathf.InverseLerp(0.22f, 0.82f, f)), SegA[i] + BeltX), 0.2f);
             _bandeja[i].position = b;
-            _malaSeg[i].transform.SetPositionAndRotation(b + Vector3.up * 0.14f, _cam.transform.rotation);
+            _malaSeg[i].transform.SetPositionAndRotation(b + Vector3.up * 0.08f, _cam.transform.rotation);
             _malaSeg[i].color = Art.VooCor[p.Voo];
             _malaSeg[i].sortingOrder = Ordem(b) + 6;
-            if (scan) _scanner[i].position = V3(pos + new Vector2(0.14f, -0.08f), 0.5f + 0.3f * Mathf.PingPong(Time.time * 1.6f, 1f));
+            if (scan) _scanner[i].position = V3(pos + new Vector2(0.08f, -0.05f), 0.15f + 0.2f * Mathf.PingPong(Time.time * 1.6f, 1f));
         }
     }
 }

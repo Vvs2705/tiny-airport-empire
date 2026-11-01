@@ -18,6 +18,9 @@ namespace TA
     ///    (sul do portao), despacho (leste do portao) e oficina (leste do despacho, com porta para o patio). Fechada pelo marco, a sala e
     ///    so o piso com a placa. Salas de 4 x 4 em corte (paredes baixas, sem teto), portas na tabela Portas, fila indiana entre fitas e
     ///    os balcoes junto a parede de saida. Atras das salas, o predio do terminal, que cresce com o marco; no patio, torre e hangar.
+    ///  - Escala (docs/COMPETITIVO.md §h.8, decidida em 01/11 com fotos): adulto de 0,5 m (Gente) e 0,2 m de ombros, entao a grade de 4 m tem 20
+    ///    pessoas de lado, 17 de piso util (Interno) e um corredor de 3 pessoas entre as salas. Regua em pessoas: cadeira 1, balcao 3,4, porta 2,2.
+    ///    O patio nao muda: o aviao de 9 m tem 18 pessoas de comprimento e a fuselagem de 1 m cabe gente em pe.
     ///  - Corpos rigidos = malhas do Tripo decimadas (client/tools/malhas_ta.py, em Resources/Malhas de Assets/_TA/ArtLocal, fora do git
     ///    pela licenca; GDD §10.2). Sem a pasta (clone do repositorio), as primitivas da v0.1 entram no lugar.
     ///  - Placa pequena no chao de cada sala (nome; "fechada" na loja sem gente) e, so quando ha problema, um selo curto do estado acima
@@ -30,9 +33,12 @@ namespace TA
     {
         // ------------------------------------------------------------------ planta (unidades de mundo = m; Y para cima, chao em Y = 0)
 
-        public const float Lado = 4f;
-        const float Elev = 45f, VelPax = 1.8f, Troca = 0.35f, EscalaFunc = 1f, PortaLarg = 0.9f;
-        static readonly float[] Desloc = { -0.8f, 0.8f, -1.55f, 1.55f };   // balcoes ao longo da parede de saida, com o corredor no meio
+        /// <summary>Grade das salas, corredor entre elas (metade para cada sala: as paredes ficam recuadas) e o adulto. `Em` mede a partir da parede.</summary>
+        public const float Lado = 4f, Corredor = 0.6f, Gente = 0.5f, Interno = Lado - Corredor;
+        const float Elev = 45f, VelPax = 1.2f, Troca = 0.35f, EscalaFunc = Gente, PortaLarg = 0.45f;
+        /// <summary>Fileiras de quem atende e de quem e atendido, a partir da parede de saida; a fila em pessoas (1,35 por lugar).</summary>
+        const float AtrasD = 0.16f, BalcaoD = 0.62f, FrenteD = 1.08f, FaixaD = 1.25f, FilaD = 1.42f, FilaPasso = 0.27f, FilaLinha = 0.34f;
+        static readonly float[] Desloc = { -0.6f, 0.6f, -1.3f, 1.3f };   // balcoes ao longo da parede de saida, com o corredor no meio
 
         /// <summary>Sala de cada estacao: canto (x, z), porta de entrada e de saida (no meio da parede) e a direcao da saida (para fora).</summary>
         struct Sala { public Vector2 Min, In, Out, N, T; }
@@ -83,7 +89,7 @@ namespace TA
         /// <summary>Malha de balcao de cada estacao e a escala dela (a loja e um quiosque grande: 0,6 cabe 1 por posto). A oficina tem a
         /// bancada aqui e o predio dela fica no mundo (Planta): o mecanico da Fase C mora la antes de a sala abrir.</summary>
         static readonly string[] BalcaoMalha = { "balcao_checkin", "raio_x", "loja", "portao_embarque", "esteira_bagagem", "alimentacao", "balcao_informacoes", "balcao_informacoes" };
-        static readonly float[] BalcaoEscala = { 1f, EscalaSeg, 0.6f, 1f, 1f, 0.6f, 1f, 1f };
+        static readonly float[] BalcaoEscala = { 0.9f, EscalaSeg, 0.6f, 1f, 1f, 0.6f, 0.75f, 0.75f };
         /// <summary>Nivel de Velocidade a partir do qual o balcao troca pela malha `<malha>_n2` e `_n3` (Lotes 5 e 6): o upgrade muda o predio
         /// (GDD §5.13). Sem a malha daquele nivel, fica a do nivel abaixo.</summary>
         static readonly int[] NivelMalha = { 0, 2, 4 };
@@ -97,23 +103,23 @@ namespace TA
         static readonly Vector2 Calcada = new Vector2(-2.6f, 2f), PonteFim = new Vector2(10f, 12.1f);
 
         /// <summary>Ponto da sala a `d` da parede de saida e `a` ao longo dela.</summary>
-        static Vector2 Em(int e, float d, float a) => Salas[e].Out - Salas[e].N * d + Salas[e].T * a;
-        static Vector2 Balcao(int e, int i) => Em(e, 1.0f, Posto(e, i));
-        static Vector2 NoBalcao(int e, int i) => Em(e, 1.55f, Posto(e, i));
-        static Vector2 AtrasBalcao(int e, int i) => e == (int)Estacao.Seguranca ? Em(e, 0.62f, SegA[i] + 0.44f) : Em(e, 0.45f, Posto(e, i));
+        static Vector2 Em(int e, float d, float a) => Salas[e].Out - Salas[e].N * (d + Corredor * 0.5f) + Salas[e].T * a;
+        static Vector2 Balcao(int e, int i) => Em(e, BalcaoD, Posto(e, i));
+        static Vector2 NoBalcao(int e, int i) => Em(e, FrenteD, Posto(e, i));
+        static Vector2 AtrasBalcao(int e, int i) => e == (int)Estacao.Seguranca ? Em(e, SegAgenteD, SegA[i] + PassoX) : Em(e, AtrasD, Posto(e, i));
         static Vector2 Centro(int e) => Salas[e].Min + new Vector2(Lado * 0.5f, Lado * 0.5f);
         /// <summary>Rumo (graus de yaw do Unity) da direcao `d` do chao: +z = 0.</summary>
         static float Rumo(Vector2 d) => Mathf.Atan2(d.x, d.y) * Mathf.Rad2Deg;
 
         /// <summary>Lugar k da fila indiana: 5 fileiras de 12 paralelas aos balcoes, em serpentina (60 cabem: o estresse do K3).</summary>
-        static Vector2 Fila(int e, int k)
+        public static Vector2 Fila(int e, int k)
         {
             int r = Mathf.Min(k / 12, 4), c = k % 12;
-            float a = -1.7f + (r % 2 == 0 ? c : 11 - c) * 0.31f;
-            return Em(e, 2.05f + r * 0.42f, a);
+            float a = (r % 2 == 0 ? c - 5.5f : 5.5f - c) * FilaPasso;
+            return Em(e, FilaD + r * FilaLinha, a);
         }
 
-        static int SalaEm(Vector2 p)
+        public static int SalaEm(Vector2 p)
         {
             for (int e = 0; e < Salas.Length; e++)
             {
@@ -259,7 +265,7 @@ namespace TA
             else if (_vista == "garagem") { _alvo = new Vector3(27f, 0f, 12f); _tam = 10f; }
             else if (_vista == "seguranca") { _alvo = new Vector3(6f, 0f, 2.4f); _tam = 2.4f; }
             else if (_vista == "hangar") { _alvo = new Vector3(29f, 0f, 16f); _tam = 11f; }
-            else if (_vista != null && _vista.Length == 5 && _vista.StartsWith("sala")) { _alvo = V3(Centro(_vista[4] - '0')); _tam = 3.4f; }
+            else if (_vista != null && _vista.Length == 5 && _vista.StartsWith("sala")) { _alvo = V3(Centro(_vista[4] - '0')); _tam = 4.4f; }
         }
 
         /// <summary>Game (-vista, so no -testsession): enquadramento das fotos e do -record (perto = zoom nas salas; hangar = o caminho ate ele; patio = salas, estandes
@@ -275,7 +281,7 @@ namespace TA
 
         void Posiciona()
         {
-            _tam = Mathf.Clamp(_tam, 2.2f, 20f);
+            _tam = Mathf.Clamp(_tam, 1.6f, 20f);
             _alvo.x = Mathf.Clamp(_alvo.x, -8f, 40f);
             _alvo.z = Mathf.Clamp(_alvo.z, -4f, 26f);
             _cam.orthographicSize = _tam;
@@ -339,7 +345,7 @@ namespace TA
                     bool vazio = i < st.Postos && i >= gente;
                     _vazio[e, i].enabled = vazio;
                     if (!vazio) continue;
-                    Vector3 pv = V3(Balcao(e, i), 1.05f);
+                    Vector3 pv = V3(Balcao(e, i), 0.68f);
                     _vazio[e, i].transform.SetPositionAndRotation(pv, _cam.transform.rotation);
                     _vazio[e, i].sortingOrder = Ordem(pv) + 8;
                 }
@@ -347,7 +353,7 @@ namespace TA
                 _mao[e].enabled = toque;
                 if (toque)
                 {
-                    Vector3 pm = V3(Em(e, 1.3f, 0f), 1.6f);
+                    Vector3 pm = V3(Em(e, FrenteD, 0f), 0.95f);
                     _mao[e].transform.position = pm;
                     _mao[e].transform.rotation = _cam.transform.rotation;
                     _mao[e].transform.localScale = Vector3.one * (0.55f + 0.1f * Mathf.PingPong(Time.unscaledTime * 3f, 1f));
@@ -359,7 +365,7 @@ namespace TA
                 _selo[e].gameObject.SetActive(alerta);
                 if (alerta)
                 {
-                    Coloca(_selo[e], V3(Centro(e), 1.9f));
+                    Coloca(_selo[e], V3(Centro(e), 1.2f));
                     Prende(_selo[e]);
                     _seloTexto[e].text = Textos.EstadoTexto(st.Estado, st.VooEmRisco);
                     _seloTexto[e].color = st.Estado == Estado.Critico ? Art.Bad : Art.Warn;
@@ -391,7 +397,9 @@ namespace TA
         {
             int pessoas = _pax.Count + _patio.Count + _equipe.Count + _andantes.Count + S.Staff.Count, avioes = 0;
             foreach (Aviao a in _avioes) if (a.T.gameObject.activeSelf) avioes++;
-            return "pessoas=" + pessoas + " avioes=" + avioes + " veiculos=" + _veiculos.Count;
+            int ligados = 0;   // aproxima as chamadas de desenho: o PC prende em 60 qps e nao mostra piora
+            foreach (Renderer r in _raiz.GetComponentsInChildren<Renderer>()) if (r.enabled) ligados++;
+            return "pessoas=" + pessoas + " avioes=" + avioes + " veiculos=" + _veiculos.Count + " renderers=" + ligados;
         }
 
         void Coloca(RectTransform rt, Vector3 mundo)

@@ -28,5 +28,20 @@ namespace TA.Tests
             Mundo.PelasPortas(4, 1, r);   // a volta da bagagem passa pelo check-in
             CollectionAssert.AreEqual(new[] { new Vector2(2f, 4f), new Vector2(4f, 2f) }, r);
         }
+
+        [Test]
+        public void Fila60_CabeNoPisoDaSala_SemEncostarNaParede()
+        {
+            const float folga = Mundo.Corredor * 0.5f + 0.1f;   // meia pessoa da parede
+            for (int e = 0; e < 8; e++)
+                for (int k = 0; k < 60; k++)
+                {
+                    Vector2 p = Mundo.Fila(e, k);
+                    Assert.AreEqual(e, Mundo.SalaEm(p), e + " lugar " + k);
+                    float x = Mathf.Repeat(p.x, Mundo.Lado), z = Mathf.Repeat(p.y, Mundo.Lado);
+                    Assert.That(x, Is.InRange(folga, Mundo.Lado - folga), e + " lugar " + k);
+                    Assert.That(z, Is.InRange(folga, Mundo.Lado - folga), e + " lugar " + k);
+                }
+        }
     }
 }

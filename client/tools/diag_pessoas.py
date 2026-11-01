@@ -6,9 +6,9 @@ Pessoas (pax#id e func#k; a coluna y = 1 com o boneco andando, a coluna yaw = o 
   viradas   trocas de rumo da folha por 10 m andados (zigue-zague)
   tele      saltos acima de 6 m/s (teletransporte); a pessoa que entra ou sai de cena nao conta
   vMax      velocidade maxima (m/s)
-  pe%       amostras andando fora de 0,39 a 2,53 m/s: a cadencia da folha satura e o pe desliza (PassoNatural 1,1 m/s, Pinta)
-  balcao%   amostras andando a menos de 0,3 m do centro de um balcao (balcao#e.i, gravado no comeco): atravessou
-  choque    pessoa andando a menos de 0,15 m de outra, por minuto de pessoa andando
+  pe%       amostras andando fora de 0,19 a 1,65 m/s: a cadencia da folha satura e o pe desliza (PassoNatural 0,55 m/s, Pinta)
+  balcao%   amostras andando a menos de 0,2 m do centro de um balcao (balcao#e.i, gravado no comeco): atravessou
+  choque    pessoa andando a menos de 0,08 m de outra, por minuto de pessoa andando
 Veiculos: sobrepos = amostras com 2 veiculos com as caixas (comprimento x largura da malha) sobrepostas, parados ou nao; o rebocador
 preso ao aviao nao conta. Criterio do Vinicius (30/10): nenhuma sobreposicao; sem andar de lado, sem atravessar, sem teletransporte.
 """
@@ -90,16 +90,16 @@ def pessoas(linhas, balcoes):
                 tot["lado"] += 1
             if abs(ang(b[4] - a[4])) > 1.0:
                 tot["vira"] += 1
-            if v < 0.39 or v > 2.53:
+            if v < 0.19 or v > 1.65:
                 tot["pe"] += 1
-            if any(math.hypot(b[1] - q[0], b[2] - q[1]) < 0.3 for q in balcoes):
+            if any(math.hypot(b[1] - q[0], b[2] - q[1]) < 0.2 for q in balcoes):
                 tot["balcao"] += 1
     for t, gente in por_t.items():
         for i, g in enumerate(gente):
             if g[3] < 0.5:
                 continue
             if any(
-                j != i and math.hypot(g[1] - o[1], g[2] - o[2]) < 0.15
+                j != i and math.hypot(g[1] - o[1], g[2] - o[2]) < 0.08
                 for j, o in enumerate(gente)
             ):
                 tot["choque"] += 1

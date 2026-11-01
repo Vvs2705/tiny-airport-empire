@@ -21,7 +21,7 @@ namespace TA
         /// <summary>Corpo do passageiro: hash de Fibonacci do id (a conta linear so caia em indices pares e a fila saia quase toda igual).</summary>
         static string CorpoDe(Pax p) => PaxAtor[(int)(((uint)p.Id * 2654435761u) >> 24) % PaxAtor.Length];
         static readonly string[] FuncAtor = { "atendente", "seguranca", "vendedor", "bagageiro", "mecanico", "despachante" };   // Textos.Funcionario (a vendedora do Tripo e mulher: o Caio virou Cida em 29/10)
-        const float PassoNatural = 1.1f, Freada = 4f, VelFunc = 2.4f, VelMax = 2.5f;   // m/s em que o andar da folha nao patina (adulto de 1 m); m/s2; com pressa; teto em que a folha ainda acompanha
+        const float PassoNatural = 1.1f * Gente, Freada = 3f, VelFunc = 1.6f, VelMax = 1.65f, CadenciaMax = 3f;   // m/s em que o andar da folha nao patina; m/s2; com pressa (sala vizinha na Tuning.Caminhada); teto em que a folha ainda acompanha
 
         sealed class Boneco
         {
@@ -35,7 +35,7 @@ namespace TA
             public readonly List<Vector2> Caminho = new List<Vector2>();
             public int Zona = -1;
             public bool Saindo, Andou, Cima, Atende, NoBalcao;
-            public float Dir = 1f, Escala = 1f;
+            public float Dir = 1f, Escala = Gente;
         }
 
         /// <summary>Gente do patio: pontos de uma volta curta e a pausa em cada um.</summary>
@@ -72,8 +72,8 @@ namespace TA
             b.Sombra = Art.NewSprite(b.T, "Sombra", Art.Disc(), new Color(0f, 0f, 0f, 0.3f), 0, new Vector2(0f, 0.02f), new Vector2(0.46f, 0.16f));
             b.Corpo = Art.NewSprite(b.T, "Corpo", null, Color.white, 0, Vector2.zero, Vector2.one);
             if (SpriteSheet.Material != null) b.Corpo.sharedMaterial = SpriteSheet.Material;
-            b.Coracao = Art.NewSprite(b.T, "Historia", Art.Heart(), Art.Bad, 0, new Vector2(0f, 1.12f), new Vector2(0.26f, 0.26f));
-            b.Humor = Art.NewSprite(b.T, "Humor", Art.Alerta(), Art.Bad, 0, new Vector2(0.18f, 1.1f), new Vector2(0.24f, 0.24f));
+            b.Coracao = Art.NewSprite(b.T, "Historia", Art.Heart(), Art.Bad, 0, new Vector2(0f, 1.2f), new Vector2(0.52f, 0.52f));   // o selo nao encolhe com a pessoa
+            b.Humor = Art.NewSprite(b.T, "Humor", Art.Alerta(), Art.Bad, 0, new Vector2(0.3f, 1.2f), new Vector2(0.48f, 0.48f));
             b.Coracao.enabled = b.Humor.enabled = false;
             Veste(b, ator);
             return b;
@@ -127,7 +127,7 @@ namespace TA
                     Liga(p, e, alvo, s, true, false);
                     if (seg) BandejaPasso(i, p, f, i < agentes, _pax[p.Id].Pos);
                     _arco[e, i].sprite = Art.Arc(f);
-                    Vector3 pa = V3(alvo, 1.35f);
+                    Vector3 pa = V3(alvo, 0.82f);
                     _arco[e, i].transform.position = pa;
                     _arco[e, i].transform.rotation = _cam.transform.rotation;
                     _arco[e, i].sortingOrder = Ordem(pa) + 9;
@@ -176,7 +176,7 @@ namespace TA
                 // da fila para o balcao: um passo a frente, ao longo do corredor livre entre a fila e os balcoes, e chega de frente
                 Sala sala = Salas[e];
                 b.Caminho.Clear();
-                Vector2 q = Em(e, 1.8f, Vector2.Dot(b.Pos - sala.Out, sala.T));
+                Vector2 q = Em(e, FaixaD, Vector2.Dot(b.Pos - sala.Out, sala.T));
                 b.Caminho.Add(q);
                 Eixos(b.Caminho, ref q, alvo, Mathf.Abs(sala.N.x) > 0.5f);
             }
@@ -243,7 +243,7 @@ namespace TA
             {
                 int clip = b.Andou ? b.Andar : b.Atende ? b.Atender : b.Parado;
                 if (clip != b.Clip) { b.Clip = clip; b.Tempo = 0f; }
-                b.Tempo += _g.DtJogo * (b.Andou ? Mathf.Clamp(b.Vel / PassoNatural, 0.35f, 2.3f) : 1f);
+                b.Tempo += _g.DtJogo * (b.Andou ? Mathf.Clamp(b.Vel / PassoNatural, 0.35f, CadenciaMax) : 1f);
                 b.Corpo.sprite = b.Folha.Frame(clip, b.Cima ? 1 : 0, b.Folha.FrameAt(clip, b.Tempo));
                 b.Corpo.flipX = b.Dir > 0f;
             }
@@ -348,8 +348,8 @@ namespace TA
             bool normalX = Mathf.Abs(s.N.x) > 0.5f;
             if (fila)
             {
-                float d = Vector2.Dot(s.Out - alvo, s.N), a = Vector2.Dot(alvo - s.Out, s.T);
-                Eixos(r, ref p, Em(para, Mathf.Min(d + 0.42f, 3.85f), a), !normalX);
+                float d = Vector2.Dot(s.Out - alvo, s.N) - Corredor * 0.5f, a = Vector2.Dot(alvo - s.Out, s.T);
+                Eixos(r, ref p, Em(para, Mathf.Min(d + FilaLinha, Interno - 0.15f), a), !normalX);
             }
             Eixos(r, ref p, alvo, normalX);
         }

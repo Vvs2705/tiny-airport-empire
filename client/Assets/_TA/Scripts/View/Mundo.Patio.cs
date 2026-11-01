@@ -480,7 +480,7 @@ namespace TA
                 for (int i = 0; i < 4; i++)
                     if (_mesa[e, i, 0] != null && _mesa[e, i, 0].activeSelf)
                     {
-                        Vector2 b = e == (int)Estacao.Seguranca ? Em(e, 1f, SegA[i] + BeltX) : Balcao(e, i);
+                        Vector2 b = e == (int)Estacao.Seguranca ? Em(e, SegMaquinaD, SegA[i] + BeltX) : Balcao(e, i);
                         _diag.WriteLine(string.Format(inv, "0,balcao#{0}.{1},{2:0.000},0,{3:0.000},0", e, i, b.x, b.y));
                     }
         }
