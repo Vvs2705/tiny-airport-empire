@@ -27,8 +27,11 @@ namespace TA
         Button _patioHire;
         readonly Button[] _patioAviao = new Button[2];
         readonly Button[,] _patioBtn = new Button[4, 2];
-        readonly Text[] _equipeNome = new Text[Sim.MaxEquipe], _equipeInfo = new Text[Sim.MaxEquipe];
-        readonly Button[] _equipeBtn = new Button[Sim.MaxEquipe];
+        readonly Text[] _equipeNome = new Text[Sim.MaxEquipe], _equipeCargo = new Text[Sim.MaxEquipe], _equipeInfo = new Text[Sim.MaxEquipe];
+        readonly Image[] _equipePlaca = new Image[Sim.MaxEquipe];
+        readonly BotaoPreco[] _equipeBtn = new BotaoPreco[Sim.MaxEquipe];
+        Numero _equipeTime, _equipeCash, _equipeNivel;
+        BarraNivel _equipeBarra;
 
         void BuildOperacao(RectTransform canvas)
         {
@@ -100,21 +103,31 @@ namespace TA
             }
             Art.NewButton(pp, Textos.Fechar, 40, Art.Off, new Vector2(0.3f, 0.03f), new Vector2(0.7f, 0.13f), () => Fecha(_patio));
 
-            _equipe = NovoModal(canvas, "Equipe", 0.08f, 0.92f);
-            _equipe.Titulo.text = Textos.Equipe;
-            _equipe.Corpo.text = "";
-            RectTransform pe = PainelDe(_equipe);
+            _equipe = NovaFolhaModal(canvas, "Equipe", Textos.Equipe, Art.Pessoas(), 1600f);
+            RectTransform pe = _equipe.F.Corpo;
+            RectTransform nums = Art.Node(pe, "Numeros", Vector2.up, Vector2.one);
+            nums.offsetMin = new Vector2(24f, -172f); nums.offsetMax = new Vector2(-24f, -16f);
+            _equipeTime = Art.NovoNumero(nums, "Contratados", Art.Pessoas(), Art.Azul, Textos.Contratados, Vector2.zero, new Vector2(0.34f, 1f));
+            _equipeCash = Art.NovoNumero(nums, "Cash", Art.Moeda(), Color.white, Textos.CashNome, new Vector2(0.34f, 0f), new Vector2(0.67f, 1f));
+            _equipeNivel = Art.NovoNumero(nums, "Terminal", Art.Estrela(), Art.Coin, Textos.TerminalNome, new Vector2(0.67f, 0f), Vector2.one);
+            _equipeBarra = Art.NovaBarraNivel(pe, "Vagas", Sim.MaxEquipe, Vector2.up, Vector2.one);
+            RectTransform vagas = (RectTransform)_equipeBarra.Pai;
+            vagas.offsetMin = new Vector2(36f, -196f); vagas.offsetMax = new Vector2(-30f, -180f);
+            RectTransform lista = Art.NovaLista(pe, Vector2.zero, Vector2.one);
+            Art.Margem((RectTransform)lista.parent, 24f, 0f, 24f, 208f);
             for (int p = 0; p < Sim.MaxEquipe; p++)
             {
                 int pp2 = p;
-                float y1 = 0.85f - p * 0.115f;
-                Art.Img(pe, "Icone" + p, Art.IconePerfil(p), Art.EstacaoCor[(int)Funcionario.Casa((Perfil)p)], new Vector2(0.03f, y1 - 0.09f), new Vector2(0.14f, y1 - 0.01f));
-                _equipeNome[p] = Art.NewText(pe, "Nome" + p, 32, new Vector2(0.16f, y1 - 0.05f), new Vector2(0.66f, y1), TextAnchor.MiddleLeft);
-                _equipeInfo[p] = Art.NewText(pe, "Info" + p, 28, new Vector2(0.16f, y1 - 0.1f), new Vector2(0.66f, y1 - 0.05f), TextAnchor.MiddleLeft);
-                _equipeInfo[p].color = Art.Dim;
-                _equipeBtn[p] = Art.NewButton(pe, "", 28, Art.Good, new Vector2(0.67f, y1 - 0.105f), new Vector2(0.97f, y1), () => EquipeAcao(pp2));
+                RectTransform c = Art.NovoCartao(lista, "Perfil" + p, 186f, 290f);
+                _equipePlaca[p] = Art.NovaPlaca(c, "Placa", Art.IconePerfil(p), Art.Apagado, Color.white);
+                Art.Fixa(_equipePlaca[p].rectTransform, new Vector2(0f, 0.5f), new Vector2(28f, 0f), new Vector2(126f, 126f));
+                _equipeNome[p] = Art.Escreve(c, "Nome", Tipo.Nome, new Vector2(0f, 0.6f), new Vector2(1f, 0.9f));
+                _equipeCargo[p] = Art.Escreve(c, "Cargo", Tipo.Legenda, new Vector2(0f, 0.36f), new Vector2(1f, 0.62f));
+                _equipeInfo[p] = Art.Escreve(c, "Info", Tipo.Legenda, new Vector2(0f, 0.1f), new Vector2(1f, 0.37f));
+                foreach (Text t in new[] { _equipeNome[p], _equipeCargo[p], _equipeInfo[p] }) Art.Margem(t.rectTransform, 172f, 0f, 306f, 0f);
+                _equipeBtn[p] = Art.NovoBotaoPreco(c, Vector2.zero, Vector2.zero, () => EquipeAcao(pp2));
+                Art.Fixa((RectTransform)_equipeBtn[p].B.transform, new Vector2(1f, 0.5f), new Vector2(-24f, 0f), new Vector2(246f, 146f));
             }
-            Art.NewButton(pe, Textos.Fechar, 40, Art.Off, new Vector2(0.3f, 0.03f), new Vector2(0.7f, 0.13f), () => Fecha(_equipe));
         }
 
         /// <summary>Quem ja veio: "mover para". Quem nao veio: contrata (os 3 da v0.1 pela ordem, com Hire(); Dani, Edu e Fatima pelo perfil).</summary>
@@ -225,17 +238,27 @@ namespace TA
 
         void PintaEquipe(Sim s)
         {
+            _equipeTime.Valor.text = Textos.DeTotal(s.Staff.Count, Sim.MaxEquipe);
+            _equipeCash.Valor.text = Textos.Num(s.Cash);
+            _equipeNivel.Valor.text = Textos.NivelNome(s.Marco + 1);
+            _equipeBarra.Pinta(s.Staff.Count, Art.Compra);
+            int proximo = 0;   // Ana, Beto e Cida vem na ordem (Sim.Hire)
+            while (proximo < Sim.MaxFuncionarios && s.Contratado((Perfil)proximo)) proximo++;
             for (int p = 0; p < Sim.MaxEquipe; p++)
             {
                 var perfil = (Perfil)p;
-                int quem = s.Staff.FindIndex(f => f.Perfil == perfil);
-                _equipeNome[p].text = Textos.PerfilLinha(p);
-                bool veio = quem >= 0, aberto = s.Marco >= s.T.PerfilMarco[p];
-                long c = p < Sim.MaxFuncionarios ? (s.Staff.Count == p ? s.CustoContratar() : -1) : s.CustoContratar(perfil);
-                _equipeInfo[p].text = veio ? Textos.EmEstacao((int)s.Staff[quem].Em, s.Staff[quem].Andando > 0) : Textos.PerfilInfo(p);
-                Text r = Art.Rotulo(_equipeBtn[p]);
-                r.text = veio ? Textos.MoverCurto : !aberto ? Textos.Nivel(s.T.PerfilMarco[p]) : Textos.Contratar(c < 0 ? s.T.Contratacao[p] : c);
-                _equipeBtn[p].interactable = veio || (c >= 0 && s.Cash >= c);
+                int quem = s.Staff.FindIndex(f => f.Perfil == perfil), marco = s.T.PerfilMarco[p];
+                bool veio = quem >= 0, aberto = s.Marco >= marco, naVez = p >= Sim.MaxFuncionarios || p == proximo;
+                _equipeNome[p].text = Textos.Funcionario[p];
+                _equipeNome[p].color = aberto ? Art.Tinta : Art.Fraco;
+                _equipeCargo[p].text = Textos.Perfil[p];
+                _equipeInfo[p].text = veio ? Textos.EmEstacao((int)s.Staff[quem].Em, s.Staff[quem].Andando > 0)
+                    : aberto ? Textos.PerfilInfo(p) : Textos.FaltamEmbarques(s.T.Marcos[marco - 1] - s.TotalEmbarcados);
+                _equipePlaca[p].color = aberto ? Art.EstacaoCor[(int)Funcionario.Casa(perfil)] : Art.Vazio;
+                if (veio) _equipeBtn[p].Secundario(Textos.MoverCurto);
+                else if (!aberto) _equipeBtn[p].Travado(Textos.TerminalNome, Textos.NivelNome(marco + 1));
+                else if (!naVez) _equipeBtn[p].Travado(Textos.ContrateAntes, Textos.Funcionario[proximo]);
+                else _equipeBtn[p].Preco(Textos.ContratarCurto, s.CustoContratar(perfil), s.Cash);
             }
         }
     }
