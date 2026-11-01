@@ -1,4 +1,3 @@
-using System;
 using TA.Core;
 using UnityEngine;
 using UnityEngine.UI;
@@ -78,28 +77,6 @@ namespace TA
                 case TipoIncidente.Neblina: case TipoIncidente.Neve: return -1;
                 default: return Portao;
             }
-        }
-
-        /// <summary>-cenario (so no -testsession): nome de um TipoIncidente ou "Pane" = acontece na proxima onda, para as fotos e o -record.</summary>
-        public static void Ensaia(Sim s, string nome)
-        {
-            Tuning t = s.T;
-            if (nome == "Pane")
-            {
-                t.FalhaAviaoChance = 1f; t.FalhaAviaoPesos = new[] { 1, 0, 0 };
-                foreach (TA.Core.Aviao a in s.Avioes) a.Desgaste = 85;
-                return;
-            }
-            if (!Enum.TryParse(nome, out TipoIncidente tipo)) return;
-            int coluna = Array.FindIndex(t.Climas, c => c.Tipo == tipo);
-            var linha = new float[t.Climas.Length];
-            if (coluna >= 0) linha[coluna] = 1f;
-            Aeroporto aero = t.Aeroportos[s.AeroportoAtual];
-            aero.Clima = new[] { linha, linha, linha, linha };
-            t.RegraClima = coluna >= 0; t.ClimaMarco = 0;
-            if (coluna >= 0) return;
-            aero.Pesos = new int[4]; aero.Pesos[(int)tipo] = 1;
-            aero.Incidentes = 1f; t.IncidenteTeto = 1f;
         }
 
         /// <summary>Textura de 256 x 256 que repete sem emenda: N riscos macios, com a volta nas bordas.</summary>
