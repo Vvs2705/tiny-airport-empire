@@ -88,8 +88,8 @@ namespace TA.Core
             return true;
         }
 
-        /// <summary>Passageiros do voo da rota r na onda w (sem o grupo de incidente).</summary>
-        int PaxDaRota(int w, int r) => (int)Math.Round(T.Pax(w) * (double)Efeito(r).Pax);
+        /// <summary>Passageiros do voo da rota r na onda w, com a demanda da hora e da estacao do ano (sem o grupo de incidente).</summary>
+        int PaxDaRota(int w, int r) => (int)Math.Round(T.Pax(w) * (double)Efeito(r).Pax * Demanda(w));
 
         /// <summary>Tarifa do passageiro no voo v: a do marco com o fator da rota; o grupo de conexao atrasada paga Tuning.ConexaoTarifa x.</summary>
         int TarifaDe(Voo v, Pax p)

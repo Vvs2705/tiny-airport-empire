@@ -8,7 +8,7 @@ Base: `GDD.md` §4.1 (conteúdo obrigatório), §17 (fases e portões), §21 (ma
 
 **Guardrails que não mudam:** 1 moeda (Cash) na v0.1, e Gems só com D-05 e D-07; offline com teto de 2 h no código; nada aleatório pago (ECA Digital, Lei 15.211/2025); nenhum interstitial; anúncio não personalizado, sem `AD_ID`; perder voo custa só a receita dele; criativos gravados do jogo real; nenhum dado pessoal no diário.
 
-## 1. Matriz §4.1 × feito (estado em 2026-10-30: Fase B feita, menos o K2; Fase C no núcleo: tripulação, pátio, manutenção, 8 estações, 6 perfis, 3 aeroportos, 12 rotas e 4 incidentes)
+## 1. Matriz §4.1 × feito (estado em 2026-10-31: Fase B feita, menos o K2; Fase C no núcleo: tripulação, pátio, manutenção, 8 estações, 6 perfis, 3 aeroportos, 12 rotas, 4 incidentes, clima e falhas de avião)
 
 Estados: **feito** (com evidência) · **parcial** · **falta** · **depende** (de decisão, conta ou recurso externo).
 
@@ -26,6 +26,7 @@ Estados: **feito** (com evidência) · **parcial** · **falta** · **depende** (
 | 7 | Quadro de partidas com horários e estados (TA-1) | 2 voos por onda | **feito** na v0.1: quadro com horário, estado, a bordo e barra; bot 99,7% (Bom) e 75,4% (Lento) | B; portão: bot ≥ 85% / ≥ 60% | P-03 |
 | 8 | Fluxo de passageiros, filas, embarque, partida e perda de receita por voo perdido | sim | **feito** na v0.1: núcleo testado e bonecos andando pela fila, embarque pela ponte e saída de quem perdeu o voo | B | P-02 |
 | 9 | 4 incidentes com aviso prévio | — | **parcial**: núcleo feito: frente fria, falha de equipamento, pico de demanda e atraso de conexão, da semente, um por vez, com 30 s de aviso e saída, em testes e invariantes; portão do §5.13 **passou: 1,146 e 1,170** (como um sistema; ressalva na D-C3c do `BALANCE.md`); falta a tela | C (núcleo); View na próxima frente | P-06 |
+| 9a | Dia a dia: dia e noite, picos, estações do ano, clima com previsão e falhas de avião (§5.14) | — | **parcial**: núcleo feito (`CONTRATO_FASE_C4.md`): relógio do jogo, 5 climas da semente com previsão e aviso, 3 falhas acima do aviso de 80%, pouso sempre seguro; portão do §5.13 **passou**: clima 1,161 e 1,147, falhas 1,134, 1,131 e 1,124; demanda por estação só visual (D-C4a); falta a tela | C (núcleo); View na próxima frente | P-06 |
 | 10 | 20 micro-histórias de passageiros (TA-3) | 1 | **parcial**: 1 história feita (coração no boneco e no quadro, álbum no save); as 20 na C | B (1), C (20) | P-06 |
 | 11 | Campanha principal: 30 objetivos, 10 por aeroporto | — | falta | C; `docs/CAMPANHA.md` | P-05 |
 | 12 | Missões diárias e semanais | — | falta | C (`Metas.cs` do Forge) | P-05 |

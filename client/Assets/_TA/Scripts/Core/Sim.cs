@@ -31,8 +31,13 @@ using System.Collections.Generic;
 //               onda); Voo.Rota, Voo.Total = 0 = sem voo (o aviao esta fora na rota longa); sim.TrechoSeg(r). Incidentes: sim.Inc (null ate o
 //               aviso: Tipo, Vaga, Estacao, Inicio, Fim, Resolvido), sim.PistaFechada, sim.Falhou(e), sim.Reparo; saidas sim.Adianta(),
 //               sim.Repara() e sim.Prioriza(); Voo.Grupo (grupo extra, ja somado no Total), Ev.Incidente*, Ev.Rota*, Ev.Viagem, Ev.AeroportoChegada.
+//   Fase C4:    sim.Hora, sim.DiaJogo, sim.Noite, sim.Epoca, sim.Previsao (clima da onda seguinte; null = tempo bom), sim.ClimaDe(tipo) (o que o
+//               clima faz: FechaPista, ParaPatio, Espera, Degelo), sim.PatioParado, sim.EsperaPista, sim.PistaAte, sim.Degelando(aviao),
+//               sim.EmRisco(aviao), Sim.Opcoes(tipo) e Sim.Opcoes(falha). Clima vem em sim.Inc, com os tipos novos. Saidas: sim.Adianta(), sim.Atrasa()
+//               e segurar (nao fazer nada). Falhas: Aviao.Pane, SaiEm e Retorno; reparo sim.ReparaAviao(aviao) (so Cash); Ev.Pane, Ev.Rejeicao,
+//               Ev.RetornoPedido, Ev.PousoSeguro, Ev.Remarcados.
 //   Gravar:     texto = sim.Save(versaoDoJogo, nowUnix): payload chave=valor dentro do SaveEnvelope (SHA-256 + schema). Grava filas e o
-//               relogio do quadro: reabrir retoma a onda do ponto gravado. Schema 4; os saves dos schemas 1, 2 e 3 migram no Load.
+//               relogio do quadro: reabrir retoma a onda do ponto gravado. Schema 5; os saves dos schemas 1 a 4 migram no Load.
 //
 // Nomes acima sao estaveis (so crescem). Mudou a API: atualize este cabecalho e o docs/MAPA_CODIGO.md no mesmo PR.
 
@@ -46,9 +51,9 @@ namespace TA.Core
         /// <summary>Teto do dt de um quadro (s): uma travada longa nao vira um salto de minutos no relogio do quadro de partidas.</summary>
         public const float MaxFrame = 0.25f;
         /// <summary>Versao do formato do save (SaveEnvelope). Sobe a cada mudanca de formato; save de schema maior e' recusado; menor migra
-        /// no Load (4 = Fase C3: aeroportos, rotas e incidentes; 3 = Fase C2: 8 estacoes e o perfil de cada funcionario; 2 = Fase C: avioes,
+        /// no Load (5 = Fase C4: falhas de aviao e portao atrasado; 4 = Fase C3: aeroportos, rotas e incidentes; 3 = Fase C2: 8 estacoes e o perfil de cada funcionario; 2 = Fase C: avioes,
         /// tripulacao e patio; o 1 e' a v0.1).</summary>
-        public const int Schema = 4;
+        public const int Schema = 5;
         /// <summary>A equipe da v0.1 (Hire()): Ana, Beto e Caio. MaxEquipe = os 6 perfis, com Dani, Edu e Fatima (Hire(perfil)).</summary>
         public const int MaxFuncionarios = 3, MaxEquipe = 6;
 
@@ -145,7 +150,7 @@ namespace TA.Core
                     // Fase C: o embarque espera o aviao liberado (patio, tripulacao e manutencao: Sim.Patio.cs)
                     if (loc == v.AbrePasso) ContaAtrasoPatio(v);
                     Aviao a = Avioes[v.Indice];
-                    if (a.VooId == v.Id && Pronto(a)) { v.Embarque = true; Emit(Ev.EmbarqueAberto, v.Id); }
+                    if (a.VooId == v.Id && Pronto(a) && !EntrouEmPane(a)) { v.Embarque = true; Emit(Ev.EmbarqueAberto, v.Id); }
                 }
             }
             foreach (Funcionario f in Staff)
@@ -173,6 +178,7 @@ namespace TA.Core
             }
             for (int f = 0; f < 2; f++) Voos[f] = NovoVoo(w, f, Prog[f]);
             SorteiaIncidente(w);
+            if (Previsao is TipoIncidente previsto) Emit(Ev.Previsto, (int)previsto, w + 1);
             foreach (Voo v in Voos) Emit(Ev.VooCriado, v.Id, v.Total, v.FechaPasso);
             PatioNaOnda(w);
         }
@@ -290,7 +296,7 @@ namespace TA.Core
             return false;
         }
 
-        /// <summary>O portao atende este voo: embarque aberto e, com a pista fechada, so quem adiantou (frente fria).</summary>
+        /// <summary>O portao atende este voo: embarque aberto e, com a pista fechada, so quem adiantou (clima).</summary>
         bool PodeEmbarcar(Voo v) => v != null && v.Embarque && (!PistaFechada || v.Adiantado);
 
         void Avanca(Station s, Pax p, int loc)

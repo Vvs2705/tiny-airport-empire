@@ -15,8 +15,8 @@ namespace TA.Core
         /// <summary>Passos que faltam no reparo em andamento (ocupa o mecanico da Fase C) e a ultima onda com incidente ou chegada a aeroporto.</summary>
         public int Reparo, UltimoIncidente = -99;
 
-        /// <summary>Frente fria: ninguem pousa nem decola, e so embarca quem adiantou.</summary>
-        public bool PistaFechada => T.RegraIncidentes && _inc != null && _inc.Tipo == TipoIncidente.FrenteFria && Steps >= _inc.Inicio && Steps < _inc.Fim;
+        /// <summary>Frente fria e temporal: ninguem pousa nem decola, e so embarca quem adiantou.</summary>
+        public bool PistaFechada => ClimaAgora?.FechaPista == true;
 
         /// <summary>A estacao esta com falha de equipamento agora (atende Tuning.FalhaFator x mais devagar).</summary>
         public bool Falhou(Estacao e) => T.RegraIncidentes && _inc != null && _inc.Tipo == TipoIncidente.Falha && _inc.Estacao == e && !_inc.Resolvido && Steps >= _inc.Inicio && Steps < _inc.Fim;
@@ -26,27 +26,33 @@ namespace TA.Core
 
         int RiscoDe(Voo v) => v.Total > 0 ? Efeito(v).Risco : 0;
 
-        /// <summary>Virada da onda, com os 2 voos criados e antes de anuncia-los: a semente decide se ha incidente, qual e em que vaga.</summary>
+        /// <summary>A vaga de maior risco com voo; no empate, a semente.</summary>
+        int VagaDoPerigo(int w) => Voos[0].Total == 0 ? 1 : Voos[1].Total == 0 ? 0 : RiscoDe(Voos[1]) != RiscoDe(Voos[0]) ? (RiscoDe(Voos[1]) > RiscoDe(Voos[0]) ? 1 : 0) : U(w, 0, 0, 11) < 0.5 ? 0 : 1;
+
+        /// <summary>Virada da onda, com os 2 voos criados e antes de anuncia-los: a semente decide se ha clima ou incidente, qual e em que vaga.
+        /// O clima vem primeiro (Sim.Clima.cs) e, com ele, a frente fria sai dos pesos do aeroporto.</summary>
         void SorteiaIncidente(int w)
         {
-            if (_inc != null || w - UltimoIncidente <= T.IncidenteFolga || Voos[0].Total == 0 && Voos[1].Total == 0) return;
+            if (_inc != null || w - UltimoIncidente <= T.IncidenteFolga) return;
+            if (ClimaDaOnda(w) is TipoIncidente clima) { NovoClima(w, clima); return; }
+            if (Voos[0].Total == 0 && Voos[1].Total == 0) return;
             double chance = Math.Min(T.IncidenteTeto, Aero.Incidentes + T.RiscoChance * (RiscoDe(Voos[0]) + RiscoDe(Voos[1])));
             if (U(w, 0, 0, 9) >= chance) return;
             UltimoIncidente = w;
-            int[] pesos = T.Aeroportos[AeroportoAtual].Pesos;
+            int[] pesos = (int[])T.Aeroportos[AeroportoAtual].Pesos.Clone();
+            if (T.RegraClima) pesos[(int)TipoIncidente.FrenteFria] = 0;
             int soma = 0, tipo = 0;
             foreach (int p in pesos) soma += p;
             for (int x = (int)(U(w, 0, 0, 10) * soma); tipo < pesos.Length - 1 && x >= pesos[tipo]; tipo++) x -= pesos[tipo];
-            // a vaga de maior risco com voo; no empate, a semente
-            int vaga = Voos[0].Total == 0 ? 1 : Voos[1].Total == 0 ? 0 : RiscoDe(Voos[1]) != RiscoDe(Voos[0]) ? (RiscoDe(Voos[1]) > RiscoDe(Voos[0]) ? 1 : 0) : U(w, 0, 0, 11) < 0.5 ? 0 : 1;
+            int vaga = VagaDoPerigo(w);
             Voo v = Voos[vaga];
             long t0 = (long)w * OndaPassos;
             var i = new Incidente { Tipo = (TipoIncidente)tipo, Vaga = vaga, Fim = t0 + v.FechaPasso + 1 };
             switch (i.Tipo)
             {
                 case TipoIncidente.FrenteFria:
-                    i.Inicio = t0 + v.FechaPasso - Passos(T.FrenteAntes);
-                    i.Fim = i.Inicio + Passos(T.FrenteSeg);
+                    i.Inicio = t0 + v.FechaPasso - Passos(ClimaDe(i.Tipo).Antes);
+                    i.Fim = i.Inicio + Passos(ClimaDe(i.Tipo).Seg);
                     break;
                 case TipoIncidente.Falha:
                     int de = Efeito(v).Tipo == TipoRota.Conexao ? 1 : 0;
@@ -111,12 +117,13 @@ namespace TA.Core
 
         // ------------------------------------------------------------------ intencoes do jogador
 
-        /// <summary>Frente fria, durante o aviso: o embarque do voo atingido abre agora e continua com a pista fechada (TA-4: quem adianta nao
-        /// perde o voo). A decolagem espera a pista abrir. Sem adiantar, o portao para ate a pista abrir e quem ficou perde so a propria receita.</summary>
+        /// <summary>Clima, durante o aviso: o embarque do voo atingido abre agora e continua com a pista fechada (TA-4: quem adianta nao perde o
+        /// voo). A decolagem espera a pista abrir; com vento, neblina ou neve, quem adiantou ja pegou a vez e ja degelou. Sem adiantar, o portao
+        /// para ate a pista abrir e quem ficou perde so a propria receita.</summary>
         public bool Adianta()
         {
             Incidente i = Inc;
-            if (i == null || i.Tipo != TipoIncidente.FrenteFria || i.Resolvido || Steps >= i.Inicio || !T.RegraIncidentes) return false;
+            if (i == null || ClimaDe(i.Tipo) == null || i.Resolvido || Steps >= i.Inicio || !T.RegraIncidentes) return false;
             Voo v = Voos[i.Vaga];
             if (v.Partiu) return false;
             i.Resolvido = v.Adiantado = true;

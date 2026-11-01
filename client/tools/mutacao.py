@@ -1,6 +1,6 @@
 """Prova de mutacao das travas da Fase C (CONTRATO_FASE_C §7): tira cada trava do nucleo, roda o dotnet test e exige que algum teste caia.
 
-uso (da raiz do repo): python client/tools/mutacao.py
+uso (da raiz do repo): python client/tools/mutacao.py [trecho do nome da trava ...]
 Cada mutante e' aplicado, testado e desfeito (o arquivo volta byte a byte, mesmo com erro). Sai 1 se algum mutante sobreviver.
 """
 
@@ -29,14 +29,14 @@ MUTANTES = [
     (
         "checagem so com Cash",
         "Sim.Patio.cs",
-        "|| !MecanicoLivre || Cash < T.CheckCusto) return false;",
-        "|| !MecanicoLivre) return false;",
+        "&& a.Desgaste > 0 && MecanicoLivre && Cash >= T.CheckCusto;",
+        "&& a.Desgaste > 0 && MecanicoLivre;",
     ),
     (
         "hangar so com Cash",
         "Sim.Patio.cs",
-        "if (a == null || !T.RegraManutencao || Cash < T.HangarCusto) return false;",
-        "if (a == null || !T.RegraManutencao) return false;",
+        "AntesDoEmbarque(aviao) != null && T.RegraManutencao && Cash >= T.HangarCusto;",
+        "AntesDoEmbarque(aviao) != null && T.RegraManutencao;",
     ),
     (
         "offline nao gasta desgaste",
@@ -95,14 +95,14 @@ MUTANTES = [
     (
         "incidente nao tira Cash",
         "Sim.Incidentes.cs",
-        'if (Steps == i.Inicio) Emit(Ev.IncidenteInicio, (int)i.Tipo, i.Vaga, (int)i.Estacao);',
-        'if (Steps == i.Inicio) { Cash = Math.Max(0, Cash - 10); Emit(Ev.IncidenteInicio, (int)i.Tipo, i.Vaga, (int)i.Estacao); }',
+        "if (Steps == i.Inicio) Emit(Ev.IncidenteInicio, (int)i.Tipo, i.Vaga, (int)i.Estacao);",
+        "if (Steps == i.Inicio) { Cash = Math.Max(0, Cash - 10); Emit(Ev.IncidenteInicio, (int)i.Tipo, i.Vaga, (int)i.Estacao); }",
     ),
     (
         "um incidente por vez, com folga depois",
         "Sim.Incidentes.cs",
-        "if (_inc != null || w - UltimoIncidente <= T.IncidenteFolga || ",
-        "if (_inc != null || ",
+        "if (_inc != null || w - UltimoIncidente <= T.IncidenteFolga) return;",
+        "if (_inc != null) return;",
     ),
     (
         "reparo so com Cash",
@@ -146,6 +146,78 @@ MUTANTES = [
         "s.Fila.RemoveAll(p => p.Onda == v.Onda && p.Voo == v.Indice);",
         "if ((int)s.Tipo < 4) s.Fila.RemoveAll(p => p.Onda == v.Onda && p.Voo == v.Indice);",
     ),
+    (
+        "falha de aviao so acima do aviso",
+        "Sim.Clima.cs",
+        " && Avioes[aviao].Desgaste >= T.DesgasteAviso;",
+        ";",
+    ),
+    (
+        "uma falha por voo",
+        "Sim.Clima.cs",
+        "if (a.VooId < 0 || a.VooId == a.Falhou || !EmRisco(a.Id))",
+        "if (a.VooId < 0 || !EmRisco(a.Id))",
+    ),
+    (
+        "reparo da pane so com Cash",
+        "Sim.Clima.cs",
+        "if (aviao < 0 || aviao >= Avioes.Length || Cash < T.PaneCusto || Reparo > 0) return false;",
+        "if (aviao < 0 || aviao >= Avioes.Length || Reparo > 0) return false;",
+    ),
+    (
+        "clima tem o aviso inteiro",
+        "Sim.Clima.cs",
+        "Aviso = inicio - Passos(T.AvisoSeg) };",
+        "Aviso = inicio };",
+    ),
+    (
+        "Cash nao muda o clima",
+        "Sim.Clima.cs",
+        "double x = U(w, 0, 0, 30);",
+        "double x = U(w, 0, 0, 30) + (Cash > 0 ? 0.5 : 0);",
+    ),
+    (
+        "anuncio nao evita falha",
+        "Sim.Clima.cs",
+        "if (U(w, a.Id, 0, 20) >= T.FalhaAviaoChance) return TipoFalha.Nenhuma;",
+        "if (BoostLeft > 0 || U(w, a.Id, 0, 20) >= T.FalhaAviaoChance) return TipoFalha.Nenhuma;",
+    ),
+    (
+        "pane nao tira Cash",
+        "Sim.Clima.cs",
+        "a.Falhou = a.VooId; a.Pane = true;",
+        "a.Falhou = a.VooId; a.Pane = true; Cash = Math.Max(0, Cash - 5);",
+    ),
+    (
+        "todo retorno pousa seguro",
+        "Sim.Clima.cs",
+        "Emit(Ev.PousoSeguro, a.Id);",
+        "",
+    ),
+    (
+        "retorno tem prioridade na pista",
+        "Sim.Patio.cs",
+        "(a.Retorno > 0 ? Steps >= a.Chega : Steps >= a.Chega + EsperaPista && !PistaFechada && Steps >= PistaAte)",
+        "Steps >= a.Chega + EsperaPista && !PistaFechada && Steps >= PistaAte",
+    ),
+    (
+        "sem Cash a pane nao trava o jogo",
+        "Sim.Patio.cs",
+        "if (a.NoPatio && (a.Pendente || a.Pane) && a.Check == 0 && a.FechouEm < 0 && MecanicoLivre)",
+        "if (a.NoPatio && a.Pendente && a.Check == 0 && a.FechouEm < 0 && MecanicoLivre)",
+    ),
+    (
+        "com clima a frente fria sai dos pesos",
+        "Sim.Incidentes.cs",
+        "if (T.RegraClima) pesos[(int)TipoIncidente.FrenteFria] = 0;",
+        "",
+    ),
+    (
+        "atrasar custa o bonus",
+        "Sim.Patio.cs",
+        "return !PistaFechada && !v.Atrasado && EsperaDecolagem(a) == 0 &&",
+        "return !PistaFechada && EsperaDecolagem(a) == 0 &&",
+    ),
 ]
 
 
@@ -172,7 +244,9 @@ def testa():
 
 def main():
     vivos = 0
-    for nome, arq, de, para in MUTANTES:
+    filtro = sys.argv[1:]
+    lista = [m for m in MUTANTES if not filtro or any(f in m[0] for f in filtro)]
+    for nome, arq, de, para in lista:
         p = os.path.join(CORE, arq)
         with open(p, "rb") as f:
             original = f.read()
@@ -203,7 +277,7 @@ def main():
             )
         else:
             print("MORTO  %s: %d teste(s): %s" % (nome, caiu, ", ".join(quais[:4])))
-    print("mutacao: %d de %d mutantes mortos" % (len(MUTANTES) - vivos, len(MUTANTES)))
+    print("mutacao: %d de %d mutantes mortos" % (len(lista) - vivos, len(lista)))
     sys.exit(1 if vivos else 0)
 
 
