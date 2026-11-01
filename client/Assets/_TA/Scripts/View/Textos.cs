@@ -67,6 +67,7 @@ namespace TA
             if (passoNaOnda < v.AbrePasso) return L("CHECK-IN");
             if (a.Hangar > 0) return L("NO HANGAR");
             if (!a.NoPatio) return L("A CAMINHO");
+            if (a.Pane) return L("EM PANE");
             return a.Pendente || a.Check > 0 ? L("MANUTENÇÃO") : L("PÁTIO");
         }
         public static string ABordo(Voo v) => v.Embarcados + "/" + v.Total + L(" a bordo");
@@ -150,7 +151,33 @@ namespace TA
         public static string HangarEfeito(float seg) => L("Zera o desgaste em ") + Tempo(seg);
         public static string AlbumEstado(bool tem) => tem ? L("Entregue") : L("Ainda não");
 
-                // ---------- tutorial (GDD_ORIGEM "Onboarding", passos 1-12) ----------
+        // ---------- avisos de perigo (GDD §5.8: causa, duracao e opcoes; bombeiros so de rotina, sem fogo nem acidente) ----------
+        /// <summary>Na ordem de TipoIncidente.</summary>
+        public static readonly string[] Perigo = { L("Frente fria"), L("Falha"), L("Pico de passageiros"), L("Conexão atrasada"), L("Temporal"), L("Vento"), L("Neblina"), L("Neve") };
+        static string SegInt(float s) => (int)s + L("\u00A0s");
+        public static string PerigoEm(string nome, int seg) => nome + L(" em ") + SegInt(seg);
+        public static string PerigoResta(string nome, int seg) => nome + ": " + SegInt(seg);
+        public static string Previsao(TipoIncidente t) => L("Previsão: ") + Perigo[(int)t];
+        public static string FalhaEm(int e) => L("Falha ") + EstacaoNo[e];
+        public static string CausaClima(Clima c) => c.ParaPatio ? L("Pista e pátio param por ") + SegInt(c.Seg) : c.FechaPista ? L("Pista fechada por ") + SegInt(c.Seg)
+            : c.Espera > 0f ? L("Pousos e decolagens esperam ") + SegInt(c.Espera) : L("Degelo de ") + SegInt(c.Degelo) + L(" antes de cada voo");
+        public static string CausaFalha(int fator, float seg) => L("Atende ") + fator + L("x mais devagar por ") + SegInt(seg);
+        public static string CausaGrupo(int voo) => L("Grupo extra no ") + Voo(voo);
+        public static string FazerAdiantar(int voo) => L("Adiante o embarque do ") + Voo(voo);
+        public static string FazerAtrasar(int voo) => L("Atrase o portão do ") + Voo(voo);
+        public static string FazerReforcar(int e) => L("Mova a equipe ") + EstacaoPara[e];
+        public static string EmPane(string aviao) => aviao + L(" em pane");
+        public static string Voltando(string aviao, int seg) => aviao + L(" voltando: ") + SegInt(seg);
+        public static string Abortou(string aviao) => aviao + L(" abortou a decolagem");
+        public static string SaiEm(int seg) => L("Sai de novo em ") + SegInt(seg);
+        public static string RiscoFalha(int d) => Desgaste(d) + L(": pode falhar");
+        public static readonly string FazerReparar = L("Repare ou leve o mecânico"), FazerPriorizar = L("Priorize e ele fura as filas"), JaDecidiu = L("Decidido: agora é esperar"),
+            CausaPane = L("Embarque parado até o reparo"), FazerPane = L("Repare agora ou espere a inspeção"), Consertando = L("Mecânico trabalhando"),
+            PousoPrioridade = L("Pouso seguro, com prioridade"), Prontidao = L("Bombeiros em prontidão, de rotina"), NadaAFazer = L("Não precisa fazer nada"),
+            Adiantar = L("Adiantar"), Atrasar = L("Atrasar"), Priorizar = L("Priorizar"), Reparar = L("Reparar"),
+            AtrasoNao = L("Não dá para atrasar: o clima passa da virada da onda."), MecanicoOcupado = L("O mecânico está ocupado."), PousoSeguro = L("Pouso seguro. Passageiros remarcados.");
+
+        // ---------- tutorial (GDD_ORIGEM "Onboarding", passos 1-12) ----------
         // Titulo = o que fazer; texto = por que, em uma ou duas frases. Seta: use o guillemet U+00BB; a seta U+2192 nao existe nas fontes. Passos 10 a 12 = evento.
         public static readonly string Lara = L("Lara, Chefe de Terminal");
         public static readonly string[] TourTitulo =

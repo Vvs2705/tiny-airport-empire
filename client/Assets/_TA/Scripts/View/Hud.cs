@@ -28,7 +28,7 @@ namespace TA
         Game _g;
         Sim S => _g.Sim;
         RectTransform _canvas, _root, _quadro, _toastFundo;
-        Text _cash, _relogio, _onda, _toast, _aviso;
+        Text _cash, _relogio, _onda, _previsao, _toast, _aviso;
         float _toastT;
         BotaoPreco _contratar;
         Button _equipeAtalho, _melhoriasBtn, _receita;
@@ -77,6 +77,7 @@ namespace TA
             BuildTopo();
             BuildBase();
             BuildAvisos();
+            BuildAlerta();
             BuildTelas(_canvas);
             BuildOperacao(_canvas);
             BuildTour(_canvas);
@@ -131,7 +132,8 @@ namespace TA
             _quadro = Art.Panel(topo, "Quadro", Art.Board, Vector2.up, Vector2.one).rectTransform;
             _quadro.offsetMin = new Vector2(10f, -AltBarra - AltQuadro); _quadro.offsetMax = new Vector2(-10f, -AltBarra);
             Icone(_quadro, "Aviao", Art.Aviao(), Art.Placa, 26f, 3f, 38f);
-            Coluna(Textos.Quadro, Art.Placa, 80f, 300f);
+            Coluna(Textos.Quadro, Art.Placa, 80f, 150f);
+            _previsao = Coluna("", Art.Warn, 232f, 286f);
             Coluna(Textos.ColunaFecha, Art.Dim, 520f, 120f);
             Coluna(Textos.ColunaSituacao, Art.Dim, 650f, 300f);
             for (int f = 0; f < 2; f++)
@@ -172,10 +174,11 @@ namespace TA
             }
         }
 
-        void Coluna(string texto, Color cor, float x, float l)
+        Text Coluna(string texto, Color cor, float x, float l)
         {
             Text t = Texto(_quadro, "Coluna", Tipo.Legenda, cor, x, 0f, l, AltTituloQuadro);
             t.font = Art.Titulo(); t.text = texto;
+            return t;
         }
 
         /// <summary>Atalho da barra de baixo, na vaga i: icone em cima, rotulo embaixo. Claro = gratis; compra e video tem cor propria (ART_BIBLE §5).</summary>
@@ -237,6 +240,7 @@ namespace TA
             _cash.text = Textos.Num(s.Cash);
             _relogio.text = Textos.Hora(s.Time);
             _onda.text = Textos.Onda(Math.Max(0, s.Onda) + 1) + " · " + Textos.NivelNome(s.Marco + 1);
+            _previsao.text = s.Previsao is TipoIncidente previsao ? Textos.Previsao(previsao) : "";
             for (int f = 0; f < 2; f++) PintaLinha(_linhas[f], s.Voos[f], s);
             bool equipe = EquipeNoBotao(s);
             _equipeAtalho.gameObject.SetActive(equipe);
@@ -246,6 +250,7 @@ namespace TA
             _receita.interactable = !boost && s.Anuncios.Pode(Anuncio.Receita) && Anuncios.Veto(Arrastando, TourAberto, ModalAberto) == null;
             Art.Rotulo(_receita).text = boost ? Textos.Tempo(s.BoostLeft / (float)Sim.Hz) : Textos.Receita2x(s.Anuncios.HojeDe(Anuncio.Receita), s.T.BoostPorDia);
             if (_toastT > 0f && (_toastT -= Time.unscaledDeltaTime) <= 0f) _toastFundo.gameObject.SetActive(false);
+            PintaAlerta(s);
             PintaTelas();
             PintaTour();
         }
@@ -277,7 +282,7 @@ namespace TA
 
             // uma nota so: o que pede acao agora, depois o que e bom saber
             if (falta > 0f && falta < 0.2f && v.Embarcados < v.Total) Nota(l, Art.Relogio(), Art.Bad, Art.Bad, Textos.FechaEm(Mathf.CeilToInt((v.FechaPasso - s.PassoNaOnda) * Sim.Step)));
-            else if (a.Desgaste >= s.T.DesgasteAviso) Nota(l, Art.Chave(), CorDesgaste(a, s), CorDesgaste(a, s), Textos.Desgaste(a.Desgaste));
+            else if (a.Desgaste >= s.T.DesgasteAviso) Nota(l, Art.Chave(), CorDesgaste(a, s), CorDesgaste(a, s), s.EmRisco(a.Id) ? Textos.RiscoFalha(a.Desgaste) : Textos.Desgaste(a.Desgaste));
             else if (HistoriaNoAeroporto(s, v)) Nota(l, Art.Heart(), Art.Bad, Art.Paper, Textos.Historia[0]);
             else
             {
@@ -302,7 +307,7 @@ namespace TA
             if (passoNaOnda < v.AbrePasso) return (Art.Bilhete(), Art.Ink);
             if (a.Hangar > 0) return (Art.Chave(), Art.Warn);
             if (!a.NoPatio) return (Art.Aviao(), Art.Ink);
-            if (a.Pendente) return (Art.Alerta(), Art.Bad);
+            if (a.Pane || a.Pendente) return (Art.Alerta(), Art.Bad);
             return a.Check > 0 ? (Art.Chave(), Art.Warn) : (Art.Caminhao(), Art.Ink);
         }
 
