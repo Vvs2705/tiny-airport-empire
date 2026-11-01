@@ -1,6 +1,6 @@
 """Prova de mutacao das travas da Fase C (CONTRATO_FASE_C §7): tira cada trava do nucleo, roda o dotnet test e exige que algum teste caia.
 
-uso (da raiz do repo): python client/tools/mutacao.py
+uso (da raiz do repo): python client/tools/mutacao.py [trecho do nome]   (com o trecho, so os mutantes que o contem, ex.: campanha)
 Cada mutante e' aplicado, testado e desfeito (o arquivo volta byte a byte, mesmo com erro). Sai 1 se algum mutante sobreviver.
 """
 
@@ -29,14 +29,14 @@ MUTANTES = [
     (
         "checagem so com Cash",
         "Sim.Patio.cs",
-        "|| !MecanicoLivre || Cash < T.CheckCusto) return false;",
-        "|| !MecanicoLivre) return false;",
+        "&& MecanicoLivre && Cash >= T.CheckCusto;",
+        "&& MecanicoLivre;",
     ),
     (
         "hangar so com Cash",
         "Sim.Patio.cs",
-        "if (a == null || !T.RegraManutencao || Cash < T.HangarCusto) return false;",
-        "if (a == null || !T.RegraManutencao) return false;",
+        "!= null && T.RegraManutencao && Cash >= T.HangarCusto;",
+        "!= null && T.RegraManutencao;",
     ),
     (
         "offline nao gasta desgaste",
@@ -101,8 +101,8 @@ MUTANTES = [
     (
         "um incidente por vez, com folga depois",
         "Sim.Incidentes.cs",
-        "if (_inc != null || w - UltimoIncidente <= T.IncidenteFolga || ",
-        "if (_inc != null || ",
+        "if (_inc != null || w - UltimoIncidente <= T.IncidenteFolga) return;",
+        "if (_inc != null) return;",
     ),
     (
         "reparo so com Cash",
@@ -218,6 +218,102 @@ MUTANTES = [
         "return !PistaFechada && !v.Atrasado && EsperaDecolagem(a) == 0 &&",
         "return !PistaFechada && EsperaDecolagem(a) == 0 &&",
     ),
+    (
+        "campanha: recompensa fixa, sem semente",
+        "Sim.Metas.cs",
+        "int pago = T.RegraCampanha ? o.Recompensa : 0;",
+        "int pago = T.RegraCampanha ? o.Recompensa + System.Math.Abs(Seed) % 7 : 0;",
+    ),
+    (
+        "campanha: recompensa fora do 2x e do cofre",
+        "Sim.Metas.cs",
+        "Cash += pago;",
+        "Ganha(pago);",
+    ),
+    (
+        "campanha: regra desligada nao paga",
+        "Sim.Metas.cs",
+        "int pago = T.RegraCampanha ? o.Recompensa : 0;",
+        "int pago = o.Recompensa;",
+    ),
+    (
+        "campanha: conclui so no alvo",
+        "Sim.Metas.cs",
+        "if (o == null || Progresso(a) < o.Alvo) continue;",
+        "if (o == null || Progresso(a) < 1) continue;",
+    ),
+    (
+        "campanha: fechar e abrir nao paga de novo",
+        "Sim.Save.cs",
+        "_feitos[a] = Math.Max(0, Math.Min(T.Objetivos[a].Length, c[0]));",
+        "_feitos[a] = 0;",
+    ),
+    (
+        "campanha: contador do save limitado",
+        "Sim.Save.cs",
+        "_conta[a][i] = Math.Max(0, Math.Min(T.Objetivos[a][i].Alvo, c[i + 1]));",
+        "_conta[a][i] = c[i + 1];",
+    ),
+    (
+        "campanha: offline nao conclui",
+        "Sim.Offline.cs",
+        "LastClaim = claimId;",
+        "LastClaim = claimId; PassoMetas();",
+    ),
+    (
+        "campanha: offline nao conta",
+        "Sim.Offline.cs",
+        "LastClaim = claimId;",
+        "LastClaim = claimId; Conta(Meta.Embarcados);",
+    ),
+    (
+        "campanha: anuncio nao anda a campanha",
+        "Sim.Metas.cs",
+        "case Ev.Historia: Conta(Meta.Historias); break;",
+        "case Ev.Historia: Conta(Meta.Historias); break; case Ev.Recompensa: Conta(Meta.Embarcados); break;",
+    ),
+    (
+        "campanha: so conta no aeroporto do objetivo",
+        "Sim.Metas.cs",
+        "int a = AeroportoAtual;",
+        "int a = 1;",
+    ),
+    (
+        "campanha: so a rota pedida conta",
+        "Sim.Metas.cs",
+        "(c[i].Arg < 0 || c[i].Arg == arg)",
+        "true",
+    ),
+    (
+        "campanha: conta antes de virar o ativo",
+        "Sim.Metas.cs",
+        "for (int i = _feitos[a]; i < c.Length; i++)",
+        "for (int i = _feitos[a]; i < c.Length && i == _feitos[a]; i++)",
+    ),
+    (
+        "campanha: voo perdido zera a sequencia",
+        "Sim.Metas.cs",
+        "else Conta(Meta.Seguidos, -1, true);",
+        "",
+    ),
+    (
+        "campanha: so a sequencia recua",
+        "Sim.Metas.cs",
+        "else Conta(Meta.Seguidos, -1, true);",
+        "else { Conta(Meta.Seguidos, -1, true); Conta(Meta.Embarcados, -1, true); Conta(Meta.Voos, -1, true); }",
+    ),
+    (
+        "campanha: perigo so conta resolvido",
+        "Sim.Metas.cs",
+        "case Ev.IncidenteFim: if (b == 1) Conta(",
+        "case Ev.IncidenteFim: Conta(",
+    ),
+    (
+        "campanha: nao tranca o jogo",
+        "Sim.Rotas.cs",
+        "|| ProximoAeroporto >= 0 || Marco < T.Aeroportos[a].Marco) return -1;",
+        "|| ProximoAeroporto >= 0 || Marco < T.Aeroportos[a].Marco || ObjetivoAtual(AeroportoAtual) != null) return -1;",
+    ),
 ]
 
 
@@ -244,7 +340,9 @@ def testa():
 
 def main():
     vivos = 0
-    for nome, arq, de, para in MUTANTES:
+    filtro = sys.argv[1] if len(sys.argv) > 1 else ""
+    lista = [m for m in MUTANTES if filtro in m[0]]
+    for nome, arq, de, para in lista:
         p = os.path.join(CORE, arq)
         with open(p, "rb") as f:
             original = f.read()
@@ -275,7 +373,7 @@ def main():
             )
         else:
             print("MORTO  %s: %d teste(s): %s" % (nome, caiu, ", ".join(quais[:4])))
-    print("mutacao: %d de %d mutantes mortos" % (len(MUTANTES) - vivos, len(MUTANTES)))
+    print("mutacao: %d de %d mutantes mortos" % (len(lista) - vivos, len(lista)))
     sys.exit(1 if vivos else 0)
 
 

@@ -80,6 +80,8 @@ namespace TA.Core
         RetornoPedido,      // A = aviao (bombeiros e ambulancia em prontidao)                    -> return_requested
         PousoSeguro,        // A = aviao                                                          -> safe_landing
         Remarcados,         // A = aviao (os passageiros do voo foram remarcados)                 -> pax_rebooked
+        // Fase C5 (CONTRATO_FASE_C5): campanha
+        ObjetivoConcluido,  // A = aeroporto, B = indice na cadeia, C = Cash                      -> campaign_objective_completed
     }
 
     /// <summary>Funcoes da tripulacao (GDD §5.11). Indice vai no save.</summary>
@@ -339,6 +341,13 @@ namespace TA.Core
         /// <summary>Rejeicao: o aviao sai RejeicaoSeg s depois. Retorno: pede RetornoPede s depois de decolar e pousa RetornoVolta s depois disso.
         /// Os dois deixam a pista bloqueada por PistaBloqueioSeg s.</summary>
         public float RejeicaoSeg = 40f, PistaBloqueioSeg = 20f, RetornoPede = 15f, RetornoVolta = 25f;
+
+        // ---- Fase C5 (CONTRATO_FASE_C5, hipoteses) ----
+        /// <summary>Portao de design do GDD §5.13 (false = so visual: conta e mostra, sem pagar) e a tabela (Objetivos.cs).</summary>
+        public bool RegraCampanha = true;
+        public Objetivo[][] Objetivos = Tabelas.Objetivos;
+        /// <summary>Voo lotado para a campanha: pelo menos esta parte dos passageiros a bordo, em %.</summary>
+        public int LotadoPct = 90;
     }
 
     /// <summary>Historias do TA-3 (GDD §5.9). A v0.1 tem 1. Id = indice (vai no album do save): so cresce no fim.</summary>
