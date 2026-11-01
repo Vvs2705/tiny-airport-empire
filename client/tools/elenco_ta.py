@@ -36,6 +36,8 @@ UNIFORME = {
     "lara": ([], 0.0, 0.0, 1.0),
     "comissaria": ([], 0.0, 0.0, 1.0),
     "comissario": ([], 0.0, 0.0, 1.0),
+    "agente_portao": ([], 0.0, 0.0, 1.0),
+    "agente_portao_f": ([], 0.0, 0.0, 1.0),
 }
 
 

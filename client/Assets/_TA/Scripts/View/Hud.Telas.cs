@@ -10,7 +10,7 @@ namespace TA
     /// Telas modais (seguram o relogio do quadro enquanto abertas), todas em folha (Art.NovaFolha): melhorias (efeito de cada upgrade escrito
     /// antes de comprar, GDD §5.6, e as estacoes travadas com o motivo), "mover para" (o botao alternativo ao arrasto, GDD §5.5), cofre offline
     /// (intervalo e calculo, GDD §6.3), anuncio simulado (v0.1 sem SDK: 3 s e so entao o Pagar do nucleo; fechar antes = sem recompensa), pausa e
-    /// album das historias (TA-3). Item, Compra e Faixa sao as pecas que estas telas e as da operacao repetem, com as medidas da Equipe.
+    /// album das historias (TA-3). Item, Compra e Resumo sao as pecas que estas telas e as da operacao repetem, com as medidas da Equipe.
     /// </summary>
     public sealed partial class Hud
     {
@@ -37,7 +37,7 @@ namespace TA
         }
 
         /// <summary>Os 3 numeros do alto da folha: o da tela, Cash e Terminal.</summary>
-        sealed class Faixa
+        sealed class Resumo
         {
             public Numero Tela, Cash, Terminal;
 
@@ -51,7 +51,7 @@ namespace TA
 
         Modal _melhorias, _mover, _cofre, _anuncio, _pausa, _album;
         readonly List<Modal> _modais = new List<Modal>();
-        Faixa _melhoriasFaixa, _pausaFaixa, _albumFaixa;
+        Resumo _melhoriasResumo, _pausaResumo, _albumResumo;
         readonly Item[] _melhoriaTrancada = new Item[8];   // as 8 estacoes; o despacho so tem este cartao, porque nao tem upgrade
         readonly RectTransform[] _melhoriaCartao = new RectTransform[7];
         readonly Compra[,] _melhoriaCompra = new Compra[7, 2];
@@ -83,12 +83,12 @@ namespace TA
             return m;
         }
 
-        /// <summary>Faixa de 3 numeros no alto da folha; devolve a lista rolavel que fica embaixo dela.</summary>
-        RectTransform NovaFaixa(Modal m, string rotulo, Sprite icone, Color cor, out Faixa f)
+        /// <summary>Resumo de 3 numeros no alto da folha; devolve a lista rolavel que fica embaixo dela.</summary>
+        RectTransform NovoResumo(Modal m, string rotulo, Sprite icone, Color cor, out Resumo f)
         {
             RectTransform pe = m.F.Corpo, nums = Art.Node(pe, "Numeros", Vector2.up, Vector2.one);
             nums.offsetMin = new Vector2(24f, -172f); nums.offsetMax = new Vector2(-24f, -16f);
-            f = new Faixa
+            f = new Resumo
             {
                 Tela = Art.NovoNumero(nums, "Tela", icone, cor, rotulo, Vector2.zero, new Vector2(0.34f, 1f)),
                 Cash = Art.NovoNumero(nums, "Cash", Art.Moeda(), Color.white, Textos.CashNome, new Vector2(0.34f, 0f), new Vector2(0.67f, 1f)),
@@ -171,7 +171,7 @@ namespace TA
             BuildMelhorias(canvas);
             BuildMover(canvas);
 
-            _cofre = NovaFolhaModal(canvas, "Cofre", Textos.DeVolta, Art.Estrela(), 830f);
+            _cofre = NovaFolhaModal(canvas, "Cofre", Textos.CofreTitulo, Art.Estrela(), 830f);
             RectTransform pc = _cofre.F.Corpo, topo = Art.Node(pc, "Ganho", Vector2.up, Vector2.one);
             topo.offsetMin = new Vector2(24f, -204f); topo.offsetMax = new Vector2(-24f, -16f);
             _cofreGanho = Art.NovoNumero(topo, "Ganho", Art.Moeda(), Color.white, Textos.Rendeu, Vector2.zero, Vector2.one);
@@ -194,7 +194,7 @@ namespace TA
             BotaoDoPe(_anuncio.F.Corpo, Vector2.zero, new Vector2(1f, 0f), () => Fecha(_anuncio)).Secundario(Textos.FecharSemRecompensa);
 
             _pausa = NovaFolhaModal(canvas, "Pausa", Textos.Pausado, Art.Relogio(), 1120f);
-            RectTransform lp = NovaFaixa(_pausa, Textos.Embarcados, Art.Pessoas(), Art.Azul, out _pausaFaixa);
+            RectTransform lp = NovoResumo(_pausa, Textos.Embarcados, Art.Pessoas(), Art.Azul, out _pausaResumo);
             Art.Margem((RectTransform)lp.parent, 24f, 186f, 24f, 184f);
             ItemPausa(lp, "Tutorial", Art.Mao(), Art.EstacaoCor[0], Textos.ReverTutorial, Textos.TutorialLegenda, Textos.Rever, it => { Fecha(_pausa); ReverTour(); });
             _pausaDiario = ItemPausa(lp, "Diario", Art.Bilhete(), Art.EstacaoCor[3], Textos.ExportarDiario, Textos.DiarioLegenda, Textos.Exportar, it => it.Linha.text = _g.ExportarDiario());
@@ -202,7 +202,7 @@ namespace TA
             BotaoDoPe(_pausa.F.Corpo, Vector2.zero, new Vector2(1f, 0f), () => Fecha(_pausa)).Principal(Textos.Continuar, Art.Compra);
 
             _album = NovaFolhaModal(canvas, "Album", Textos.Album, Art.Estrela(), 560f);
-            RectTransform lh = NovaFaixa(_album, Textos.Historias, Art.Estrela(), Art.Coin, out _albumFaixa);
+            RectTransform lh = NovoResumo(_album, Textos.HistoriasNome, Art.Estrela(), Art.Coin, out _albumResumo);
             _albumItem = new Item[Textos.Historia.Length];
             for (int h = 0; h < _albumItem.Length; h++)
             {
@@ -214,7 +214,7 @@ namespace TA
         void BuildMelhorias(RectTransform canvas)
         {
             _melhorias = NovaFolhaModal(canvas, "Melhorias", Textos.Melhorias, Art.Raio(), 1600f);
-            RectTransform lista = NovaFaixa(_melhorias, Textos.Compradas, Art.Raio(), Art.Azul, out _melhoriasFaixa);
+            RectTransform lista = NovoResumo(_melhorias, Textos.Compradas, Art.Raio(), Art.Azul, out _melhoriasResumo);
             for (int i = 0; i < 8; i++)
             {
                 var e = (Estacao)i;
@@ -325,7 +325,7 @@ namespace TA
                 }
                 else compradas += PintaEstacao(s, e);
             }
-            _melhoriasFaixa.Pinta(s, Textos.DeTotal(compradas, 7 * (s.T.VelNiveis + s.T.CapNiveis)));
+            _melhoriasResumo.Pinta(s, Textos.DeTotal(compradas, 7 * (s.T.VelNiveis + s.T.CapNiveis)));
         }
 
         /// <summary>Pinta as 2 linhas da estacao aberta; devolve quantos niveis ja foram comprados nela.</summary>
@@ -361,7 +361,7 @@ namespace TA
             Sim s = S;
             if (_melhorias.Rt.gameObject.activeSelf) PintaMelhorias(s);
             if (_mover.Rt.gameObject.activeSelf && _moverQuem >= 0 && _moverQuem < s.Staff.Count) PintaMover(s);
-            if (_pausa.Rt.gameObject.activeSelf) _pausaFaixa.Pinta(s, Textos.Num(s.TotalEmbarcados));
+            if (_pausa.Rt.gameObject.activeSelf) _pausaResumo.Pinta(s, Textos.Num(s.TotalEmbarcados));
             if (_cofre.Rt.gameObject.activeSelf)
             {
                 bool pode = s.Anuncios.Pode(Anuncio.Cofre);
@@ -388,7 +388,7 @@ namespace TA
                     _albumItem[h].Glifo.sprite = tem ? Art.Estrela() : Art.Cadeado();
                     _albumItem[h].Linha.text = Textos.AlbumEstado(tem);
                 }
-                _albumFaixa.Pinta(s, Textos.DeTotal(entregues, _albumItem.Length));
+                _albumResumo.Pinta(s, Textos.DeTotal(entregues, _albumItem.Length));
             }
             PintaOperacao();
         }

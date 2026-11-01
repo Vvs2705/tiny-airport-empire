@@ -16,7 +16,7 @@ namespace TA
 
         Modal _voo, _trip, _patio, _equipe;
         int _vooK;
-        Faixa _vooFaixa, _tripFaixa, _patioFaixa;
+        Resumo _vooResumo, _tripResumo, _patioResumo;
         BarraNivel _vooBarra;
         Item _vooEstado, _checar, _hangar, _vooEscala, _patioHire;
         readonly Item[,] _troca = new Item[2, MaxTrip - 1];
@@ -69,7 +69,7 @@ namespace TA
         void BuildVoo(RectTransform canvas)
         {
             _voo = NovaFolhaModal(canvas, "Voo", "", Art.Aviao(), 1600f);
-            RectTransform lista = NovaFaixa(_voo, Textos.DesgasteNome, Art.Chave(), Art.Azul, out _vooFaixa);
+            RectTransform lista = NovoResumo(_voo, Textos.DesgasteNome, Art.Chave(), Art.Azul, out _vooResumo);
             _vooBarra = Art.NovaBarraNivel(_voo.F.Corpo, "Desgaste", 10, Vector2.up, Vector2.one);
             var barra = (RectTransform)_vooBarra.Pai;
             barra.offsetMin = new Vector2(36f, -196f); barra.offsetMax = new Vector2(-30f, -180f);
@@ -94,7 +94,7 @@ namespace TA
         void BuildTrip(RectTransform canvas)
         {
             _trip = NovaFolhaModal(canvas, "Tripulacao", Textos.Tripulacao, Art.Aviao(), 1600f);
-            RectTransform lista = NovaFaixa(_trip, Textos.Tripulacao, Art.Pessoas(), Art.Azul, out _tripFaixa);
+            RectTransform lista = NovoResumo(_trip, Textos.Tripulacao, Art.Pessoas(), Art.Azul, out _tripResumo);
             for (int f = 0; f < 2; f++)
             {
                 var ff = (Funcao)f;
@@ -112,7 +112,7 @@ namespace TA
         void BuildPatio(RectTransform canvas)
         {
             _patio = NovaFolhaModal(canvas, "Patio", Textos.Patio, Art.Caminhao(), 1600f);
-            RectTransform lista = NovaFaixa(_patio, Textos.Equipe, Art.Pessoas(), Art.Azul, out _patioFaixa);
+            RectTransform lista = NovoResumo(_patio, Textos.Equipe, Art.Pessoas(), Art.Azul, out _patioResumo);
             _patioHire = NovoItem(lista, "Equipe", Art.Pessoas(), Art.Azul, () => _g.HirePatio(), 168f, 34f);
             _patioHire.Nome.text = Textos.EquipePatioNome;
             _patioHire.Linha.text = Textos.UmServico;
@@ -167,7 +167,7 @@ namespace TA
             bool embarcando = v != null && v.Embarque && !v.Partiu;
             int custo = s.T.CheckCusto;
             _voo.Titulo.text = v != null ? Textos.VooTitulo(v.Id) : Textos.AviaoNome[_vooK];
-            _vooFaixa.Pinta(s, Textos.Porcento(a.Desgaste));
+            _vooResumo.Pinta(s, Textos.Porcento(a.Desgaste));
             _vooBarra.Pinta(NivelDesgaste(a), CorDesgaste(a, s));
             _vooEstado.Placa.color = Art.VooCor[_vooK];
             _vooEstado.Nome.text = Textos.AviaoEstado(_vooK, a, a.Hangar * Sim.Step);
@@ -217,7 +217,7 @@ namespace TA
         void PintaTrip(Sim s)
         {
             int limite = s.T.TrechosAteDescanso, teto = s.TetoTripulacao;
-            _tripFaixa.Pinta(s, Textos.DeTotal(s.Tripulacao.Count, 2 * teto));
+            _tripResumo.Pinta(s, Textos.DeTotal(s.Tripulacao.Count, 2 * teto));
             for (int f = 0; f < 2; f++)
             {
                 int i = 0;
@@ -238,7 +238,7 @@ namespace TA
                 bool sobe = c < 0 && s.Marco < s.T.Marcos.Length;
                 Item h = _tripHire[f];
                 h.Linha.text = Textos.DeTotal(s.Quantos((Funcao)f), teto);
-                h.Info.text = sobe ? Textos.TetoSobe : "";
+                h.Info.text = sobe ? Textos.LimiteSobe : "";
                 if (c >= 0) h.Btn.Preco(Textos.ContratarCurto, c, s.Cash);
                 else if (sobe) h.Btn.Travado(Textos.TerminalNome, Textos.NivelNome(s.Marco + 2));
                 else h.Btn.Maximo(Textos.Completa);
@@ -247,7 +247,7 @@ namespace TA
 
         void PintaPatio(Sim s)
         {
-            _patioFaixa.Pinta(s, Textos.DeTotal(s.EquipePatio, s.T.PatioIniciais + s.T.PatioContratacao.Length));
+            _patioResumo.Pinta(s, Textos.DeTotal(s.EquipePatio, s.T.PatioIniciais + s.T.PatioContratacao.Length));
             long c = s.CustoPatio();
             if (c >= 0) _patioHire.Btn.Preco(Textos.ContratarCurto, c, s.Cash); else _patioHire.Btn.Maximo(Textos.Completa);
             for (int k = 0; k < 2; k++)

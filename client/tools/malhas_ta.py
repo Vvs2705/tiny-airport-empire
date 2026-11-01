@@ -76,6 +76,9 @@ PECAS = {
     "portico_detector": (1500, 512, -1.3),
     "bandeja_seguranca": (600, 256, 0.42),
     "scanner_mao": (400, 128, 0.3),
+    # a sala de espera do portao
+    "catraca_embarque": (1200, 512, 0.7),
+    "cordao_fila": (800, 256, 1.0),
 }
 
 

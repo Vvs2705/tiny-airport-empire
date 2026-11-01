@@ -22,6 +22,9 @@ foto critico_onda4    -onda 4 -speed 6 -shotdelay 12
 foto estresse_60      -passageiros 60 -speed 10 -shotdelay 11
 foto estresse_60_bot  -passageiros 60 -bot -speed 6 -shotdelay 12
 foto perto_onda2      -onda 2 -bot -speed 6 -shotdelay 10 -vista perto
+foto portao_espera    -onda 2 -bot -speed 6 -shotdelay 8 -vista portao
+foto portao_fila      -onda 2 -bot -speed 6 -shotdelay 20 -vista portao
+foto portao_estresse  -passageiros 60 -bot -speed 6 -shotdelay 12 -vista portao
 foto patio_pouso      -speed 2 -shotdelay 7 -vista patio
 foto patio_turnaround -bot -speed 6 -shotdelay 12 -vista patio
 foto geral            -bot -speed 6 -shotdelay 14 -vista geral
@@ -43,6 +46,10 @@ foto patio_salas      -onda 3 -bot -speed 6 -shotdelay 14 -vista geral -cenario 
 foto seguranca        -onda 4 -bot -speed 2 -shotdelay 14 -vista seguranca
 foto seguranca_cabine -onda 4 -bot -speed 2 -shotdelay 14 -vista seguranca -cenario salas
 for n in 1 2 3 4 5 6 7 8 9; do foto "passo$n" -tutorial -bot -speed 8 -shotdelay 12 -tela "passo$n"; done
+# passos 10 a 12 (evento): a historia nasce na 2a onda; o terminal em nivel 3 vem do cenario; o cofre nao precisa de estado
+foto passo10 -tutorial -onda 2 -bot -speed 4 -shotdelay 22 -tela passo10
+foto passo11 -tutorial -speed 4 -shotdelay 4 -tela passo11 -cenario oficina
+foto passo12 -tutorial -speed 4 -shotdelay 4 -tela passo12
 
 # tutorial jogavel: o bot joga com o tutorial ligado (ENTENDI sozinho em 2 s); o log diz quais passos apareceram e terminaram
 foto tutorial_bot -tutorial -bot -speed 10 -shotdelay 120

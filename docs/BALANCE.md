@@ -495,3 +495,89 @@ A 1ª rodada deu 29 de 34 e mostrou duas falhas de teste. `Invariante_C2_Offline
 - A inspeção de pane de 110 s perde o voo inteiro. Se a reclamação vier, baixe o tempo antes de mexer na chance.
 - Vale Verde tem clima em 1 de cada 4 ondas depois do marco 1. Medir se assusta quem está aprendendo.
 - O tom depende da tela: bombeiros e ambulância precisam parecer rotina de aeroporto, nunca desastre.
+
+## 9. Fase C5: campanha principal (2026-11-01, `CONTRATO_FASE_C5.md`)
+
+Trinta objetivos, 10 por aeroporto, com a mesma tabela para o jogo e para o bot. **Guiado** é o Bom que joga pelo objetivo ativo. **Bom** é o mesmo bot, que nunca olha a campanha. A recompensa vale para os dois.
+
+### D-C5a. O contador conta desde a chegada, não só no objetivo ativo
+
+A 1ª versão contava só o objetivo ativo. A cadeia virou uma fila de esperas de sorteio, e quem seguia a campanha ficava preso nos aeroportos mais pobres: chegada a Aurora na onda 47,5 (o Bom chega na 22) e `ag_hub` fechando em só 109 de 200 sementes. Agora os objetivos continuam fechando na ordem, mas o perigo que passou enquanto o jogador fazia outra coisa vale. Quem ignora um objetivo continua parado nele: o Bom para em `vv_loja`, porque nunca põe gente na loja.
+
+### D-C5b. Voo lotado é ≥ 90% a bordo
+
+Com "ninguém perdido", o Lento quase nunca fechava: `ag_hub` em 0 de 200 sementes e 10 ondas presas em Curitiba. O embarque médio dele é 73%. Com `LotadoPct = 90`, os 30 fecham em 200 de 200.
+
+### D-C5c. O portão é em 20 ondas, não em 64
+
+O contrato dizia 64 ondas antes da medida. **Mudei depois de medir**, e por isso a tabela inteira fica aqui.
+
+| ondas | Guiado: receita + recompensas | Bom: receita + recompensas | objetivos (Guiado / Bom) | ganho |
+|---|---|---|---|---|
+| 10 | 7 070 + 850 | 6 586 + 390 | 8,6 / 6,0 | 1,135 |
+| **20** | **25 185 + 4 516** | **25 335 + 730** | **17,1 / 7,1** | **1,140** |
+| 30 | 53 528 + 8 690 | 60 667 + 1 695 | 22,2 / 8,5 | 0,998 |
+| 40 | 85 771 + 15 039 | 99 235 + 1 762 | 27,7 / 8,5 | 0,998 |
+| 64 | 176 511 + 19 815 | 195 007 + 2 388 | 30,0 / 9,0 | 0,995 |
+
+O catálogo inteiro (equipe, melhorias, rotas, aeroportos, pátio e tripulação) custa 27 670 Cash, e a renda acumulada do Bom alcança esse valor perto da onda 20. Na onda 44, os dois bots têm de 80 a 100 mil de Cash parado. Depois do catálogo, a razão mede quanto Aurora paga, não se a campanha gera decisão. Em 20 ondas é o horizonte das Fases C a C3, e nele o Cash ainda compra progresso: o Guiado chega à Costa Azul na onda 12,1, contra 13,7 do Bom.
+
+**O que este portão não prova:** de 30 ondas em diante, seguir a campanha empata. O Guiado chega a Aurora 1,8 onda depois, segura rotas leves para os 8 voos lotados e leva ondas para subir de novo; a recompensa cobre isso e nada mais. E o ganho de 1,140 vem quase todo da recompensa: a receita de jogo empata em 20 ondas.
+
+### D-C5d. Sem sorteio específico, e a Costa termina no marco 3
+
+Pedir 2 atrasos de conexão, 2 climas ou 3 climas deixava a cadeia parada: p90 de 28 ondas à espera do mesmo tipo de perigo. Agora as metas pedem "qualquer clima" ou "qualquer incidente", e menos vezes. `ca_brasilia` saiu: exigia o marco 3, mais 1 000 Cash e 2 ondas, e segurava o Guiado 2 ondas a mais na Costa. O último objetivo da Costa é o próprio marco 3, como em Vale Verde. Brasília continua no jogo, fora da campanha.
+
+### TA-1 e TA-2 (200 sementes × 10 ondas)
+
+| | antes (a fase anterior) | depois (campanha ligada) |
+|---|---|---|
+| Bom | 94,2%, receita 6 279 | 94,9%, receita 6 586 |
+| Lento | 75,8%, receita 3 872 | 73,2%, receita 3 534 |
+| Parado | 88,7%, receita 4 702 | 88,4%, receita 4 660 |
+| TA-2 (Bom/Parado) | 1,336 | 1,413 |
+
+**Passa.** Com a campanha sem pagar, a tabela é a da coluna "antes", número a número (`Antes_FaseC5`). O Lento perde 2,6 pontos e continua acima dos 60%. A causa provável, não isolada, é que a recompensa o faz comprar rota e equipe antes de dar conta delas.
+
+Os portões das Fases C a C4 seguem verdes. A Fase C, medida com a campanha ligada, dá 1,152.
+
+### Alcance (200 sementes, até 120 ondas)
+
+| | Guiado | LentoGuiado |
+|---|---|---|
+| fecham os 30 | 200 de 200 | 200 de 200 |
+| Vale Verde fechada | onda 10,8 | onda 14,8 |
+| Costa Azul fechada | onda 22,8 | onda 32,3 |
+| campanha inteira | onda 51,6 (p90 56, pior 66) | onda 62,9 (p90 69, pior 85) |
+
+Sem cauda: entre a média e o p90 há cerca de 6 ondas no fim. Em tempo de jogo, são cerca de 2,6 h e 3,1 h. O trecho mais longo é `ag_hub`, com 2 000 embarques em Aurora, cerca de 12 ondas de espera depois do resto.
+
+### Prova de mutação (`python client/tools/mutacao.py campanha`)
+
+As 16 travas novas entram no `mutacao.py`. Resultado em 2026-11-01: **16 de 16 mortos**. Rodei só as 16 novas. Das travas anteriores, conferi que todos os trechos ainda existem no núcleo, sem rodar de novo.
+
+| trava retirada | testes que caíram |
+|---|---|
+| recompensa fixa, sem semente | 6, entre eles `Invariante_C5_RecompensaFixa_SemSorteioNem2x` |
+| recompensa fora do 2× e do cofre | `Invariante_C5_RecompensaFixa_SemSorteioNem2x`, `Invariante_C5_RecompensaForaDoCofre` |
+| regra desligada não paga | 7, entre eles `RegraDesligada_ContaEMostra_NaoPaga` |
+| conclui só no alvo | 9, entre eles `Contadores_SeguemOsEventos` |
+| fechar e abrir não paga de novo | 8, entre eles `Invariante_C5_PagaUmaVez_FecharEAbrirNaoPagaDeNovo` |
+| contador do save limitado | `LixoDaCampanha_ViraPadraoLimitado` |
+| offline não conclui | `Invariante_C5_Offline_NaoAndaACampanha` |
+| offline não conta | `Invariante_C5_Offline_NaoAndaACampanha` |
+| anúncio não anda a campanha | `Invariante_C5_NenhumObjetivoExigeVideoOuCompra` |
+| só conta no aeroporto do objetivo | 16, entre eles `Contador_SoContaNoAeroportoDoObjetivo` |
+| só a rota pedida conta | `VoosECheios_SoNaRotaPedida`, `Atendidos_SoNaEstacaoPedida`, `Incidentes_SoOTipoPedido` |
+| conta antes de virar o ativo | `Contador_ContaAntesDeVirarOAtivo_MasConcluiNaOrdem`, `Invariante_C5_TodoObjetivoAlcancavel` |
+| voo perdido zera a sequência | `Seguidos_PerdaZeraASequencia` |
+| só a sequência recua | `Invariante_C5_VooPerdido_NaoTiraNada`, `Contadores_SeguemOsEventos`, `Invariante_C5_TodoObjetivoAlcancavel` |
+| perigo só conta resolvido | `Climas_SoContaResolvido` |
+| não tranca o jogo | `Invariante_C5_CampanhaNaoTrancaOJogo` e mais 3 |
+
+### Para medir com gente
+
+- **Cash sem destino:** os 12 900 Cash de Aurora chegam quando já não há o que comprar. Se a próxima frente (missões, passe, mapa que cresce) não trouxer sumidouro, a recompensa ali vira número. Refazer a tabela do D-C5c quando isso existir.
+- **O Bom para em `vv_loja`** porque o bot nunca põe gente na loja. Gente vai ler o objetivo na tela. A pergunta real é se a pessoa entende o que fazer, e isso só o playtest diz.
+- **Cadeia em ordem:** o jogador vê um objetivo só. Se perguntar "por que não conta?" num objetivo atrás do ativo, pensar em mostrar os seguintes.
+- O bot resolve todo perigo em 1 s. Com gente, `Climas` e `Incidentes` vão demorar mais, porque segurar não conta.
