@@ -489,6 +489,15 @@ namespace TA.Tests
 
         const string CabecaCompras = "| bot | fecham os 30 | Vale Verde | Costa Azul | campanha | p90 | pior | embarque |\n|---|---|---|---|---|---|---|---|";
 
+        /// <summary>Quem nao gasta Gems joga a tabela da fase anterior, numero a numero.</summary>
+        [Test]
+        public void Antes_FaseD1()
+        {
+            Linha bom = Rodar(BotProfile.Bom), lento = Rodar(BotProfile.Lento), parado = Rodar(BotProfile.Parado);
+            Imprime("Fase D1, sem gastar Gems (a main da Fase C6)", new[] { bom, lento, parado });
+            Assert.AreEqual((6740, 4219, 4709), ((int)Math.Round(bom.Receita), (int)Math.Round(lento.Receita), (int)Math.Round(parado.Receita)), "a tabela da fase anterior");
+        }
+
         /// <summary>Portao de compras (CONTRATO_FASE_D1 §7): sem compra fecha os 30, e dinheiro sem limite acelera pouco, porque campanha pede embarque, nao Cash.</summary>
         [Test]
         public void Portao_FaseD1_Compras()

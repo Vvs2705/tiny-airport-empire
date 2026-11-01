@@ -1,6 +1,7 @@
 """Prova de mutacao das travas da Fase C (CONTRATO_FASE_C §7): tira cada trava do nucleo, roda o dotnet test e exige que algum teste caia.
 
 uso (da raiz do repo): python client/tools/mutacao.py [trecho do nome da trava ...]
+MUTACAO_TESTES = filtro do dotnet test, para rodar so os testes da trava (ex.: FullyQualifiedName~ComprasTests).
 Cada mutante e' aplicado, testado e desfeito (o arquivo volta byte a byte, mesmo com erro). Sai 1 se algum mutante sobreviver.
 """
 
@@ -509,8 +510,8 @@ MUTANTES = [
     (
         "compra: teto nao engole",
         "Compras.cs",
-        "if (p.Gems > T.GemsTeto - Gems) return Credito.Teto;\n            _tx.Add(id);",
-        "_tx.Add(id);\n            if (p.Gems > T.GemsTeto - Gems) return Credito.Teto;",
+        "if (p.Gems > T.GemsTeto - Gems) return Credito.Teto;",
+        "if (p.Gems > T.GemsTeto - Gems) { _tx.Add(id); return Credito.Teto; }",
     ),
     (
         "compra: conteudo fixo, sem semente",
@@ -637,7 +638,8 @@ def testa():
             "test",
             os.path.join(RAIZ, "client", "tools", "coretests"),
             "-nologo",
-        ],
+        ]
+        + (["--filter", os.environ["MUTACAO_TESTES"]] if "MUTACAO_TESTES" in os.environ else []),
         capture_output=True,
         text=True,
         env=env,
