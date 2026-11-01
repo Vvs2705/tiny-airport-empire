@@ -16,9 +16,9 @@ namespace TA.EditorTools
     /// </summary>
     public static class Setup
     {
-        // ponytail: appId e nome PROVISORIOS, so para build de desenvolvimento. D-03 (nome comercial e appId br.com.vstack.<nome>) esta
-        // pendente; nunca publicar com estes: o appId nao muda depois de publicado. Trocar aqui (e so aqui) quando o Vinicius decidir.
-        public const string AppId = "br.com.vstack.tinyairport.dev", ProductName = "Tiny Airport (dev)";
+        // D-03 (2026-11-01): nome "Little Terminal", busca de marca limpa em docs/NOME.md. O appId nao muda depois de publicado;
+        // trocar aqui (e em ProjectSettings.asset) so com decisao nova do Vinicius.
+        public const string AppId = "br.com.vstack.littleterminal", ProductName = "Little Terminal";
         const string Scene = "Assets/_TA/Scenes/Main.unity";
         const string ApkDir = "Builds/android";
         /// <summary>Versao mostrada ao jogador (Application.version) e no save.</summary>

@@ -41,7 +41,7 @@ Estados: **feito** (com evidência) · **parcial** · **falta** · **depende** (
 | 21 | Configurações, áudio, acessibilidade básica, política de privacidade, suporte e exclusão de dados | — | depende | C (telas e áudio); política e suporte dependem de D-09, D-10 e D-12 | P-11 |
 | 22 | Telemetria de eventos, crash reporting e painel mínimo de saúde | diário CSV | **parcial**: diário CSV com os eventos do §15.1 e `diario_report.py` (K2 e embarque médio); produção **depende** de D-11 | B (diário), D (SDK de D-11); crash pelo Android vitals | P-16 |
 | 23 | Arte final, UI, ícone, screenshots e materiais de loja sem placeholder | greybox | depende | C e E; Tripo depende de D-14; logo e ícone dependem de D-03 | P-12, P-15 |
-| — | Build Android assinado (AAB) e iOS | — | depende | E; AAB depende de D-03 (a chave de upload leva o nome) e da Play Console; iOS depende de macOS e conta Apple (D-04) | P-14 |
+| — | Build Android assinado (AAB) e iOS | — | depende | E; AAB depende da Play Console (D-03 decidida e chave de upload feita, `docs/NOME.md`); iOS depende de macOS e conta Apple (D-04) | P-14 |
 | — | Segurança e anti-fraude (§8), privacidade e LGPD (§9) | — | falta | D | P-17, P-11 |
 | — | Regressão final e GO/NO-GO (§25) | — | falta | E | P-18 |
 
@@ -49,12 +49,12 @@ Estados: **feito** (com evidência) · **parcial** · **falta** · **depende** (
 
 | Decisão | Trava |
 |---|---|
-| D-03 nome e appId | o `Setup.cs` usa `br.com.vstack.tinyairport.dev` só para build de desenvolvimento; trava app no LevelPlay, chave de upload, logo, ícone e loja |
-| D-05/D-06/D-07 compras, backend e Gems | linha 15 e o premium da linha 14 |
-| D-08 idiomas | textos já entram numa tabela (padrão do `Textos.cs` do DC); a tradução espera a decisão |
-| D-13 nomes de companhias e aeroportos | arte de marca e textos das rotas |
-| D-14 lotes do Tripo | toda a arte além do greybox |
-| D-02 nova data-alvo | decidida no portão da Fase B, com a velocidade real |
+| D-03 nome e appId | **decidida em 2026-11-01:** "Little Terminal", `br.com.vstack.littleterminal` (`docs/NOME.md`); libera app no LevelPlay, chave de upload (feita), logo, ícone e loja |
+| D-05/D-06/D-07 compras, backend e Gems | decididas em 2026-11-01: opção (b), com Gems; falta a Play Console para a linha 15 e o premium da linha 14 |
+| D-08 idiomas | decidida em 2026-11-01: pt-BR e en |
+| D-13 nomes de companhias e aeroportos | **decidida em 2026-11-01** (`docs/NOME.md`): 5 companhias novas, aeroportos mantidos; arte de marca e textos das rotas já podem usar |
+| D-14 lotes do Tripo | saldo livre até o plano vencer, em 2026-11-29 (Vinicius, 2026-11-01) |
+| D-02 nova data-alvo | decidida em 2026-11-01: assim que a Play Console sair e a regressão fechar |
 
 ## 3. Como esta matriz anda
 
