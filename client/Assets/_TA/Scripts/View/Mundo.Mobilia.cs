@@ -43,8 +43,8 @@ namespace TA
             new Mov(SalaLoja, "vaso_planta", 3.2f, -1.52f, 1f, 0f, 0.7f),
 
             new Mov(SalaMalas, "conteiner_bagagem", 3.1f, 1.3f, 0f, -1f, 0.42f),
-            new Mov(SalaMalas, "conteiner_bagagem", 2.45f, 1.4f, 0f, -1f, 0.42f),
-            new Mov(SalaMalas, "placa_direcao", 3.15f, 0.65f, -1f, 0f),
+            new Mov(SalaMalas, "conteiner_bagagem", 3.1f, 0.72f, 0f, -1f, 0.42f),
+            new Mov(SalaMalas, "placa_direcao", 3.15f, -0.65f, -1f, 0f),
             new Mov(SalaMalas, "vaso_planta", 3.2f, -1.52f, 1f, 0f, 0.7f),
 
             new Mov(SalaComida, "mesas_alimentacao", 3.05f, -1.05f, 1f, 0f),
