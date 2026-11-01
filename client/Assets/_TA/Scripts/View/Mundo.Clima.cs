@@ -131,11 +131,11 @@ namespace TA
             }
             _totem = new GameObject("Totem").transform;
             _totem.SetParent(_raiz, false);
-            Bloco("Base", PrimitiveType.Cylinder, new Vector3(0f, 0.02f, 0f), new Vector3(0.4f, 0.02f, 0.4f), Pau, _totem);
-            Bloco("Pau", PrimitiveType.Cylinder, new Vector3(0f, 0.7f, 0f), new Vector3(0.06f, 0.7f, 0.06f), Pau, _totem);
+            Bloco("Base", PrimitiveType.Cylinder, new Vector3(0f, 0.02f, 0f), new Vector3(0.3f, 0.02f, 0.3f), Pau, _totem);
+            Bloco("Pau", PrimitiveType.Cylinder, new Vector3(0f, 0.45f, 0f), new Vector3(0.05f, 0.45f, 0.05f), Pau, _totem);
             _totem.gameObject.SetActive(false);
-            _totemFundo = Billboard("TotemFundo", Art.Disc(), Art.Dark, 0.66f);
-            _totemIcone = Billboard("TotemIcone", Art.Alerta(), Art.Warn, 0.44f);
+            _totemFundo = Billboard("TotemFundo", Art.Disc(), Art.Dark, 0.52f);
+            _totemIcone = Billboard("TotemIcone", Art.Alerta(), Art.Warn, 0.35f);
             _reparoAnel = Billboard("ReparoAnel", Art.Arc(0f), Art.Good, 0.5f);
             for (int i = 0; i < _raioBalcao.Length; i++) _raioBalcao[i] = Billboard("RaioBalcao" + i, Art.Raio(), Art.Warn, 0.45f);
             for (int i = 0; i < _conesSala.Length; i++) _conesSala[i] = Cone();
@@ -250,9 +250,9 @@ namespace TA
             _totem.gameObject.SetActive(tem);
             _totemFundo.enabled = _totemIcone.enabled = tem;
             if (!tem) return;
-            Vector3 p = V3(Em(sala, 3.7f, 1.75f));
+            Vector3 p = V3(Em(sala, 3.1f, 1.45f));
             _totem.position = p;
-            Vector3 topo = p + Vector3.up * 1.6f;
+            Vector3 topo = p + Vector3.up * 1.05f;
             Quaternion q = _cam.transform.rotation;
             int ordem = Ordem(topo) + 9;
             _totemFundo.transform.SetPositionAndRotation(topo, q);
@@ -275,7 +275,7 @@ namespace TA
                 bool liga = falha && n < s.Estacoes[e].Postos;
                 _raioBalcao[n].enabled = liga;
                 if (!liga) continue;
-                Vector3 p = V3(Balcao(e, n), 1.3f);
+                Vector3 p = V3(Balcao(e, n), 0.93f);
                 _raioBalcao[n].transform.SetPositionAndRotation(p, q);
                 _raioBalcao[n].sortingOrder = Ordem(p) + 9;
                 _raioBalcao[n].color = Art.A(s.Steps >= i.Inicio ? Art.Bad : Art.Warn, Pulso());
@@ -283,27 +283,27 @@ namespace TA
             for (int n = 0; n < _conesSala.Length; n++)
             {
                 _conesSala[n].gameObject.SetActive(falha);
-                if (falha) _conesSala[n].position = V3(Em(e, 0.9f + n * 0.7f, -1.85f));
+                if (falha) _conesSala[n].position = V3(Em(e, 0.75f + n * 0.6f, -1.55f));
             }
             bool reparo = falha && s.Reparo > 0;
             _reparoAnel.enabled = reparo;
             if (reparo)
             {
-                Vector3 p = V3(Balcao(e, 0), 1.3f);
+                Vector3 p = V3(Balcao(e, 0), 0.93f);
                 _reparoAnel.sprite = Art.Arc(1f - s.Reparo * Sim.Step / s.T.ReparoSeg);
                 _reparoAnel.transform.SetPositionAndRotation(p, q);
                 _reparoAnel.sortingOrder = Ordem(p) + 10;
             }
             bool daEquipe = false;
             if (falha) foreach (Funcionario f in s.Staff) if (f.Perfil == Perfil.Mecanico && f.Em == i.Estacao) daEquipe = true;
-            VisitaPasso(_tecnico, reparo && !daEquipe ? e : -1, falha ? Em(e, 1.25f, -1.3f) : Vector2.zero, dt);
+            VisitaPasso(_tecnico, reparo && !daEquipe ? e : -1, falha ? Em(e, 0.85f, -0.95f) : Vector2.zero, dt);
         }
 
         /// <summary>Do lado de dentro da porta da sala, sem tampar quem entra.</summary>
         static Vector2 LugarGuia(int e)
         {
             Vector2 d = (Centro(e) - Salas[e].In).normalized;
-            return Salas[e].In + d * 0.4f + new Vector2(-d.y, d.x) * 0.85f;
+            return Salas[e].In + d * 0.6f + new Vector2(-d.y, d.x) * 0.75f;
         }
 
         /// <summary>Entra pela porta quando `sala` liga e sai por ela quando desliga.</summary>
