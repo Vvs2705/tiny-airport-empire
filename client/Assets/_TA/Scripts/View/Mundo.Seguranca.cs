@@ -10,14 +10,13 @@ namespace TA
     /// corpo inteiro. O passageiro põe a mala na bandeja, passa pelo pórtico, para na cabine enquanto o feixe corre, sai diante do agente e pega a
     /// mala no fim da mesa. Um em cada 4 passa pela vistoria com o scanner de mão, se houver agente no posto (fixo pelo id do passageiro: a tela não
     /// sorteia nada). As linhas são espelhadas no meio da sala, com a raia da pessoa para fora, e quem sai anda atrás das máquinas até a porta.
-    /// As medidas são para EscalaSeg 0,5 (LinhaM): a linha acompanha o tamanho das máquinas e cabe entre a parede e a 1ª fileira da fila.
     /// </summary>
     public sealed partial class Mundo
     {
         const int SalaSeg = (int)Estacao.Seguranca, Etapas = 4;
         /// <summary>Linha de cada posto ao longo da parede (a linha cheia cabe 4 na sala) e a escala do raio-x e do pórtico.</summary>
-        static readonly float[] SegA = { -0.48f, 0.48f, -1.43f, 1.43f };
-        const float EscalaSeg = 0.62f, PassoX = -0.2f, BeltX = 0.2f, EscalaCabine = EscalaSeg * 0.85f;
+        static readonly float[] SegA = { -0.43f, 0.43f, -1.26f, 1.26f };
+        const float EscalaSeg = 0.5f, PassoX = -0.22f, BeltX = 0.2f, EscalaCabine = EscalaSeg * 0.85f;
         /// <summary>Distâncias da parede de saída: parada diante da mesa, pórtico, cabine, raio-x, parada atrás das máquinas, agente e as pontas da
         /// esteira (centro do rolo: ela passa disso meia largura). Altura e largura da mesa.</summary>
         const float EntraD = 1.22f, PorticoD = 1.06f, CabineD = 0.6f, RaioXD = 0.66f, SaiD = 0.2f, AgenteD = 0.09f, MesaIniD = 1.08f, MesaFimD = 0.4f, AltMesa = 0.2f, LargMesa = 0.24f;
@@ -29,10 +28,9 @@ namespace TA
         readonly SpriteRenderer[] _feixe = new SpriteRenderer[4];
         readonly Mala[] _malaSeg = new Mala[4];
 
-        static float Posto(int e, int i) => e == SalaSeg ? SegA[i] : e == SalaCheckIn ? LinhaM(ChkA[i]) : Desloc[i];
-        static float LinhaM(float m) => m * EscalaSeg / 0.5f;
-        static Vector2 RaiaPessoa(int i, float d) => Em(SalaSeg, LinhaM(d), SegA[i] - Mathf.Sign(SegA[i]) * PassoX);
-        static Vector2 RaiaMala(int i, float d) => Em(SalaSeg, LinhaM(d), SegA[i] - Mathf.Sign(SegA[i]) * BeltX);
+        static float Posto(int e, int i) => e == SalaSeg ? SegA[i] : e == SalaCheckIn ? ChkA[i] : e == Portao ? PodioA[i] : Desloc[i];
+        static Vector2 RaiaPessoa(int i, float d) => Em(SalaSeg, d, SegA[i] - Mathf.Sign(SegA[i]) * PassoX);
+        static Vector2 RaiaMala(int i, float d) => Em(SalaSeg, d, SegA[i] - Mathf.Sign(SegA[i]) * BeltX);
         /// <summary>O centro do que fica no lugar do balcão (na segurança, o raio-x), para a planta e o -diag.</summary>
         static Vector2 MesaEm(int e, int i) => e == SalaSeg ? RaiaMala(i, RaioXD) : Balcao(e, i);
         public static Vector2 Agente(int i) => RaiaPessoa(i, AgenteD);
@@ -43,12 +41,12 @@ namespace TA
         /// <summary>O que ninguém atravessa na linha `i`, no chão: mesa, raio-x, as colunas do pórtico e os painéis da cabine (PostosTests).</summary>
         public static Rect[] CaixasLinha(int i)
         {
-            float lado = LinhaM(0.21f);
+            float lado = 0.21f;
             Vector2 p = RaiaPessoa(i, PorticoD), c0 = RaiaPessoa(i, CabineD + 0.2f), c1 = RaiaPessoa(i, CabineD - 0.2f), x = Vector2.right * lado;
             return new[]
             {
-                Caixa(RaiaMala(i, MesaIniD), RaiaMala(i, MesaFimD), LinhaM(LargMesa) * 0.5f), Caixa(RaiaMala(i, RaioXD + 0.08f), RaiaMala(i, RaioXD - 0.08f), LinhaM(0.2f)),
-                Caixa(p - x, p - x, LinhaM(0.04f)), Caixa(p + x, p + x, LinhaM(0.04f)), Caixa(c0 - x, c1 - x, LinhaM(0.02f)), Caixa(c0 + x, c1 + x, LinhaM(0.02f)),
+                Caixa(RaiaMala(i, MesaIniD), RaiaMala(i, MesaFimD), LargMesa * 0.5f), Caixa(RaiaMala(i, RaioXD + 0.08f), RaiaMala(i, RaioXD - 0.08f), 0.2f),
+                Caixa(p - x, p - x, 0.04f), Caixa(p + x, p + x, 0.04f), Caixa(c0 - x, c1 - x, 0.02f), Caixa(c0 + x, c1 + x, 0.02f),
             };
         }
 
@@ -65,12 +63,12 @@ namespace TA
             _cont = new GameObject("Linha" + i).transform;
             _cont.SetParent(sala, false);
             _linha[i] = _cont.gameObject;
-            float alt = LinhaM(AltMesa);
+            float alt = AltMesa;
             _portico[i] = Peca("portico_detector", V3(RaiaPessoa(i, PorticoD)), 0f, EscalaSeg);
             _cabine[i] = Peca("cabine_scanner_corpo", V3(RaiaPessoa(i, CabineD)), 0f, EscalaCabine);
-            _luz[i] = Bloco("Luz", PrimitiveType.Cube, V3(RaiaPessoa(i, PorticoD), LinhaM(0.68f)), Vector3.one * LinhaM(0.05f), CorLuz);
-            Esteira(RaiaMala(i, MesaIniD), RaiaMala(i, MesaFimD), alt, LinhaM(LargMesa));
-            for (int n = 0; n < 3; n++) Peca("bandeja_seguranca", V3(RaiaMala(i, MesaIniD), alt + n * LinhaM(0.035f)), 0f, EscalaSeg);   // a pilha de bandejas vazias
+            _luz[i] = Bloco("Luz", PrimitiveType.Cube, V3(RaiaPessoa(i, PorticoD), 0.68f), Vector3.one * 0.05f, CorLuz);
+            Esteira(RaiaMala(i, MesaIniD), RaiaMala(i, MesaFimD), alt, LargMesa);
+            for (int n = 0; n < 3; n++) Peca("bandeja_seguranca", V3(RaiaMala(i, MesaIniD), alt + n * 0.035f), 0f, EscalaSeg);   // a pilha de bandejas vazias
             _bandeja[i] = Peca("bandeja_seguranca", V3(RaiaMala(i, MesaIniD), alt), 0f, EscalaSeg);
             if (_bandeja[i] == null) _bandeja[i] = Bloco("Bandeja", PrimitiveType.Cube, V3(RaiaMala(i, MesaIniD), alt), new Vector3(0.3f, 0.04f, 0.3f), Art.Hex(0x8A94A6)).transform;
             _bandeja[i].gameObject.SetActive(false);
@@ -142,7 +140,7 @@ namespace TA
             _malaSeg[i].T.gameObject.SetActive(naBandeja);
             if (_scanner[i] != null) _scanner[i].gameObject.SetActive(scan);
             _feixe[i].enabled = naCabine;
-            bool noArco = dono != null && Vector2.Distance(dono.Pos, RaiaPessoa(i, PorticoD)) < LinhaM(0.16f);
+            bool noArco = dono != null && Vector2.Distance(dono.Pos, RaiaPessoa(i, PorticoD)) < 0.16f;
             Cor(_luz[i], noArco ? (Vistoria(p) ? Art.Bad : Art.Good) : agente ? CorLuz : Apagado);
             if (dono == null) return;
             if (parou && dono.Etapa == 0) { Olha(dono, Salas[SalaSeg].T * -Mathf.Sign(SegA[i])); Gesto(dono, dono.PoeMala, Mathf.InverseLerp(0f, 0.2f, f)); }   // poe a mala na bandeja
@@ -157,9 +155,9 @@ namespace TA
             if (scan && _scanner[i] != null) _scanner[i].position = V3(dono.Pos + new Vector2(0.14f, 0.08f) * EscalaFunc, EscalaFunc * (0.3f + 0.45f * Mathf.PingPong(Time.time * 1.6f, 1f)));
             if (!ve) return;
             SoMao(dono, p, naBandeja || dono.Despachou);
-            Vector3 b = V3(RaiaMala(i, Mathf.Lerp(MesaIniD, MesaFimD, Mathf.InverseLerp(0.22f, 0.8f, f))), LinhaM(AltMesa));
+            Vector3 b = V3(RaiaMala(i, Mathf.Lerp(MesaIniD, MesaFimD, Mathf.InverseLerp(0.22f, 0.8f, f))), AltMesa);
             _bandeja[i].position = b;
-            Deita(_malaSeg[i], b + Vector3.up * LinhaM(0.14f), Rumo(Salas[SalaSeg].T), LinhaM(0.56f) * (dono.Despachou ? 0.6f : 1f));
+            Deita(_malaSeg[i], b + Vector3.up * 0.14f, Rumo(Salas[SalaSeg].T), 0.56f * (dono.Despachou ? 0.6f : 1f));
             Cor(_malaSeg[i].R, Art.VooCor[p.Voo]);
         }
     }

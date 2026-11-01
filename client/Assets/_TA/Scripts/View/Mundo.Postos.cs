@@ -14,7 +14,6 @@ namespace TA
     ///  - Posto com gente tem as faixas no chão e as telas acesas; posto sem ninguém fica vazio de verdade: tudo apagado, cordão fechando a passagem e a
     ///    placa de fora de serviço. Quem está vindo para o posto já abre o cordão, e quem está sendo atendido pelo toque do jogador acende o posto.
     ///  - Atrás da bancada e das máquinas o boneco sai do chão para a câmera: a folha deita para trás e entraria no painel.
-    /// As medidas são para EscalaSeg 0,5 (LinhaM), como na linha da segurança.
     /// </summary>
     public sealed partial class Mundo
     {
@@ -41,7 +40,7 @@ namespace TA
         readonly SpriteRenderer[] _doc = new SpriteRenderer[4];
 
         /// <summary>O boneco sai do chão para a câmera atrás da bancada e das máquinas.</summary>
-        static float FrenteAtras => LinhaM(0.3f);
+        static float FrenteAtras => 0.3f;
 
         /// <summary>Bancada de um guichê no nível `n` da Velocidade (a malha do Tripo entra no lugar quando existir): corpo, tampo, monitor, teclado e impressora;
         /// o nível 1 ganha 2º monitor e divisória de vidro, o 2 ganha tampo de pedra e faixa de luz na frente.</summary>
@@ -50,18 +49,18 @@ namespace TA
             const int e = SalaCheckIn;
             Transform sala = _cont;
             _cont = Grupo("Bancada" + i + n, sala);
-            Vector2 c = Balcao(e, i), frente = c - Salas[e].N * (LinhaM(BancadaF) * 0.5f + 0.004f);
-            float l = LinhaM(BancadaL), f = LinhaM(BancadaF), h = LinhaM(BancadaH), topo = h + LinhaM(0.015f);
+            Vector2 c = Balcao(e, i), frente = c - Salas[e].N * (BancadaF * 0.5f + 0.004f);
+            float l = BancadaL, f = BancadaF, h = BancadaH, topo = h + 0.015f;
             Bloco("Corpo", PrimitiveType.Cube, V3(c, h * 0.5f), new Vector3(f, h, l), CorBancada);
-            Bloco("Rodape", PrimitiveType.Cube, V3(c, LinhaM(0.015f)), new Vector3(f + LinhaM(0.02f), LinhaM(0.03f), l + LinhaM(0.02f)), CorMonitor);
-            Bloco("Tampo", PrimitiveType.Cube, V3(c, h), new Vector3(f + LinhaM(0.05f), LinhaM(0.03f), l + LinhaM(0.05f)), n == 2 ? CorPedra : CorTampo);
-            if (n == 2) _telas[i].Add(Bloco("Luz", PrimitiveType.Cube, V3(frente, h * 0.2f), new Vector3(0.012f, LinhaM(0.02f), l * 0.9f), CorTela));
-            Vector2 t = Salas[e].T * Mathf.Sign(ChkBalancaA * Mathf.Sign(ChkA[i]) - ChkA[i]) * LinhaM(0.11f);
-            Monitor(i, c + Salas[e].N * LinhaM(0.05f) - t, topo);
-            if (n >= 1) Monitor(i, c + Salas[e].N * LinhaM(0.05f) + t, topo);
-            Bloco("Teclado", PrimitiveType.Cube, V3(c + Salas[e].N * LinhaM(0.1f), topo + LinhaM(0.006f)), new Vector3(LinhaM(0.05f), LinhaM(0.012f), LinhaM(0.14f)), CorMonitor);
-            Bloco("Impressora", PrimitiveType.Cube, V3(c - Salas[e].N * LinhaM(0.03f) + t * 2f, topo + LinhaM(0.03f)), new Vector3(LinhaM(0.08f), LinhaM(0.06f), LinhaM(0.08f)), Art.Paper);
-            if (n >= 1) Bloco("Vidro", PrimitiveType.Cube, V3(c - Salas[e].N * LinhaM(0.1f), topo + LinhaM(0.1f)), new Vector3(0.012f, LinhaM(0.2f), l * 0.8f), CorVidro);
+            Bloco("Rodape", PrimitiveType.Cube, V3(c, 0.015f), new Vector3(f + 0.02f, 0.03f, l + 0.02f), CorMonitor);
+            Bloco("Tampo", PrimitiveType.Cube, V3(c, h), new Vector3(f + 0.05f, 0.03f, l + 0.05f), n == 2 ? CorPedra : CorTampo);
+            if (n == 2) _telas[i].Add(Bloco("Luz", PrimitiveType.Cube, V3(frente, h * 0.2f), new Vector3(0.012f, 0.02f, l * 0.9f), CorTela));
+            Vector2 t = Salas[e].T * Mathf.Sign(ChkBalancaA * Mathf.Sign(ChkA[i]) - ChkA[i]) * 0.11f;
+            Monitor(i, c + Salas[e].N * 0.05f - t, topo);
+            if (n >= 1) Monitor(i, c + Salas[e].N * 0.05f + t, topo);
+            Bloco("Teclado", PrimitiveType.Cube, V3(c + Salas[e].N * 0.1f, topo + 0.006f), new Vector3(0.05f, 0.012f, 0.14f), CorMonitor);
+            Bloco("Impressora", PrimitiveType.Cube, V3(c - Salas[e].N * 0.03f + t * 2f, topo + 0.03f), new Vector3(0.08f, 0.06f, 0.08f), Art.Paper);
+            if (n >= 1) Bloco("Vidro", PrimitiveType.Cube, V3(c - Salas[e].N * 0.1f, topo + 0.1f), new Vector3(0.012f, 0.2f, l * 0.8f), CorVidro);
             GameObject g = _cont.gameObject;
             _cont = sala;
             return g;
@@ -71,8 +70,8 @@ namespace TA
         {
             Vector2 rumo = new Vector2(0.5f, -0.87f);   // meio de lado: o atendente vê, e a câmera também
             Quaternion q = Quaternion.LookRotation(V3(rumo));
-            float l = LinhaM(0.15f), h = LinhaM(0.1f), y = topo + LinhaM(0.03f) + h * 0.5f;
-            Bloco("Pe", PrimitiveType.Cube, V3(p, topo + LinhaM(0.015f)), Vector3.one * LinhaM(0.03f), CorMonitor);
+            float l = 0.15f, h = 0.1f, y = topo + 0.03f + h * 0.5f;
+            Bloco("Pe", PrimitiveType.Cube, V3(p, topo + 0.015f), Vector3.one * 0.03f, CorMonitor);
             Bloco("Monitor", PrimitiveType.Cube, V3(p, y), new Vector3(l, h, 0.014f), CorMonitor).transform.rotation = q;
             Renderer tela = Bloco("Tela", PrimitiveType.Cube, V3(p + rumo * 0.012f, y), new Vector3(l * 0.86f, h * 0.8f, 0.006f), CorTela);
             tela.transform.rotation = q;
@@ -84,18 +83,18 @@ namespace TA
         {
             const int e = SalaCheckIn;
             _telas[i] = _telas[i] ?? new List<Renderer>();
-            _visor[i] = Bloco("Visor", PrimitiveType.Cube, V3(Balcao(e, i) - Salas[e].N * (LinhaM(BancadaF) * 0.5f + 0.004f), LinhaM(BancadaH) * 0.62f), new Vector3(0.012f, LinhaM(0.08f), LinhaM(BancadaL) * 0.42f), CorTelaOff);
-            Vector2 c = Em(e, LinhaM(0.03f), Posto(e, i));
-            float l = LinhaM(BancadaL + 0.02f), h = LinhaM(0.62f), g = LinhaM(0.05f);
+            _visor[i] = Bloco("Visor", PrimitiveType.Cube, V3(Balcao(e, i) - Salas[e].N * (BancadaF * 0.5f + 0.004f), BancadaH * 0.62f), new Vector3(0.012f, 0.08f, BancadaL * 0.42f), CorTelaOff);
+            Vector2 c = Em(e, 0.03f, Posto(e, i));
+            float l = BancadaL + 0.02f, h = 0.62f, g = 0.05f;
             Bloco("Painel", PrimitiveType.Cube, V3(c, h * 0.5f), new Vector3(g, h, l), CorPainel);
-            _tira[i] = Bloco("Tira", PrimitiveType.Cube, V3(c - Salas[e].N * (g * 0.5f + 0.003f), h - LinhaM(0.03f)), new Vector3(0.012f, LinhaM(0.02f), l * 0.92f), CorTela);
+            _tira[i] = Bloco("Tira", PrimitiveType.Cube, V3(c - Salas[e].N * (g * 0.5f + 0.003f), h - 0.03f), new Vector3(0.012f, 0.02f, l * 0.92f), CorTela);
             var go = new GameObject("Numero" + i);
             go.transform.SetParent(_cont, false);
-            go.transform.SetPositionAndRotation(V3(c - Salas[e].N * (g * 0.5f + 0.01f), h - LinhaM(0.14f)), Quaternion.LookRotation(V3(Salas[e].N)));
+            go.transform.SetPositionAndRotation(V3(c - Salas[e].N * (g * 0.5f + 0.01f), h - 0.14f), Quaternion.LookRotation(V3(Salas[e].N)));
             TextMesh tm = go.AddComponent<TextMesh>();
             tm.font = Art.Font();
             tm.fontSize = 72;
-            tm.characterSize = LinhaM(0.025f);
+            tm.characterSize = 0.025f;
             tm.anchor = TextAnchor.MiddleCenter;
             tm.fontStyle = FontStyle.Bold;
             tm.color = Color.white;
@@ -110,33 +109,33 @@ namespace TA
         {
             for (int lado = -1; lado <= 1; lado += 2)
             {
-                Vector2 p = Em(SalaCheckIn, LinhaM(ChkBalancaD), lado * LinhaM(ChkBalancaA)), canto = Em(SalaCheckIn, LinhaM(ChkEsteiraD), lado * LinhaM(ChkBalancaA)), boca = Em(SalaCheckIn, LinhaM(ChkEsteiraD), lado * FimChk);
-                Peca("balanca_bagagem", V3(p), Rumo(-Salas[SalaCheckIn].N), LinhaM(0.4f));
+                Vector2 p = Em(SalaCheckIn, ChkBalancaD, lado * ChkBalancaA), canto = Em(SalaCheckIn, ChkEsteiraD, lado * ChkBalancaA), boca = Em(SalaCheckIn, ChkEsteiraD, lado * FimChk);
+                Peca("balanca_bagagem", V3(p), Rumo(-Salas[SalaCheckIn].N), 0.4f);
                 Esteira(p, canto);
                 Esteira(canto, boca);
                 Boca(boca);
             }
         }
 
-        static float FimChk => Mathf.Min(LinhaM(MeiaChk), Lado * 0.5f);
-        static Vector2 BalancaChk(int i) => Em(SalaCheckIn, LinhaM(ChkBalancaD), Mathf.Sign(ChkA[i]) * LinhaM(ChkBalancaA));
+        static float FimChk => Mathf.Min(MeiaChk, Lado * 0.5f);
+        static Vector2 BalancaChk(int i) => Em(SalaCheckIn, ChkBalancaD, Mathf.Sign(ChkA[i]) * ChkBalancaA);
 
         static void RotaChk(List<Vector2> r, int i)
         {
             float lado = Mathf.Sign(ChkA[i]);
-            r.Add(Em(SalaCheckIn, LinhaM(ChkEsteiraD), lado * LinhaM(ChkBalancaA)));
-            r.Add(Em(SalaCheckIn, LinhaM(ChkEsteiraD), lado * FimChk));
+            r.Add(Em(SalaCheckIn, ChkEsteiraD, lado * ChkBalancaA));
+            r.Add(Em(SalaCheckIn, ChkEsteiraD, lado * FimChk));
         }
 
         /// <summary>O chão da bancada do guichê `i` (PostosTests).</summary>
         public static Rect CaixaBancada(int i)
         {
-            Vector2 c = Balcao(SalaCheckIn, i), t = Salas[SalaCheckIn].T * (LinhaM(BancadaL) * 0.5f);
-            return Caixa(c - t, c + t, LinhaM(BancadaF) * 0.5f);
+            Vector2 c = Balcao(SalaCheckIn, i), t = Salas[SalaCheckIn].T * (BancadaL * 0.5f);
+            return Caixa(c - t, c + t, BancadaF * 0.5f);
         }
 
         /// <summary>Onde para quem vai despachar: de lado no guichê, perto da balança do par.</summary>
-        public static Vector2 PeBalanca(int i) => NoBalcao(SalaCheckIn, i) + Salas[SalaCheckIn].T * (Mathf.Sign(Vector2.Dot(BalancaChk(i) - NoBalcao(SalaCheckIn, i), Salas[SalaCheckIn].T)) * LinhaM(0.16f));
+        public static Vector2 PeBalanca(int i) => NoBalcao(SalaCheckIn, i) + Salas[SalaCheckIn].T * (Mathf.Sign(Vector2.Dot(BalancaChk(i) - NoBalcao(SalaCheckIn, i), Salas[SalaCheckIn].T)) * 0.16f);
 
         /// <summary>A mala fica na balança do check-in se ela é despachada e a sala de bagagem, sem gente, não vai pegá-la.</summary>
         static bool DespachaAqui(Sim s, Pax p) => p.Mala && s.Presentes(Estacao.Bagagem) == 0;
@@ -328,7 +327,7 @@ namespace TA
             _doc[i].enabled = ve;
             if (!ve) return;
             float t = f < EntregaAte ? Mathf.InverseLerp(0.3f, 0.7f, f / EntregaAte) : 1f - Mathf.InverseLerp(0.3f, 0.7f, (f - DevolveDe) / (1f - DevolveDe));
-            Vector3 c = V3(Vector2.Lerp(b.Pos, AtrasBalcao(SalaCheckIn, i), t), LinhaM(0.36f)) - _cam.transform.forward * LinhaM(0.6f);
+            Vector3 c = V3(Vector2.Lerp(b.Pos, AtrasBalcao(SalaCheckIn, i), t), 0.36f) - _cam.transform.forward * 0.6f;
             _doc[i].transform.SetPositionAndRotation(c, _cam.transform.rotation);
             _doc[i].sortingOrder = Ordem(c) + 9;
         }

@@ -15,7 +15,7 @@ namespace TA
     public sealed partial class Mundo
     {
         const int SalaMalas = (int)Estacao.Bagagem, MaxMalas = 16, MaxPilha = 6;
-        const float EscalaMala = 1f, EscalaBalanca = 0.5f, EscalaBalcaoMala = 0.5f, EscalaBandeja = 0.7f, MeiaMala = 0.21f, MeiaEspessura = 0.07f;
+        const float EscalaMala = 0.5f, EscalaBalanca = 0.5f, EscalaBalcaoMala = 0.5f, EscalaBandeja = 0.35f, MeiaMala = 0.21f, MeiaEspessura = 0.07f;
         /// <summary>Esteira: velocidade (m/s de jogo), altura, largura, distância da parede, lado da balança a partir do posto, a fachada do
         /// terminal e o tempo da mala na balança (s de jogo).</summary>
         const float VelEsteira = 0.9f, AltEsteira = 0.12f, LargEsteira = 0.16f, DEsteira = 0.12f, LadoBalanca = 0.4f, TerminalZ = 10.75f, Pesando = 1.4f;
@@ -154,7 +154,7 @@ namespace TA
             m.Espera = Pesando;
             Cor(m.R, Art.VooCor[p.Voo]);
             m.T.position = V3(PontoBalanca(i), 0.22f * EscalaBalanca);
-            m.T.localScale = Vector3.one * (i >= 4 ? LinhaM(0.5f) : EscalaMala);
+            m.T.localScale = Vector3.one * EscalaMala;
             m.T.gameObject.SetActive(true);
             _balanca[i] = m;
         }
@@ -225,7 +225,7 @@ namespace TA
             {
                 Mala m = NovaMala("Pilha");
                 m.T.SetParent(v.T, false);
-                Deita(m, new Vector3(0f, 0.36f + i / 3 * 0.15f, -0.36f + i % 3 * 0.24f), 90f, 1f);
+                Deita(m, new Vector3(0f, 0.36f + i / 3 * 0.15f * EscalaMala, -0.12f + (i % 3 - 1) * 0.24f * EscalaMala), 90f, EscalaMala);
                 pilha[i] = m;
             }
             return pilha;

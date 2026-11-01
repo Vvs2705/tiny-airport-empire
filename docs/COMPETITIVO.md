@@ -350,6 +350,8 @@ Ordem de prioridade. Nada aqui usa item aleatório pago, anúncio forçado, qued
 | 14 | Volta ao portão por aviso técnico antes da decolagem: 5º incidente, com a pessoa decidindo checar agora ou no hangar | 0 de 10 mostrou; sistema novo, só com o portão §5.13 (bot ≥ 1,10×) e mudança do GDD §4.3. Custa no máximo a receita do voo, sem Gems nem anúncio. Sem passar, fica visual | Núcleo | M |
 | 15 | Números e textos: R$ e milhar em pt-BR, teste de layout contra corte | `05_idle_airport_empire/300`, `07_airport_inc/029` | Menus | P |
 
+**Prioridade 1, decidida em 01/11 com fotos:** a sala continua na grade de 4 m e o adulto cai para 0,5 m, com corredor de 0,6 m entre as salas. Dá 20 pessoas de lado na grade e 17 de piso útil [D]. Com as 4 salas na tela e pessoa ≥ 28 px, ~21 é o teto em qualquer escala [D]: sala maior só afasta a câmera. A saída de 8 × 8 m daria a mesma leitura na sala e deixaria o avião do tamanho de uma sala.
+
 A escala vem primeiro porque muda a planta de que dependem as prioridades 2, 4 e 5, e encolhe o que cabe na tela. As prioridades 2, 4, 5 e 6 somam gente e objetos em movimento: medir no K3 ampliado (GDD §5.13) a cada entrega. Ficam fora de propósito caixas, banner, intersticial, compra no cartão de vídeo e gerente pago.
 
 ### h.9 O que os testes corrigiram neste documento
