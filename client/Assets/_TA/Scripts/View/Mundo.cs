@@ -37,7 +37,7 @@ namespace TA
         public const float Lado = 4f, Corredor = 0.6f, Gente = 0.5f, Interno = Lado - Corredor;
         const float Elev = 45f, VelPax = 1.2f, Troca = 0.35f, EscalaFunc = Gente, PortaLarg = 0.45f;
         /// <summary>Fileiras de quem atende e de quem e atendido, a partir da parede de saida; a fila em pessoas (1,35 por lugar).</summary>
-        const float AtrasD = 0.16f, BalcaoD = 0.62f, FrenteD = 1.08f, FaixaD = 1.25f, FilaD = 1.42f, FilaPasso = 0.27f, FilaLinha = 0.34f;
+        const float AtrasD = 0.16f, BalcaoD = 0.62f, FrenteD = 1.08f, FaixaD = 1.25f, FilaD = 1.42f, FilaPasso = 0.24f, FilaLinha = 0.34f;
         static readonly float[] Desloc = { -0.6f, 0.6f, -1.3f, 1.3f };   // balcoes ao longo da parede de saida, com o corredor no meio
 
         /// <summary>Sala de cada estacao: canto (x, z), porta de entrada e de saida (no meio da parede) e a direcao da saida (para fora).</summary>
@@ -50,7 +50,7 @@ namespace TA
             Nova(4f, 4f, new Vector2(6f, 4f), new Vector2(8f, 6f), new Vector2(1f, 0f)),     // loja: entra ao sul, sai a leste
             Nova(8f, 4f, new Vector2(8f, 6f), new Vector2(10f, 8f), new Vector2(0f, 1f)),    // portao: entra a oeste, sai ao norte (ponte)
             Nova(0f, 4f, new Vector2(2f, 4f), new Vector2(2f, 8f), new Vector2(0f, 1f)),     // bagagem: entra pelo check-in, balcoes ao norte
-            Nova(8f, 0f, new Vector2(10f, 4f), new Vector2(10f, 0f), new Vector2(0f, -1f)),  // alimentacao: entra pelo portao, balcoes ao sul
+            Nova(8f, 0f, new Vector2(10f, 4f), new Vector2(12f, 2f), new Vector2(1f, 0f)),   // alimentacao: entra pelo portao, balcoes a leste, na parede de fundo
             Nova(16f, 4f, new Vector2(16f, 6f), new Vector2(18f, 8f), new Vector2(0f, 1f)),  // oficina: entra pelo despacho, sai ao norte (patio)
             Nova(12f, 4f, new Vector2(12f, 6f), new Vector2(16f, 6f), new Vector2(1f, 0f)),  // despacho: entra pelo portao, sai para a oficina
         };
@@ -88,14 +88,13 @@ namespace TA
 
         /// <summary>Malha de balcao de cada estacao e a escala dela (a loja e um quiosque grande: 0,6 cabe 1 por posto). A oficina tem a
         /// bancada aqui e o predio dela fica no mundo (Planta): o mecanico da Fase C mora la antes de a sala abrir.</summary>
-        static readonly string[] BalcaoMalha = { "balcao_checkin", "raio_x", "loja", "catraca_embarque", "esteira_bagagem", "alimentacao", "balcao_informacoes", "balcao_informacoes" };
-        static readonly float[] BalcaoEscala = { 0.9f, EscalaSeg, 0.6f, 0.55f, EscalaBalcaoMala, 0.6f, 0.75f, 0.75f };
+        static readonly string[] BalcaoMalha = { "balcao_checkin", "raio_x", "vitrine_loja", "catraca_embarque", "esteira_bagagem", "vitrine_cafe", "balcao_informacoes", "balcao_informacoes" };
+        static readonly float[] BalcaoEscala = { 0.9f, EscalaSeg, 1f, 0.55f, EscalaBalcaoMala, 1f, 0.75f, 0.75f };
         /// <summary>Nivel de Velocidade a partir do qual o balcao troca pela malha `<malha>_n2` e `_n3` (Lotes 5 e 6): o upgrade muda o predio
         /// (GDD §5.13). Sem a malha daquele nivel, fica a do nivel abaixo.</summary>
         static readonly int[] NivelMalha = { 0, 2, 4 };
         static readonly Color ReservaCor = new Color(1f, 0.93f, 0.78f);
         /// <summary>Placa no chao, do lado de fora da parede mais perto da camera (onde nao ha outra sala).</summary>
-        static readonly Vector2[] PlacaEm = { new Vector2(2.2f, -0.9f), new Vector2(5.5f, -0.85f), new Vector2(5f, 5f), new Vector2(8.7f, 8.75f), new Vector2(-0.95f, 5.6f), new Vector2(9.9f, -0.85f), new Vector2(17.7f, 3.2f), new Vector2(13.9f, 3.2f) };
 
         static Sala Nova(float x, float z, Vector2 entra, Vector2 sai, Vector2 n) =>
             new Sala { Min = new Vector2(x, z), In = entra, Out = sai, N = n, T = new Vector2(n.y, n.x) };
@@ -192,7 +191,7 @@ namespace TA
         /// <summary>Funcionario sendo arrastado (-1 = nenhum).</summary>
         public int Arrastando => _arrasto ? _press : -1;
 
-        static readonly Color CorParede = Art.Hex(0xD9DEE8), Fita = Art.Hex(0x2F6FE4), Asfalto = Art.Hex(0x5A5F6B), Grama = Art.Hex(0x7FB069), Trancada = Art.Hex(0xA9ADB5);
+        static readonly Color CorParede = Art.Hex(0xF4F1E8), Fita = Art.Hex(0x2F6FE4), Asfalto = Art.Hex(0x5A5F6B), Grama = Art.Hex(0x7FB069), Trancada = Art.Hex(0xA9ADB5);
 
         public Mundo(Hud h, Game g, RectTransform rotulos)
         {
@@ -339,24 +338,25 @@ namespace TA
             {
                 Station st = s.Estacoes[e];
                 bool aberta = s.Desbloqueada(st.Tipo);
-                if (aberta != _aberta[e] || _sala[e].gameObject.activeSelf != aberta) { _aberta[e] = aberta; _sala[e].gameObject.SetActive(aberta); }
+                if (aberta != _aberta[e] || _sala[e].gameObject.activeSelf != aberta) { _aberta[e] = aberta; _sala[e].gameObject.SetActive(aberta); _obra[e].gameObject.SetActive(!aberta); }
                 if (!aberta)
                 {
                     Cor(_piso[e], Trancada);
                     string trancada = Textos.PlacaTrancada(e, s.T.Abre[e]);
-                    if (_placa[e].text != trancada) { _placa[e].text = trancada; _placa[e].characterSize = 0.03f; }
+                    if (_placa[e].text != trancada) { _placa[e].text = trancada; _placa[e].characterSize = 0.02f; }
                     _mao[e].enabled = false;
                     _selo[e].gameObject.SetActive(false);
                     for (int i = 0; i < 4; i++) _vazio[e, i].enabled = false;
                     continue;
                 }
                 bool fechada = e != (int)Estacao.CheckIn && e != (int)Estacao.Seguranca && e != (int)Estacao.Portao && s.Alocados(st.Tipo) == 0;
-                Cor(_piso[e], Color.Lerp(Art.EstacaoCor[e], Color.white, fechada ? 0.1f : 0.55f) * (fechada ? 0.6f : 1f));
+                Cor(_piso[e], PisoCor(e) * (fechada ? 0.6f : 1f));
                 Color cor = st.Estado == Estado.Critico ? Art.Bad : st.Estado == Estado.Atencao ? Art.Warn : Art.Good;
                 bool destino = Arrastando >= 0 && s.Staff[Arrastando].Em != st.Tipo;
                 if (destino) cor = Color.Lerp(Art.Good, Color.white, sob == e ? 0.6f : 0f);
-                float pulso = st.Estado == Estado.Normal && !destino ? 0.55f : 0.6f + 0.4f * Mathf.PingPong(Time.unscaledTime * 2f, 1f);
-                foreach (Renderer m in _moldura[e]) { Cor(m, cor * pulso); m.transform.localScale = Escalada(m.transform.localScale, destino ? 0.2f : 0.12f); }
+                bool acesa = destino || st.Estado != Estado.Normal;   // sala em ordem fica sem moldura
+                float pulso = 0.6f + 0.4f * Mathf.PingPong(Time.unscaledTime * 2f, 1f);
+                foreach (Renderer m in _moldura[e]) { m.enabled = acesa; if (acesa) { Cor(m, cor * pulso); m.transform.localScale = Escalada(m.transform.localScale, destino ? 0.2f : 0.12f); } }
                 for (int i = 0; i < 4; i++)
                 {
                     int nivel = NivelDe(st.Vel);
@@ -385,7 +385,7 @@ namespace TA
                     _mao[e].sortingOrder = Ordem(pm) + 9;
                 }
                 string nome = fechada ? Textos.Estacao[e] + " " + Textos.FechadaCurto : Textos.Estacao[e];
-                if (_placa[e].text != nome) { _placa[e].text = nome; _placa[e].characterSize = fechada ? 0.032f : 0.045f; }
+                if (_placa[e].text != nome) { _placa[e].text = nome; _placa[e].characterSize = fechada ? 0.02f : 0.03f; }
                 bool alerta = st.Estado != Estado.Normal;
                 _selo[e].gameObject.SetActive(alerta);
                 if (alerta)

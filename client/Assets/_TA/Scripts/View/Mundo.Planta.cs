@@ -103,16 +103,18 @@ namespace TA
             Bloco("Gramado", PrimitiveType.Cube, new Vector3(9f, -0.12f, 9f), new Vector3(90f, 0.1f, 90f), Grama);
             Bloco("Calcada", PrimitiveType.Cube, new Vector3(-1.6f, -0.06f, 2f), new Vector3(3.2f, 0.1f, 4.4f), Art.Hex(0xB8B2A6));
             Bloco("Rua", PrimitiveType.Cube, new Vector3(-4.4f, -0.07f, 4f), new Vector3(2.6f, 0.1f, 22f), Asfalto);
-            Bloco("Saguao", PrimitiveType.Cube, new Vector3(6f, -0.08f, 4f), new Vector3(12.6f, 0.1f, 8.6f), Art.Hex(0xCFC7B5));
-            Bloco("SaguaoLeste", PrimitiveType.Cube, new Vector3(16.1f, -0.08f, 6f), new Vector3(8f, 0.1f, 4.6f), Art.Hex(0xCFC7B5));
-            for (int e = 0; e < Salas.Length; e++) Sala3D(e);
+            Bloco("Saguao", PrimitiveType.Cube, new Vector3(6f, -0.08f, 4f), new Vector3(12.6f, 0.1f, 8.6f), CorCorredor);
+            Bloco("SaguaoLeste", PrimitiveType.Cube, new Vector3(16.1f, -0.08f, 6f), new Vector3(8f, 0.1f, 4.6f), CorCorredor);
+            for (int e = 0; e < Salas.Length; e++) { Sala3D(e); Obra(e); }
+            Capachos();
+            Funde();
             Ponte3D();
             // cenario (so com as malhas; sem elas o greybox da v0.1 nao tinha nada aqui)
             _terminal = Niveis("terminal_vale_verde", new Vector3(1.2f, 0f, 13.2f), 180f);
             _torre = Niveis("torre_controle", new Vector3(26.5f, 0f, 6.3f), 225f);
             _hangar = Niveis("hangar_manutencao", HangarEm, HangarYaw, HangarEscala);
             if (_hangar[2] != null) _hangar[2].position += Vector3.left * 2.66f;   // a malha do nivel 3 e rasa: alinha a fachada com as outras
-            Peca("oficina_mecanico", new Vector3(19f, 0f, 6.9f), 180f, 0.6f);
+            Peca("oficina_mecanico", new Vector3(22f, 0f, 5.8f), 180f, 0.75f);
             Peca("sala_tripulacao", new Vector3(6.2f, 0f, 9.9f), 90f, 0.85f);
             foreach (Vector2 v in new[] { new Vector2(-0.5f, 4.5f), new Vector2(-0.5f, -0.5f), new Vector2(8.5f, -0.5f), new Vector2(12.5f, 3.5f) })
                 Peca("vaso_planta", V3(v), 0f, 0.7f);
@@ -133,7 +135,14 @@ namespace TA
             Sala s = Salas[e];
             Vector2 c = Centro(e);
             _piso[e] = Bloco("Piso" + e, PrimitiveType.Cube, new Vector3(c.x, -0.05f, c.y), new Vector3(Interno, 0.1f, Interno), Color.white);
+            if (Material != null) _piso[e].sharedMaterial = MatPiso();
             Placa(e);
+            // paredes em corte: as de fundo sobem, as da frente deixam ver dentro; ficam de pe com a sala trancada
+            Vector2 m = s.Min + Vector2.one * (Corredor * 0.5f);
+            Parede(e, new Vector2(m.x, m.y), new Vector2(m.x + Interno, m.y), AltoFrente);                       // sul
+            Parede(e, new Vector2(m.x, m.y + Interno), new Vector2(m.x + Interno, m.y + Interno), AltoFundo);   // norte
+            Parede(e, new Vector2(m.x, m.y), new Vector2(m.x, m.y + Interno), AltoFrente);                       // oeste
+            Parede(e, new Vector2(m.x + Interno, m.y), new Vector2(m.x + Interno, m.y + Interno), AltoFundo);   // leste
             _sala[e] = _cont = new GameObject("Sala" + e).transform;
             _cont.SetParent(_raiz, false);
             // moldura de estado no chao (normal/atencao/critico; destino aceso no arrasto)
@@ -145,12 +154,6 @@ namespace TA
                 Vector3 p = hor ? new Vector3(c.x, 0.01f, c.y + off) : new Vector3(c.x + off, 0.01f, c.y);
                 _moldura[e][i] = Bloco("Moldura" + e + i, PrimitiveType.Cube, p, hor ? new Vector3(Interno - 0.1f, 0.02f, 0.12f) : new Vector3(0.12f, 0.02f, Interno - 0.1f), Art.Good);
             }
-            // paredes baixas (corte) com as portas de entrada e de saida, recuadas do corredor
-            Vector2 m = s.Min + Vector2.one * (Corredor * 0.5f);
-            Parede(new Vector2(m.x, m.y), new Vector2(m.x + Interno, m.y));                       // sul
-            Parede(new Vector2(m.x, m.y + Interno), new Vector2(m.x + Interno, m.y + Interno));   // norte
-            Parede(new Vector2(m.x, m.y), new Vector2(m.x, m.y + Interno));                       // oeste
-            Parede(new Vector2(m.x + Interno, m.y), new Vector2(m.x + Interno, m.y + Interno));   // leste
             for (int i = 0; i < 4; i++)
             {
                 Vector2 b = e == (int)Estacao.Seguranca ? Em(e, SegMaquinaD, SegA[i] + BeltX) : Balcao(e, i);
@@ -162,7 +165,8 @@ namespace TA
                     for (int n = 1; n < NivelMalha.Length; n++)
                     {
                         string nome = BalcaoMalha[e] + "_n" + (n + 1);
-                        Transform tn = Peca(nome, V3(b), Rumo(-s.N), BalcaoEscala[e]);
+                        Transform tn = MesaNivel(e, n, b);
+                        if (tn == null) tn = Peca(nome, V3(b), Rumo(-s.N), BalcaoEscala[e]);
                         if (tn != null) ant = nome;
                         else if ((tn = Peca(ant, V3(b), Rumo(-s.N), BalcaoEscala[e] * (1f + 0.08f * n))) != null)   // reserva ate o export chegar
                             foreach (Renderer r in tn.GetComponentsInChildren<Renderer>()) Cor(r, ReservaCor);   // (ASSETS §2.6): maior e dourado
@@ -183,26 +187,28 @@ namespace TA
             if (e == Portao) Espera3D();
             else if (e != (int)Estacao.Manutencao && e != (int)Estacao.Despacho)   // oficina e despacho nao tem fila de passageiros
             {
+                Tapete(e, 2.1f, 2.84f, 1.7f);
                 // fitas da fila: postes nas pontas das fileiras
                 for (int r = 0; r < 5; r++)
                     for (int lado = -1; lado <= 1; lado += 2)
                     {
-                        Vector2 p = Em(e, FilaD + (r + 0.5f) * FilaLinha, lado * 1.62f);
-                        Bloco("Poste", PrimitiveType.Cylinder, new Vector3(p.x, 0.12f, p.y), new Vector3(0.03f, 0.12f, 0.03f), Fita);
+                        Vector2 p = Em(e, FilaD + (r + 0.5f) * FilaLinha, lado * PosteA);
+                        Fixo(PrimitiveType.Cylinder, new Vector3(p.x, 0.12f, p.y), new Vector3(0.03f, 0.12f, 0.03f), Fita);
                     }
                 for (int r = 0; r < 4; r++)
                 {
                     Vector2 p = Em(e, FilaD + (r + 0.5f) * FilaLinha, (r % 2 == 0 ? 0.16f : -0.16f));
                     bool longoX = Mathf.Abs(s.T.x) > 0.5f;
-                    _fita[e, r] = Bloco("Fita", PrimitiveType.Cube, new Vector3(p.x, 0.2f, p.y), longoX ? new Vector3(2.92f, 0.03f, 0.02f) : new Vector3(0.02f, 0.03f, 2.92f), Fita).gameObject;
+                    _fita[e, r] = Bloco("Fita", PrimitiveType.Cube, new Vector3(p.x, 0.2f, p.y), longoX ? new Vector3(FitaLarg, 0.03f, 0.02f) : new Vector3(0.02f, 0.03f, FitaLarg), Fita).gameObject;
                 }
             }
+            Mobilia(e);
             _cont = null;
             _mao[e] = Billboard("Toque" + e, Art.Mao(), Art.BoardInk, 0.6f);
         }
 
-        /// <summary>Parede baixa de a ate b, com vao onde houver porta (tabela Portas).</summary>
-        void Parede(Vector2 a, Vector2 b)
+        /// <summary>Parede de a ate b, com vao onde houver porta (tabela Portas).</summary>
+        void Parede(int e, Vector2 a, Vector2 b, float alto)
         {
             Vector2 d = (b - a).normalized;
             float len = Vector2.Distance(a, b);
@@ -214,33 +220,36 @@ namespace TA
             }
             cortes.Sort();
             float ini = 0f;
-            foreach (float t in cortes) { Muro(a, d, ini, t - PortaLarg * 0.5f); ini = t + PortaLarg * 0.5f; }
-            Muro(a, d, ini, len);
+            foreach (float t in cortes) { Muro(e, a, d, ini, t - PortaLarg * 0.5f, alto); ini = t + PortaLarg * 0.5f; }
+            Muro(e, a, d, ini, len, alto);
         }
 
-        void Muro(Vector2 a, Vector2 d, float t0, float t1)
+        void Muro(int e, Vector2 a, Vector2 d, float t0, float t1, float alto)
         {
             if (t1 - t0 < 0.05f) return;
             Vector2 c = a + d * ((t0 + t1) * 0.5f);
-            float l = t1 - t0;
+            float l = t1 - t0 + 0.06f;
             bool x = Mathf.Abs(d.x) > 0.5f;
-            Bloco("Parede", PrimitiveType.Cube, new Vector3(c.x, 0.17f, c.y), x ? new Vector3(l + 0.06f, 0.34f, 0.08f) : new Vector3(0.08f, 0.34f, l + 0.06f), CorParede);
+            Vector3 tam(float h, float esp) => x ? new Vector3(l, h, esp) : new Vector3(esp, h, l);
+            Fixo(PrimitiveType.Cube, new Vector3(c.x, alto * 0.5f, c.y), tam(alto, EspParede), CorParede);
+            Fixo(PrimitiveType.Cube, new Vector3(c.x, alto + 0.012f, c.y), tam(0.024f, EspParede + 0.03f), CorCapa);
+            if (alto > AltoFrente) Fixo(PrimitiveType.Cube, new Vector3(c.x, 0.09f, c.y), tam(0.18f, EspParede + 0.012f), Art.EstacaoCor[e]);   // rodape na cor da sala
         }
 
-        /// <summary>Placa no chao (faixa na cor do setor com o nome deitado, lido de frente pela camera) e o selo do estado, que so aparece
+        /// <summary>Letreiro em cima da parede norte (quadro na cor do setor com o nome, um pouco deitado para a camera; atras dele so ha corredor) e o selo do estado, que so aparece
         /// em atencao ou critico.</summary>
         void Placa(int e)
         {
-            Vector3 p = V3(PlacaEm[e], 0.012f);
-            Vector3 longe = new Vector3(_cam.transform.forward.x, 0f, _cam.transform.forward.z).normalized;   // "para cima" na tela
-            Bloco("Placa" + e, PrimitiveType.Cube, p, new Vector3(2.3f, 0.02f, 0.5f), Art.EstacaoCor[e]).transform.rotation = Quaternion.LookRotation(longe, Vector3.up);
+            Vector3 p = V3(Salas[e].Min + new Vector2(Lado * 0.5f, Lado - Corredor * 0.5f), AltoFundo + 0.2f);
+            Quaternion rosto = Quaternion.Euler(20f, 0f, 0f);
+            Bloco("Placa" + e, PrimitiveType.Cube, p, new Vector3(1.8f, 0.34f, 0.03f), Art.EstacaoCor[e]).transform.rotation = rosto;
             var go = new GameObject("PlacaNome" + e);
             go.transform.SetParent(_raiz, false);
-            go.transform.SetPositionAndRotation(p + Vector3.up * 0.02f, Quaternion.LookRotation(Vector3.down, longe));
+            go.transform.SetPositionAndRotation(p + rosto * Vector3.back * 0.02f, rosto);
             TextMesh tm = go.AddComponent<TextMesh>();
             tm.font = Art.Font();
             tm.fontSize = 72;
-            tm.characterSize = 0.045f;
+            tm.characterSize = 0.03f;
             tm.anchor = TextAnchor.MiddleCenter;
             tm.alignment = TextAlignment.Center;
             tm.fontStyle = FontStyle.Bold;
