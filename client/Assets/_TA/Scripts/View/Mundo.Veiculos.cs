@@ -258,7 +258,7 @@ namespace TA
                 if (o == v) continue;
                 Vector3 d = Centro(o) - c;
                 float frente = Vector3.Dot(d, f);
-                if (NaRua(o, RuaOeste, oeste) || NaRua(o, RuaLeste, leste) || (frente > 0f && frente < (v.Comp + o.Comp) * 0.5f + 0.15f + freada && Mathf.Abs(Vector3.Dot(d, lado)) < 1.2f))
+                if (NaRua(o, RuaOeste, oeste) || NaRua(o, RuaLeste, leste) || (frente > 0f && frente < (v.Comp + o.Comp) * 0.5f + 0.5f + freada && Mathf.Abs(Vector3.Dot(d, lado)) < 1.2f))
                 {
                     v.Parado += dt;
                     return v.Parado >= 6f;

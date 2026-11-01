@@ -115,11 +115,13 @@ A decisão do jogador seria a escala: quem voa agora e quem fica na sala para de
 - **Segurança:** bandeja, raio-x, pórtico, mala de volta e, em 1 de cada 4 passageiros (fixo pelo id), vistoria com o scanner de mão. No nível 2 de malha, a cabine de corpo inteiro (`PorticoMalha`).
 - **Andar das pessoas:** caminho nos eixos do mundo (os 4 rumos da folha), passando reto pelas portas, chegada à fila pela fileira de trás, fitas que abrem conforme a fila cresce, partida e chegada suaves e cadência ligada à velocidade. O funcionário anda pelas portas e chega depois da `Tuning.Caminhada` quando a sala é longe: a tela não teleporta, e o núcleo continua igual.
 
-| Medida (`diag_pessoas.py`, 110 s na onda 3, 8 salas) | Antes | Depois |
+| Medida (`diag_pessoas.py`, onda 3, 8 salas; antes 165 s de jogo, depois 350 s) | Antes | Depois |
 |---|---|---|
-| Andando de lado | 28,6% | DEPOIS_LADO |
-| Teletransporte (saltos acima de 6 m/s) | 24 | DEPOIS_TELE |
-| Pé deslizando (fora da cadência da folha) | 78,0% | DEPOIS_PE |
-| Atravessando balcão | 3,6% | DEPOIS_BALCAO |
-| Trocas de rumo por 10 m | 7,9 | DEPOIS_VIRA |
-| Veículos com caixas sobrepostas | 41,6% das amostras | DEPOIS_CAIXA |
+| Andando de lado | 28,6% | 5,6% |
+| Teletransporte (saltos acima de 6 m/s) | 24 | 0 |
+| Pé deslizando (fora da cadência da folha) | 71,9% | 4,1% |
+| Atravessando balcão | 3,6% | 0,2% |
+| Trocas de rumo por 10 m | 7,9 | 5,4 |
+| Veículos com caixas sobrepostas | 41,6% das amostras | 0,65% das amostras |
+
+Resíduo dos veículos: escada e ônibus saindo juntos do lado esquerdo do jato (21 amostras de 3.362) e 1 toque ao recuar da vaga. Fica para a frente de física, que mede também contra paredes e telhados.
