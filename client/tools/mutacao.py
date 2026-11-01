@@ -1,6 +1,6 @@
 """Prova de mutacao das travas da Fase C (CONTRATO_FASE_C §7): tira cada trava do nucleo, roda o dotnet test e exige que algum teste caia.
 
-uso (da raiz do repo): python client/tools/mutacao.py
+uso (da raiz do repo): python client/tools/mutacao.py [trecho do nome da trava ...]
 Cada mutante e' aplicado, testado e desfeito (o arquivo volta byte a byte, mesmo com erro). Sai 1 se algum mutante sobreviver.
 """
 
@@ -29,14 +29,14 @@ MUTANTES = [
     (
         "checagem so com Cash",
         "Sim.Patio.cs",
-        "|| !MecanicoLivre || Cash < T.CheckCusto) return false;",
-        "|| !MecanicoLivre) return false;",
+        "&& a.Desgaste > 0 && MecanicoLivre && Cash >= T.CheckCusto;",
+        "&& a.Desgaste > 0 && MecanicoLivre;",
     ),
     (
         "hangar so com Cash",
         "Sim.Patio.cs",
-        "if (a == null || !T.RegraManutencao || Cash < T.HangarCusto) return false;",
-        "if (a == null || !T.RegraManutencao) return false;",
+        "AntesDoEmbarque(aviao) != null && T.RegraManutencao && Cash >= T.HangarCusto;",
+        "AntesDoEmbarque(aviao) != null && T.RegraManutencao;",
     ),
     (
         "offline nao gasta desgaste",
@@ -101,8 +101,8 @@ MUTANTES = [
     (
         "um incidente por vez, com folga depois",
         "Sim.Incidentes.cs",
-        "if (_inc != null || w - UltimoIncidente <= T.IncidenteFolga || ",
-        "if (_inc != null || ",
+        "if (_inc != null || w - UltimoIncidente <= T.IncidenteFolga) return;",
+        "if (_inc != null) return;",
     ),
     (
         "reparo so com Cash",
@@ -244,7 +244,9 @@ def testa():
 
 def main():
     vivos = 0
-    for nome, arq, de, para in MUTANTES:
+    filtro = sys.argv[1:]
+    lista = [m for m in MUTANTES if not filtro or any(f in m[0] for f in filtro)]
+    for nome, arq, de, para in lista:
         p = os.path.join(CORE, arq)
         with open(p, "rb") as f:
             original = f.read()
@@ -275,7 +277,7 @@ def main():
             )
         else:
             print("MORTO  %s: %d teste(s): %s" % (nome, caiu, ", ".join(quais[:4])))
-    print("mutacao: %d de %d mutantes mortos" % (len(MUTANTES) - vivos, len(MUTANTES)))
+    print("mutacao: %d de %d mutantes mortos" % (len(lista) - vivos, len(lista)))
     sys.exit(1 if vivos else 0)
 
 
