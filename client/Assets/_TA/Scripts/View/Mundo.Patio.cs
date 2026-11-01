@@ -12,7 +12,8 @@ namespace TA
     ///    PousoSeg antes da hora do nucleo (Aviao.Chega) e encosta quando ele encosta; Ev.Decolou solta o pushback (com o rebocador preso no
     ///    nariz no G), o taxi, a corrida e a decolagem; o hangar leva o aviao pela taxiway ate a frente da porta (a porta da malha e menor que a
     ///    envergadura: ele para no patio do hangar) e o traz de volta antes de o nucleo liberar.
-    ///  - Cruzamentos medidos com -diag e client/tools/diag_caixas.py: a taxiway passa atras das caudas e longe da pista com a asa inteira.
+    ///  - Cruzamentos medidos com -diag e client/tools/diag_caixas.py: a taxiway passa atras das caudas e longe da pista com a asa inteira, e um
+    ///    aviao da a vez ao outro na ligacao, na pista e no hangar (OutroPerto, PousoNaPista, HangarOcupado, Freia). Esperar custa so tempo de tela.
     ///  - Os veiculos estao em Mundo.Veiculos.cs.
     ///  - Em cima do aviao: o icone do servico que falta com o anel de progresso (GDD §5.12), e o aviso de desgaste a partir de 80%.
     ///  - Movimento sem patinar (medido com -diag e client/tools/diag_patio.py): o pivo de cada peca e o eixo traseiro (o trem principal

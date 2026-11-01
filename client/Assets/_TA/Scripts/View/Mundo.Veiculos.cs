@@ -7,13 +7,14 @@ namespace TA
     /// <summary>
     /// Veiculos do patio (GDD §5.12), so tela. A garagem fica a leste, com a boca para o sul (5 vaos entre os pilares da malha) e a rua na frente:
     /// cada veiculo tem a sua vaga e a sua faixa, e nenhum atravessa peca, aviao ou outro veiculo (medido com client/tools/diag_caixas.py).
-    ///  - Duas ruas de mao unica na frente dos narizes: a oeste leva do patio de manobra aos avioes, a leste traz de volta. Ao norte delas sobra a
-    ///    calcada (Calcada, para a gente do patio) e as faixas, com todo veiculo inteiro antes da asa: a do jato e baixa, nao ha como passar por baixo.
+    ///  - Duas ruas de mao unica entre o terminal e os narizes: a oeste leva da garagem aos avioes, a leste, mais ao sul, traz de volta. Ao norte delas
+    ///    sobra a calcada (CalcadaZ, para a gente do patio) e as faixas, com todo veiculo inteiro antes da asa: a do jato e baixa, nao ha como passar por baixo.
     ///  - O aviao encosta: os veiculos dos servicos que faltam saem de frente da vaga, seguem a rua oeste, passam da faixa e entram nela de re, com
     ///    o nariz para a rua, sem encostar no vizinho. O nucleo faz o servico (Aviao.Fazendo); o veiculo sai de frente quando acaba (Aviao.Falta),
     ///    cruza a rua oeste e volta pela rua leste ate entrar de re na vaga. Se o regional precisa dele e ele esta no jato, vai direto.
     ///  - Faixas: 3 do lado direito de cada aviao (bagagem, catering e combustivel no regional; bagagem, combustivel e catering no jato) e, do lado
     ///    esquerdo do jato, onibus e escada, que ficam ate ele sair. No estande G o desembarque e pela ponte.
+    ///  - Um por vez: na frente da garagem (ManobraOcupada) e para fora das faixas (VizinhoSaindo); nas ruas, fila e vez no cruzamento (FrenteLivre).
     ///  - O +1 veiculo da Capacidade tem vaga pintada ao lado da garagem.
     /// </summary>
     public sealed partial class Mundo
