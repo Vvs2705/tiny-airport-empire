@@ -31,8 +31,8 @@ namespace TA
             new Tempo { Veu = Art.Hex(0x34435C), VeuAlfa = 0.26f, Alfa = 0.55f, Vel = new Vector2(0.3f, 2.2f), N = 70, Rx = 0.9f, Ry = 15f },
             null, null, null,
             new Tempo { Veu = Art.Hex(0x1C2740), VeuAlfa = 0.44f, Alfa = 0.7f, Vel = new Vector2(0.9f, 3.2f), N = 100, Rx = 1.1f, Ry = 20f, Raios = true },
-            new Tempo { Veu = Art.Hex(0x8A8F80), VeuAlfa = 0.1f, Alfa = 0.4f, Tam = 1.4f, Vel = new Vector2(-2.6f, 0.15f), N = 26, Rx = 0.9f, Ry = 34f },
-            new Tempo { Veu = Art.Hex(0xDDE3E8), VeuAlfa = 0.38f, Alfa = 0.75f, Tam = 2.2f, Vel = new Vector2(-0.05f, 0f), N = 16, Rx = 40f, Ry = 62f },
+            new Tempo { Veu = Art.Hex(0x8A8F80), VeuAlfa = 0.1f, Alfa = 0.55f, Tam = 1.4f, Vel = new Vector2(-2.6f, 0.15f), N = 26, Rx = 0.9f, Ry = 34f },
+            new Tempo { Veu = Art.Hex(0xDDE3E8), VeuAlfa = 0.28f, Alfa = 0.5f, Tam = 2.2f, Vel = new Vector2(-0.05f, 0f), N = 16, Rx = 40f, Ry = 62f },
             new Tempo { Veu = Art.Hex(0xB9C9DE), VeuAlfa = 0.2f, Alfa = 0.95f, Vel = new Vector2(0.06f, 0.42f), N = 60, Rx = 2.6f, Ry = 2.6f },
         };
 
@@ -356,7 +356,7 @@ namespace TA
                 bool espera = pane && c.Check == 0;   // com o mecanico la, o selo do aviao ja mostra a chave e o anel
                 _alertaPane[k].enabled = espera;
                 if (!espera) continue;
-                Vector3 p = _avioes[k].T.position + Vector3.up * 4.4f - _cam.transform.right * 1.2f;
+                Vector3 p = V(EstandeX[k] + 0.4f, NarizZ - 0.3f, 1.9f);   // no nariz: o centro do aviao fica atras do cartao do HUD
                 _alertaPane[k].transform.SetPositionAndRotation(p, _cam.transform.rotation);
                 _alertaPane[k].sortingOrder = Ordem(p) + 10;
                 _alertaPane[k].color = Art.A(Art.Bad, Pulso());
