@@ -22,6 +22,22 @@ namespace TA.Tests
         }
 
         [Test]
+        public void Malas_EsteiraDoPostoPassaLongeDosBalcoesESegueAteOTerminal()
+        {
+            var r = new List<Vector2>();
+            for (int i = 0; i < 4; i++)
+            {
+                Mundo.RotaMala(r, i);
+                Vector2 balanca = Mundo.PontoBalanca(i);
+                Assert.IsTrue(Mathf.Approximately(balanca.x, r[0].x), i + ": esteira do posto em diagonal");
+                for (int j = 0; j < 4; j++) Assert.Greater(Mathf.Abs(balanca.x - Mundo.BalcaoMala(j).x), 0.25f, i + " passa pelo balcao " + j);
+                Assert.IsTrue(Mathf.Approximately(r[0].y, r[1].y), i + ": esteira da parede torta");
+                Assert.IsTrue(Mathf.Approximately(r[1].x, r[2].x), i + ": saida torta");
+                Assert.Greater(r[2].y, 10f, i + ": nao chegou ao terminal");
+            }
+        }
+
+        [Test]
         public void Portao_ChegaAoLugarPeloCorredorDaFileira()
         {
             var lugar = new Vector2(10.58f, 4.5f);   // no meio das fileiras do bloco leste

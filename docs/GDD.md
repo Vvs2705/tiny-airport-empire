@@ -1701,26 +1701,29 @@ As de D-01 a D-14 travam o início ou uma fase; as outras podem esperar.
 | ID | Decisão | Recomendação | Trava |
 |---|---|---|---|
 | D-01 | Tirar o jogo do NO-GO da rodada e autorizar o projeto Unity neste repositório | autorizar só as Fases A e B; decidir o lançamento completo no portão da Fase B. **Aprovada pelo Vinicius em 2026-10-29: Fases A e B.** Ampliada no mesmo dia pelo prompt mestre do estúdio (`~/.claude/estudio/PROMPT_MESTRE_NOVOS_JOGOS.md`): a missão é levar o jogo até "só falta publicar", sem parar no portão da Fase B | P-01 e tudo depois |
-| D-02 | Nova data-alvo no lugar de 29/10/2026 | definir depois do portão da Fase B, com a velocidade real; a Play Console não sai antes de ~25/11 | plano |
+| D-02 | Nova data-alvo no lugar de 29/10/2026 | definir depois do portão da Fase B, com a velocidade real; a Play Console não sai antes de ~25/11 **Decidida pelo Vinicius em 2026-11-01:** sem data fixa: assim que a Play Console sair (previsão 25/11) e a regressão fechar. | plano |
 | D-03 | Nome comercial final e appId (`br.com.vstack.<nome>`), irreversíveis depois de publicados | "Little Terminal", depois da busca no INPI, USPTO, EUIPO e nas duas lojas | Setup, LevelPlay, chave de upload, ícone, loja |
-| D-04 | Plataformas com conta e ambiente prontos para envio | Android no lançamento; iOS quando houver macOS e conta Apple | P-14 (IPA) |
-| D-05 | Compras no lançamento: (a) só rewarded, IAP numa atualização; (b) IAP com validação no servidor | (b); se o backend não passar no §16.6, lançar como (a) | P-07 premium, P-08 |
-| D-06 | Backend de validação | Cloud Run em projeto próprio, southamerica-east1, sem chave JSON | P-08 |
-| D-07 | Gems no lançamento e o que elas compram | só com D-05 (b); sumidouros do §6.1 | §6.1, §7.3 |
-| D-08 | Idiomas no lançamento | pt-BR + en no mínimo; es e id só com revisão humana | textos, loja, criativos |
-| D-09 | Países do 1º lançamento | BR/PH/ID (a coorte do §15.2); EEE, Reino Unido e EUA depois | consentimento, loja |
-| D-10 | Público-alvo e classificação etária | 13+, fora do programa Famílias, tratado como de acesso provável por adolescentes (ECA Digital), com revisão jurídica | Data safety, classificação |
-| D-11 | Analytics em produção | Unity Analytics (UGS) com os eventos do §15.1, sem dado pessoal, e o Data safety atualizado; crash pelo Android vitals | P-16, K2 em produção |
-| D-12 | E-mail de suporte e URL da política de privacidade | um endereço da V-STACK monitorado; política no GitHub Pages | P-11 |
+| D-04 | Plataformas com conta e ambiente prontos para envio | Android no lançamento; iOS quando houver macOS e conta Apple **Decidida pelo Vinicius em 2026-11-01:** só Android no lançamento; iOS depois. | P-14 (IPA) |
+| D-05 | Compras no lançamento: (a) só rewarded, IAP numa atualização; (b) IAP com validação no servidor | (b); se o backend não passar no §16.6, lançar como (a) **Decidida pelo Vinicius em 2026-11-01:** opção (b); se o backend não passar no §16.6, lança como (a). | P-07 premium, P-08 |
+| D-06 | Backend de validação | Cloud Run em projeto próprio, southamerica-east1, sem chave JSON **Decidida pelo Vinicius em 2026-11-01:** como recomendado. | P-08 |
+| D-07 | Gems no lançamento e o que elas compram | só com D-05 (b); sumidouros do §6.1 **Decidida pelo Vinicius em 2026-11-01:** Gems entram no lançamento, com os sumidouros do §6.1. | §6.1, §7.3 |
+| D-08 | Idiomas no lançamento | pt-BR + en no mínimo; es e id só com revisão humana **Decidida pelo Vinicius em 2026-11-01:** pt-BR e en; es e id depois, com revisão humana. | textos, loja, criativos |
+| D-09 | Países do 1º lançamento | BR/PH/ID (a coorte do §15.2); EEE, Reino Unido e EUA depois **Decidida pelo Vinicius em 2026-11-01:** BR, PH e ID primeiro; EEE, Reino Unido e EUA depois. | consentimento, loja |
+| D-10 | Público-alvo e classificação etária | 13+, fora do programa Famílias, tratado como de acesso provável por adolescentes (ECA Digital), com revisão jurídica **Decidida pelo Vinicius em 2026-11-01:** 13+, fora do programa Famílias. A revisão jurídica ainda não tem responsável. | Data safety, classificação |
+| D-11 | Analytics em produção | Unity Analytics (UGS) com os eventos do §15.1, sem dado pessoal, e o Data safety atualizado; crash pelo Android vitals **Decidida pelo Vinicius em 2026-11-01:** Unity Analytics, sem dado pessoal. | P-16, K2 em produção |
+| D-12 | E-mail de suporte e URL da política de privacidade | um endereço da V-STACK monitorado; política no GitHub Pages **Decidida pelo Vinicius em 2026-11-01:** suporte@vstack-solutions.com.br (Zoho Mail); política no GitHub Pages. | P-11 |
 | D-13 | Nomes das companhias aéreas e dos aeroportos | renomear os que colidem (§0.4) antes da arte de marca | arte e textos |
 | D-14 | Aval dos lotes do Tripo | Lote 1 (≈ 400, teto 530) depois do portão da Fase B; Lote 2 (≈ 495) na Fase C. **Aprovada em 2026-10-29 pelo prompt mestre do estúdio (§3): os créditos acabam hoje, então os Lotes 1 e 2 saem hoje, pela lista fechada do `docs/ASSETS.md`** | P-12 |
 | D-15 | Bônus de recuperação de voo por anúncio | fora do lançamento (§7.2) | — |
-| D-16 | Publicação gradual ou imediata após aprovação | gradual (porcentagem pequena primeiro) | Fase E |
+| D-16 | Publicação gradual ou imediata após aprovação | gradual (porcentagem pequena primeiro) **Decidida pelo Vinicius em 2026-11-01:** gradual. | Fase E |
 | D-17 | Autorização final de submissão/publicação em produção | — | envio |
-| D-18 | Rota de arte híbrida: mundo e veículos em malha 3D em tempo real, pessoas em sprite (§0.4, §10.2) | aprovar: é o que as referências fazem, e mantém a regra do estúdio para personagens. O K3 ampliado, medido no aparelho, confirma | View da v0.1, que já está sendo feita assim |
-| D-19 | Tripulação, pátio e manutenção com regra no lançamento (§5.11, §5.12) | sim, na Fase C, com o portão de design do §5.13 | Fase C |
+| D-18 | Rota de arte híbrida: mundo e veículos em malha 3D em tempo real, pessoas em sprite (§0.4, §10.2) | aprovar: é o que as referências fazem, e mantém a regra do estúdio para personagens. O K3 ampliado, medido no aparelho, confirma **Decidida pelo Vinicius em 2026-11-01:** aprovada. | View da v0.1, que já está sendo feita assim |
+| D-19 | Tripulação, pátio e manutenção com regra no lançamento (§5.11, §5.12) | sim, na Fase C, com o portão de design do §5.13 **Decidida pelo Vinicius em 2026-11-01:** aprovada. | Fase C |
 | D-20 | Lote 3 do Tripo: comissária e comissário | aprovar hoje: ≈ 160 créditos, e os créditos vencem hoje (D-14). **Aprovada pelo Vinicius em 2026-10-29: "Aprovo o Lote 3"** | arte da tripulação |
 | D-21 | Clima, estações do ano e falhas de avião com regra no lançamento (§5.14) | sim, na Fase C, com o portão de design do §5.13 e sem acidente, morte, fogo ou queda. **Pedida pelo Vinicius em 2026-10-30: "aviões que podem quebrar, ou ter falhas ao decolar e precisar pousar"**. Medido em 2026-10-31: clima e falhas com regra; a demanda por estação do ano fica só visual (`BALANCE.md` D-C4a) | Fase C |
+| D-22 | 2× de receita por vídeo (§7.2) | manter, opcional, 5 min, até 3 por dia. **Decidida pelo Vinicius em 2026-11-01:** mantido; vale sobre a nota do `COMPETITIVO.md` §g | — |
+| D-23 | 5º incidente: volta ao portão por aviso técnico (`COMPETITIVO.md` §h, prioridade 14) | testar depois das frentes atuais. **Decidida pelo Vinicius em 2026-11-01:** testar; só entra se passar no §5.13 | §4.3 |
+| D-24 | Medição com gente e em aparelho | K2 com gente, K3 em Android de entrada. **Decidida pelo Vinicius em 2026-11-01:** K2 com pelo menos 20 pessoas reais; K3 nos aparelhos dos amigos dele, com o APK; POCO F4 só no último passo de tudo | Fases B e E |
 
 ---
 

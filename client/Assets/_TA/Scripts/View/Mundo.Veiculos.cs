@@ -276,7 +276,7 @@ namespace TA
             {
                 Vector3 d = V(q.x, q.y) - c;
                 float frente = Vector3.Dot(d, f);
-                if (frente > 0f && frente < v.Comp * 0.5f + 0.5f + freada && Mathf.Abs(Vector3.Dot(d, lado)) < v.Larg * 0.5f + 0.25f) { v.EsperaGente = true; return false; }
+                if ((frente > 0f && frente < v.Comp * 0.5f + 0.5f + freada && Mathf.Abs(Vector3.Dot(d, lado)) < v.Larg * 0.5f + 0.25f) || NoTrajeto(v, t, q, freada)) { v.EsperaGente = true; return false; }
             }
             v.EsperaGente = false;
             float oeste = Cruza(v, t, RuaOeste), leste = Cruza(v, t, RuaLeste);
@@ -296,6 +296,15 @@ namespace TA
             }
             v.Parado = 0f;
             return true;
+        }
+
+        /// <summary>Na curva o nariz vira para quem estava ao lado, fora da reta da frente: confere os pontos do trajeto logo adiante.</summary>
+        static bool NoTrajeto(Veiculo v, Trecho t, Vector2 q, float freada)
+        {
+            float eixo = t.Re ? -v.Eixo : v.Eixo, ate = v.S + eixo + v.Comp * 0.5f + 0.5f + freada, raio = v.Larg * 0.5f + 0.25f;
+            for (int i = Indice(t, v.S + Mathf.Max(eixo, 0f)); i < t.P.Count && t.L[i] <= ate; i += 3)
+                if ((new Vector2(t.P[i].x, t.P[i].z) - q).sqrMagnitude < raio * raio) return true;
+            return false;
         }
 
         /// <summary>Distancia atras de `o`: maior se ele vai entrar de re, para nao voltar por cima de quem colou.</summary>

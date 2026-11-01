@@ -18,7 +18,7 @@ namespace TA
         static readonly string[] PorticoMalha = { "portico_detector", "portico_detector", "cabine_scanner_corpo" };
         readonly GameObject[,] _portico = new GameObject[4, 3];
         readonly Transform[] _bandeja = new Transform[4], _scanner = new Transform[4];
-        readonly SpriteRenderer[] _malaSeg = new SpriteRenderer[4];
+        readonly Mala[] _malaSeg = new Mala[4];
 
         static float Posto(int e, int i) => e == (int)Estacao.Seguranca ? SegA[i] : e == Portao ? PodioA[i] : Desloc[i];
 
@@ -39,7 +39,7 @@ namespace TA
             _bandeja[i] = Peca("bandeja_seguranca", V3(Em(e, SegAntesD, SegA[i] + BeltX), 0.2f), 0f, 0.5f);
             if (_bandeja[i] == null) _bandeja[i] = Bloco("Bandeja", PrimitiveType.Cube, V3(Em(e, SegAntesD, SegA[i] + BeltX), 0.2f), new Vector3(0.15f, 0.03f, 0.15f), Art.Hex(0x8A94A6)).transform;
             _bandeja[i].gameObject.SetActive(false);
-            _malaSeg[i] = Billboard("MalaSeg" + i, Art.Mala(), Color.white, 0.12f);
+            _malaSeg[i] = NovaMala("MalaSeg" + i);
             _scanner[i] = Peca("scanner_mao", Vector3.zero, 0f, 0.6f);
             if (_scanner[i] != null) _scanner[i].gameObject.SetActive(false);
         }
@@ -65,21 +65,24 @@ namespace TA
             return Em(e, SegMalaD, SegA[i] + BeltX);   // pega a mala
         }
 
-        /// <summary>A bandeja anda pelo raio-x no tempo do atendimento; a mala em cima, na cor do voo; o scanner sobe e desce na vistoria.</summary>
+        /// <summary>A bandeja anda pelo raio-x no tempo do atendimento; a mala deitada em cima, na cor do voo, e a pessoa só com a mala de mão
+        /// até pegá-la de volta; o scanner sobe e desce na vistoria.</summary>
         void BandejaPasso(int i, Pax p, float f, bool agente, Vector2 pos)
         {
             const int e = (int)Estacao.Seguranca;
             bool ve = p != null && f >= 0.14f;
             _bandeja[i].gameObject.SetActive(ve);
-            _malaSeg[i].enabled = ve && f < 0.95f;
+            bool naBandeja = ve && f < 0.95f;
+            _malaSeg[i].T.gameObject.SetActive(naBandeja);
             bool scan = p != null && agente && Vistoria(p) && f >= 0.62f && f < 0.88f;
             if (_scanner[i] != null) _scanner[i].gameObject.SetActive(scan);
             if (!ve) return;
+            Boneco dono = _pax[p.Id];
+            SoMao(dono, p, naBandeja || dono.Despachou);
             Vector3 b = V3(Em(e, Mathf.Lerp(SegAntesD, SegMalaD, Mathf.InverseLerp(0.22f, 0.82f, f)), SegA[i] + BeltX), 0.2f);
             _bandeja[i].position = b;
-            _malaSeg[i].transform.SetPositionAndRotation(b + Vector3.up * 0.08f, _cam.transform.rotation);
-            _malaSeg[i].color = Art.VooCor[p.Voo];
-            _malaSeg[i].sortingOrder = Ordem(b) + 6;
+            Deita(_malaSeg[i], b + Vector3.up * 0.14f, Rumo(Salas[e].T), EscalaBandeja * (dono.Despachou ? 0.6f : 1f));
+            Cor(_malaSeg[i].R, Art.VooCor[p.Voo]);
             if (scan) _scanner[i].position = V3(pos + new Vector2(0.08f, -0.05f), 0.15f + 0.2f * Mathf.PingPong(Time.time * 1.6f, 1f));
         }
     }
