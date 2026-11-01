@@ -24,7 +24,7 @@ namespace TA.Tests
         public struct Linha
         {
             public BotProfile P; public double Embarque, EmbarqueP10, Receita, Moves, Taps; public double[] Marco;
-            public double SemTrip, Inspecoes, Hangares, Checagens, Trocas, Incidentes, Reacoes, Climas, Falhas, Reparos;
+            public double SemTrip, Inspecoes, Hangares, Checagens, Trocas, Incidentes, Reacoes, Climas, Falhas, Reparos, Objetivos, Recompensas;
         }
 
         public static Linha Rodar(BotProfile p, Tuning t = null, int sementes = Sementes, int ondas = Ondas, int threads = Threads)
@@ -43,6 +43,7 @@ namespace TA.Tests
                 l.Embarque += r.Embarque * k; l.Receita += r.Receita * k; l.Moves += r.Moves * k; l.Taps += r.Taps * k;
                 l.SemTrip += r.SemTrip * k; l.Inspecoes += r.Inspecoes * k; l.Hangares += r.Hangares * k; l.Checagens += r.Checagens * k; l.Trocas += r.Trocas * k;
                 l.Incidentes += r.Incidentes * k; l.Reacoes += r.Reacoes * k; l.Climas += r.Climas * k; l.Falhas += r.Falhas * k; l.Reparos += r.Reparos * k;
+                l.Objetivos += r.Objetivos * k; l.Recompensas += r.Recompensas * k;
                 for (int m = 0; m < 3; m++) if (r.MarcoEm[m] >= 0) { l.Marco[m] += r.MarcoEm[m]; marcos[m]++; }
             }
             for (int m = 0; m < 3; m++) l.Marco[m] = marcos[m] > 0 ? l.Marco[m] / marcos[m] : -1;
@@ -193,7 +194,7 @@ namespace TA.Tests
         public static Tuning SemFaseC4(Tuning t = null)
         {
             t = t ?? new Tuning();
-            t.RegraClima = t.RegraEpocas = t.RegraPicos = t.RegraFalhas = false;
+            t.RegraClima = t.RegraEpocas = t.RegraPicos = t.RegraFalhas = t.RegraCampanha = false;
             return t;
         }
 
@@ -333,6 +334,71 @@ namespace TA.Tests
                 t.Aeroportos = t.Aeroportos.Select(x => { Aeroporto k = x.Copia(); k.Clima = Enumerable.Range(0, 4).Select(_ => Enumerable.Range(0, 5).Select(i => i == col ? 0.4f : 0f).ToArray()).ToArray(); return k; }).ToArray();
                 Portao("so " + c.Tipo, t, C4("reage", true, false), C4("segura", false, false), ref nada, false, false);
             }
+        }
+
+        /// <summary>Teto da medida de alcance (CONTRATO_FASE_C5 §6).</summary>
+        public const int OndasAlcance = 120;
+
+        /// <summary>A campanha sem pagar tem de ser a tabela da fase anterior, numero a numero.</summary>
+        [Test]
+        public void Antes_FaseC5()
+        {
+            var t = new Tuning { RegraCampanha = false };
+            Linha bom = Rodar(BotProfile.Bom, t), lento = Rodar(BotProfile.Lento, t), parado = Rodar(BotProfile.Parado, t);
+            Imprime("antes da Fase C5 (a main da Fase C4)", new[] { bom, lento, parado });
+            Assert.AreEqual((6279, 3872, 4702), ((int)Math.Round(bom.Receita), (int)Math.Round(lento.Receita), (int)Math.Round(parado.Receita)), "sem pagar, a tabela da fase anterior");
+        }
+
+        static double MedeCampanha(int ondas)
+        {
+            Linha pl = Rodar(BotProfile.Guiado, null, Sementes, ondas), au = Rodar(BotProfile.Bom, null, Sementes, ondas);
+            double ganho = (pl.Receita + pl.Recompensas) / (au.Receita + au.Recompensas);
+            TestContext.Out.WriteLine(string.Format(CultureInfo.InvariantCulture, "| Guiado | {0} | {1:0.0}% | {2:0} | {3:0} | {4:0.0} | {5:0.000} |", ondas, pl.Embarque * 100, pl.Receita, pl.Recompensas, pl.Objetivos, ganho));
+            TestContext.Out.WriteLine(string.Format(CultureInfo.InvariantCulture, "| Bom | {0} | {1:0.0}% | {2:0} | {3:0} | {4:0.0} | |", ondas, au.Embarque * 100, au.Receita, au.Recompensas, au.Objetivos));
+            return ganho;
+        }
+
+        const string CabecaCampanha = "| bot | ondas | embarque | receita | recompensas | objetivos | ganho |\n|---|---|---|---|---|---|---|";
+
+        /// <summary>Portao do GDD §5.13 para a campanha (CONTRATO_FASE_C5 §6): quem joga pelo objetivo contra quem nunca olha a campanha, com a recompensa
+        /// valendo para os dois. Em 20 ondas: depois disso o catalogo acaba e o Cash nao compra mais nada (BALANCE.md D-C5c).</summary>
+        [Test]
+        public void Portao_FaseC5_Campanha()
+        {
+            TestContext.Out.WriteLine(CabecaCampanha);
+            Assert.GreaterOrEqual(MedeCampanha(OndasFaseC), 1.10, "GDD §5.13: Guiado / Bom");
+        }
+
+        /// <summary>Os outros horizontes, sem portao: 10 ondas e o que vem depois de o catalogo acabar.</summary>
+        [Test]
+        public void Medida_FaseC5()
+        {
+            TestContext.Out.WriteLine(CabecaCampanha);
+            foreach (int ondas in new[] { 10, 30, 40, 64 }) MedeCampanha(ondas);
+        }
+
+        /// <summary>Nenhum objetivo inalcancavel (CONTRATO_FASE_C5 §6): 200 sementes, onda media e p90 de cada objetivo, para ver onde a cadeia espera.</summary>
+        [Test]
+        public void Alcance_FaseC5()
+        {
+            var ci = CultureInfo.InvariantCulture;
+            string falta = "";
+            foreach (BotProfile p in new[] { BotProfile.Guiado, BotProfile.LentoGuiado })
+            {
+                var rs = new Bot.Resultado[Sementes];
+                Parallel.For(0, Sementes, new ParallelOptions { MaxDegreeOfParallelism = Threads }, i => rs[i] = Bot.Medir(p, i + 1, OndasAlcance));
+                TestContext.Out.WriteLine(p.Name + "\n| objetivo | fechou | onda media | p90 |\n|---|---|---|---|");
+                for (int i = 0; i < 30; i++)
+                {
+                    int[] ondas = rs.Select(r => r.ObjetivoEm[i]).Where(o => o >= 0).OrderBy(o => o).ToArray();
+                    string id = Tabelas.Objetivos[i / 10][i % 10].Id;
+                    TestContext.Out.WriteLine(string.Format(ci, "| {0} | {1}/200 | {2:0.0} | {3} |", id, ondas.Length, ondas.Length > 0 ? ondas.Average() : -1, ondas.Length > 0 ? ondas[ondas.Length * 9 / 10] : -1));
+                    if (ondas.Length < Sementes) falta += " " + p.Name + ":" + id + "=" + ondas.Length;
+                }
+                int[] fim = rs.Select(r => r.ObjetivoEm.Max()).OrderBy(o => o).ToArray();
+                TestContext.Out.WriteLine(string.Format(ci, "campanha inteira: onda media {0:0.0}, p90 {1}, pior {2}", fim.Average(), fim[Sementes * 9 / 10], fim[Sementes - 1]));
+            }
+            Assert.IsEmpty(falta, "nenhum objetivo inalcancavel");
         }
 
         /// <summary>TA-6 (GDD §5.7): nenhuma rota domina. As 2 vagas presas em cada rota, sem incidente, no mesmo aeroporto: a melhor rende no
