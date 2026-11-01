@@ -9,8 +9,8 @@
 - **Custo** (medido no DC e no Forge): modelo HD = **45**, Auto Rig = **20**. Personagem = 65, objeto = 45. Imagem de referência no Nano Banana 2 = **0**. Export e download = 0.
 - **Prioridade:** 1 = sem ele não há jogo (v0.1); 2 = lançamento (GDD §4.1); 3 = acabamento e variedade.
 - **Item separado do corpo, sempre:** mala, mochila, rádio, scanner, bastões e caixa de ferramentas saem como objeto próprio e são presos ao osso no Blender (`render_sprites.py --attach`). O personagem é gerado de mãos vazias.
-- **Avião genérico:** sem logotipo, sem texto, sem pintura de companhia e sem forma de fabricante real (D-13 pendente). Fuselagem branca lisa, que recebe as pinturas por troca de cor.
-- **Logo e ícone do app:** o brief do dia dizia "só depois do D-03", mas o Vinicius pediu os dois no mesmo dia (§5). Saem com o nome provisório "Little Terminal" e se refazem se o nome mudar. Retratos e ícones de interface saem depois, pintados no gerador.
+- **Avião genérico:** sem logotipo, sem texto, sem pintura de companhia e sem forma de fabricante real (nomes das companhias novos em `docs/NOME.md`, D-13). Fuselagem branca lisa, que recebe as pinturas por troca de cor.
+- **Logo e ícone do app:** o brief do dia dizia "só depois do D-03", mas o Vinicius pediu os dois no mesmo dia (§5). Saem com o nome "Little Terminal" (D-03 decidida em 2026-11-01, `docs/NOME.md`). Retratos e ícones de interface saem depois, pintados no gerador.
 - **Variantes sem crédito** (troca de cor no Blender ou na folha renderizada, `roupas_cor.py`/`roupas_2d.py` do DC): as 8 pinturas de avião, as cores de uniforme, as roupas dos passageiros, o Marco (Chefe de Bagagem = bagageiro com outra cor) e os temas de terminal.
 
 ## 1. Lista
@@ -225,7 +225,7 @@ Feitas no gerador de imagem do Tripo (Nano Banana 2, 1024 px) e ampliadas para 4
 
 | Peça | Uso | Observação |
 |---|---|---|
-| `logo_little_terminal` | logo do título, splash, loja | com o nome provisório "Little Terminal": se o D-03 mudar o nome, refazer (1 rodada de imagem) |
+| `logo_little_terminal` | logo do título, splash, loja | com o nome "Little Terminal" (D-03 decidida em 2026-11-01); só se refaz se o nome mudar um dia (1 rodada de imagem) |
 | `emblema` | selo sem texto (avião + terminal + asas douradas) | serve com qualquer nome |
 | `icone_app` | ícone do launcher (arte de instalação) | sem texto; o adaptativo sai por recorte (personagem até 0,64 da camada, prompt mestre §8) |
 | `splash` | tela de abertura 9:16 | céu livre no terço de cima para a logo |
