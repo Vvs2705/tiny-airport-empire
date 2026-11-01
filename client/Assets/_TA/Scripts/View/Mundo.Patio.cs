@@ -11,9 +11,7 @@ namespace TA
     ///  - 2 avioes, 1 por voo da onda (0 = o regional, 1 = o jato), cada um no seu estande: G (ponte de embarque) e R (remoto). O pouso comeca
     ///    PousoSeg antes da hora do nucleo (Aviao.Chega) e encosta quando ele encosta; Ev.Decolou solta o pushback (com o rebocador preso no
     ///    nariz no G), o taxi, a corrida e a decolagem; o hangar leva o aviao pela taxiway e o traz de volta antes de o nucleo liberar.
-    ///  - Veiculos por servico (Aviao.Fazendo): limpeza = catering, combustivel = caminhao, bagagem = carrinho, cada um com a vaga numa coluna
-    ///    entre os estandes (mao unica: sobe a coluna, faz a volta pela rua do norte, para ao lado da fuselagem e volta pela rua do sul).
-    ///    Desembarque no G e pela ponte; no R, escada e onibus do lado de fora, que voltam de re. +1 veiculo (Capacidade) aparece na vaga de tras.
+    ///  - Os veiculos estao em Mundo.Veiculos.cs.
     ///  - Em cima do aviao: o icone do servico que falta com o anel de progresso (GDD §5.12), e o aviso de desgaste a partir de 80%.
     ///  - Movimento sem patinar (medido com -diag e client/tools/diag_patio.py): o pivo de cada peca e o eixo traseiro (o trem principal
     ///    no aviao) e o rumo e a tangente do trajeto nesse ponto, como num carro de verdade; a frente de cada malha do Tripo esta na
@@ -24,31 +22,20 @@ namespace TA
     public sealed partial class Mundo
     {
         // pista ao norte (pousa e decola para leste), taxiway e estandes de nariz para o terminal (para -z)
-        const float PistaZ = 23f, TaxiZ = 19f, NarizZ = 10.2f, RaioAviao = 3.4f, RaioVeic = 1.5f;
+        const float PistaZ = 25f, TaxiZ = 21f, NarizZ = 11.2f, RaioAviao = 3.4f, RaioVeic = 1.5f;
         const float LatAviao = 0.5f, LatVeic = 0.8f;   // aceleracao lateral maxima (m/s2): limita a velocidade na curva
-        static readonly float[] EstandeX = { 11.4f, 21f };
+        static readonly float[] EstandeX = { 11.4f, 22.5f };
         static readonly string[] AviaoMalha = { "aviao_regional", "aviao_narrow" };
         /// <summary>s do pouso ate parar no estande e da saida do hangar ate o estande (medidos com -diag): a tela comeca esse tempo antes do nucleo.</summary>
-        static readonly float[] PousoSeg = { 24f, 19f };
+        static readonly float[] PousoSeg = { 24.4f, 19f };
         const float VoltaHangarSeg = 20f;
         /// <summary>Hangar no fim da taxiway, com a porta para oeste (a vista da camera): o aviao entra reto, de nariz; sai de re, com a cauda
         /// na ligacao leste da pista, e segue de frente: nenhum giro no lugar.</summary>
         static readonly Vector3 HangarEm = new Vector3(36.4f, 0f, TaxiZ);
         const float HangarYaw = 90f, HangarEscala = 1.1f, LigacaoX = 26f;
         /// <summary>Rebocador: vaga (de frente para oeste, na beira do patio) e o ponto em que a barra encosta no nariz do aviao da ponte.</summary>
-        static readonly Vector3 ReboqueVaga = new Vector3(14.6f, 0f, 8.5f), ReboqueNariz = new Vector3(11.4f, 0f, 9.4f);
+        static readonly Vector3 ReboqueVaga = new Vector3(14.6f, 0f, 8.5f), ReboqueNariz = new Vector3(11.4f, 0f, NarizZ - 0.8f);
         enum Reboque { Vago, Indo, Pronto, Preso, Voltando }
-
-        // ruas de servico entre os estandes, em mao unica: faixa de cada estande (ao lado da fuselagem), a coluna da vaga de cada servico
-        // (limpeza, combustivel, bagagem), a parada (pivo) na faixa e as 2 vagas da coluna (0 = a do sul, 1 = a do norte, a que sai primeiro)
-        const float RuaNorte = 17.4f, RuaSul = 10.6f;
-        static readonly float[] FaixaX = { 12.9f, 19.6f }, ColunaX = { 0f, 15f, 16.3f, 17.6f }, ParadaZ = { 0f, 14f, 16.5f, 16.5f }, VagaZ = { 11.5f, 14.3f };
-        static readonly string[] VeiculoMalha = { "", "caminhao_catering", "caminhao_combustivel", "carrinho_bagagem" };
-        static readonly float[] VeiculoEixo = { 0f, 0.75f, 0.75f, 0.6f }, VeiculoComp = { 0f, 2.8f, 2.6f, 2.6f };
-        static readonly Color[] VeiculoCor = { Color.white, Art.Hex(0xF2F4F7), Art.Hex(0xE0533D), Art.Hex(0x5DADE2) };
-        /// <summary>Escada e onibus so no estande R, pela direita do aviao: vaga e parada; voltam de re pelo mesmo caminho.</summary>
-        static readonly Vector3[] EscadaRota = { new Vector3(25.2f, 0f, 15.4f), new Vector3(25.2f, 0f, 11.6f), new Vector3(23.7f, 0f, 11.6f) };
-        static readonly Vector3[] OnibusRota = { new Vector3(28.4f, 0f, 9.4f), new Vector3(25.3f, 0f, 9.4f) };
 
         /// <summary>Trecho de trajeto: pontos densos, comprimento acumulado e curvatura em cada ponto; V = cruzeiro, A e F = aceleracao e
         /// freada (m/s2); Para = termina parado; Sai = velocidade maxima na saida do trecho (o limite de curva so enxerga o trecho atual: a curva
@@ -63,8 +50,6 @@ namespace TA
         }
 
         enum Fase { Fora, Chegando, NoPatio, Saindo, IndoHangar, Hangar }
-        enum Lida { Parado, Indo, Servindo, Voltando }
-
         sealed class Aviao
         {
             public int Id;
@@ -79,22 +64,7 @@ namespace TA
             public readonly Queue<Trecho> Trechos = new Queue<Trecho>();
         }
 
-        sealed class Veiculo
-        {
-            public Transform T, Malha;
-            public SpriteRenderer Sombra;
-            public Quaternion Base = Quaternion.identity;
-            public int Servico = -1, Aviao = -1, Vaga = 1;   // Servico -1 = o rebocador; Aviao = o que esta atendendo
-            public float S, V, Vel, Comp, Pitch, Roll;
-            public Lida Lida;
-            public Vector3[] Rota;   // escada e onibus (ida; a volta e de re)
-            public readonly Queue<Trecho> Rotas = new Queue<Trecho>();
-        }
-
         readonly Aviao[] _avioes = { new Aviao { Id = 0 }, new Aviao { Id = 1 } };
-        readonly List<Veiculo> _veiculos = new List<Veiculo>();
-        Veiculo _escada, _onibus;
-        Reboque _reboque;
         System.IO.StreamWriter _diag;
         float _diagT, _diagUlt;
 
@@ -102,11 +72,10 @@ namespace TA
 
         void Patio3D()
         {
-            Chao("Patio", new Vector3(15.5f, -0.06f, 13.05f), new Vector2(19.5f, 9.7f), Asfalto);
+            Chao("Patio", new Vector3(25.85f, -0.06f, 13.95f), new Vector2(40.2f, 11.5f), Asfalto);
             Chao("Taxiway", new Vector3(14f, -0.055f, TaxiZ), new Vector2(46f, 2.6f), Asfalto);
             Chao("Pista", new Vector3(10f, -0.05f, PistaZ), new Vector2(46f, 3.8f), Art.Hex(0x4A4F5B));
             foreach (float x in new[] { -6f, 26f }) Chao("Ligacao", new Vector3(x, -0.055f, (TaxiZ + PistaZ) * 0.5f), new Vector2(2.6f, PistaZ - TaxiZ), Asfalto);
-            Chao("PatioOnibus", new Vector3(27.2f, -0.058f, 9.4f), new Vector2(4.4f, 1.8f), Asfalto);
             for (int i = 0; i < 14; i++) Chao("FaixaPista", new Vector3(-12f + i * 3.2f, -0.04f, PistaZ), new Vector2(1.6f, 0.14f), Art.Hex(0xF4F1E8));
             for (int i = 0; i < 6; i++)
             {
@@ -139,12 +108,7 @@ namespace TA
                 if (a.Sombra != null) a.Sombra.gameObject.SetActive(false);
             }
 
-            Veiculo r = NovoVeiculo("rebocador", -1, 2.2f, 0.35f, Art.Hex(0xF2C14E), 1.5f);
-            r.T.SetPositionAndRotation(ReboqueVaga, Quaternion.Euler(0f, -90f, 0f));
-            Sombra(r);
-            for (int sv = 1; sv < 4; sv++) NoServico(sv, 1);
-            _escada = NaRota("escada_embarque", 1.3f, 0.7f, Art.Hex(0xE5E8E8), 2.3f, EscadaRota);
-            _onibus = NaRota("onibus_patio", 1.5f, 0.9f, Art.Hex(0x3FA7D6), 3.2f, OnibusRota);
+            Veiculos3D();
         }
 
         static Vector3 V(float x, float z, float y = 0f) => new Vector3(x, y, z);
@@ -163,44 +127,6 @@ namespace TA
             Bloco("Cauda", PrimitiveType.Cube, new Vector3(0f, 1.85f, -3.1f), new Vector3(0.08f, 1.3f, 1.0f), Art.VooCor[k], t);
             Bloco("Cabine", PrimitiveType.Cube, new Vector3(0f, 1.25f, 3.25f), new Vector3(0.7f, 0.2f, 0.3f), cinza, t);
             return t;
-        }
-
-        /// <summary>Veiculo com o pivo no eixo traseiro (`eixo` = do eixo ao centro da malha, em m).</summary>
-        Veiculo NovoVeiculo(string malha, int servico, float vel, float eixo, Color cor, float comp)
-        {
-            var v = new Veiculo { Servico = servico, Vel = vel, Comp = comp };
-            v.T = Peca(malha, Vector3.zero, 0f, 1f, eixo);
-            if (v.T != null) { v.Malha = v.T.GetChild(0); v.Base = v.Malha.localRotation; }
-            else
-            {
-                v.T = new GameObject(malha).transform;
-                v.T.SetParent(_raiz, false);
-                Bloco("Carroceria", PrimitiveType.Cube, new Vector3(0f, 0.3f, -0.1f), new Vector3(0.55f, 0.45f, comp - 0.4f), cor, v.T);
-                Bloco("Cabine", PrimitiveType.Cube, new Vector3(0f, 0.38f, comp * 0.5f - 0.2f), new Vector3(0.55f, 0.55f, 0.35f), Art.Hex(0xECF0F1), v.T);
-            }
-            v.Sombra = SombraDe(v.T);
-            _veiculos.Add(v);
-            return v;
-        }
-
-        /// <summary>Veiculo de um servico na vaga `vaga` da coluna dele, de frente para o norte.</summary>
-        Veiculo NoServico(int sv, int vaga)
-        {
-            Veiculo v = NovoVeiculo(VeiculoMalha[sv], sv, 2.4f, VeiculoEixo[sv], VeiculoCor[sv], VeiculoComp[sv]);
-            v.Vaga = vaga;
-            v.T.SetPositionAndRotation(V(ColunaX[sv], VagaZ[vaga]), Quaternion.identity);
-            Sombra(v);
-            return v;
-        }
-
-        /// <summary>Escada ou onibus: fica no comeco da rota, de frente para ela.</summary>
-        Veiculo NaRota(string malha, float vel, float eixo, Color cor, float comp, Vector3[] rota)
-        {
-            Veiculo v = NovoVeiculo(malha, 0, vel, eixo, cor, comp);
-            v.Rota = rota;
-            v.T.SetPositionAndRotation(rota[0], Quaternion.LookRotation(rota[1] - rota[0], Vector3.up));
-            Sombra(v);
-            return v;
         }
 
         /// <summary>Elipse escura no chao, do tamanho da planta do objeto (medida uma vez, parado em yaw 0).</summary>
@@ -403,7 +329,7 @@ namespace TA
                 case Fase.NoPatio:
                     bool revisa = hangar > VoltaHangarSeg;
                     if (!revisa && !a.QuerPartir) break;
-                    if (a.Id == 1 && (_escada.Lida == Lida.Indo || _escada.Lida == Lida.Servindo)) break;   // a escada sai antes
+                    foreach (Veiculo v in _veiculos) if (v.Aviao == a.Id) return;   // quem esta encostado sai antes
                     if (a.Id != 0 || _reboque == Reboque.Pronto)
                     {
                         if (a.Id == 0) _reboque = Reboque.Preso;
@@ -543,207 +469,20 @@ namespace TA
             return -1;
         }
 
-        // ------------------------------------------------------------------ rebocador
-
-        /// <summary>O aviao da ponte quer sair: o rebocador sai da vaga, faz a curva e encosta a barra no nariz.</summary>
-        void ReboqueVai()
-        {
-            Veiculo r = _veiculos[0];
-            Trecho t = Caminho(1f, r.Vel, ReboqueVaga, new Vector3(ReboqueNariz.x, 0f, ReboqueVaga.z), ReboqueNariz);
-            t.A = 0.7f; t.F = 0.8f; t.Para = true;
-            r.Rotas.Enqueue(t);
-            r.S = 0f;
-            _reboque = Reboque.Indo;
-        }
-
-        /// <summary>Rebocador preso no nariz durante o pushback, empurrando.</summary>
-        void Reboca(Aviao a, float dt)
-        {
-            Veiculo r = _veiculos[0];
-            Vector3 nariz = a.T.forward;
-            nariz.y = 0f;
-            nariz.Normalize();
-            Vector3 p = new Vector3(a.T.position.x, 0f, a.T.position.z) + nariz * (a.Nariz + (NarizZ - ReboqueNariz.z)), d = p - r.T.position;
-            r.T.position = p;
-            // a barra articula: o rebocador aponta para onde o nariz anda, nao para o eixo do aviao, e nao escorrega de lado na curva do recuo
-            if (dt > 0f && d.magnitude / dt > 0.15f) r.T.rotation = Quaternion.RotateTowards(r.T.rotation, Quaternion.LookRotation(d, Vector3.up), 90f * dt);
-            Sombra(r);
-        }
-
-        /// <summary>Solto na taxiway: recua fazendo a curva para o norte, cruza a taxiway para o sul, atravessa o estande vazio, passa na frente
-        /// das ruas de servico e volta para a vaga (de frente para oeste): nenhum giro no lugar.</summary>
-        void RebocadorVolta()
-        {
-            Veiculo r = _veiculos[0];
-            Vector3 p = r.T.position, tras = -r.T.forward, fim = p + tras * 1.6f + Vector3.forward * 1.6f;
-            Trecho re = Caminho(1.4f, 1.1f, p, p + tras * 1.6f, fim);
-            re.Re = re.Para = true; re.A = 0.6f; re.F = 0.7f;
-            Trecho vai = Caminho(1.4f, 2.2f, fim, new Vector3(fim.x, 0f, 12.4f), new Vector3(11.8f, 0f, 12.4f), new Vector3(11.8f, 0f, 9.7f), new Vector3(15.9f, 0f, 9.7f), new Vector3(15.9f, 0f, ReboqueVaga.z), ReboqueVaga);
-            vai.A = 0.7f; vai.F = 0.8f; vai.Para = true;
-            r.Rotas.Enqueue(re); r.Rotas.Enqueue(vai);
-            r.S = 0f;
-            _reboque = Reboque.Voltando;
-        }
-
-        // ------------------------------------------------------------------ veiculos de servico
-
-        /// <summary>Liga os veiculos ao nucleo: quem terminou volta; o servico que comecou (Aviao.Fazendo) chama o veiculo dele.</summary>
-        void ServicosPasso(Sim s)
-        {
-            foreach (Veiculo v in _veiculos)
-            {
-                if (v.Servico < 0) continue;
-                if (v.Lida == Lida.Servindo && !Ativo(v, s)) Volta(v);
-                else if (v.Lida == Lida.Parado && v.Rota == null && v.Vaga == 0 && VagaNorteLivre(v)) Avanca(v);
-            }
-            for (int k = 0; k < _avioes.Length; k++)
-            {
-                if (_avioes[k].Fase != Fase.NoPatio) continue;
-                TA.Core.Aviao c = s.Avioes[k];
-                if (c.Fazendo[0] && k == 1) { Vai(_escada, 1); Vai(_onibus, 1); }   // no estande G o desembarque e pela ponte
-                for (int sv = 1; sv < 4; sv++) if (c.Fazendo[sv]) Chama(sv, k, s);
-            }
-        }
-
-        /// <summary>O servico continua: a escada fica ate o aviao sair; os outros, enquanto o nucleo faz o servico.</summary>
-        bool Ativo(Veiculo v, Sim s)
-        {
-            Aviao a = _avioes[v.Aviao];
-            if (a.Fase != Fase.NoPatio) return false;
-            if (v == _escada) return !a.QuerPartir && s.Avioes[v.Aviao].Hangar == 0;
-            return s.Avioes[v.Aviao].Fazendo[v.Servico];
-        }
-
-        void Chama(int sv, int k, Sim s)
-        {
-            Veiculo livre = null;
-            int frota = 0;
-            foreach (Veiculo v in _veiculos)
-            {
-                if (v.Servico != sv) continue;
-                frota++;
-                if (v.Aviao == k) return;
-                if (v.Lida == Lida.Parado && (livre == null || v.Vaga > livre.Vaga)) livre = v;
-            }
-            if (livre == null && frota < s.Veiculos((Servico)sv))
-            {
-                livre = NoServico(sv, 0);   // o +1 veiculo da Capacidade
-                if (VagaNorteLivre(livre)) { livre.Vaga = 1; livre.T.position = V(ColunaX[sv], VagaZ[1]); }
-            }
-            if (livre != null) Vai(livre, k);
-        }
-
-        void Vai(Veiculo v, int k)
-        {
-            if (v.Aviao == k || v.Lida != Lida.Parado) return;
-            v.Aviao = k; v.Lida = Lida.Indo; v.S = 0f;
-            Trecho t;
-            if (v.Rota != null) t = Caminho(RaioVeic, v.Vel, v.Rota);
-            else
-            {
-                float x = ColunaX[v.Servico], f = FaixaX[k];
-                t = Caminho(RaioVeic, v.Vel, V(x, VagaZ[v.Vaga]), V(x, RuaNorte), V(f, RuaNorte), V(f, ParadaZ[v.Servico]));
-            }
-            t.A = 0.7f; t.F = 0.9f; t.Para = true;
-            v.Rotas.Enqueue(t);
-        }
-
-        void Volta(Veiculo v)
-        {
-            int k = v.Aviao;
-            v.Aviao = -1; v.Lida = Lida.Voltando; v.S = 0f;
-            Trecho t;
-            if (v.Rota != null)
-            {
-                var r = (Vector3[])v.Rota.Clone();
-                Array.Reverse(r);
-                t = Caminho(RaioVeic, v.Vel * 0.8f, r);
-                t.Re = true;
-            }
-            else
-            {
-                v.Vaga = VagaNorteLivre(v) ? 1 : 0;
-                float x = ColunaX[v.Servico], f = FaixaX[k];
-                t = Caminho(RaioVeic, v.Vel, V(f, ParadaZ[v.Servico]), V(f, RuaSul), V(x, RuaSul), V(x, VagaZ[v.Vaga]));
-            }
-            t.A = 0.7f; t.F = 0.9f; t.Para = true;
-            v.Rotas.Enqueue(t);
-        }
-
-        /// <summary>A coluna e uma fila: sai primeiro quem esta ao norte, e quem ficou ao sul anda para la.</summary>
-        void Avanca(Veiculo v)
-        {
-            float x = ColunaX[v.Servico];
-            Trecho t = Caminho(0f, v.Vel, V(x, VagaZ[0]), V(x, VagaZ[1]));
-            t.A = 0.7f; t.F = 0.9f; t.Para = true;
-            v.Vaga = 1; v.Lida = Lida.Voltando; v.S = 0f;
-            v.Rotas.Enqueue(t);
-        }
-
-        bool VagaNorteLivre(Veiculo v)
-        {
-            foreach (Veiculo o in _veiculos)
-                if (o != v && o.Servico == v.Servico && o.Rota == null && o.Vaga == 1 && (o.Lida == Lida.Parado || o.Lida == Lida.Voltando)) return false;
-            return true;
-        }
-
-        /// <summary>Quem vem atras espera (fila natural nas faixas). Conta a distancia de freada, para nao encostar.</summary>
-        bool FrenteLivre(Veiculo v, Trecho t)
-        {
-            Vector3 f = t.Re ? -v.T.forward : v.T.forward, c = Centro(v), lado = new Vector3(f.z, 0f, -f.x);
-            float freada = v.V * v.V / (2f * t.F);
-            foreach (Veiculo o in _veiculos)
-            {
-                if (o == v) continue;
-                Vector3 d = Centro(o) - c;
-                float frente = Vector3.Dot(d, f);
-                if (frente > 0f && frente < (v.Comp + o.Comp) * 0.5f + 0.05f + freada && Mathf.Abs(Vector3.Dot(d, lado)) < 1.2f) return false;
-            }
-            return true;
-        }
-
-        static Vector3 Centro(Veiculo v) => v.T.position + v.T.forward * (v.Comp * 0.4f);
-
-        void VeiculoPasso(Veiculo v, float dt)
-        {
-            float vAnt = v.V, yawAnt = v.T.eulerAngles.y;
-            bool reboque = v.Servico < 0;
-            if (reboque && _reboque == Reboque.Preso) return;
-            if (v.Rotas.Count == 0)
-            {
-                if (reboque)
-                {
-                    if (_reboque == Reboque.Indo) _reboque = Reboque.Pronto;
-                    else if (_reboque == Reboque.Voltando) _reboque = Reboque.Vago;
-                }
-                else if (v.Lida == Lida.Indo) v.Lida = Lida.Servindo;
-                else if (v.Lida == Lida.Voltando) v.Lida = Lida.Parado;
-                v.V = 0f;
-            }
-            else
-            {
-                Trecho t = v.Rotas.Peek();
-                v.V = Passo(v.V, t, v.S, reboque || FrenteLivre(v, t) ? t.V : 0f, t.Para ? t.Total - v.S : 1e4f, LatVeic, dt);
-                v.S += v.V * Mathf.Max(0f, dt);
-                Pose(v.T, t, v.S);
-                if (v.S >= t.Total - 0.01f) { v.Rotas.Dequeue(); v.S = 0f; v.V = 0f; }
-            }
-            if (dt > 0f) Inclina(v.Malha, v.Base, (v.V - vAnt) / dt, v.V * Mathf.DeltaAngle(yawAnt, v.T.eulerAngles.y) * Mathf.Deg2Rad / dt, dt, ref v.Pitch, ref v.Roll, 1f);
-            Sombra(v);
-        }
-
-        static void Sombra(Veiculo v)
-        {
-            v.Sombra.transform.position = new Vector3(v.T.position.x, 0.015f, v.T.position.z);
-            v.Sombra.transform.rotation = Quaternion.Euler(90f, v.T.eulerAngles.y, 0f);
-        }
-
         /// <summary>-diag arq.csv (so no -testsession): grava a cada ~0,1 s de jogo a pose de cada aviao e veiculo em movimento; o
         /// client/tools/diag_patio.py calcula escorregamento, velocidade, aceleracao e giro.</summary>
         public void Diag(string arq)
         {
             _diag = new System.IO.StreamWriter(arq) { AutoFlush = false };
             _diag.WriteLine("t,peca,x,y,z,yaw");
+            var inv = System.Globalization.CultureInfo.InvariantCulture;
+            for (int e = 0; e < Salas.Length; e++)
+                for (int i = 0; i < 4; i++)
+                    if (_mesa[e, i, 0] != null && _mesa[e, i, 0].activeSelf)
+                    {
+                        Vector2 b = e == (int)Estacao.Seguranca ? Em(e, 1f, SegA[i] + BeltX) : Balcao(e, i);
+                        _diag.WriteLine(string.Format(inv, "0,balcao#{0}.{1},{2:0.000},0,{3:0.000},0", e, i, b.x, b.y));
+                    }
         }
 
         public void DiagFim() { _diag?.Dispose(); _diag = null; }
@@ -758,6 +497,15 @@ namespace TA
             for (int i = 0; i < _avioes.Length; i++)
                 if (_avioes[i].T.gameObject.activeSelf) DiagLinha(inv, AviaoMalha[i], _avioes[i].T);
             for (int i = 0; i < _veiculos.Count; i++) DiagLinha(inv, _veiculos[i].T.name + "#" + i, _veiculos[i].T);
+            foreach (KeyValuePair<int, Boneco> kv in _pax) DiagBoneco(inv, "pax#" + kv.Key, kv.Value);
+            for (int k = 0; k < S.Staff.Count; k++) DiagBoneco(inv, "func#" + k, _func[k]);
+        }
+
+        /// <summary>Pessoa no -diag (client/tools/diag_pessoas.py): y = 1 andando; yaw = o rumo da folha, que e sempre um eixo do mundo.</summary>
+        void DiagBoneco(System.IFormatProvider inv, string nome, Boneco b)
+        {
+            float yaw = b.Dir > 0f ? (b.Cima ? 90f : 180f) : (b.Cima ? 0f : 270f);
+            _diag.WriteLine(string.Format(inv, "{0:0.00},{1},{2:0.000},{3},{4:0.000},{5:0}", _diagT, nome, b.Pos.x, b.Andou ? 1 : 0, b.Pos.y, yaw));
         }
 
         void DiagLinha(System.IFormatProvider inv, string nome, Transform t)

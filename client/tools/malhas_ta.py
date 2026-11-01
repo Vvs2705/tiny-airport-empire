@@ -70,6 +70,12 @@ PECAS = {
     "torre_controle_n3": (3000, 512, 2.2),
     "terminal_vale_verde_n2": (6000, 1024, 9.0),
     "terminal_vale_verde_n3": (6000, 1024, 9.0),
+    # Lote 11 e a seguranca com etapas na tela
+    "garagem_patio": (5000, 1024, 9.6),
+    "cabine_scanner_corpo": (2500, 512, -1.35),
+    "portico_detector": (1500, 512, -1.3),
+    "bandeja_seguranca": (600, 256, 0.42),
+    "scanner_mao": (400, 128, 0.3),
 }
 
 

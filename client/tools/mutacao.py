@@ -1,6 +1,6 @@
 """Prova de mutacao das travas da Fase C (CONTRATO_FASE_C §7): tira cada trava do nucleo, roda o dotnet test e exige que algum teste caia.
 
-uso (da raiz do repo): python client/tools/mutacao.py [trecho do nome]   (com o trecho, so os mutantes que o contem, ex.: campanha)
+uso (da raiz do repo): python client/tools/mutacao.py [trecho do nome da trava ...]
 Cada mutante e' aplicado, testado e desfeito (o arquivo volta byte a byte, mesmo com erro). Sai 1 se algum mutante sobreviver.
 """
 
@@ -29,14 +29,14 @@ MUTANTES = [
     (
         "checagem so com Cash",
         "Sim.Patio.cs",
-        "&& MecanicoLivre && Cash >= T.CheckCusto;",
-        "&& MecanicoLivre;",
+        "&& a.Desgaste > 0 && MecanicoLivre && Cash >= T.CheckCusto;",
+        "&& a.Desgaste > 0 && MecanicoLivre;",
     ),
     (
         "hangar so com Cash",
         "Sim.Patio.cs",
-        "!= null && T.RegraManutencao && Cash >= T.HangarCusto;",
-        "!= null && T.RegraManutencao;",
+        "AntesDoEmbarque(aviao) != null && T.RegraManutencao && Cash >= T.HangarCusto;",
+        "AntesDoEmbarque(aviao) != null && T.RegraManutencao;",
     ),
     (
         "offline nao gasta desgaste",
@@ -340,8 +340,8 @@ def testa():
 
 def main():
     vivos = 0
-    filtro = sys.argv[1] if len(sys.argv) > 1 else ""
-    lista = [m for m in MUTANTES if filtro in m[0]]
+    filtro = sys.argv[1:]
+    lista = [m for m in MUTANTES if not filtro or any(f in m[0] for f in filtro)]
     for nome, arq, de, para in lista:
         p = os.path.join(CORE, arq)
         with open(p, "rb") as f:

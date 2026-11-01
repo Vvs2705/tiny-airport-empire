@@ -12,7 +12,7 @@ namespace TA
     /// de antialias e cache por chave, mais os helpers de uGUI por codigo (Node, Img, NewText, Panel, NewButton). Greybox da v0.1: a arte do
     /// Tripo entra por cima destes metodos depois do portao da Fase B (D-14). Cada estado tem cor E forma/texto (critico nunca e so cor).
     /// </summary>
-    public static class Art
+    public static partial class Art
     {
         public static Color Hex(int rgb) => new Color(((rgb >> 16) & 255) / 255f, ((rgb >> 8) & 255) / 255f, (rgb & 255) / 255f);
         public static Color A(Color c, float a) => new Color(c.r, c.g, c.b, a);
@@ -21,6 +21,11 @@ namespace TA
         public static readonly Color Ink = Hex(0xF7F3EA), Tinta = Hex(0x101826), Bad = Hex(0xFF3B30), Good = Hex(0x45C46B), Warn = Hex(0xFFB020),
             Coin = Hex(0xF5A623), Gold = Hex(0xE0B23A), Bg = Hex(0x14203A), Dim = Hex(0x8A98B8), Off = Hex(0x4F5866), Dark = Hex(0x0B1220),
             Painel = Hex(0x1E2D4D), Board = Hex(0x0E1526), BoardInk = Hex(0xFFD54A), Paper = Hex(0xF3EEE2);
+        // Interface (ART_BIBLE §4 e §5): cabecalho azul Aurora com placa amarela de aeroporto, corpo claro, cartoes brancos.
+        // Verde compra, azul video, cinza sem dinheiro ou travado. Cor nunca vai sozinha: cada estado tem icone e texto.
+        public static readonly Color Azul = Hex(0x1F3A68), AzulLuz = Hex(0x35598F), Placa = Hex(0xFFD23F), CorFolha = Hex(0xEFE8DA), Fraco = Hex(0x4B5568),
+            Compra = Hex(0x27914F), Video = Hex(0x2F7FD6), Suave = Hex(0xDFE6F2), Apagado = Hex(0xD3D8E0), Vazio = Hex(0xC9CFD9), Perigo = Hex(0xA32014),
+            Feito = Hex(0xD9F0E0), FeitoTinta = Hex(0x1C6B3A);
         /// <summary>Cor de cada estacao (Estacao) e de cada voo da onda (o passageiro tem a cor do voo dele, ligando a fila ao quadro).</summary>
         public static readonly Color[] EstacaoCor = { Hex(0x2F6F9E), Hex(0x5B4A9E), Hex(0x2F8A6A), Hex(0x9E5B2F), Hex(0x1F9A9A), Hex(0xB8405E), Hex(0x6B7280), Hex(0xC28A1E) };
         public static readonly Color[] VooCor = { Hex(0x4FC3F7), Hex(0xFF8A65) };
@@ -46,10 +51,11 @@ namespace TA
         public static Sprite Mao() => Get("mao", (x, y) => (Mathf.Abs(x + 0.05f) < 0.16f && y > -0.1f && y < 0.85f)
             || (Mathf.Abs(x) < 0.5f && y > -0.85f && y < 0.05f && (x * x * 0.6f + (y + 0.4f) * (y + 0.4f) < 0.36f || Mathf.Abs(x) < 0.42f)));
         /// <summary>Aviao visto de cima, nariz para a direita: fuselagem com nariz redondo, asas enflechadas e empenagem.</summary>
-        public static Sprite Aviao() => Get("aviao2", (x, y) =>
+        public static Sprite Aviao() => Get("aviao2", AviaoIn);
+        static bool AviaoIn(float x, float y) =>
             (Mathf.Abs(y) < 0.11f && x > -0.92f && x < 0.8f) || (x >= 0.8f && (x - 0.8f) * (x - 0.8f) + y * y < 0.0121f)
             || (Mathf.Abs(y) < 0.85f && x < 0.22f - Mathf.Abs(y) * 0.55f && x > -0.08f - Mathf.Abs(y) * 0.55f)
-            || (Mathf.Abs(y) < 0.36f && x < -0.62f - Mathf.Abs(y) * 0.45f && x > -0.9f - Mathf.Abs(y) * 0.2f));
+            || (Mathf.Abs(y) < 0.36f && x < -0.62f - Mathf.Abs(y) * 0.45f && x > -0.9f - Mathf.Abs(y) * 0.2f);
 
         // ---------- bonecos (greybox do Mundo; a arte do Tripo troca estes sprites mantendo as camadas: corpo, colete tingido, cabeca, cabelo) ----------
         public static Sprite Rounded() => Get("rounded", RoundedIn);
@@ -64,7 +70,8 @@ namespace TA
         public static Sprite Mala() => Get("mala", (x, y) => RoundedIn(x, (y + 0.2f) * 1.25f) || (Mathf.Abs(x) < 0.4f && y > 0.55f && y < 0.85f && Mathf.Abs(x) > 0.2f) || (Mathf.Abs(x) < 0.4f && y > 0.75f && y < 0.85f));
 
         // icones dos servicos do patio (GDD §5.12) e dos perfis (GDD §5.5), na ordem de Servico e de Perfil
-        public static Sprite Pessoa() => Get("pessoa", (x, y) => x * x + (y - 0.5f) * (y - 0.5f) <= 0.12f || (y < 0.08f && y > -0.85f && Mathf.Abs(x) < 0.5f - y * 0.08f));
+        public static Sprite Pessoa() => Get("pessoa", PessoaIn);
+        static bool PessoaIn(float x, float y) => x * x + (y - 0.5f) * (y - 0.5f) <= 0.14f || (y > -0.85f && x * x / 0.42f + (y + 0.85f) * (y + 0.85f) / 0.72f <= 1f);
         public static Sprite Talher() => Get("talher", (x, y) => SegD(x, y, -0.45f, -0.85f, -0.45f, 0.1f) < 0.11f || (y > 0f && y < 0.85f && Mathf.Abs(x + 0.45f) < 0.32f && Mathf.Abs(x + 0.45f) % 0.2f < 0.09f)
             || SegD(x, y, 0.45f, -0.85f, 0.45f, 0.85f) < 0.11f || (y > 0.05f && y < 0.85f && x > 0.45f && x < 0.72f));
         public static Sprite Gota() => Get("gota", (x, y) => x * x + (y + 0.28f) * (y + 0.28f) <= 0.36f || (y > -0.1f && y < 0.92f && Mathf.Abs(x) < (0.92f - y) * 0.6f));
@@ -77,8 +84,67 @@ namespace TA
         public static Sprite Sacola() => Get("sacola", (x, y) => (Mathf.Abs(x) < 0.62f && y > -0.85f && y < 0.25f) || (x * x + (y - 0.3f) * (y - 0.3f) <= 0.19f && x * x + (y - 0.3f) * (y - 0.3f) >= 0.09f && y > 0.25f));
         public static Sprite Bilhete() => Get("bilhete", (x, y) => Mathf.Abs(x) < 0.85f && Mathf.Abs(y) < 0.5f && !(Mathf.Abs(x - 0.35f) < 0.05f && Mathf.Abs(y) % 0.3f < 0.15f));
         public static Sprite Radio() => Get("radio", (x, y) => (Mathf.Abs(x) < 0.42f && y > -0.85f && y < 0.4f) || (x > 0.14f && x < 0.3f && y >= 0.4f && y < 0.9f));
+        public static Sprite Xis() => Get("xis", (x, y) => SegD(x, y, -0.7f, -0.7f, 0.7f, 0.7f) < 0.2f || SegD(x, y, -0.7f, 0.7f, 0.7f, -0.7f) < 0.2f);
         public static Sprite IconeServico(int s) { switch (s) { case 0: return Pessoa(); case 1: return Talher(); case 2: return Gota(); default: return Mala(); } }
         public static Sprite IconePerfil(int p) { switch (p) { case 0: return Bilhete(); case 1: return Escudo(); case 2: return Sacola(); case 3: return Mala(); case 4: return Chave(); default: return Radio(); } }
+        /// <summary>Icone de cada estacao, na ordem de Estacao.</summary>
+        public static Sprite IconeEstacao(int e) { switch (e) { case 0: return Bilhete(); case 1: return Escudo(); case 2: return Sacola(); case 3: return Aviao(); case 4: return Mala(); case 5: return Talher(); case 6: return Chave(); default: return Radio(); } }
+
+        // pictogramas da interface: efeito da melhoria (Raio = velocidade, Pessoas = capacidade, Caminhao = veiculos, Relogio = tempo), estado e acao
+        static readonly float[] RaioPts = { 0.3f, 0.95f, -0.5f, -0.08f, -0.02f, -0.08f, -0.3f, -0.95f, 0.55f, 0.18f, 0.06f, 0.18f };
+        public static Sprite Raio() => Get("raio", (x, y) => Poli(x, y, RaioPts));
+        public static Sprite Pessoas() => Get("pessoas", (x, y) => PessoaIn((x - 0.36f) / 0.72f, (y - 0.14f) / 0.72f) || PessoaIn((x + 0.36f) / 0.72f, (y + 0.14f) / 0.72f));
+        public static Sprite Caminhao() => Get("caminhao", (x, y) =>
+        {
+            float a = (x + 0.48f) * (x + 0.48f) + (y + 0.52f) * (y + 0.52f), b = (x - 0.55f) * (x - 0.55f) + (y + 0.52f) * (y + 0.52f);
+            if (a < 0.022f || b < 0.022f) return false;                 // furo das rodas
+            if (a < 0.075f || b < 0.075f) return true;                  // rodas
+            return y > -0.45f && ((x > -0.95f && x < 0.18f && y < 0.6f) || (x > 0.26f && x < 0.95f && y < 0.25f - Mathf.Max(0f, x - 0.7f)));
+        });
+        public static Sprite Relogio() => Get("relogio", (x, y) =>
+        {
+            float d = x * x + y * y;
+            return (d <= 0.96f && d >= 0.62f) || SegD(x, y, 0f, 0f, 0f, 0.56f) < 0.09f || SegD(x, y, 0f, 0f, 0.38f, -0.2f) < 0.09f;
+        });
+        public static Sprite Cadeado() => Get("cadeado", (x, y) =>
+        {
+            float d = x * x + (y - 0.2f) * (y - 0.2f);
+            bool corpo = Mathf.Abs(x) < 0.66f && y > -0.9f && y < 0.14f, furo = x * x + (y + 0.32f) * (y + 0.32f) < 0.03f || (Mathf.Abs(x) < 0.07f && y < -0.32f && y > -0.62f);
+            return (corpo && !furo) || (y >= 0.14f && d <= 0.3f && d >= 0.11f);
+        });
+        public static Sprite Fechar() => Get("fechar", (x, y) => SegD(x, y, -0.62f, -0.62f, 0.62f, 0.62f) < 0.17f || SegD(x, y, -0.62f, 0.62f, 0.62f, -0.62f) < 0.17f);
+        static readonly float[] EstrelaPts = Estrela5();
+        static float[] Estrela5()
+        {
+            var p = new float[20];
+            for (int i = 0; i < 10; i++)
+            {
+                float r = i % 2 == 0 ? 0.98f : 0.46f, t = Mathf.PI * (0.5f + i / 5f);
+                p[i * 2] = r * Mathf.Cos(t); p[i * 2 + 1] = r * Mathf.Sin(t) - 0.04f;
+            }
+            return p;
+        }
+        public static Sprite Estrela() => Get("estrela", (x, y) => Poli(x, y, EstrelaPts));
+        /// <summary>Moeda: aro escuro, face dourada e o aviaozinho cunhado na diagonal. Vem pintada: use com o Image em branco.</summary>
+        public static Sprite Moeda() => Pintada("moeda", (x, y) =>
+        {
+            float d = x * x + y * y;
+            if (d > 0.94f) return Color.clear;
+            Color aro = Hex(0xB07A1E);
+            if (d > 0.68f || AviaoIn((x + y) * 0.7071f / 0.66f, (y - x) * 0.7071f / 0.66f)) return aro;
+            return Color.Lerp(Hex(0xF2B22E), Hex(0xFFDD66), (y + 1f) * 0.5f);
+        });
+        /// <summary>Picote do cartao: tracos na vertical, esticados na altura do cartao.</summary>
+        public static Sprite Pontilhado() => Get("picote", (x, y) => Mathf.Repeat((y + 1f) * 4f, 1f) < 0.55f);
+
+        /// <summary>Dentro do poligono (pares x, y)? Par-impar nas arestas.</summary>
+        static bool Poli(float x, float y, float[] p)
+        {
+            bool dentro = false;
+            for (int i = 0, j = p.Length - 2; i < p.Length; j = i, i += 2)
+                if ((p[i + 1] > y) != (p[j + 1] > y) && x < (p[j] - p[i]) * (y - p[i + 1]) / (p[j + 1] - p[i + 1]) + p[i]) dentro = !dentro;
+            return dentro;
+        }
 
         /// <summary>Arco de progresso (anel cheio no sentido horario a partir do topo ate frac). ponytail: 24 degraus em cache.</summary>
         public static Sprite Arc(float frac)
@@ -117,10 +183,37 @@ namespace TA
 
         static Sprite Mask(string key, Func<int, int, byte> alpha)
         {
-            var tex = new Texture2D(Side, Side, TextureFormat.RGBA32, false) { wrapMode = TextureWrapMode.Clamp, hideFlags = HideFlags.DontUnloadUnusedAsset };
             var px = new Color32[Side * Side];
             for (int y = 0; y < Side; y++)
                 for (int x = 0; x < Side; x++) px[y * Side + x] = new Color32(255, 255, 255, alpha(x, y));
+            return Textura(key, px);
+        }
+
+        /// <summary>Sprite em varias cores, com 4 x 4 amostras por pixel: para o que nao se tinge, como a moeda.</summary>
+        static Sprite Pintada(string key, Func<float, float, Color> cor)
+        {
+            Sprite s = Cached(key);
+            if (s != null) return s;
+            var px = new Color32[Side * Side];
+            for (int y = 0; y < Side; y++)
+                for (int x = 0; x < Side; x++)
+                {
+                    Color soma = Color.clear;
+                    for (int sy = 0; sy < 4; sy++)
+                        for (int sx = 0; sx < 4; sx++)
+                        {
+                            Color c = cor((x + (sx + 0.5f) / 4f) / Side * 2f - 1f, (y + (sy + 0.5f) / 4f) / Side * 2f - 1f);
+                            soma += new Color(c.r * c.a, c.g * c.a, c.b * c.a, c.a);
+                        }
+                    float a = Mathf.Max(soma.a, 0.0001f);
+                    px[y * Side + x] = new Color(soma.r / a, soma.g / a, soma.b / a, soma.a / 16f);
+                }
+            return Textura(key, px);
+        }
+
+        static Sprite Textura(string key, Color32[] px)
+        {
+            var tex = new Texture2D(Side, Side, TextureFormat.RGBA32, true) { wrapMode = TextureWrapMode.Clamp, hideFlags = HideFlags.DontUnloadUnusedAsset };   // mips: icone pequeno sem serrilhado
             tex.SetPixels32(px);
             tex.Apply();
             Sprite s = Sprite.Create(tex, new Rect(0, 0, Side, Side), new Vector2(0.5f, 0.5f), Side);
@@ -139,9 +232,21 @@ namespace TA
             return r;
         }
 
-        // ---------- uGUI por codigo (sem TextMeshPro); fonte embutida do Unity ate as fontes OFL da ART_BIBLE ----------
-        static Font _font;
-        public static Font Font() => _font != null ? _font : (_font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf"));
+        // ---------- uGUI por codigo (sem TextMeshPro) ----------
+        // Fontes OFL (docs/ART_BIBLE.md §5, Resources/Fonts, docs/PROVENIENCIA.md §3.2): Nunito ExtraBold no texto, nos rotulos do mundo e nas placas
+        // de chao; Lilita One em titulos, botoes e numeros. Sem os arquivos, a fonte embutida do Unity.
+        static Font _font, _titulo;
+        public static Font Font()
+        {
+            if (_font == null) _font = Resources.Load<Font>("Fonts/Nunito-ExtraBold");
+            if (_font == null) _font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            return _font;
+        }
+        public static Font Titulo()
+        {
+            if (_titulo == null) _titulo = Resources.Load<Font>("Fonts/LilitaOne-Regular");
+            return _titulo != null ? _titulo : Font();
+        }
 
         static float CaixaDist(float x, float y, int s, float raio)
         {
@@ -215,7 +320,7 @@ namespace TA
         public static Text NewText(Transform parent, string name, int size, Vector2 anchorMin, Vector2 anchorMax, TextAnchor align = TextAnchor.MiddleCenter)
         {
             var t = Node(parent, name, anchorMin, anchorMax).gameObject.AddComponent<Text>();
-            t.font = Font(); t.fontSize = size; t.color = Ink; t.alignment = align; t.raycastTarget = false; t.fontStyle = FontStyle.Bold;
+            t.font = Font(); t.fontSize = size; t.color = Ink; t.alignment = align; t.raycastTarget = false;   // as 2 fontes ja sao pesadas: sem negrito falso
             t.horizontalOverflow = HorizontalWrapMode.Wrap; t.verticalOverflow = VerticalWrapMode.Truncate;
             t.resizeTextForBestFit = true; t.resizeTextMinSize = Mathf.Max(10, size * 2 / 3); t.resizeTextMaxSize = size;
             return t;
@@ -262,6 +367,7 @@ namespace TA
             img.gameObject.AddComponent<Aperta>();
             b.onClick.AddListener(() => onClick());
             Text t = NewText(img.transform, "Rotulo", size, Vector2.zero, Vector2.one);
+            t.font = Titulo();
             t.rectTransform.offsetMin = new Vector2(12f, 14f); t.rectTransform.offsetMax = new Vector2(-12f, -4f);   // fora do contorno e da aba
             t.text = label;
             Outlined(t, Mathf.Max(2f, size / 16f));

@@ -367,6 +367,135 @@ As 9 travas novas entram no `mutacao.py`, que continua pegando as 13 das Fases C
 - Um incidente a cada 7–8 min é hipótese do bot, que reage em 1 s. Com gente, medir se 0,4 e 0,5 por onda cansam.
 - A tripulação visual (D-C2) não voltou com regra: a Fase C3 não trouxe mais voos por onda, só voos maiores.
 
+## 8. Fase C4: dia a dia, estações do ano, clima e falhas de avião (2026-10-31, `CONTRATO_FASE_C4.md`)
+
+**Como medir:** `dotnet test client/tools/coretests --filter "FullyQualifiedName~BalanceTests.Portao_|FullyQualifiedName~BalanceTests.Antes_FaseC4|FullyQualifiedName~BalanceTests.Medida_FaseC4" --logger "console;verbosity=detailed"`. As sementes rodam em 4 threads (`BalanceTests.Threads`), com a soma na ordem de sempre. `CoreTests.Bot_em_paralelo_da_o_mesmo_que_uma_semente_por_vez` prova que dá o mesmo número de rodar uma por vez. Em 200 sementes, as tabelas saíram idênticas às da rodada em série, com 19,6 min em série e 5,4 min em paralelo. `Medida_FaseC4` não roda no CI: leva 11 min.
+
+**Bots:** o perfil ganhou as chaves `Clima` (adianta no aviso e, se perdeu o aviso, atrasa), `Falhas` (paga o reparo da pane) e `Segue` (muda de aeroporto com a estação). Bom, Lento e Parado têm `Clima` e `Falhas`. Em cada portão, o Planejador e o Automático são o mesmo Bom, com rotas e reação a incidente, e a diferença é a do sistema medido.
+
+### D-C4a. A demanda por estação do ano fica só visual
+
+O Planejador que segue a estação rendeu **1,000** em 200 sementes × 2 anos: pela conta do bot, Aurora Global é o melhor aeroporto em todas as estações, e ele nunca sai de lá. Com estações de 2 dias, ele chegou a viajar e rendeu 0,985 em 60 sementes. A chave `Tuning.RegraEpocas` fica desligada, e os fatores continuam na tabela `Aeroporto.Demanda`. As estações do ano seguem mudando a chance de cada clima, que está dentro do sistema de clima. **Para voltar:** a demanda por estação pede um motivo para mudar de aeroporto, como rota de temporada ou aeroporto antigo que rende (TA-7).
+
+### D-C4b. No temporal, quem adiantou continua embarcando
+
+Na 1ª regra o embarque parava para todos e a janela reabria 8 s antes do portão: reagir rendia **1,010**. No fim do jogo, com o portão rápido, 8 s bastam para embarcar todo mundo. Agora o temporal dura 55 s, o portão fecha com ele em curso, e quem adiantou segue pela ponte, como na frente fria (D-C3a). Rende **1,218** sozinho.
+
+### D-C4c. O vento fecha a pista
+
+Na 1ª regra o vento só fazia cada pouso e decolagem esperar 25 s. Com 2 aviões, que operam a cada 50 s, a espera quase não pesa: Costa Azul ficou em 0,960 e depois 1,026. Rajada acima do limite da pista fecha a operação, o que é mais perto do real e mais fácil de explicar. Rende **1,218** sozinho.
+
+### D-C4d. Adiantar também pega a vez na pista
+
+Na 1ª regra a saída da neblina e do vento era atrasar o portão, e atrasar rendia menos que segurar: 0,977. O atraso custa o bônus e devolve o avião mais tarde. Agora quem adianta já pegou a vez na pista e sai sem esperar, como quem degela antes na neve. Atrasar ficou para quem perdeu o aviso. A neblina rende **1,130** sozinha.
+
+### D-C4e. Pane sem desconto da oficina, e chance de 0,4
+
+Com chance de 0,3, as falhas ficaram em 1,026, 1,074 e 1,097. No fim do jogo, com gente e upgrades na oficina, a inspeção cai para cerca de 30 s, e a pane deixava de custar o voo. A inspeção de pane agora leva os 110 s inteiros e a oficina acelera só o reparo pago. Com chance de 0,4 o portão passa. **Leitura honesta:** o reparo pago sozinho rende de 1,019 a 1,034. O ganho vem de cuidar do avião antes do aviso (checagem) e de pagar quando falha, juntos.
+
+### D-C4f. Vale Verde fica fora do portão do clima
+
+Vale Verde é o aeroporto que ensina: tem menos clima de propósito e rende **1,086**. Pela proporção medida, passar de 1,10 pediria clima em quase 1 de cada 2 ondas. O portão do clima vale em Costa Azul e Aurora Global, como os incidentes da C3, e a tabela mostra Vale Verde e a partida inteira (**1,184**).
+
+### D-C4g. Decisões de desenho
+
+- **Estação do ano de 1 dia (8 ondas, 24 min):** com 2 dias o ano teria 64 ondas e o job `portoes` passaria do teto de 20 min do CI. Além disso, o jogador vê a estação mudar numa sessão.
+- **Atrasar não passa da virada da onda:** o quadro vira a cada onda. Clima que termina depois da virada não dá para atrasar: restam adiantar e segurar.
+- **Segurar é não fazer nada:** não tem botão. Custa no máximo a receita de quem não embarcou.
+- **Remarcar não mexe no Cash:** o voo já pagou no embarque, e devolver tiraria Cash do saldo. O custo do retorno é o tempo do avião.
+- **Sem Cash, a inspeção resolve a pane de graça:** senão, 2 aviões em pane e Cash zerado seriam derrota.
+- **Os picos do dia não têm portão próprio:** não têm escolha própria. Ficam ligados porque TA-1 e TA-2 passam.
+
+### Antes e depois do TA-1 e do TA-2 (200 sementes × 10 ondas)
+
+Antes (`Antes_FaseC4`, tudo desligado): **igual à tabela "depois" da §7, número a número**.
+
+| perfil | embarque médio | p10 | receita | movimentos | toques | marco 1 | marco 2 | marco 3 |
+|---|---|---|---|---|---|---|---|---|
+| Bom | 96.1% | 95.3% | 6827 | 32.7 | 972 | 13.7 min | - | - |
+| Lento | 73.0% | 71.2% | 3629 | 38.7 | 573 | 15.8 min | - | - |
+| Parado | 89.7% | 89.4% | 4788 | 0.0 | 404 | 13.7 min | - | - |
+
+Depois (padrão do `Tuning`):
+
+| perfil | embarque médio | p10 | receita | movimentos | toques | marco 1 | marco 2 | marco 3 |
+|---|---|---|---|---|---|---|---|---|
+| Bom | 94.2% | 92.4% | 6279 | 25.7 | 915 | 13.7 min | - | - |
+| Lento | 75.8% | 71.5% | 3872 | 29.3 | 569 | 15.8 min | - | - |
+| Parado | 88.7% | 87.1% | 4702 | 0.0 | 408 | 13.7 min | - | - |
+
+Ganho de mover = **1,336** (era 1,426). **TA-1 e TA-2 passam.** O Lento sobe de 73,0% para 75,8%; a causa provável é a demanda menor em parte das ondas, mas não isolei isso.
+
+### Portão do §5.13 (200 sementes × 1 ano = 32 ondas, tudo aberto, um sistema por vez)
+
+| sistema | emb. planejador | emb. automático | receita planejador | receita automático | ganho | regra |
+|---|---|---|---|---|---|---|
+| clima em Costa Azul | 92,2% | 82,4% | 59014 | 50812 | **1,161** | ligada |
+| clima em Aurora Global | 95,3% | 88,1% | 94973 | 82772 | **1,147** | ligada |
+| falhas em Vale Verde | 98,0% | 90,6% | 53347 | 47044 | **1,134** | ligada |
+| falhas em Costa Azul | 90,2% | 82,8% | 56479 | 49949 | **1,131** | ligada |
+| falhas em Aurora Global | 90,6% | 84,9% | 87441 | 77797 | **1,124** | ligada |
+| estações do ano (2 anos, `Medida_FaseC4`) | 89,4% | 89,4% | 446999 | 446999 | 1,000 | só visual |
+
+Sem portão próprio (`Medida_FaseC4`):
+
+| linha | emb. planejador | emb. automático | receita planejador | receita automático | ganho |
+|---|---|---|---|---|---|
+| clima em Vale Verde | 97,6% | 90,9% | 51870 | 47768 | 1,086 |
+| clima na partida inteira (2 anos) | 94,9% | 87,7% | 211194 | 178429 | 1,184 |
+| só frente fria (Aurora, 20 ondas) | 93,2% | 84,9% | 43809 | 37155 | 1,179 |
+| só temporal | 96,3% | 85,2% | 45263 | 37164 | 1,218 |
+| só vento | 97,8% | 90,0% | 48349 | 39692 | 1,218 |
+| só neblina | 97,6% | 93,7% | 48068 | 42526 | 1,130 |
+| só neve | 98,1% | 94,1% | 48712 | 43247 | 1,126 |
+| só o reparo pago em Vale Verde | 98,0% | 95,6% | 53347 | 51605 | 1,034 |
+| só o reparo pago em Costa Azul | 90,2% | 87,3% | 56479 | 55053 | 1,026 |
+| só o reparo pago em Aurora Global | 90,6% | 89,2% | 87441 | 85788 | 1,019 |
+| manutenção sem falhas em Vale Verde | 98,6% | 98,4% | 54254 | 53556 | 1,013 |
+| manutenção sem falhas em Costa Azul | 91,6% | 90,4% | 57823 | 56241 | 1,028 |
+| manutenção sem falhas em Aurora Global | 91,7% | 91,4% | 89865 | 86927 | 1,034 |
+
+As linhas de manutenção mostram quanto as falhas acrescentam: sem elas, cuidar do avião rende de 1,013 a 1,034 em 1 ano. No fim do jogo a oficina resolve quase tudo.
+
+Portão da Fase C com tudo ligado (200 sementes × 20 ondas): **1,159** (era 1,114).
+
+### Partida longa (200 sementes × 40 ondas, 2 h de jogo, desbloqueio normal)
+
+| perfil | embarque médio | receita | chega à Costa Azul | chega a Aurora |
+|---|---|---|---|---|
+| Bom | 92,5% | 98364 | onda 14,2 (200/200) | onda 22,2 (200/200) |
+| Lento | 77,3% | 52282 | onda 21,1 (200/200) | onda 29,6 (200/200) |
+| Parado | 66,3% | 27260 | onda 18,9 (200/200) | onda 31,5 (176/200) |
+
+### Prova de mutação (`python client/tools/mutacao.py`)
+
+As 12 travas novas entram no `mutacao.py`, que continua pegando as 22 das Fases C, C2 e C3. Resultado em 2026-11-01, sobre o código final: **34 de 34 mortos**.
+
+| trava retirada | testes que caíram |
+|---|---|
+| falha de avião só acima do aviso | 10, entre eles `Checagem_TiraDaFaixaDeRisco_EEvitaAFalha` |
+| uma falha por voo | 4, entre eles `Rejeicao_AbortaNaPista_BloqueiaPoucoTempo_ESaiDepois` |
+| reparo da pane só com Cash | `Invariante_C4_ReparoSoComCash_AnuncioNaoRepara` |
+| clima tem o aviso inteiro | 5, entre eles `Adianta_ValeParaOs5Climas_ForaDoAvisoNao` |
+| Cash não muda o clima | 4, entre eles `Determinismo_MesmaSemente_MesmosEventos_ComTodosOsEventosDaC4` |
+| anúncio não evita falha | `Invariante_C4_NadaPagoMudaOPerigo`, `Invariante_C4_ReparoSoComCash_AnuncioNaoRepara` |
+| pane não tira Cash | `Invariante_C4_VooPerdido_CustaSoAReceita_ComClimaEFalha` |
+| todo retorno pousa seguro | 5, entre eles `Determinismo_MesmaSemente_MesmosEventos_ComTodosOsEventosDaC4` |
+| retorno tem prioridade na pista | `Retorno_PassaNaFrenteDaPistaFechada` |
+| sem Cash a pane não trava o jogo | 3, entre eles `Pane_SeguraOEmbarque_ReparoPagoEmSegundos` |
+| com clima, a frente fria sai dos pesos | `Previsao_AcertaSempre_EAvisaAntes` |
+| atrasar custa o bônus | `Atrasa_ProPortaoDepoisDeReabrir_SemBonus` |
+
+A 1ª rodada deu 29 de 34 e mostrou duas falhas de teste. `Invariante_C2_Offline_NuncaPerdeVoo_NemAndaAsEstacoesNovas` media um instante sem ninguém em atendimento nas estações novas, e o teste do atraso não garantia que todos tinham embarcado. Os dois agora exigem esse estado antes de medir. Os outros 3 eram padrões vencidos no `mutacao.py`.
+
+### Para medir com gente
+
+- O bot adianta sempre, e adiantar não custa nada. Se todo mundo fizer isso, o aviso vira rotina e a decisão some. Vale medir se o jogador usa o atrasar e, se não usar, dar um custo pequeno ao adiantar.
+- Chance de 0,4 por voo acima do aviso é alta. O bot só chega lá quando ignora a checagem, mas gente pode não entender o aviso amarelo. O playtest precisa medir se a falha parece justa.
+- A inspeção de pane de 110 s perde o voo inteiro. Se a reclamação vier, baixe o tempo antes de mexer na chance.
+- Vale Verde tem clima em 1 de cada 4 ondas depois do marco 1. Medir se assusta quem está aprendendo.
+- O tom depende da tela: bombeiros e ambulância precisam parecer rotina de aeroporto, nunca desastre.
+
 ## 9. Fase C5: campanha principal (2026-11-01, `CONTRATO_FASE_C5.md`)
 
 Trinta objetivos, 10 por aeroporto, com a mesma tabela para o jogo e para o bot. **Guiado** é o Bom que joga pelo objetivo ativo. **Bom** é o mesmo bot, que nunca olha a campanha. A recompensa vale para os dois.
@@ -425,7 +554,7 @@ Sem cauda: entre a média e o p90 há cerca de 6 ondas no fim. Em tempo de jogo,
 
 ### Prova de mutação (`python client/tools/mutacao.py campanha`)
 
-As 16 travas novas entram no `mutacao.py`. Resultado em 2026-11-01: **16 de 16 mortos**. O script agora aceita um trecho do nome para rodar só parte da lista. Aqui rodei só as 16 novas, e conferi que os trechos das 34 antigas ainda existem no núcleo. Dois apontavam para um lugar que tinha mudado e um terceiro tinha o texto errado: corrigi os 3.
+As 16 travas novas entram no `mutacao.py`. Resultado em 2026-11-01: **16 de 16 mortos**. Rodei só as 16 novas. Das travas anteriores, conferi que todos os trechos ainda existem no núcleo, sem rodar de novo.
 
 | trava retirada | testes que caíram |
 |---|---|

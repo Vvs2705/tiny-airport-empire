@@ -517,6 +517,15 @@ Gerado por `client/tools/audio_gen.py` (Python 3.14.4, numpy 2.4.6, scipy 1.18.1
 | `Audio/musica/costa_azul.wav` | `client/tools/audio_gen.py` (numpy/scipy) | `0f4a82f4…b3d8` | `c0d8479b1f4566d27f04d77fade814a48bd23c719faba153db363141c86f94aa` | própria (sintetizado) |
 | `Audio/musica/aurora_global.wav` | `client/tools/audio_gen.py` (numpy/scipy) | `0f4a82f4…b3d8` | `62b5ef05d5bbb031e711fdb74be46716e25510229865cd38e41f9d7e355985d5` | própria (sintetizado) |
 
+## 3.2. Fontes (SIL OFL 1.1, sem crédito)
+
+Cópias do Dungeon Courier (`client/Assets/_DC/Resources/Fonts/`), sem download nesta rodada. As duas entram no build em `client/Assets/_TA/Resources/Fonts/`, com a licença ao lado. O nome de cada uma está em `docs/CREDITOS.md`.
+
+| Arquivo | Origem | Uso | SHA-256 | Licença |
+|---|---|---|---|---|
+| `LilitaOne-Regular.ttf` (28092 B; licença em `OFL-LilitaOne.txt`) | Google Fonts (github.com/google/fonts, `ofl/lilitaone`) | títulos, botões e números | `f5b641c45c69d772ee4eda687bc9fda411d5cad6b0b45371491da4580cbc8d59` | SIL OFL 1.1 |
+| `Nunito-ExtraBold.ttf` (132252 B; licença em `OFL-Nunito.txt`) | Google Fonts (`ofl/nunito/Nunito[wght].ttf`, 276932 B, SHA-256 `bb55a5ca5c2042335b3991af27c4d0705d0ef41cac6164ac737fd8f2a1e85207`), instância estática wght=800 pelo `fontTools.varLib.instancer` (a licença da Nunito não tem Nome de Fonte Reservado, então a instância pode manter o nome) | texto, rótulos do mundo e placas de chão | `82494be2918c50a4e52c2dd2e2bf351a26a4eb38093cdebd91190681bac37b83` | SIL OFL 1.1 |
+
 ## 4. Licenças e termos
 
 - **Tripo:** modelos e imagens gerados na conta paga da V-STACK, com "Privado" marcado antes de gerar. Só o plano pago permite uso comercial; o gratuito é "Non-Commercial Use". Termos: https://www.tripo3d.ai/terms (reler a versão vigente antes do lançamento). Zips, FBX e `.blend` ficam fora do repositório público por decisão do estúdio.

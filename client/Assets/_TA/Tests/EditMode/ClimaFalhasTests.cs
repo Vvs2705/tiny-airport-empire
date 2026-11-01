@@ -174,7 +174,7 @@ namespace TA.Tests
         {
             Sim s = Pronta(ComClima(TipoIncidente.FrenteFria));
             Incidente i = RotasIncidentesTests.AteOAviso(s);
-            Assert.AreEqual((TipoIncidente.FrenteFria, 30 * Sim.Hz, 60 * Sim.Hz), (i.Tipo, i.Inicio - s.Steps + 0, i.Fim - i.Inicio), "aviso de 30 s e pista fechada por 60 s");
+            Assert.AreEqual((TipoIncidente.FrenteFria, 30 * Sim.Hz, 60 * Sim.Hz), (i.Tipo, (int)(i.Inicio - s.Steps), (int)(i.Fim - i.Inicio)), "aviso de 30 s e pista fechada por 60 s");
             RotasIncidentesTests.Ate(s, i.Inicio + 1);
             Assert.AreEqual((true, false), (s.PistaFechada, s.PatioParado));
             Tuning semClima = RotasIncidentesTests.Com(TipoIncidente.FrenteFria);
@@ -271,6 +271,7 @@ namespace TA.Tests
         public void Atrasa_ProPortaoDepoisDeReabrir_SemBonus()
         {
             Tuning t = ComClima(TipoIncidente.FrenteFria);
+            t.PaxFixo = 2;  // todo mundo embarca: o que tira o bonus e' o atraso, nao quem ficou
             Sim s = Pronta(t);
             Incidente i;
             do { RotasIncidentesTests.Ate(s, s.Steps + s.OndaPassos); i = RotasIncidentesTests.AteOAviso(s); } while (i.Vaga != 0);
@@ -283,6 +284,7 @@ namespace TA.Tests
             Assert.IsFalse(s.Adianta(), "uma saida por clima");
             var ev = RegrasTests.Coleta(s, 120f);
             Assert.AreEqual(1, ev.Count(e => e.Tipo == Ev.VooPartiu && e.A == v.Id), "fecha no novo horario");
+            Assert.AreEqual(0, v.Perdidos);
             Assert.AreEqual(0, ev.Count(e => e.Tipo == Ev.Bonus && e.A == v.Id), "atrasar custa o bonus");
         }
 
