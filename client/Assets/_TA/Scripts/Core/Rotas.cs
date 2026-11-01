@@ -77,7 +77,7 @@ namespace TA.Core
     }
 
     /// <summary>As tabelas do contrato. Numeros sao hipotese: o bot mede e o docs/BALANCE.md §7 registra.</summary>
-    public static class Tabelas
+    public static partial class Tabelas
     {
         public static readonly Aeroporto[] Aeroportos =
         {

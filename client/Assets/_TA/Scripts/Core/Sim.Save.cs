@@ -46,6 +46,7 @@ namespace TA.Core
             SalvaFaseC(sb);
             SalvaFaseC3(sb);
             SalvaFaseC4(sb);
+            SalvaCampanha(sb);
             return SaveEnvelope.Wrap(sb.ToString(), content, nowUnix);
         }
 
@@ -102,6 +103,25 @@ namespace TA.Core
                     sb.Append("falha.").Append(a.Id).Append('=').Append(a.Pane ? 1 : 0).Append(',').Append(a.Falhou).Append(',').Append(a.SaiEm.ToString(Ci))
                       .Append(',').Append(a.Retorno.ToString(Ci)).Append('\n');
             if (PistaAte > Steps) Kv(sb, "pista", PistaAte);
+        }
+
+        /// <summary>Schema 6 (CONTRATO_FASE_C5 §5): por aeroporto, os objetivos feitos e o contador de cada um.</summary>
+        void SalvaCampanha(StringBuilder sb)
+        {
+            for (int a = 0; a < _feitos.Length; a++)
+                sb.Append("camp.").Append(a).Append('=').Append(_feitos[a]).Append(',').Append(string.Join(",", _conta[a])).Append('\n');
+        }
+
+        /// <summary>Le o schema 6, com tudo limitado. O schema 5 nao tem a chave: nada feito, e o que o estado ja prova conclui nos primeiros passos.</summary>
+        void CarregaCampanha(Dictionary<string, string> kv)
+        {
+            for (int a = 0; a < _feitos.Length; a++)
+            {
+                int[] c = Ints(kv, "camp." + a);
+                if (c.Length == 0) continue;
+                _feitos[a] = Math.Max(0, Math.Min(T.Objetivos[a].Length, c[0]));
+                for (int i = 0; i < _conta[a].Length && i + 1 < c.Length; i++) _conta[a][i] = Math.Max(0, Math.Min(T.Objetivos[a][i].Alvo, c[i + 1]));
+            }
         }
 
         /// <summary>Le o schema 5 depois dos avioes, com tudo limitado. O schema 4 nao tem estas chaves: nada em andamento.</summary>
@@ -298,6 +318,7 @@ namespace TA.Core
                 if (p.Key.StartsWith("ad.", StringComparison.Ordinal)) s.Anuncios.Load(p.Key.Substring(3), p.Value);
             s.CarregaFaseC(kv, r.Schema);
             s.CarregaFaseC4(kv);
+            s.CarregaCampanha(kv);
             return s;
         }
 
