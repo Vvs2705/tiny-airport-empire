@@ -105,8 +105,9 @@ PECAS = {
     "arbusto": (800, 256, 0.4),
     "canteiro_flores": (800, 256, 0.6),
     "arco_entrada": (1500, 512, 1.0),
-    "cordao_fila": (800, 256, 1.0),
+    # a sala de espera do portao
     "catraca_embarque": (1200, 512, 0.7),
+    "cordao_fila": (800, 256, 1.0),
 }
 
 

@@ -10,7 +10,10 @@ namespace TA
     /// Patio vivo (GDD §5.12 e §5.13): a tela segue o nucleo (sim.Avioes) e nada aqui muda regra.
     ///  - 2 avioes, 1 por voo da onda (0 = o regional, 1 = o jato), cada um no seu estande: G (ponte de embarque) e R (remoto). O pouso comeca
     ///    PousoSeg antes da hora do nucleo (Aviao.Chega) e encosta quando ele encosta; Ev.Decolou solta o pushback (com o rebocador preso no
-    ///    nariz no G), o taxi, a corrida e a decolagem; o hangar leva o aviao pela taxiway e o traz de volta antes de o nucleo liberar.
+    ///    nariz no G), o taxi, a corrida e a decolagem; o hangar leva o aviao pela taxiway ate a frente da porta (a porta da malha e menor que a
+    ///    envergadura: ele para no patio do hangar) e o traz de volta antes de o nucleo liberar.
+    ///  - Cruzamentos medidos com -diag e client/tools/diag_caixas.py: a taxiway passa atras das caudas e longe da pista com a asa inteira, e um
+    ///    aviao da a vez ao outro na ligacao, na pista e no hangar (OutroPerto, PousoNaPista, HangarOcupado, Freia). Esperar custa so tempo de tela.
     ///  - Os veiculos estao em Mundo.Veiculos.cs.
     ///  - Em cima do aviao: o icone do servico que falta com o anel de progresso (GDD §5.12), e o aviso de desgaste a partir de 80%.
     ///  - Movimento sem patinar (medido com -diag e client/tools/diag_patio.py): o pivo de cada peca e o eixo traseiro (o trem principal
@@ -22,19 +25,23 @@ namespace TA
     public sealed partial class Mundo
     {
         // pista ao norte (pousa e decola para leste), taxiway e estandes de nariz para o terminal (para -z)
-        const float PistaZ = 25f, TaxiZ = 21f, NarizZ = 11.2f, RaioAviao = 3.4f, RaioVeic = 1.5f;
+        // da taxiway a pista cabe a ponta da asa do jato mais o motor do regional: um passa ao lado do outro
+        const float PistaZ = 32.6f, TaxiZ = 25.7f, NarizZ = 11.2f, RaioAviao = 3.4f, RaioVeic = 1.5f;
         const float LatAviao = 0.5f, LatVeic = 0.8f;   // aceleracao lateral maxima (m/s2): limita a velocidade na curva
         static readonly float[] EstandeX = { 11.4f, 22.5f };
+        /// <summary>Linha do nariz em cada estande: o R recua 1,6 m para as duas ruas e os veiculos caberem entre o terminal e a asa baixa do jato.</summary>
+        static readonly float[] NarizEm = { NarizZ, 12.8f };
         static readonly string[] AviaoMalha = { "aviao_regional", "aviao_narrow" };
         /// <summary>s do pouso ate parar no estande e da saida do hangar ate o estande (medidos com -diag): a tela comeca esse tempo antes do nucleo.</summary>
-        static readonly float[] PousoSeg = { 24.4f, 19f };
-        const float VoltaHangarSeg = 20f;
-        /// <summary>Hangar no fim da taxiway, com a porta para oeste (a vista da camera): o aviao entra reto, de nariz; sai de re, com a cauda
-        /// na ligacao leste da pista, e segue de frente: nenhum giro no lugar.</summary>
-        static readonly Vector3 HangarEm = new Vector3(36.4f, 0f, TaxiZ);
-        const float HangarYaw = 90f, HangarEscala = 1.1f, LigacaoX = 26f;
-        /// <summary>Rebocador: vaga (de frente para oeste, na beira do patio) e o ponto em que a barra encosta no nariz do aviao da ponte.</summary>
-        static readonly Vector3 ReboqueVaga = new Vector3(14.6f, 0f, 8.5f), ReboqueNariz = new Vector3(11.4f, 0f, NarizZ - 0.8f);
+        static readonly float[] PousoSeg = { 28.4f, 19.4f };
+        const float VoltaHangarSeg = 30f;
+        /// <summary>Hangar no fim da taxiway, com a porta para oeste (a vista da camera; a boca da malha fica em +z, dai o yaw). O aviao para de nariz
+        /// na frente da porta (HangarVaga), com a cauda fora do alcance de quem usa a ligacao; sai de re ate a ligacao leste e segue de frente: nenhum
+        /// giro no lugar. A ligacao fica na linha do estande R: o jato desce reto.</summary>
+        static readonly Vector3 HangarEm = new Vector3(43f, 0f, TaxiZ);
+        const float HangarYaw = -90f, HangarEscala = 1.5f, HangarFrente = 38.2f, LigacaoX = 22.5f;
+        /// <summary>Rebocador: vaga (na boca do estande G, de cauda para o nariz) e o ponto em que a barra encosta no nariz do aviao da ponte.</summary>
+        static readonly Vector3 ReboqueVaga = new Vector3(11.4f, 0f, 9.75f), ReboqueNariz = new Vector3(11.4f, 0f, NarizZ - 0.5f);
         enum Reboque { Vago, Indo, Pronto, Preso, Voltando }
 
         /// <summary>Trecho de trajeto: pontos densos, comprimento acumulado e curvatura em cada ponto; V = cruzeiro, A e F = aceleracao e
@@ -72,10 +79,10 @@ namespace TA
 
         void Patio3D()
         {
-            Chao("Patio", new Vector3(25.85f, -0.06f, 13.95f), new Vector2(40.2f, 11.5f), Asfalto);
+            Chao("Patio", new Vector3(28.65f, -0.06f, 17.45f), new Vector2(45.8f, 19.1f), Asfalto);
             Chao("Taxiway", new Vector3(14f, -0.055f, TaxiZ), new Vector2(46f, 2.6f), Asfalto);
             Chao("Pista", new Vector3(10f, -0.05f, PistaZ), new Vector2(46f, 3.8f), Art.Hex(0x4A4F5B));
-            foreach (float x in new[] { -6f, 26f }) Chao("Ligacao", new Vector3(x, -0.055f, (TaxiZ + PistaZ) * 0.5f), new Vector2(2.6f, PistaZ - TaxiZ), Asfalto);
+            foreach (float x in new[] { -6f, LigacaoX }) Chao("Ligacao", new Vector3(x, -0.055f, (TaxiZ + PistaZ) * 0.5f), new Vector2(2.6f, PistaZ - TaxiZ), Asfalto);
             for (int i = 0; i < 14; i++) Chao("FaixaPista", new Vector3(-12f + i * 3.2f, -0.04f, PistaZ), new Vector2(1.6f, 0.14f), Art.Hex(0xF4F1E8));
             for (int i = 0; i < 6; i++)
             {
@@ -237,20 +244,31 @@ namespace TA
             malha.localRotation = Quaternion.Euler(pitch, 0f, roll) * basal;
         }
 
-        static float ZEstande(Aviao a) => NarizZ + a.Nariz;
+        static float ZEstande(Aviao a) => NarizEm[a.Id] + a.Nariz;
 
-        /// <summary>Pouso de oeste para leste (planeio, arredondamento e toque), rolagem freando, saida pela ligacao leste e taxi ate o estande
-        /// dele, de nariz para o terminal.</summary>
+        /// <summary>x do pivo de quem espera na frente da porta do hangar, com o nariz a 0,6 m da fachada.</summary>
+        static float HangarVaga(Aviao a) => HangarFrente - 0.6f - a.Nariz;
+
+        /// <summary>Taxi a partir de `p`, na ligacao, ate o estande dele, de nariz para o terminal: o jato desce reto, o regional segue a taxiway.</summary>
+        static Trecho TaxiEstande(Aviao a, params Vector3[] p)
+        {
+            float x = EstandeX[a.Id];
+            var q = new List<Vector3>(p);
+            if (x != LigacaoX) { q.Add(V(LigacaoX, TaxiZ)); q.Add(V(x, TaxiZ)); }
+            q.Add(V(x, ZEstande(a)));
+            Trecho t = Caminho(RaioAviao, 2.6f, q.ToArray());
+            t.A = 0.4f; t.F = 0.6f; t.Para = true;
+            return t;
+        }
+
+        /// <summary>Pouso de oeste para leste (planeio, arredondamento e toque), rolagem freando, saida pela ligacao leste e taxi ate o estande.</summary>
         void Pousa(Aviao a)
         {
-            float x = EstandeX[a.Id], z = ZEstande(a);
-            Trecho ar = Caminho(0f, 10f, V(-34f, PistaZ, 9f), V(-16f, PistaZ, 3.4f), V(-8f, PistaZ, 1.0f), V(-4f, PistaZ, 0.22f), V(0f, PistaZ));
-            Trecho rola = Caminho(0f, 2.6f, V(0f, PistaZ), V(21f, PistaZ));
+            Trecho ar = Caminho(0f, 10f, V(-40f, PistaZ, 9f), V(-22f, PistaZ, 3.4f), V(-14f, PistaZ, 1.0f), V(-10f, PistaZ, 0.22f), V(-6f, PistaZ));
+            Trecho rola = Caminho(0f, 2.6f, V(-6f, PistaZ), V(LigacaoX - 5f, PistaZ));
             rola.F = 2.2f; rola.Sai = 1.3f;   // o reverso segura: sai da rolagem na velocidade da curva da ligacao
-            Trecho taxi = Caminho(RaioAviao, 2.6f, V(21f, PistaZ), V(26f, PistaZ), V(26f, TaxiZ), V(x, TaxiZ), V(x, z));
-            taxi.A = 0.4f; taxi.F = 0.6f; taxi.Para = true;
             a.V = 10f; a.QuerPartir = false;
-            a.Trechos.Enqueue(ar); a.Trechos.Enqueue(rola); a.Trechos.Enqueue(taxi);
+            a.Trechos.Enqueue(ar); a.Trechos.Enqueue(rola); a.Trechos.Enqueue(TaxiEstande(a, V(LigacaoX - 5f, PistaZ), V(LigacaoX, PistaZ)));
         }
 
         /// <summary>Recuo de re, com a cauda virando para `lado` (+1 = leste, o nariz fica para oeste), parado na taxiway para o rebocador sair.</summary>
@@ -269,20 +287,20 @@ namespace TA
             Trecho taxi = Caminho(RaioAviao, 2.6f, V(x + 3f, TaxiZ), V(-6f, TaxiZ), V(-6f, PistaZ), V(-2f, PistaZ));
             taxi.A = 0.4f; taxi.F = 0.6f;
             a.Trechos.Enqueue(taxi);
-            Trecho corre = Caminho(0f, 14f, V(-2f, PistaZ), V(16f, PistaZ));
+            Trecho corre = Caminho(0f, 14f, V(-2f, PistaZ), V(12f, PistaZ));
             corre.A = 1.7f;
             a.Trechos.Enqueue(corre);
-            Trecho sobe = Caminho(0f, 16f, V(16f, PistaZ), V(30f, PistaZ, 2.2f), V(46f, PistaZ, 9f));
+            Trecho sobe = Caminho(0f, 16f, V(12f, PistaZ), V(22f, PistaZ, 2.4f), V(36f, PistaZ, 8f), V(52f, PistaZ, 14f));   // passa por cima do hangar
             sobe.A = 1f;
             a.Trechos.Enqueue(sobe);
         }
 
-        /// <summary>Do estande ao hangar: recua com o nariz para leste e segue reto pela taxiway ate dentro da porta.</summary>
+        /// <summary>Do estande ao hangar: recua com o nariz para leste e segue reto pela taxiway ate a frente da porta.</summary>
         void ParaHangar(Aviao a)
         {
             float x = EstandeX[a.Id];
             a.Trechos.Enqueue(Recuo(x, ZEstande(a), a.Id == 0, -1f));
-            Trecho taxi = Caminho(RaioAviao, 2.6f, V(x - 3f, TaxiZ), V(HangarEm.x, TaxiZ));
+            Trecho taxi = Caminho(RaioAviao, 2.6f, V(x - 3f, TaxiZ), V(HangarVaga(a), TaxiZ));
             taxi.A = 0.4f; taxi.F = 0.6f; taxi.Para = true;
             a.Trechos.Enqueue(taxi);
         }
@@ -290,13 +308,10 @@ namespace TA
         /// <summary>Do hangar ao estande: sai de re ate a cauda entrar na ligacao, desce de frente e taxia para oeste ate o estande.</summary>
         void DoHangar(Aviao a)
         {
-            float x = EstandeX[a.Id];
-            Trecho re = Caminho(3f, 1.2f, V(HangarEm.x, TaxiZ), V(LigacaoX, TaxiZ), V(LigacaoX, TaxiZ + 3.4f));
+            Trecho re = Caminho(3f, 1.2f, V(HangarVaga(a), TaxiZ), V(LigacaoX, TaxiZ), V(LigacaoX, TaxiZ + 3.4f));
             re.Re = re.Para = true; re.A = 0.3f; re.F = 0.4f;
             a.Trechos.Enqueue(re);
-            Trecho taxi = Caminho(RaioAviao, 2.6f, V(LigacaoX, TaxiZ + 3.4f), V(LigacaoX, TaxiZ), V(x, TaxiZ), V(x, ZEstande(a)));
-            taxi.A = 0.4f; taxi.F = 0.6f; taxi.Para = true;
-            a.Trechos.Enqueue(taxi);
+            a.Trechos.Enqueue(TaxiEstande(a, V(LigacaoX, TaxiZ + 3.4f)));
         }
 
         // ------------------------------------------------------------------ quadro a quadro
@@ -306,6 +321,7 @@ namespace TA
             for (int k = 0; k < _avioes.Length; k++) AviaoPasso(_avioes[k], s.Avioes[k], s, dt);
             ServicosPasso(s);
             for (int i = 0; i < _veiculos.Count; i++) VeiculoPasso(_veiculos[i], dt);
+            _naFaixa.Clear();
             DiagPasso(dt);
         }
 
@@ -319,17 +335,19 @@ namespace TA
             switch (a.Fase)
             {
                 case Fase.Fora:
-                    if (c.NoPatio) { NoEstande(a); a.Fase = Fase.NoPatio; }
-                    else if (c.Hangar > 0) { a.T.SetPositionAndRotation(HangarEm, Quaternion.Euler(0f, 90f, 0f)); a.Fase = Fase.Hangar; }
+                    if (c.NoPatio || (c.Hangar > 0 && HangarOcupado(a))) { NoEstande(a); a.Fase = Fase.NoPatio; }
+                    else if (c.Hangar > 0) { a.T.SetPositionAndRotation(V(HangarVaga(a), TaxiZ), Quaternion.Euler(0f, 90f, 0f)); a.Fase = Fase.Hangar; }
                     else if (c.Chega >= 0 && (c.Chega - s.Steps) * Sim.Step <= PousoSeg[a.Id]) { Pousa(a); a.Fase = Fase.Chegando; a.S = 0f; }
                     break;
                 case Fase.Hangar:
-                    if (c.NoPatio || hangar <= VoltaHangarSeg) { DoHangar(a); a.Fase = Fase.Chegando; a.S = 0f; a.V = 0f; }
+                    if ((c.NoPatio || hangar <= VoltaHangarSeg) && !OutroPerto(a, LigacaoX)) { DoHangar(a); a.Fase = Fase.Chegando; a.S = 0f; a.V = 0f; }
                     break;
                 case Fase.NoPatio:
-                    bool revisa = hangar > VoltaHangarSeg;
+                    bool revisa = hangar > VoltaHangarSeg && !HangarOcupado(a) && !PousoNaPista(a, s);
                     if (!revisa && !a.QuerPartir) break;
+                    if (GenteNoTrilho(a.Id)) return;   // o ultimo do trilho entra antes
                     foreach (Veiculo v in _veiculos) if (v.Aviao == a.Id) return;   // quem esta encostado sai antes
+                    if (OutroPerto(a, EstandeX[a.Id])) break;
                     if (a.Id != 0 || _reboque == Reboque.Pronto)
                     {
                         if (a.Id == 0) _reboque = Reboque.Preso;
@@ -361,7 +379,7 @@ namespace TA
                 else if (a.Trechos.Count > 0)
                 {
                     Trecho t = a.Trechos.Peek();
-                    a.V = Passo(a.V, t, a.S, Freia(a, t) ? 0f : t.V, t.Para || t.Sai >= 0f ? t.Total - a.S : 1e4f, LatAviao, dt);
+                    a.V = Passo(a.V, t, a.S, Freia(a, t, s) ? 0f : t.V, t.Para || t.Sai >= 0f ? t.Total - a.S : 1e4f, LatAviao, dt);
                     a.S += a.V * Mathf.Max(0f, dt);
                     Pose(a.T, t, a.S);
                     Vector3 d = Tangente(t, a.S);
@@ -391,10 +409,38 @@ namespace TA
             Selos(a, c, s, visivel);
         }
 
-        /// <summary>Outro aviao na frente, no chao e no mesmo sentido: um atraso do nucleo pode junta-los na taxiway; quem vem atras espera.</summary>
-        bool Freia(Aviao a, Trecho t)
+        /// <summary>A frente da porta do hangar cabe um aviao: o segundo faz a revisao no estande (o selo mostra a chave do mesmo jeito).</summary>
+        bool HangarOcupado(Aviao a)
+        {
+            Fase f = _avioes[1 - a.Id].Fase;
+            return f == Fase.Hangar || f == Fase.IndoHangar;
+        }
+
+        /// <summary>O outro aviao anda no chao, fora da pista, perto do x (no caminho do hangar, em toda a taxiway): quem vai recuar ou descer a
+        /// ligacao espera ele passar.</summary>
+        bool OutroPerto(Aviao a, float x)
+        {
+            Aviao o = _avioes[1 - a.Id];
+            Vector3 p = o.T.position;
+            return (o.Fase == Fase.Chegando || o.Fase == Fase.Saindo || o.Fase == Fase.IndoHangar) && p.y < 0.5f && p.z < PistaZ - 2.5f
+                && Mathf.Abs(p.x - x) < (o.Fase == Fase.IndoHangar || (o.Fase == Fase.Chegando && p.x > LigacaoX) ? 20f : 8.5f);
+        }
+
+        /// <summary>O outro aviao esta pousando, na pista ou chega em instantes (o tempo de quem sai cruzar a pista e decolar).</summary>
+        bool PousoNaPista(Aviao a, Sim s)
+        {
+            Aviao o = _avioes[1 - a.Id];
+            TA.Core.Aviao c = s.Avioes[o.Id];
+            return o.Fase == Fase.Chegando ? o.T.position.z > TaxiZ + 3f : o.Fase == Fase.Fora && c.Chega >= 0 && (c.Chega - s.Steps) * Sim.Step <= PousoSeg[o.Id] + 12f;
+        }
+
+        /// <summary>Vez no chao: quem pousou espera na pista o outro sair da ligacao, quem vai decolar espera na taxiway a pista ficar livre, e no
+        /// mesmo sentido quem vem atras espera (um atraso do nucleo pode junta-los na taxiway).</summary>
+        bool Freia(Aviao a, Trecho t, Sim s)
         {
             if (t.V > 2.7f || t.Re) return false;
+            if (a.Fase == Fase.Chegando && a.T.position.z > PistaZ - 1f && OutroPerto(a, LigacaoX)) return true;
+            if (a.Fase == Fase.Saindo && a.T.position.x < 3f && a.T.position.z < TaxiZ + 0.5f && PousoNaPista(a, s)) return true;
             foreach (Aviao o in _avioes)
             {
                 if (o == a || !o.T.gameObject.activeSelf || o.T.position.y > 0.5f) continue;
@@ -423,7 +469,7 @@ namespace TA
                         frac = 1f - c.Falta[sv] / (float)s.ServicoPassos((Servico)sv);
                         if (c.Fazendo[sv]) break;
                     }
-            Vector3 ps = (a.Fase == Fase.Hangar ? HangarEm : a.T.position) + Vector3.up * (a.Fase == Fase.Hangar ? 6.4f : 4.4f);
+            Vector3 ps = a.T.position + Vector3.up * 4.4f;
             Quaternion q = _cam.transform.rotation;
             int ordem = Ordem(ps) + 9;
             a.Selo.enabled = parado;
@@ -463,7 +509,7 @@ namespace TA
             foreach (Aviao a in _avioes)
             {
                 if (!a.Selo.enabled) continue;
-                Vector3 p = a.Fase == Fase.Hangar ? HangarEm : a.T.position;
+                Vector3 p = a.T.position;
                 if (Vector2.Distance(Tela(a.Selo.transform.position), tela) <= r || (Mathf.Abs(c.x - p.x) < 1.8f && Mathf.Abs(c.y - p.z) < a.Nariz)) return a.Id;
             }
             return -1;
@@ -474,7 +520,7 @@ namespace TA
         public void Diag(string arq)
         {
             _diag = new System.IO.StreamWriter(arq) { AutoFlush = false };
-            _diag.WriteLine("t,peca,x,y,z,yaw");
+            _diag.WriteLine("t,peca,x,y,z,yaw,sx,sy,sz");
             var inv = System.Globalization.CultureInfo.InvariantCulture;
             for (int e = 0; e < Salas.Length; e++)
                 for (int i = 0; i < 4; i++)
@@ -483,6 +529,51 @@ namespace TA
                         Vector2 b = e == (int)Estacao.Seguranca ? Em(e, SegMaquinaD, SegA[i] + BeltX) : Balcao(e, i);
                         _diag.WriteLine(string.Format(inv, "0,balcao#{0}.{1},{2:0.000},0,{3:0.000},0", e, i, b.x, b.y));
                     }
+            for (int i = 0; i < _cadeiras.Count; i++) _diag.WriteLine(string.Format(inv, "0,cadeira#{0},{1:0.000},0,{2:0.000},0", i, _cadeiras[i].x, _cadeiras[i].y));
+            DiagCaixas(inv);
+        }
+
+        /// <summary>As caixas do client/tools/diag_caixas.py: a medida de cada peca que anda (movel#, com o centro relativo ao pivo em yaw 0) e cada
+        /// peca parada do cenario (fixa#, com o centro no mundo). Le a malha, nao o Renderer: predio de outro nivel e sala fechada estao desligados.</summary>
+        void DiagCaixas(System.IFormatProvider inv)
+        {
+            var anda = new List<Transform>();
+            foreach (Aviao a in _avioes) anda.Add(a.T);
+            foreach (Veiculo v in _veiculos) anda.Add(v.T);
+            foreach (Transform t in anda)
+            {
+                Bounds b = Caixa(t);
+                _diag.WriteLine(string.Format(inv, "0,movel#{0},{1:0.000},{2:0.000},{3:0.000},0,{4:0.000},{5:0.000},{6:0.000}", t.name, b.center.x, b.min.y, b.center.z, b.size.x, b.size.y, b.size.z));
+            }
+            var vistas = new HashSet<Transform>();
+            foreach (MeshFilter f in _raiz.GetComponentsInChildren<MeshFilter>(true))
+            {
+                Transform t = f.name == "malha" ? f.transform.parent : f.transform;
+                if (t.name.StartsWith("Sombra") || !vistas.Add(t) || anda.Exists(m => t.IsChildOf(m))) continue;
+                Bounds b = Caixa(t);
+                if (b.max.y + t.position.y < 0.1f) continue;   // pista, faixa, piso: sem altura, ninguem atravessa
+                Vector3 c = t.position + Quaternion.Euler(0f, t.eulerAngles.y, 0f) * b.center;
+                _diag.WriteLine(string.Format(inv, "0,fixa#{0},{1:0.000},{2:0.000},{3:0.000},{4:0.00},{5:0.000},{6:0.000},{7:0.000}", t.name, c.x, b.min.y + t.position.y, c.z, t.eulerAngles.y, b.size.x, b.size.y, b.size.z));
+            }
+        }
+
+        /// <summary>Caixa do objeto em yaw 0, relativa ao pivo, pelos limites das malhas.</summary>
+        static Bounds Caixa(Transform t)
+        {
+            Quaternion q = Quaternion.Euler(0f, -t.eulerAngles.y, 0f);
+            var b = new Bounds();
+            bool um = false;
+            foreach (MeshFilter f in t.GetComponentsInChildren<MeshFilter>(true))
+            {
+                Bounds m = f.sharedMesh.bounds;
+                for (int i = 0; i < 8; i++)
+                {
+                    Vector3 c = m.center + Vector3.Scale(m.extents, new Vector3((i & 1) * 2 - 1, (i >> 1 & 1) * 2 - 1, (i >> 2 & 1) * 2 - 1));
+                    Vector3 p = q * (f.transform.TransformPoint(c) - t.position);
+                    if (um) b.Encapsulate(p); else { b = new Bounds(p, Vector3.zero); um = true; }
+                }
+            }
+            return b;
         }
 
         public void DiagFim() { _diag?.Dispose(); _diag = null; }
@@ -499,6 +590,10 @@ namespace TA
             for (int i = 0; i < _veiculos.Count; i++) DiagLinha(inv, _veiculos[i].T.name + "#" + i, _veiculos[i].T);
             foreach (KeyValuePair<int, Boneco> kv in _pax) DiagBoneco(inv, "pax#" + kv.Key, kv.Value);
             for (int k = 0; k < S.Staff.Count; k++) DiagBoneco(inv, "func#" + k, _func[k]);
+            for (int i = 0; i < _equipe.Count; i++) DiagBoneco(inv, "equipe#" + i, _equipe[i]);
+            for (int i = 0; i < _patio.Count; i++) DiagBoneco(inv, "ator#" + i, _patio[i].B);
+            for (int i = 0; i < _andantes.Count; i++) DiagBoneco(inv, "trip#" + i, _andantes[i].B);
+            DiagBoneco(inv, "mec#0", _mecanico);
         }
 
         /// <summary>Pessoa no -diag (client/tools/diag_pessoas.py): y = 1 andando; yaw = o rumo da folha, que e sempre um eixo do mundo.</summary>

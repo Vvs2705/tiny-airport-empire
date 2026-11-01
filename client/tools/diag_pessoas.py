@@ -8,6 +8,7 @@ Pessoas (pax#id e func#k; a coluna y = 1 com o boneco andando, a coluna yaw = o 
   vMax      velocidade maxima (m/s)
   pe%       amostras andando fora de 0,19 a 1,65 m/s: a cadencia da folha satura e o pe desliza (PassoNatural 0,55 m/s, Pinta)
   balcao%   amostras andando a menos de 0,2 m do centro de um balcao (balcao#e.i, gravado no comeco): atravessou
+  cadeira%  amostras andando dentro da caixa de uma cadeira do portao (cadeira#i, gravado no comeco; as fileiras correm em z)
   choque    pessoa andando a menos de 0,08 m de outra, por minuto de pessoa andando
 Veiculos: sobrepos = amostras com 2 veiculos com as caixas (comprimento x largura da malha) sobrepostas, parados ou nao; o rebocador
 preso ao aviao nao conta. Criterio do Vinicius (30/10): nenhuma sobreposicao; sem andar de lado, sem atravessar, sem teletransporte.
@@ -27,6 +28,9 @@ CAIXA = {
     "onibus_patio": (3.2, 1.47, 0.9),
     "rebocador": (1.5, 0.76, 0.35),
 }
+
+
+CADEIRA = (0.1, 0.4)  # meia profundidade em x, meia largura em z
 
 
 def ang(a):
@@ -55,7 +59,7 @@ def separa(a, b):
     return False
 
 
-def pessoas(linhas, balcoes):
+def pessoas(linhas, balcoes, cadeiras=()):
     serie = defaultdict(list)
     por_t = defaultdict(list)
     for r in linhas:
@@ -79,7 +83,7 @@ def pessoas(linhas, balcoes):
             if v > 6.0:
                 tot["tele"] += 1
                 continue
-            if v < 0.2:
+            if v < 0.2 or b[3] < 0.5:  # parado, ou sentando: a pose vem da View, nao do andar
                 continue
             tot["n"] += 1
             tot["dist"] += d
@@ -94,6 +98,8 @@ def pessoas(linhas, balcoes):
                 tot["pe"] += 1
             if any(math.hypot(b[1] - q[0], b[2] - q[1]) < 0.2 for q in balcoes):
                 tot["balcao"] += 1
+            if any(abs(b[1] - q[0]) < CADEIRA[0] and abs(b[2] - q[1]) < CADEIRA[1] for q in cadeiras):
+                tot["cadeira"] += 1
     for t, gente in por_t.items():
         for i, g in enumerate(gente):
             if g[3] < 0.5:
@@ -106,7 +112,7 @@ def pessoas(linhas, balcoes):
     n = max(tot["n"], 1)
     print("PESSOAS amostras=%d dist=%.0f m" % (tot["n"], tot["dist"]))
     print(
-        "  lado%%=%.1f viradas=%.2f/10m tele=%d vMax=%.2f pe%%=%.1f balcao%%=%.1f choque=%.1f/min"
+        "  lado%%=%.1f viradas=%.2f/10m tele=%d vMax=%.2f pe%%=%.1f balcao%%=%.1f cadeira%%=%.1f choque=%.1f/min"
         % (
             100 * tot["lado"] / n,
             10 * tot["vira"] / max(tot["dist"], 1),
@@ -114,6 +120,7 @@ def pessoas(linhas, balcoes):
             tot["vmax"],
             100 * tot["pe"] / n,
             100 * tot["balcao"] / n,
+            100 * tot["cadeira"] / n,
             60 * tot["choque"] * 0.1 / max(tot["tempo"], 1),
         )
     )
@@ -154,17 +161,19 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("csv")
     a = ap.parse_args()
-    gente, carros, balcoes = [], [], []
+    gente, carros, balcoes, cadeiras = [], [], [], []
     with open(a.csv, newline="") as f:
         for r in csv.DictReader(f):
             nome = r["peca"].split("#")[0]
             if nome == "balcao":
                 balcoes.append((float(r["x"]), float(r["z"])))
+            elif nome == "cadeira":
+                cadeiras.append((float(r["x"]), float(r["z"])))
             elif nome in ("pax", "func"):
                 gente.append(r)
             elif nome in CAIXA:
                 carros.append(r)
-    pessoas(gente, balcoes)
+    pessoas(gente, balcoes, cadeiras)
     veiculos(carros)
 
 

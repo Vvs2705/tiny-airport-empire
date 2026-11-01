@@ -35,7 +35,7 @@ namespace TA
         /// escorregando 90 graus (medido em 30/10 com -diag; a frente de cada uma foi conferida na vista de cima e de ponta no Blender).</summary>
         static readonly Dictionary<string, float> Frente = new Dictionary<string, float>
         {
-            { "aviao_narrow", -90f }, { "rebocador", -90f }, { "carrinho_bagagem", -90f }, { "caminhao_combustivel", -90f }, { "caminhao_catering", -90f }, { "escada_embarque", 180f },
+            { "aviao_narrow", -90f }, { "rebocador", -90f }, { "carrinho_bagagem", -90f }, { "caminhao_combustivel", -90f }, { "caminhao_catering", -90f }, { "escada_embarque", 180f }, { "catraca_embarque", 90f },
         };
 
         /// <summary>Malha do Tripo (Resources/Malhas/nome.fbx + nome.png, pivo no chao, de frente para +z) num pai que gira em yaw; null se a
@@ -106,28 +106,20 @@ namespace TA
             Bloco("Saguao", PrimitiveType.Cube, new Vector3(6f, -0.08f, 4f), new Vector3(12.6f, 0.1f, 8.6f), Art.Hex(0xCFC7B5));
             Bloco("SaguaoLeste", PrimitiveType.Cube, new Vector3(16.1f, -0.08f, 6f), new Vector3(8f, 0.1f, 4.6f), Art.Hex(0xCFC7B5));
             for (int e = 0; e < Salas.Length; e++) Sala3D(e);
-            // ponte de embarque, da porta norte do portao ate a porta do aviao
-            Transform ponte = Peca("ponte_embarque", new Vector3(10f, 0f, 10.2f), 0f, 1.3f);
-            if (ponte == null)
-            {
-                Bloco("Ponte", PrimitiveType.Cube, new Vector3(10f, 0.04f, 10.05f), new Vector3(0.8f, 0.08f, 4.1f), Art.Hex(0x9AA6BC));
-                Bloco("PonteLadoE", PrimitiveType.Cube, new Vector3(9.58f, 0.3f, 10.05f), new Vector3(0.06f, 0.5f, 4.1f), Art.Hex(0x6E7A90));
-                Bloco("PonteLadoD", PrimitiveType.Cube, new Vector3(10.42f, 0.3f, 10.05f), new Vector3(0.06f, 0.5f, 4.1f), Art.Hex(0x6E7A90));
-            }
+            Ponte3D();
             // cenario (so com as malhas; sem elas o greybox da v0.1 nao tinha nada aqui)
             _terminal = Niveis("terminal_vale_verde", new Vector3(1.2f, 0f, 13.2f), 180f);
-            _torre = Niveis("torre_controle", new Vector3(26.5f, 0f, 6.5f), 225f);
+            _torre = Niveis("torre_controle", new Vector3(26.5f, 0f, 6.3f), 225f);
             _hangar = Niveis("hangar_manutencao", HangarEm, HangarYaw, HangarEscala);
+            if (_hangar[2] != null) _hangar[2].position += Vector3.left * 2.66f;   // a malha do nivel 3 e rasa: alinha a fachada com as outras
             Peca("oficina_mecanico", new Vector3(19f, 0f, 6.9f), 180f, 0.6f);
             Peca("sala_tripulacao", new Vector3(6.2f, 0f, 9.9f), 90f, 0.85f);
-            Peca("cadeiras_espera", new Vector3(-1.9f, 0f, 4.6f), 90f, 0.5f);
-            Peca("cadeiras_espera", new Vector3(-1.9f, 0f, -0.6f), 90f, 0.5f);
             foreach (Vector2 v in new[] { new Vector2(-0.5f, 4.5f), new Vector2(-0.5f, -0.5f), new Vector2(8.5f, -0.5f), new Vector2(12.5f, 3.5f) })
                 Peca("vaso_planta", V3(v), 0f, 0.7f);
-            // arvores so nas bordas (esquerda, direita e atras da pista): na frente das salas tampariam a fila
-            foreach (Vector2 v in new[] { new Vector2(-8f, 2f), new Vector2(-8.5f, 8f), new Vector2(-6f, 14.5f), new Vector2(15f, -2f), new Vector2(19f, 1f), new Vector2(0f, 27.5f), new Vector2(9f, 27.8f), new Vector2(18f, 27.5f) })
+            // arvores so nas bordas (esquerda, direita e atras da pista, fora do alcance da asa): na frente das salas tampariam a fila
+            foreach (Vector2 v in new[] { new Vector2(-8f, 2f), new Vector2(-8.5f, 8f), new Vector2(-6f, 14.5f), new Vector2(15f, -2f), new Vector2(19f, 1f), new Vector2(0f, 38.6f), new Vector2(9f, 39.1f), new Vector2(18f, 39.3f) })
                 Peca("arvore", V3(v), v.x * 37f);
-            foreach (Vector2 v in new[] { new Vector2(8.9f, 13.6f), new Vector2(45.4f, 8.4f) }) Peca("poste", V3(v), 45f, 0.75f);
+            foreach (Vector2 v in new[] { new Vector2(8.2f, 12.9f), new Vector2(46f, 7.2f) }) Peca("poste", V3(v), 45f, 0.75f);
             foreach (Vector2 v in new[] { new Vector2(7.3f, 15.6f) }) Peca("cone", V3(v), 0f, 0.7f);
             Peca("conteiner_bagagem", new Vector3(7f, 0f, 16.6f), 0f);
             Peca("conteiner_bagagem", new Vector3(8.3f, 0f, 16.6f), 0f);
@@ -186,7 +178,8 @@ namespace TA
                 _vazio[e, i] = Billboard("Vazio" + e + i, Art.Xis(), Art.A(Art.Off, 0.85f), 0.22f);
                 if (e == (int)Estacao.Seguranca) Seguranca3D(i);
             }
-            if (e != (int)Estacao.Manutencao && e != (int)Estacao.Despacho)   // oficina e despacho nao tem fila de passageiros
+            if (e == Portao) Espera3D();
+            else if (e != (int)Estacao.Manutencao && e != (int)Estacao.Despacho)   // oficina e despacho nao tem fila de passageiros
             {
                 // fitas da fila: postes nas pontas das fileiras
                 for (int r = 0; r < 5; r++)

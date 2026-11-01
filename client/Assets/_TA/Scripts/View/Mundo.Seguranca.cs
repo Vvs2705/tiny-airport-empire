@@ -20,7 +20,7 @@ namespace TA
         readonly Transform[] _bandeja = new Transform[4], _scanner = new Transform[4];
         readonly SpriteRenderer[] _malaSeg = new SpriteRenderer[4];
 
-        static float Posto(int e, int i) => e == (int)Estacao.Seguranca ? SegA[i] : Desloc[i];
+        static float Posto(int e, int i) => e == (int)Estacao.Seguranca ? SegA[i] : e == Portao ? PodioA[i] : Desloc[i];
 
         /// <summary>Pórtico, bandeja, mala e scanner de um posto (Sala3D). O raio-x é o balcão da estação.</summary>
         void Seguranca3D(int i)
