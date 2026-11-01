@@ -7,10 +7,11 @@ using UnityEngine.UI;
 namespace TA
 {
     /// <summary>
-    /// Tutorial guiado, passos 1-9 da Origem ("Onboarding"), no desenho do dc:Scripts/View/Tour.cs: veu com buraco no alvo, contorno
+    /// Tutorial guiado, passos 1-12 da Origem ("Onboarding"), no desenho do dc:Scripts/View/Tour.cs: veu com buraco no alvo, contorno
     /// dourado, seta e cartao com o que/quando/por que. Explicacao = o relogio do quadro para e so o ENTENDI anda; acao = so o alvo recebe o
     /// toque e o passo termina quando a acao acontece (lida do Sim). Um passo por vez, na ordem; passo cuja acao ja aconteceu e' pulado
-    /// sem aparecer (quem contratou antes nao ve "contrate"). Cada passo aparece uma vez (PlayerPrefs "ta_tour"; Pausa > Rever tutorial
+    /// sem aparecer (quem contratou antes nao ve "contrate"). Os passos 10-12 (historia, terminal que cresceu, cofre) sao de evento: nascem
+    /// quando o fato acontece, depois dos 9 primeiros, com 20 s de folga entre eles, e um que nao veio nao segura o seguinte. Cada passo aparece uma vez (PlayerPrefs "ta_tour"; Pausa > Rever tutorial
     /// zera). "Pular tutorial" sempre visivel. Desligado no -testsession e no -bot; -tutorial liga sem gravar; -tela passoN mostra o passo N.
     /// </summary>
     public sealed partial class Hud
@@ -19,10 +20,13 @@ namespace TA
         {
             public Func<bool> Quando, Feito;     // Feito null = explicacao (ENTENDI)
             public Func<Rect> Alvo;              // px de tela; null ou vazio = cartao no meio, sem buraco
-            public bool Arrastar, Fala;
+            public bool Arrastar, Fala, Evento;
         }
 
         public const string TourKey = "ta_tour";
+        /// <summary>Os passos 1-9 formam o tutorial (tutorial_completed); os 10-12 sao dicas de evento.</summary>
+        const int PassosGuiados = 9;
+        const float FolgaEventos = 20f;
         public bool TourLigado { get; set; }
         public bool TourGrava { get; set; }
         /// <summary>-bot com -tutorial: o ENTENDI se aperta sozinho em 2 s.</summary>
@@ -32,7 +36,8 @@ namespace TA
         readonly HashSet<int> _feitos = new HashSet<int>();
         int _atual = -1;
         float _tourT;
-        bool _tourComecou, _forcado;
+        bool _tourComecou, _forcado, _cofreVisto;
+        float _fimT = -99f;
         RectTransform _tour, _tourCard, _tourDedo;
         readonly Image[] _veu = new Image[4];
         Image _tourBorda, _tourSeta, _tourRetrato;
@@ -61,6 +66,9 @@ namespace TA
                 new Passo { Quando = () => true, Alvo = () => M.ZonaTela(Estacao.Seguranca) },
                 new Passo { Quando = () => s.St(Estacao.Seguranca).Vel > 0 || s.Cash >= s.Custo(Estacao.Seguranca, Melhoria.Velocidade), Alvo = () => NaTela(MelhoriasRt),
                             Feito = () => s.St(Estacao.Seguranca).Vel > 0 },
+                new Passo { Quando = () => LinhaDaHistoria(s) >= 0, Alvo = () => NaTela(LinhaRt(Math.Max(0, LinhaDaHistoria(s)))), Evento = true },
+                new Passo { Quando = () => s.Marco >= 1, Alvo = () => NaTela(TerminalRt), Evento = true },
+                new Passo { Quando = () => _cofreVisto, Alvo = () => NaTela(CashRt), Evento = true },
             };
             foreach (string id in PlayerPrefs.GetString(TourKey, "").Split(','))
                 if (int.TryParse(id, out int n)) _feitos.Add(n);
@@ -95,6 +103,18 @@ namespace TA
             _tour.gameObject.SetActive(false);
         }
 
+        /// <summary>Linha do quadro cujo voo tem o passageiro com historia no aeroporto (-1 = nenhuma). Sem ela, a foto do passo 10 cai na linha 0.</summary>
+        int LinhaDaHistoria(Sim s)
+        {
+            for (int f = 0; f < _linhas.Length; f++)
+                if (s.Voos[f] != null && HistoriaNoAeroporto(s, s.Voos[f])) return f;
+            return -1;
+        }
+
+        RectTransform LinhaRt(int f) => (RectTransform)_linhas[f].Voo.transform.parent;
+        RectTransform TerminalRt => _terminal.rectTransform;
+        RectTransform CashRt => _cash.rectTransform;
+
         static int QuemArrasta(Sim s)
         {
             foreach (Funcionario f in s.Staff) if (f.Em != Estacao.Seguranca) return f.Id;
@@ -107,6 +127,7 @@ namespace TA
             if (n < 1 || n > _passos.Length) return;
             TourLigado = true;
             _forcado = true;   // a foto mostra o passo mesmo que a acao ja tenha acontecido
+            _tourT = 0f;
             _atual = n - 1;
             _tour.gameObject.SetActive(true);
             _tour.SetAsLastSibling();
@@ -115,6 +136,7 @@ namespace TA
         void ReverTour()
         {
             _feitos.Clear();
+            _cofreVisto = false;
             if (TourGrava) { PlayerPrefs.DeleteKey(TourKey); PlayerPrefs.Save(); }
             TourLigado = true;
             _tourComecou = false;
@@ -140,7 +162,8 @@ namespace TA
             _tour.gameObject.SetActive(false);
             _atual = -1;
             _forcado = false;
-            if (n == _passos.Length) _g.Diario("tutorial_completed", 0);
+            _fimT = Time.unscaledTime;
+            if (n == PassosGuiados) _g.Diario("tutorial_completed", 0);
         }
 
         void Grava()
@@ -153,6 +176,7 @@ namespace TA
         void PintaTour()
         {
             if (!TourLigado || _passos == null) return;
+            if (_cofre.Rt.gameObject.activeSelf) _cofreVisto = true;   // o passo 12 nasce depois que o cofre fecha
             if (!TourAberto)
             {
                 if (ModalAberto || Arrastando) return;
@@ -161,7 +185,8 @@ namespace TA
                     if (_feitos.Contains(i + 1)) continue;
                     Passo p = _passos[i];
                     if (p.Feito != null && p.Feito()) { _feitos.Add(i + 1); Grava(); continue; }   // ja fez sozinho: nao ensina o que ele ja sabe
-                    if (!p.Quando()) return;   // um por vez, na ordem
+                    if (!p.Quando()) { if (p.Evento) continue; return; }   // um por vez, na ordem; evento que nao veio nao segura os outros
+                    if (p.Evento && Time.unscaledTime - _fimT < FolgaEventos) return;
                     if (!_tourComecou) { _tourComecou = true; _g.Diario("tutorial_started"); }
                     _atual = i; _tourT = 0f;
                     _tour.gameObject.SetActive(true);
@@ -173,7 +198,7 @@ namespace TA
             Passo a = _passos[_atual];
             _tourT += Time.unscaledDeltaTime;
             if (a.Feito != null && !_forcado && a.Feito()) { Conclui(true); return; }
-            if (a.Feito == null && TourAuto && _tourT > 2f) { Conclui(true); return; }
+            if (a.Feito == null && TourAuto && !_forcado && _tourT > 2f) { Conclui(true); return; }
             _tourTitulo.text = Textos.TourTitulo[_atual];
             _tourTexto.text = Textos.TourTexto[_atual];
             _tourConta.text = Textos.TourConta(_atual + 1, _passos.Length);
