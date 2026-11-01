@@ -61,6 +61,7 @@ OCA = {
 
 # contato que e o servico: a barra do rebocador no nariz e a ponte na porta (a ponte e da frente ta-embarque)
 LIGADOS = (("rebocador", "aviao_regional.nariz"), ("aviao_regional", "ponte_embarque"))
+ESCADA = "escada_embarque"  # parada, a gente sobe nela: pessoa x escada so conta com ela andando
 
 
 class Caixa:
@@ -202,6 +203,7 @@ def mede(arquivo, conta, cobertura):
                 por_t[float(r["t"])].append(r)
     tempos = sorted(por_t)
     casa, longe, em_casa = {}, defaultdict(int), {}
+    antes, parada = {}, set()
     for i, t in enumerate(tempos):
         dt = t - tempos[i - 1] if i else 0.1
         moveis, gente = [], []
@@ -217,6 +219,9 @@ def mede(arquivo, conta, cobertura):
                 continue
             if base not in medidas and base not in AVIAO:
                 continue
+            if base == ESCADA:
+                (parada.add if antes.get(peca) == (x, z) else parada.discard)(peca)
+                antes[peca] = (x, z)
             moveis.append(
                 (peca, base, partes_movel(base, medidas.get(base), x, y, z, yaw))
             )
@@ -263,7 +268,7 @@ def mede(arquivo, conta, cobertura):
                                 p,
                                 dt,
                             )
-            if not aviao:
+            if not aviao and pa not in parada:
                 for pg, g in gente:
                     p = penetra(ca[0], g)
                     if p > TOLERANCIA:

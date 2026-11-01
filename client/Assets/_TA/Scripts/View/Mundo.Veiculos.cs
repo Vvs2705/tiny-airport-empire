@@ -31,7 +31,7 @@ namespace TA
         /// <summary>Cada tipo de veiculo: Servico, faixa e parada (pivo, com o nariz para a rua) em cada estande (-1 = nao vai) e vaga na garagem.</summary>
         sealed class Tipo
         {
-            public string Malha; public int Servico, Vaga, Extra; public float Vel, Eixo, Comp, Rua = RuaOeste, Raio = RaioVeic; public Color Cor; public float[] Faixa, Parada;
+            public string Malha; public int Servico, Vaga, Extra; public bool Encosta; public float Vel, Eixo, Comp, Rua = RuaOeste, Raio = RaioVeic; public Color Cor; public float[] Faixa, Parada;
         }
 
         static readonly Tipo[] Tipos =
@@ -40,7 +40,8 @@ namespace TA
             new Tipo { Malha = "caminhao_combustivel", Servico = 2, Vaga = 2, Extra = 6, Vel = 2.6f, Eixo = 0.75f, Comp = 2.6f, Cor = Art.Hex(0xE0533D), Faixa = new[] { 17.4f, 25.95f }, Parada = new[] { 14.5f, 14.5f } },
             // a bagagem passa da faixa ate perto do nariz do regional: anda pelo lado sul da rua, por baixo dele
             new Tipo { Malha = "carrinho_bagagem", Servico = 3, Vaga = 0, Extra = 7, Vel = 2.6f, Eixo = 0.6f, Comp = 2.6f, Rua = 10.8f, Cor = Art.Hex(0x5DADE2), Faixa = new[] { 14.9f, 24.8f }, Parada = new[] { 14.3f, 14.35f } },
-            new Tipo { Malha = "escada_embarque", Servico = 0, Vaga = 3, Vel = 2f, Eixo = 0.7f, Comp = 2.3f, Cor = Art.Hex(0xE5E8E8), Faixa = new[] { -1f, 20.8f }, Parada = new[] { 0f, 14.3f } },
+            // a escada encosta de frente: a plataforma fica na frente da malha. O bico para antes do motor do jato, e a faixa deixa a curva passar pelo onibus
+            new Tipo { Malha = "escada_embarque", Servico = 0, Vaga = 3, Encosta = true, Vel = 2f, Eixo = 0.7f, Comp = 2.3f, Cor = Art.Hex(0xE5E8E8), Faixa = new[] { -1f, 20.8f }, Parada = new[] { 0f, 13.3f } },
             // o onibus abre a curva: e o mais comprido, e o bico passa logo depois da quina do terminal
             new Tipo { Malha = "onibus_patio", Servico = 0, Vaga = 4, Vel = 2f, Eixo = 0.9f, Comp = 3.2f, Raio = 2.2f, Cor = Art.Hex(0x3FA7D6), Faixa = new[] { -1f, 18.75f }, Parada = new[] { 0f, 14.9f } },
         };
@@ -173,7 +174,8 @@ namespace TA
         {
             Aviao a = _avioes[k];
             TA.Core.Aviao c = s.Avioes[k];
-            if (t.Faixa[k] < 0f || a.Fase != Fase.NoPatio || a.QuerPartir || c.Hangar > 0) return false;
+            if (t.Faixa[k] < 0f || a.Fase != Fase.NoPatio || c.Hangar > 0) return false;
+            if (a.QuerPartir) return t.Servico == 0 && GenteNoTrilho(k);
             return t.Servico == 0 || c.Falta[t.Servico] > 0;
         }
 
@@ -202,16 +204,16 @@ namespace TA
             return false;
         }
 
-        /// <summary>Segue de frente pela rua oeste, passa da faixa e entra nela de re, com o nariz para a rua.</summary>
+        /// <summary>Segue de frente pela rua oeste, passa da faixa e entra nela de re, com o nariz para a rua. A escada vira direto na faixa.</summary>
         void EntraDeRe(Veiculo v, int k, params Vector3[] p)
         {
             Tipo t = v.Tipo;
             float f = t.Faixa[k];
-            var q = new List<Vector3>(p) { V(f - Ajuste, t.Rua) };
+            var q = new List<Vector3>(p);
+            if (t.Encosta) { q.Add(V(f, t.Rua)); q.Add(V(f, t.Parada[k])); }
+            else q.Add(V(f - Ajuste, t.Rua));
             v.Rotas.Enqueue(DeFrente(v, RaioVeic, q.ToArray()));
-            Trecho re = Caminho(RaioVeic, 1.3f, V(f - Ajuste, t.Rua), V(f, t.Rua), V(f, t.Parada[k]));
-            re.Re = re.Para = true; re.A = 0.7f; re.F = 0.9f;
-            v.Rotas.Enqueue(re);
+            if (!t.Encosta) v.Rotas.Enqueue(DeRe(V(f - Ajuste, t.Rua), V(f, t.Rua), V(f, t.Parada[k])));
             v.Aviao = k; v.Lida = Lida.Indo;
         }
 
@@ -223,8 +225,8 @@ namespace TA
             v.S = 0f;
         }
 
-        /// <summary>Acabou: sai de frente da faixa, cruza a rua oeste e volta pela rua leste ate entrar de re na vaga. Do jato, se o regional precisa e
-        /// ninguem foi, vira na rua oeste e vai direto para a faixa dele.</summary>
+        /// <summary>Acabou: sai de frente da faixa (a escada, de re ate a rua leste), cruza a rua oeste e volta pela rua leste ate entrar de re na vaga. Do
+        /// jato, se o regional precisa e ninguem foi, vira na rua oeste e vai direto para a faixa dele.</summary>
         void Libera(Veiculo v, Sim s)
         {
             Tipo t = v.Tipo;
@@ -236,10 +238,13 @@ namespace TA
             if (t.Servico > 0 && o == 0 && !ocupado && Precisa(t, o, s)) EntraDeRe(v, o, V(f, t.Parada[k]), V(f, t.Rua));
             else
             {
-                v.Rotas.Enqueue(DeFrente(v, t.Raio, V(f, t.Parada[k]), V(f, RuaLeste), V(x + Ajuste, RuaLeste)));
-                Trecho re = Caminho(RaioVeic, 1.3f, V(x + Ajuste, RuaLeste), V(x, RuaLeste), V(x, VagaZ));
-                re.Re = re.Para = true; re.A = 0.7f; re.F = 0.9f;
-                v.Rotas.Enqueue(re);
+                if (t.Encosta)
+                {
+                    v.Rotas.Enqueue(DeRe(V(f, t.Parada[k]), V(f, RuaLeste), V(f - Ajuste, RuaLeste)));
+                    v.Rotas.Enqueue(DeFrente(v, t.Raio, V(f - Ajuste, RuaLeste), V(x + Ajuste, RuaLeste)));
+                }
+                else v.Rotas.Enqueue(DeFrente(v, t.Raio, V(f, t.Parada[k]), V(f, RuaLeste), V(x + Ajuste, RuaLeste)));
+                v.Rotas.Enqueue(DeRe(V(x + Ajuste, RuaLeste), V(x, RuaLeste), V(x, VagaZ)));
                 v.Lida = Lida.Voltando;
             }
             v.S = 0f;
@@ -249,6 +254,13 @@ namespace TA
         {
             Trecho t = Caminho(raio, v.Vel, p);
             t.A = 0.8f; t.F = 1f; t.Para = true;
+            return t;
+        }
+
+        Trecho DeRe(params Vector3[] p)
+        {
+            Trecho t = Caminho(RaioVeic, 1.3f, p);
+            t.Re = t.Para = true; t.A = 0.7f; t.F = 0.9f;
             return t;
         }
 
@@ -316,6 +328,7 @@ namespace TA
             Vector2 prox = b.Pos + (b.Caminho[0] - b.Pos).normalized * 0.4f;
             foreach (Veiculo v in _veiculos)
             {
+                if (_escada && b.Estande == 1 && v.Tipo?.Encosta == true) continue;   // sobe nela
                 Vector3 c = Centro(v), f = v.T.forward;
                 Vector2 eixo = new Vector2(f.x, f.z), lado = new Vector2(f.z, -f.x), a = prox - new Vector2(c.x, c.z), n = b.Pos - new Vector2(c.x, c.z);
                 float folga = v.V > 0.1f ? 0.45f : 0.25f, ax = Mathf.Abs(Vector2.Dot(a, eixo)), ay = Mathf.Abs(Vector2.Dot(a, lado));
