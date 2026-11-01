@@ -1,17 +1,19 @@
 namespace TA.Core
 {
     /// <summary>O que um objetivo mede (CONTRATO_FASE_C5 §2). O indice nao vai no save. Nenhuma meta olha anuncio ou compra digital.</summary>
-    public enum Meta { Embarcados, Equipe, Movidos, Velocidade, Capacidade, Historias, Atendidos, Climas, Incidentes, Cheios, Voos, Seguidos, Pontuais, Checagens, Hangar, Marco, Chegou }
+    public enum Meta { Embarcados, Equipe, Movidos, Velocidade, Capacidade, Historias, Atendidos, Climas, Incidentes, Cheios, Voos, Seguidos, Pontuais, Checagens, Hangar, Marco, Chegou, Melhorias, Passageiros, Rotas, Campanha, Missoes }
 
     /// <summary>
-    /// Uma linha da campanha (docs/CAMPANHA.md). A posicao na cadeia vai no save: objetivo novo so no fim. Id e' estavel; Nome e' de trabalho.
-    /// Arg = estacao, rota, aeroporto ou TipoIncidente, conforme a meta (-1 = qualquer um). Recompensa = Cash fixo.
+    /// Uma linha da campanha (docs/CAMPANHA.md), das missoes ou das conquistas (docs/MISSOES.md). A posicao na tabela vai no save: linha nova so
+    /// no fim. Id e' estavel; Nome e' de trabalho. Arg = estacao, rota, aeroporto ou TipoIncidente, conforme a meta (-1 = qualquer um). Recompensa = Cash fixo.
+    /// So nas missoes: Marco = o marco do terminal em que a linha entra no sorteio e E = a segunda parte da semanal (a mesma classe, sem Recompensa).
     /// </summary>
     public sealed class Objetivo
     {
         public string Id = "", Nome = "";
         public Meta Meta;
-        public int Arg = -1, Alvo = 1, Recompensa;
+        public int Arg = -1, Alvo = 1, Recompensa, Marco;
+        public Objetivo E;
     }
 
     public static partial class Tabelas

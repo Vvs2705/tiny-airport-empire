@@ -4,7 +4,7 @@ using System.Collections.Generic;
 // API do nucleo para a View (TA.Core, C# puro, deterministico, passo fixo de 1/30 s; nunca le o relogio do aparelho).
 // Regras e numeros: docs/CONTRATO_V01.md §3 e §4 e docs/CONTRATO_FASE_C.md (Defs.cs, Tuning). Arquivos: Sim.cs (relogio, onda, filas,
 // equipe), Sim.Estados.cs (estado das estacoes), Sim.Patio.cs (ciclo do aviao, patio e manutencao), Sim.Tripulacao.cs, Sim.Save.cs,
-// Sim.Offline.cs (cofre e dia local), Sim.Metas.cs (campanha), Anuncios.cs (2 rewarded), Bot.cs.
+// Sim.Offline.cs (cofre e dia local), Sim.Metas.cs (campanha), Sim.Missoes.cs (missoes e conquistas), Anuncios.cs (2 rewarded), Bot.cs.
 //
 //   Abrir:      var sim = Sim.Load(texto) ("" ou null = jogo novo; Sim.Load(texto, tuning, semente) para teste). sim.SaveRefused => save
 //               de schema futuro ou corrompido: avise e NUNCA grave por cima (sim.Save devolve null). Depois: sim.Agora(nowUnix, fusoSeg)
@@ -38,8 +38,11 @@ using System.Collections.Generic;
 //               Ev.RetornoPedido, Ev.PousoSeguro, Ev.Remarcados.
 //   Fase C5:    tabela sim.T.Objetivos[aeroporto][i] (Id, Nome, Meta, Arg, Alvo, Recompensa). sim.ObjetivoAtual(aeroporto) (null = cadeia fechada),
 //               sim.ObjetivosFeitos(aeroporto), sim.Progresso(aeroporto), sim.CampanhaCompleta; Ev.ObjetivoConcluido (Cash ja pago).
+//   Fase C6:    sim.Diarias[0..2] e sim.Semanais[0..4] (null antes do 1o passo: O = a linha da tabela, com E na 2a parte da semanal; Conta, ContaE, Feita),
+//               sim.SemanaJogo; tabela sim.T.Conquistas, sim.ConquistaFeita(i), sim.ProgressoConquista(i), sim.ConquistasFeitas; Ev.MissaoConcluida
+//               (Cash ja pago), Ev.ConquistaFeita. O dia e a semana sao os do jogo (sim.DiaJogo), nunca os do aparelho.
 //   Gravar:     texto = sim.Save(versaoDoJogo, nowUnix): payload chave=valor dentro do SaveEnvelope (SHA-256 + schema). Grava filas e o
-//               relogio do quadro: reabrir retoma a onda do ponto gravado. Schema 6; os saves dos schemas 1 a 5 migram no Load.
+//               relogio do quadro: reabrir retoma a onda do ponto gravado. Schema 7; os saves dos schemas 1 a 6 migram no Load.
 //
 // Nomes acima sao estaveis (so crescem). Mudou a API: atualize este cabecalho e o docs/MAPA_CODIGO.md no mesmo PR.
 
@@ -53,9 +56,9 @@ namespace TA.Core
         /// <summary>Teto do dt de um quadro (s): uma travada longa nao vira um salto de minutos no relogio do quadro de partidas.</summary>
         public const float MaxFrame = 0.25f;
         /// <summary>Versao do formato do save (SaveEnvelope). Sobe a cada mudanca de formato; save de schema maior e' recusado; menor migra
-        /// no Load (6 = Fase C5: campanha; 5 = Fase C4: falhas de aviao e portao atrasado; 4 = Fase C3: aeroportos, rotas e incidentes; 3 = Fase C2: 8 estacoes e o perfil de cada funcionario; 2 = Fase C: avioes,
+        /// no Load (7 = Fase C6: missoes e conquistas; 6 = Fase C5: campanha; 5 = Fase C4: falhas de aviao e portao atrasado; 4 = Fase C3: aeroportos, rotas e incidentes; 3 = Fase C2: 8 estacoes e o perfil de cada funcionario; 2 = Fase C: avioes,
         /// tripulacao e patio; o 1 e' a v0.1).</summary>
-        public const int Schema = 6;
+        public const int Schema = 7;
         /// <summary>A equipe da v0.1 (Hire()): Ana, Beto e Caio. MaxEquipe = os 6 perfis, com Dani, Edu e Fatima (Hire(perfil)).</summary>
         public const int MaxFuncionarios = 3, MaxEquipe = 6;
 
@@ -104,6 +107,7 @@ namespace TA.Core
             Seed = seed;
             _feitos = new int[T.Objetivos.Length];
             _conta = Array.ConvertAll(T.Objetivos, c => new int[c.Length]);
+            _marca = new int[T.Conquistas.Length];
             for (int i = 0; i < Estacoes.Length; i++) Estacoes[i] = new Station { Tipo = (Estacao)i, Postos = Math.Max(1, T.PostosBase[i]) };
             Array.Copy(Estacoes, Stations, Stations.Length);
             Anuncios = new Anuncios(this);
@@ -163,6 +167,7 @@ namespace TA.Core
             foreach (Voo v in Voos) if (!v.Partiu && loc >= v.FechaPasso) Fecha(v);
             Decolagens();
             PassoMetas();
+            PassoMissoes();
             if (BoostLeft > 0) BoostLeft--;
             if (Steps % (Hz / 2) == 0) AtualizaEstados(true);
             if (Steps % (10 * Hz) == 0) foreach (Station s in Estacoes) if (Desbloqueada(s.Tipo)) Emit(Ev.Fila, (int)s.Tipo, s.Fila.Count, (int)s.Estado);
