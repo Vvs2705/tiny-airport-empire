@@ -5,7 +5,9 @@ Uso: python client/tools/diag_caixas.py arq.csv [arq2.csv ...]     (sai 1 se hou
      python client/tools/diag_caixas.py --selftest
 
 Conta um cruzamento por encontro (2 pecas sobrepostas em amostras seguidas), mais fundo que TOLERANCIA:
-  veiculo x peca, veiculo x veiculo, veiculo x aviao, aviao x peca, aviao x aviao e pessoa x veiculo. Pessoa em sala e parede: PlantaTests.
+  veiculo x peca, veiculo x veiculo, veiculo x aviao, aviao x peca, aviao x aviao e pessoa x veiculo.
+Nas salas: pessoa x parede e pessoa x movel, por sala e por peca, com o corpo do adulto (circulo de CORPO_RAIO) contra as pecas ligadas naquele
+momento (liga#). Nao conta quem esta sentado, contra a cadeira, nem quem esta parado no posto e so encosta: la, so conta com o centro dentro da peca.
 Cobertura: quantas vezes cada peca saiu do lugar e voltou (ida e volta) e por onde passou; o par so vale se a rota rodou.
 A caixa de um veiculo e a da malha. As de aviao, garagem e rebocador preso sao as tabelas abaixo, medidas nos cortes das malhas.
 """
@@ -19,6 +21,11 @@ from collections import defaultdict
 TOLERANCIA = 0.02  # m: menos que isso e o contorno da malha, nao um cruzamento
 PESSOAS = ("pax", "func", "equipe", "ator", "trip", "mec")
 PESSOA_LADO, PESSOA_ALTURA = 0.4, 1.2
+CORPO_RAIO, CORPO_ALTURA = 0.1, 0.5  # adulto de 0,5 m e 0,2 m de ombros (Mundo.Gente)
+CADEIRAS = ("cadeiras_espera", "Cadeira")
+FINAS = ("cordao_fila",)  # a caixa e a da diagonal da malha, mais larga que o corredor da fila: encostar nao conta, so o centro dentro (atravessou)
+# a gente passa por dentro (portico, cabine) ou a peca anda com ela (Mundo.Seguranca, Mundo.Malas): nao e obstaculo
+SEM_CORPO = ("portico_detector", "cabine_scanner_corpo", "bandeja_seguranca", "Bandeja", "scanner_mao", "mala_rodinha", "Mala", "MalaSeg", "Pilha")
 
 # partes do aviao: (nome, frente0, frente1, lateral0, lateral1, altura0, altura1), m a partir do pivo, com a frente para +z
 AVIAO = {
@@ -108,6 +115,14 @@ def penetra(a, b):
     return menor
 
 
+def dentro(c, x, z):
+    """Quanto o ponto esta dentro da caixa, no plano, em m: negativo = fora, a essa distancia."""
+    dx, dz = x - c.cx, z - c.cz
+    ex = abs(dx * c.ux + dz * c.uz) - c.hl
+    ez = abs(dx * c.uz - dz * c.ux) - c.hw
+    return -math.hypot(ex, ez) if ex > 0.0 and ez > 0.0 else -max(ex, ez)
+
+
 def partes_fixas(nome, x, y0, z, yaw, sx, sy, sz):
     """A peca parada: uma caixa ou, se for oca, uma por parte (escala = medida da malha no jogo / medida em escala 1)."""
     if nome not in OCA:
@@ -195,14 +210,43 @@ class Conta:
         self.onde.setdefault(rot, (t, self.x, self.z))
 
 
+def sala_de(salas, x, z):
+    for e, (x0, z0, lado) in salas.items():
+        if x0 <= x <= x0 + lado and z0 <= z <= z0 + lado:
+            return e
+    return -1
+
+
+def corpo(conta, salas, pecas, nome, x, z, sentado, posto, t, dt):
+    """Uma amostra de uma pessoa contra as pecas ligadas da sala em que ela esta (pecas: sala -> [(id, Caixa)])."""
+    e = sala_de(salas, x, z)
+    if e < 0:
+        return
+    conta.x, conta.z = x, z
+    base = nome.split("#")[0]
+    for i, c in pecas.get(e, ()):
+        d = dentro(c, x, z)
+        p = d if posto or c.nome in FINAS else d + CORPO_RAIO
+        if p <= TOLERANCIA or (sentado and c.nome in CADEIRAS):
+            continue
+        classe = "pessoa x parede" if c.nome == "Parede" else "pessoa x movel"
+        conta.anota(classe, "sala%d %s" % (e, base), c.nome, (nome, i), t, p, dt)
+
+
 def mede(arquivo, conta, cobertura):
     fixas, medidas, por_t = [], {}, defaultdict(list)
+    salas, por_id, liga = {}, {}, []
     with open(arquivo, newline="") as f:
         for r in csv.DictReader(f):
             tipo, _, nome = r["peca"].partition("#")
             if tipo == "fixa":
                 vals = [float(r[c]) for c in ("x", "y", "z", "yaw", "sx", "sy", "sz")]
-                fixas += partes_fixas(nome, *vals)
+                por_id[int(r["id"])] = partes_fixas(nome, *vals)
+                fixas += por_id[int(r["id"])]
+            elif tipo == "sala":
+                salas[int(nome)] = (float(r["x"]), float(r["z"]), float(r["sx"]))
+            elif tipo == "liga":
+                liga.append((float(r["t"]), int(nome), r["sx"] == "1"))
             elif tipo == "movel":
                 medidas[nome] = [float(r[c]) for c in ("x", "y", "z", "sx", "sy", "sz")]
             elif tipo not in ("balcao", "cadeira"):
@@ -210,9 +254,26 @@ def mede(arquivo, conta, cobertura):
     tempos = sorted(por_t)
     casa, longe, em_casa = {}, defaultdict(int), {}
     antes, parada = {}, set()
+    pecas = defaultdict(list)  # sala -> pecas ligadas que barram gente
+    obstaculos = {
+        i: [c for c in cs if c.y0 < CORPO_ALTURA and c.y1 > TOLERANCIA and c.nome.split(".")[0] not in SEM_CORPO]
+        for i, cs in por_id.items()
+    }
+    prox = 0
     for i, t in enumerate(tempos):
         dt = t - tempos[i - 1] if i else 0.1
         moveis, gente = [], []
+        while prox < len(liga) and liga[prox][0] <= t:
+            _, ident, ligou = liga[prox]
+            prox += 1
+            for c in obstaculos.get(ident, ()):
+                for e, (x0, z0, lado) in salas.items():
+                    if x0 - c.r <= c.cx <= x0 + lado + c.r and z0 - c.r <= c.cz <= z0 + lado + c.r:
+                        par = (ident, c)
+                        if ligou:
+                            pecas[e].append(par)
+                        elif par in pecas[e]:
+                            pecas[e].remove(par)
         for r in por_t[t]:
             peca = r["peca"]
             base = peca.split("#")[0]
@@ -222,6 +283,8 @@ def mede(arquivo, conta, cobertura):
                 gente.append(
                     (peca, Caixa(base, x, z, 0.0, lado, lado, 0.0, PESSOA_ALTURA))
                 )
+                if salas:
+                    corpo(conta, salas, pecas, peca, x, z, r["sx"] == "1", r["sy"] == "1", t, dt)
                 continue
             if base not in medidas and base not in AVIAO:
                 continue
@@ -309,6 +372,18 @@ def selftest():
     assert abs(next(c for c in pp if c.nome.endswith("nariz")).cx - 3.75) < 1e-6, (
         "yaw 90 = frente para +x"
     )
+    assert abs(dentro(a, 0, 0) - 0.5) < 1e-9, "no meio: 0,5 da borda mais perto"
+    assert abs(dentro(a, 0, 1.5) + 0.5) < 1e-9, "fora, de frente"
+    assert abs(dentro(a, 1.5, 2.0) + math.hypot(1.0, 1.0)) < 1e-9, "fora, pela quina"
+    salas, parede = {0: (0.0, 0.0, 4.0)}, Caixa("Parede", 1, 1, 0, 1, 0.04, 0, 0.34)
+    c = Conta()
+    corpo(c, salas, {0: [(1, parede)]}, "pax#1", 1.1, 1.0, False, False, 1.0, 0.1)
+    corpo(c, salas, {0: [(1, parede)]}, "func#1", 1.1, 1.0, False, True, 1.0, 0.1)
+    assert list(c.pares) == [("pessoa x parede", "sala0 pax", "Parede")], "parado no posto so encosta"
+    c = Conta()
+    corpo(c, salas, {0: [(1, Caixa("cadeiras_espera", 1, 1, 0, 0.4, 0.1, 0, 0.3))]}, "pax#1", 1.0, 1.0, True, False, 1.0, 0.1)
+    corpo(c, salas, {0: [(1, parede)]}, "pax#1", 9.0, 9.0, False, False, 1.0, 0.1)
+    assert not c.pares, "sentado na cadeira e fora das salas nao contam"
     c = Conta()
     for t, p in ((1.0, 0.1), (1.1, 0.2), (3.0, 0.1)):
         c.anota("v", "a", "b", "k", t, p, 0.1)

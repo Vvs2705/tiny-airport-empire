@@ -185,9 +185,9 @@ namespace TA
         /// <summary>De p até alvo dentro do portão: quem está entre as cadeiras sai pelo corredor da fileira e anda pelo corredor de trás da fila.</summary>
         public static void RotaSala(List<Vector2> r, ref Vector2 p, Vector2 alvo)
         {
-            if (DeSaida(p) > DCorredor) Eixos(r, ref p, Em(Portao, DCorredor, Ao(p)), false);
-            if (DeSaida(alvo) > DCorredor) Eixos(r, ref p, Em(Portao, DCorredor, Ao(alvo)), true);
-            Eixos(r, ref p, alvo, true);
+            if (DeSaida(p) > DCorredor) Contorna(r, ref p, Em(Portao, DCorredor, Ao(p)), false);
+            if (DeSaida(alvo) > DCorredor) Contorna(r, ref p, Em(Portao, DCorredor, Ao(alvo)), true);
+            Contorna(r, ref p, alvo, true);
         }
 
         /// <summary>Sai(): quem deixa a sala do meio das cadeiras passa antes pelo corredor.</summary>
@@ -195,7 +195,7 @@ namespace TA
         {
             b.Vaga = -1;
             if (b.Cadeira >= 0) p = _assentos[b.Cadeira].Pe;
-            if (DeSaida(p) > DCorredor) Eixos(b.Caminho, ref p, Em(Portao, DCorredor, Ao(p)), false);
+            if (DeSaida(p) > DCorredor) Contorna(b.Caminho, ref p, Em(Portao, DCorredor, Ao(p)), false);
         }
 
         /// <summary>Senta ao chegar diante do lugar e levanta quando a vaga muda: a pessoa recua até o assento, sem deslizar o pé. true = parada nisso.</summary>

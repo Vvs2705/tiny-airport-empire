@@ -211,6 +211,7 @@ namespace TA
             RenderSettings.ambientLight = new Color(0.52f, 0.54f, 0.58f);
             _raiz = new GameObject("Mundo").transform;
             Planta();
+            LePecas();
             for (int k = 0; k < _func.Length; k++)
             {
                 _func[k] = NovoBoneco(FuncAtor[k]);

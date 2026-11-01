@@ -74,6 +74,9 @@ namespace TA
             return a - Mathf.Sign(a) * LadoBalanca;
         }
 
+        /// <summary>De pé na frente do balcão, ao lado da balança. A esteira da parede e as dos postos fecham o fundo da sala: atrás do balcão não há onde pisar.</summary>
+        static Vector2 PeBalanca(int i) => Em(SalaMalas, FrenteD, Mathf.Lerp(Posto(SalaMalas, i), ABalanca(i), 0.55f));
+
         public static Vector2 PontoBalanca(int i) => Balcao(SalaMalas, i) + Salas[SalaMalas].T * (ABalanca(i) - Posto(SalaMalas, i));
         public static Vector2 BalcaoMala(int i) => Balcao(SalaMalas, i);
 

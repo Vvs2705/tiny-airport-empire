@@ -73,6 +73,8 @@ namespace TA
 
         readonly Aviao[] _avioes = { new Aviao { Id = 0 }, new Aviao { Id = 1 } };
         System.IO.StreamWriter _diag;
+        readonly List<Transform> _diagFixas = new List<Transform>();
+        readonly HashSet<int> _diagLigadas = new HashSet<int>();
         float _diagT, _diagUlt;
 
         // ------------------------------------------------------------------ construcao
@@ -520,7 +522,7 @@ namespace TA
         public void Diag(string arq)
         {
             _diag = new System.IO.StreamWriter(arq) { AutoFlush = false };
-            _diag.WriteLine("t,peca,x,y,z,yaw,sx,sy,sz");
+            _diag.WriteLine("t,peca,x,y,z,yaw,sx,sy,sz,id");
             var inv = System.Globalization.CultureInfo.InvariantCulture;
             for (int e = 0; e < Salas.Length; e++)
                 for (int i = 0; i < 4; i++)
@@ -530,11 +532,13 @@ namespace TA
                         _diag.WriteLine(string.Format(inv, "0,balcao#{0}.{1},{2:0.000},0,{3:0.000},0", e, i, b.x, b.y));
                     }
             for (int i = 0; i < _cadeiras.Count; i++) _diag.WriteLine(string.Format(inv, "0,cadeira#{0},{1:0.000},0,{2:0.000},0", i, _cadeiras[i].x, _cadeiras[i].y));
+            for (int e = 0; e < Salas.Length; e++) _diag.WriteLine(string.Format(inv, "0,sala#{0},{1:0.000},0,{2:0.000},0,{3:0.000}", e, Salas[e].Min.x, Salas[e].Min.y, Lado));
             DiagCaixas(inv);
         }
 
         /// <summary>As caixas do client/tools/diag_caixas.py: a medida de cada peca que anda (movel#, com o centro relativo ao pivo em yaw 0) e cada
-        /// peca parada do cenario (fixa#, com o centro no mundo). Le a malha, nao o Renderer: predio de outro nivel e sala fechada estao desligados.</summary>
+        /// peca parada do cenario (fixa#, com o centro no mundo e o id). Le a malha, nao o Renderer: predio de outro nivel e sala fechada estao
+        /// desligados, e o DiagPasso diz quando cada uma liga (liga#id, sx = 1) e desliga (sx = 0).</summary>
         void DiagCaixas(System.IFormatProvider inv)
         {
             var anda = new List<Transform>();
@@ -553,7 +557,8 @@ namespace TA
                 Bounds b = Caixa(t);
                 if (b.max.y + t.position.y < 0.1f) continue;   // pista, faixa, piso: sem altura, ninguem atravessa
                 Vector3 c = t.position + Quaternion.Euler(0f, t.eulerAngles.y, 0f) * b.center;
-                _diag.WriteLine(string.Format(inv, "0,fixa#{0},{1:0.000},{2:0.000},{3:0.000},{4:0.00},{5:0.000},{6:0.000},{7:0.000}", t.name, c.x, b.min.y + t.position.y, c.z, t.eulerAngles.y, b.size.x, b.size.y, b.size.z));
+                _diag.WriteLine(string.Format(inv, "0,fixa#{0},{1:0.000},{2:0.000},{3:0.000},{4:0.00},{5:0.000},{6:0.000},{7:0.000},{8}", t.name, c.x, b.min.y + t.position.y, c.z, t.eulerAngles.y, b.size.x, b.size.y, b.size.z, _diagFixas.Count));
+                _diagFixas.Add(t);
             }
         }
 
@@ -594,13 +599,24 @@ namespace TA
             for (int i = 0; i < _patio.Count; i++) DiagBoneco(inv, "ator#" + i, _patio[i].B);
             for (int i = 0; i < _andantes.Count; i++) DiagBoneco(inv, "trip#" + i, _andantes[i].B);
             DiagBoneco(inv, "mec#0", _mecanico);
+            if (_agente != null && _agente.T.gameObject.activeSelf) DiagBoneco(inv, "ator#agente", _agente);
+            if (_porteiro != null && _porteiro.T.gameObject.activeSelf) DiagBoneco(inv, "ator#porteiro", _porteiro);
+            for (int i = 0; i < _diagFixas.Count; i++)
+            {
+                bool liga = _diagFixas[i].gameObject.activeInHierarchy;
+                if (liga == _diagLigadas.Contains(i)) continue;
+                if (liga) _diagLigadas.Add(i); else _diagLigadas.Remove(i);
+                _diag.WriteLine(string.Format(inv, "{0:0.00},liga#{1},0,0,0,0,{2}", _diagT, i, liga ? 1 : 0));
+            }
         }
 
-        /// <summary>Pessoa no -diag (client/tools/diag_pessoas.py): y = 1 andando; yaw = o rumo da folha, que e sempre um eixo do mundo.</summary>
+        /// <summary>Pessoa no -diag (client/tools/diag_pessoas.py e diag_caixas.py): y = 1 andando; yaw = o rumo da folha, que e sempre um eixo do
+        /// mundo; sx = 1 sentando ou sentada; sy = 1 parada no posto (no balcao ou atras dele), onde encostar na peca e o servico.</summary>
         void DiagBoneco(System.IFormatProvider inv, string nome, Boneco b)
         {
             float yaw = b.Dir > 0f ? (b.Cima ? 90f : 180f) : (b.Cima ? 0f : 270f);
-            _diag.WriteLine(string.Format(inv, "{0:0.00},{1},{2:0.000},{3},{4:0.000},{5:0}", _diagT, nome, b.Pos.x, b.Andou ? 1 : 0, b.Pos.y, yaw));
+            bool posto = b.Caminho.Count == 0 && (b.NoBalcao || !nome.StartsWith("pax"));
+            _diag.WriteLine(string.Format(inv, "{0:0.00},{1},{2:0.000},{3},{4:0.000},{5:0},{6},{7}", _diagT, nome, b.Pos.x, b.Andou ? 1 : 0, b.Pos.y, yaw, b.Senta > 0f ? 1 : 0, posto ? 1 : 0));
         }
 
         void DiagLinha(System.IFormatProvider inv, string nome, Transform t)
