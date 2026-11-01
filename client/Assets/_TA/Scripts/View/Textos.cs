@@ -76,8 +76,9 @@ namespace TA
         public static string Cofre(long cash, long seg) => L("Enquanto você esteve fora (") + (seg / 60) + L(" min, teto de 2 h), o aeroporto rendeu +") + Num(cash)
             + L(" Cash. Nenhum voo foi perdido: o quadro esperou você.");
         public static string Dobrar(long c) => L("Dobrar (+") + Num(c) + L(") com anúncio");
-        public static string Receita2x(int hoje, int max) => L("2x renda 5 min\n(") + (max - hoje) + L(" hoje)");
-        public static string Receita2xAtiva(int seg) => L("2x renda\n") + (seg / 60) + ":" + (seg % 60).ToString("00", CultureInfo.InvariantCulture);
+        public static string Receita2x(int hoje, int max) => L("5 min · ") + (max - hoje) + L(" hoje");
+        public static string FechaEm(int min) => L("Fecha em ") + min + L(" min");
+        public static readonly string Dobro = L("2x"), ColunaFecha = L("FECHA"), ColunaSituacao = L("SITUAÇÃO");
         public static string AnuncioConta(int s) => L("O anúncio termina em ") + s + L(" s");
         public static string MelhoriaLinha(Melhoria m, int nivel, int max, string efeito) => Melhoria[(int)m] + " " + nivel + "/" + max + "\n" + efeito;
         public static string Custo(long c) => c < 0 ? L("máximo") : Num(c);
