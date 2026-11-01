@@ -31,7 +31,7 @@ namespace TA
         // ------------------------------------------------------------------ planta (unidades de mundo = m; Y para cima, chao em Y = 0)
 
         public const float Lado = 4f;
-        const float Elev = 45f, VelPax = 2.6f, Troca = 0.35f, EscalaFunc = 1f, PortaLarg = 0.9f;
+        const float Elev = 45f, VelPax = 1.8f, Troca = 0.35f, EscalaFunc = 1f, PortaLarg = 0.9f;
         static readonly float[] Desloc = { -0.8f, 0.8f, -1.55f, 1.55f };   // balcoes ao longo da parede de saida, com o corredor no meio
 
         /// <summary>Sala de cada estacao: canto (x, z), porta de entrada e de saida (no meio da parede) e a direcao da saida (para fora).</summary>
@@ -83,7 +83,7 @@ namespace TA
         /// <summary>Malha de balcao de cada estacao e a escala dela (a loja e um quiosque grande: 0,6 cabe 1 por posto). A oficina tem a
         /// bancada aqui e o predio dela fica no mundo (Planta): o mecanico da Fase C mora la antes de a sala abrir.</summary>
         static readonly string[] BalcaoMalha = { "balcao_checkin", "raio_x", "loja", "portao_embarque", "esteira_bagagem", "alimentacao", "balcao_informacoes", "balcao_informacoes" };
-        static readonly float[] BalcaoEscala = { 1f, 1f, 0.6f, 1f, 1f, 0.6f, 1f, 1f };
+        static readonly float[] BalcaoEscala = { 1f, EscalaSeg, 0.6f, 1f, 1f, 0.6f, 1f, 1f };
         /// <summary>Nivel de Velocidade a partir do qual o balcao troca pela malha `<malha>_n2` e `_n3` (Lotes 5 e 6): o upgrade muda o predio
         /// (GDD §5.13). Sem a malha daquele nivel, fica a do nivel abaixo.</summary>
         static readonly int[] NivelMalha = { 0, 2, 4 };
@@ -94,13 +94,13 @@ namespace TA
         static Sala Nova(float x, float z, Vector2 entra, Vector2 sai, Vector2 n) =>
             new Sala { Min = new Vector2(x, z), In = entra, Out = sai, N = n, T = new Vector2(n.y, n.x) };
 
-        static readonly Vector2 Calcada = new Vector2(-2.6f, 2f), PonteFim = new Vector2(10f, 11.1f);
+        static readonly Vector2 Calcada = new Vector2(-2.6f, 2f), PonteFim = new Vector2(10f, 12.1f);
 
         /// <summary>Ponto da sala a `d` da parede de saida e `a` ao longo dela.</summary>
         static Vector2 Em(int e, float d, float a) => Salas[e].Out - Salas[e].N * d + Salas[e].T * a;
-        static Vector2 Balcao(int e, int i) => Em(e, 1.0f, Desloc[i]);
-        static Vector2 NoBalcao(int e, int i) => Em(e, 1.55f, Desloc[i]);
-        static Vector2 AtrasBalcao(int e, int i) => Em(e, 0.45f, Desloc[i]);
+        static Vector2 Balcao(int e, int i) => Em(e, 1.0f, Posto(e, i));
+        static Vector2 NoBalcao(int e, int i) => Em(e, 1.55f, Posto(e, i));
+        static Vector2 AtrasBalcao(int e, int i) => e == (int)Estacao.Seguranca ? Em(e, 0.62f, SegA[i] + 0.44f) : Em(e, 0.45f, Posto(e, i));
         static Vector2 Centro(int e) => Salas[e].Min + new Vector2(Lado * 0.5f, Lado * 0.5f);
         /// <summary>Rumo (graus de yaw do Unity) da direcao `d` do chao: +z = 0.</summary>
         static float Rumo(Vector2 d) => Mathf.Atan2(d.x, d.y) * Mathf.Rad2Deg;
@@ -153,12 +153,12 @@ namespace TA
         readonly int[] _colete = { -1, -1, -1, -1, -1, -1 };
         readonly float[] _troca = new float[Sim.MaxEquipe], _falha = new float[Sim.MaxEquipe];
         readonly Estacao[] _rotaPara = new Estacao[Sim.MaxEquipe];
-        readonly List<Vector2>[] _rota = { new List<Vector2>(), new List<Vector2>(), new List<Vector2>(), new List<Vector2>(), new List<Vector2>(), new List<Vector2>() };
         readonly Text[] _nome = new Text[Sim.MaxEquipe];
         readonly Renderer[] _piso = new Renderer[8];
         readonly Renderer[][] _moldura = new Renderer[8][];
         readonly GameObject[,,] _mesa = new GameObject[8, 4, 3];
-        readonly SpriteRenderer[,] _arco = new SpriteRenderer[8, 4];
+        readonly SpriteRenderer[,] _arco = new SpriteRenderer[8, 4], _vazio = new SpriteRenderer[8, 4];
+        readonly GameObject[,] _fita = new GameObject[8, 4];
         readonly SpriteRenderer[] _mao = new SpriteRenderer[8];
         readonly TextMesh[] _placa = new TextMesh[8];
         readonly RectTransform[] _selo = new RectTransform[8];
@@ -255,7 +255,9 @@ namespace TA
             _enquadrado = true;
             if (_vista == "perto") { _alvo += new Vector3(-1.5f, 0f, -1.2f); _tam *= 0.55f; }
             else if (_vista == "patio") { _alvo = new Vector3(10.5f, 0f, 10.5f); _tam = 9.5f; }
-            else if (_vista == "geral") { _alvo = new Vector3(11f, 0f, 11f); _tam = 15f; }
+            else if (_vista == "geral") { _alvo = new Vector3(21f, 0f, 13f); _tam = 19f; }
+            else if (_vista == "garagem") { _alvo = new Vector3(27f, 0f, 12f); _tam = 10f; }
+            else if (_vista == "seguranca") { _alvo = new Vector3(6f, 0f, 2.4f); _tam = 2.4f; }
             else if (_vista == "hangar") { _alvo = new Vector3(29f, 0f, 16f); _tam = 11f; }
         }
 
@@ -272,8 +274,8 @@ namespace TA
 
         void Posiciona()
         {
-            _tam = Mathf.Clamp(_tam, 2.2f, 16f);
-            _alvo.x = Mathf.Clamp(_alvo.x, -8f, 32f);
+            _tam = Mathf.Clamp(_tam, 2.2f, 20f);
+            _alvo.x = Mathf.Clamp(_alvo.x, -8f, 40f);
             _alvo.z = Mathf.Clamp(_alvo.z, -4f, 26f);
             _cam.orthographicSize = _tam;
             _cam.transform.position = _alvo - _cam.transform.forward * 120f;
@@ -300,6 +302,7 @@ namespace TA
             MostraNivel(_hangar, NivelDe(s.St(Estacao.Manutencao).Vel));
             MostraNivel(_torre, Mathf.Min(s.Marco, 2));
             MostraNivel(_terminal, Mathf.Min(s.Marco, 2));
+            PorticoNivel(s);
             for (int e = 0; e < Salas.Length; e++)
             {
                 Station st = s.Estacoes[e];
@@ -312,6 +315,7 @@ namespace TA
                     if (_placa[e].text != trancada) { _placa[e].text = trancada; _placa[e].characterSize = 0.03f; }
                     _mao[e].enabled = false;
                     _selo[e].gameObject.SetActive(false);
+                    for (int i = 0; i < 4; i++) _vazio[e, i].enabled = false;
                     continue;
                 }
                 bool fechada = e != (int)Estacao.CheckIn && e != (int)Estacao.Seguranca && e != (int)Estacao.Portao && s.Alocados(st.Tipo) == 0;
@@ -326,6 +330,17 @@ namespace TA
                     int nivel = NivelDe(st.Vel);
                     while (nivel > 0 && _mesa[e, i, nivel] == null) nivel--;
                     for (int n = 0; n < NivelMalha.Length; n++) if (_mesa[e, i, n] != null) _mesa[e, i, n].SetActive(i < st.Postos && n == nivel);
+                }
+                for (int r = 0; r < 4; r++) if (_fita[e, r] != null) _fita[e, r].SetActive(st.Fila.Count > 12 * (r + 1));   // a fita abre conforme a fila cresce: ninguem a atravessa
+                int gente = s.Presentes(st.Tipo);
+                for (int i = 0; i < 4; i++)   // posto sem ninguem: um X em cima do balcao
+                {
+                    bool vazio = i < st.Postos && i >= gente;
+                    _vazio[e, i].enabled = vazio;
+                    if (!vazio) continue;
+                    Vector3 pv = V3(Balcao(e, i), 1.05f);
+                    _vazio[e, i].transform.SetPositionAndRotation(pv, _cam.transform.rotation);
+                    _vazio[e, i].sortingOrder = Ordem(pv) + 8;
                 }
                 bool toque = s.PodeTocar(st.Tipo);
                 _mao[e].enabled = toque;
