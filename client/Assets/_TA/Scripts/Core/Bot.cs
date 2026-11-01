@@ -12,10 +12,14 @@ namespace TA.Core
         /// esta pendente (CONTRATO_FASE_C2 §5). Sem eles, tudo fica no padrao do nucleo. Rotas = abre e programa rotas; Viaja = vai ao proximo
         /// aeroporto; Incidentes = reage ao aviso (CONTRATO_FASE_C3 §7).</summary>
         public string Name; public float Decide; public bool Move, Planeja, Equipe, Rotas, Viaja, Incidentes;
+        /// <summary>Clima = reage ao aviso de clima; Falhas = paga o reparo da pane (CONTRATO_FASE_C4 §8). Sem eles, segura e espera a inspecao.</summary>
+        public bool Clima, Falhas;
+        /// <summary>Segue = troca para o aeroporto com a melhor estacao do ano (CONTRATO_FASE_C4 §8).</summary>
+        public bool Segue;
 
-        public static readonly BotProfile Bom = new BotProfile { Name = "Bom", Decide = 1f, Move = true, Planeja = true, Equipe = true, Rotas = true, Viaja = true, Incidentes = true };
-        public static readonly BotProfile Lento = new BotProfile { Name = "Lento", Decide = 2.5f, Move = true, Planeja = true, Equipe = true, Rotas = true, Viaja = true, Incidentes = true };
-        public static readonly BotProfile Parado = new BotProfile { Name = "Parado", Decide = 1f, Move = false, Planeja = true, Rotas = true, Viaja = true, Incidentes = true };
+        public static readonly BotProfile Bom = new BotProfile { Name = "Bom", Decide = 1f, Move = true, Planeja = true, Equipe = true, Rotas = true, Viaja = true, Incidentes = true, Clima = true, Falhas = true };
+        public static readonly BotProfile Lento = new BotProfile { Name = "Lento", Decide = 2.5f, Move = true, Planeja = true, Equipe = true, Rotas = true, Viaja = true, Incidentes = true, Clima = true, Falhas = true };
+        public static readonly BotProfile Parado = new BotProfile { Name = "Parado", Decide = 1f, Move = false, Planeja = true, Rotas = true, Viaja = true, Incidentes = true, Clima = true, Falhas = true };
         /// <summary>Portao de design do GDD §5.13 (Fase C): o Bom que planeja contra o Bom que deixa tudo no automatico.</summary>
         public static readonly BotProfile Planejador = new BotProfile { Name = "Planejador", Decide = 1f, Move = true, Planeja = true, Equipe = true };
         public static readonly BotProfile Automatico = new BotProfile { Name = "Automatico", Decide = 1f, Move = true, Planeja = false, Equipe = true };
@@ -38,7 +42,7 @@ namespace TA.Core
     public sealed class Bot
     {
         public BotProfile P;
-        public int Moves, Taps, Buys, Trocas, Checagens, Hangares, Reacoes;
+        public int Moves, Taps, Buys, Trocas, Checagens, Hangares, Reacoes, Reparos;
         float _t;
 
         public Bot(BotProfile p) { P = p; }
@@ -63,6 +67,33 @@ namespace TA.Core
             if (!moveu && P.Move && P.Equipe) Equipe(s);
             if (P.Rotas) Programa(s);
             if (P.Incidentes) Reage(s);
+            if (P.Clima && s.T.RegraClima) ReageClima(s);
+            if (P.Segue) SegueEpoca(s);
+            if (P.Falhas) foreach (Aviao a in s.Avioes) if (a.Pane && s.ReparaAviao(a.Id)) Reparos++;
+        }
+
+        /// <summary>Fase C4: adianta no aviso; quem perdeu o aviso ainda pode atrasar o portao.</summary>
+        void ReageClima(Sim s)
+        {
+            Incidente i = s.Inc;
+            if (i != null && !i.Resolvido && s.ClimaDe(i.Tipo) != null && (s.Adianta() || s.Atrasa())) Reacoes++;
+        }
+
+        /// <summary>Fase C4: na virada da estacao do ano, vai ao aeroporto ja pago em que a receita da rota mais rica x demanda fica melhor.</summary>
+        void SegueEpoca(Sim s)
+        {
+            int w = s.Onda + 1, melhor = s.AeroportoAtual;
+            if (s.ProximoAeroporto >= 0) return;
+            double Nota(int a)
+            {
+                double r = 0;
+                for (int i = 0; i < s.T.Rotas.Length; i++) if (s.T.Rotas[i].Aeroporto == a && s.RotaAberta(i)) r = Math.Max(r, s.T.Rotas[i].Receita);
+                return r * s.DemandaDe(a, w);
+            }
+            double nota = Nota(melhor) * 1.05;
+            for (int a = 0; a < s.T.Aeroportos.Length; a++)
+                if (a != melhor && s.CustoViagem(a) == 0 && Nota(a) > nota) { melhor = a; nota = Nota(a); }
+            if (melhor != s.AeroportoAtual) s.Viajar(melhor);
         }
 
         readonly int[] _vooVisto = { -1, -1 };
@@ -97,7 +128,7 @@ namespace TA.Core
         {
             Incidente i = s.Inc;
             if (i == null) return;
-            if (i.Tipo == TipoIncidente.FrenteFria && s.Adianta() || i.Tipo == TipoIncidente.Falha && s.Repara() || i.Tipo == TipoIncidente.Conexao && s.Prioriza()) { Reacoes++; return; }
+            if (i.Tipo == TipoIncidente.FrenteFria && !s.T.RegraClima && s.Adianta() || i.Tipo == TipoIncidente.Falha && s.Repara() || i.Tipo == TipoIncidente.Conexao && s.Prioriza()) { Reacoes++; return; }
             if (i.Tipo != TipoIncidente.Pico || i.Inicio == _picoVisto || !P.Move || s.Alocados(Estacao.CheckIn) >= s.St(Estacao.CheckIn).Postos) return;
             _picoVisto = i.Inicio;   // uma pessoa por pico: a Equipe a leva de volta depois dele
             foreach (Funcionario f in s.Staff)
@@ -266,6 +297,8 @@ namespace TA.Core
             public int SemTrip, Inspecoes, Hangares, Checagens, Trocas;
             /// <summary>Fase C3: incidentes, reacoes do bot, viagens e onda em que chegou a cada aeroporto (-1 = nao chegou).</summary>
             public int Incidentes, Reacoes, Viagens; public int[] ChegouEm;
+            /// <summary>Fase C4: climas, falhas de aviao e reparos pagos.</summary>
+            public int Climas, Falhas, Reparos;
         }
 
         /// <summary>Joga `ondas` ondas inteiras com o perfil `p` e a semente `seed`, sem render. `reabre` = fecha e reabre o jogo (Save ->
@@ -292,12 +325,13 @@ namespace TA.Core
                         case Ev.ChecagemIniciada: if (e.C == 1) r.Inspecoes++; else r.Checagens++; break;
                         case Ev.HangarIniciado: r.Hangares++; break;
                         case Ev.Escalado: if (e.C == 1) r.Trocas++; break;
-                        case Ev.IncidenteInicio: r.Incidentes++; break;
+                        case Ev.IncidenteInicio: r.Incidentes++; if (s.ClimaDe((TipoIncidente)e.A) != null) r.Climas++; break;
+                        case Ev.Pane: case Ev.Rejeicao: case Ev.RetornoPedido: r.Falhas++; break;
                         case Ev.AeroportoChegada: r.Viagens++; if (r.ChegouEm[e.A] < 0) r.ChegouEm[e.A] = s.Onda; break;
                     }
             }
             r.Embarque = r.Voos > 0 ? soma / r.Voos : 0;
-            r.Moves = bot.Moves; r.Taps = bot.Taps; r.Reacoes = bot.Reacoes;
+            r.Moves = bot.Moves; r.Taps = bot.Taps; r.Reacoes = bot.Reacoes; r.Reparos = bot.Reparos;
             return r;
         }
 

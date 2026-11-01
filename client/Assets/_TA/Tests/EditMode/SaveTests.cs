@@ -157,7 +157,7 @@ namespace TA.Tests
         static Bot SemC3()
         {
             BotProfile p = BotProfile.Bom;
-            p.Rotas = p.Viaja = p.Incidentes = false;
+            p.Rotas = p.Viaja = p.Incidentes = p.Clima = p.Falhas = false;
             return new Bot(p);
         }
 
@@ -166,7 +166,8 @@ namespace TA.Tests
         [Test]
         public void MigracaoDoSchema3_SaveReal_DaOMesmoJogoQueJogarComOCodigoNovo()
         {
-            Sim m = Sim.Load(V03);
+            Tuning t = BalanceTests.SemFaseC4();   // o jogo que o schema 3 gravava, sem o clima que abre no marco 1
+            Sim m = Sim.Load(V03, t, 7);
             Assert.IsFalse(m.SaveRefused, "schema 3 migra, nao e' recusado");
             Assert.AreEqual((121L, 30000L, 205L, 2, 1), (m.Cash, m.Steps, m.TotalEmbarcados, m.Staff.Count, m.Marco));
             Assert.AreEqual((0, 3, 0, 1, -1), (m.AeroportoAtual, m.RotasAbertas, m.Prog[0], m.Prog[1], m.ProximoAeroporto));
@@ -174,13 +175,13 @@ namespace TA.Tests
             Assert.AreEqual((0, 1, 0, 0), (m.Voos[0].Rota, m.Voos[1].Rota, m.Voos[0].Grupo, m.Avioes[0].VoltaOnda));
             Assert.AreEqual((30, 30), (m.Voos[0].Total, m.Voos[1].Total));
 
-            Sim n = new Sim(null, 7);
+            Sim n = new Sim(t, 7);
             Bot bn = SemC3();
             for (int i = 0; i < 1000 * Sim.Hz; i++) bn.Step(n);
             string a = m.Save("0.4.0", T);
-            StringAssert.Contains("\nschema=4\n", a);
+            StringAssert.Contains("\nschema=5\n", a);
             Assert.AreEqual(SemEma(n.Save("0.4.0", T)), SemEma(a), "migrar = jogar ate ali com o codigo novo");
-            Assert.AreEqual(a, Sim.Load(a).Save("0.4.0", T), "ida e volta estavel no schema 4");
+            Assert.AreEqual(a, Sim.Load(a, t, 7).Save("0.4.0", T), "ida e volta estavel");
 
             Bot b1 = SemC3(), b2 = SemC3();
             for (int i = 0; i < 300 * Sim.Hz; i++) { b1.Step(m); b2.Step(n); }
@@ -188,6 +189,113 @@ namespace TA.Tests
             m.Cash = 1000;
             Assert.IsTrue(m.AbreRota(2), "a rota do marco 1 abre no save migrado");
             Assert.IsTrue(m.Programa(0, 2));
+        }
+
+        /// <summary>Save real gravado pelo codigo do schema 4 (main de 2026-10-30, PR #23: semente 7, bot Bom, 700 s = onda 3 aos 160 s): antes do
+        /// marco 1, ainda sem clima nem demanda, com os 2 voos da onda e a equipe gravados.</summary>
+        const string V04 = "sha256=dca7e568b519139d46fcefe333a5df531c5ee6398f0a0b117f7d2955565caa4d\nschema=4\ncontent=0.4.0\nat=1800000000\nt=21000\ncash=11\n" +
+            "seed=7\nonda=3\nemb=128\nperd=0\nalbum=1\nbst=0\nema=2.449953885136964\nsaved=1800000000\nclaim=0\nclaimcash=0\ndia=0\nest.0=4,0\nest.1=4,0\n" +
+            "est.2=0,0\nest.3=3,0\nest.4=0,0\nest.5=0,0\nest.6=0,0\nest.7=0,0\nfunc.0=0,0,0,0\nfunc.1=1,1,0,1\nvoo.0=22,22,176,1,1\nvoo.1=22,22,176,1,0\n" +
+            "aviao.0=40,22200,0,-1,-1,0,0,1,0,0\nsrv.0=0:0,0:0,0:0,0:0\naviao.1=15,18300,1,7,-1,0,0,1,0,0\nsrv.1=0:0,0:0,0:0,0:0\ntrip.0=0,2,0,0\n" +
+            "trip.1=0,0,5400,1\ntrip.2=0,2,2669,-1\ntrip.3=1,2,0,0\ntrip.4=1,0,5400,1\ntrip.5=1,2,2639,-1\npatio=2\npatioatraso=1\naero=0,1,-1\n" +
+            "rotas=3\nprog=0,1\nvr.0=0,22,0,0,0,0,1800,0\nvr.1=1,22,0,0,0,0,3300,0\nreparo=0\nincw=-99\n";
+
+        /// <summary>CONTRATO_FASE_C4 §7: o save do schema 4 abre sem nada em andamento e da o mesmo jogo que jogar ate ali com o codigo novo. Depois
+        /// os dois passam do marco 1 juntos, com o clima, a demanda e as falhas valendo.</summary>
+        [Test]
+        public void MigracaoDoSchema4_SaveReal_DaOMesmoJogoQueJogarComOCodigoNovo()
+        {
+            const long U = 1800000000;   // o instante gravado no save
+            Sim m = Sim.Load(V04);
+            Assert.IsFalse(m.SaveRefused, "schema 4 migra, nao e' recusado");
+            Assert.AreEqual((11L, 21000L, 128L, 0, 3), (m.Cash, m.Steps, m.TotalEmbarcados, m.Marco, m.Onda));
+            Assert.IsFalse(m.Avioes.Any(a => a.Pane || a.Retorno > 0 || a.SaiEm > 0 || a.Falhou >= 0), "nada em andamento");
+            Assert.AreEqual((false, 0L), (m.Voos.Any(v => v.Atrasado), m.PistaAte));
+
+            Sim n = new Sim(null, 7);
+            var bn = new Bot(BotProfile.Bom);
+            for (int i = 0; i < 700 * Sim.Hz; i++) bn.Step(n);
+            string texto = m.Save("0.5.0", U);
+            StringAssert.Contains("\nschema=5\n", texto);
+            Assert.AreEqual(SemEma(n.Save("0.5.0", U)), SemEma(texto), "migrar = jogar ate ali com o codigo novo");
+            Assert.AreEqual(texto, Sim.Load(texto).Save("0.5.0", U), "ida e volta estavel no schema 5");
+
+            var b1 = new Bot(BotProfile.Bom);
+            var b2 = new Bot(BotProfile.Bom);
+            for (int i = 0; i < 1800 * Sim.Hz; i++) { b1.Step(m); b2.Step(n); }
+            Assert.GreaterOrEqual(m.Marco, 1, "passou do marco 1");
+            Assert.AreEqual(SemEma(n.Save("0.5.0", U + 1)), SemEma(m.Save("0.5.0", U + 1)));
+        }
+
+        /// <summary>Fechar e reabrir no meio de cada onda com clima, demanda e falhas em jogo: 40 ondas iguais a sem fechar.</summary>
+        [Test]
+        public void RetomadaComFaseC4_ContinuaIgual()
+        {
+            int climas = 0, falhas = 0;
+            foreach (int aero in new[] { 0, 1, 2 })
+                foreach (BotProfile p in new[] { BotProfile.Bom, BotProfile.Lento })
+                    for (int seed = 1; seed <= 2; seed++)
+                    {
+                        Tuning t = BalanceTests.AbertoC4(aero);
+                        Bot.Resultado a = Bot.Medir(p, seed, 40, t), b = Bot.Medir(p, seed, 40, t, true);
+                        Assert.AreEqual((a.Receita, a.Embarque, a.Climas, a.Falhas, a.Reparos), (b.Receita, b.Embarque, b.Climas, b.Falhas, b.Reparos), p.Name + " semente " + seed);
+                        climas += a.Climas; falhas += a.Falhas;
+                    }
+            Assert.Greater(climas, 0, "o clima entrou em jogo");
+            Assert.Greater(falhas, 0, "as falhas entraram em jogo");
+        }
+
+        [Test]
+        public void FaseC4_EmAndamento_VoltaDoSave()
+        {
+            Sim s = EstacoesPerfisTests.Pronta(ClimaFalhasTests.ComClima(TipoIncidente.Temporal));
+            Incidente i = RotasIncidentesTests.AteOAviso(s);
+            Assert.AreEqual(TipoIncidente.Temporal, i.Tipo);
+            Sim b = Sim.Load(s.Save("x", T), s.T, s.Seed);
+            Assert.AreEqual((TipoIncidente.Temporal, i.Inicio, i.Fim), (b.Inc.Tipo, b.Inc.Inicio, b.Inc.Fim), "tipo novo volta do save");
+
+            Sim f = EstacoesPerfisTests.Pronta(ClimaFalhasTests.ComClima(TipoIncidente.FrenteFria));
+            Incidente j;
+            do { RotasIncidentesTests.Ate(f, f.Steps + f.OndaPassos); j = RotasIncidentesTests.AteOAviso(f); } while (j.Vaga != 0);
+            Assert.IsTrue(f.Atrasa());
+            Sim g = Sim.Load(f.Save("x", T), f.T, f.Seed);
+            Assert.AreEqual((f.Voos[0].FechaPasso, true), (g.Voos[0].FechaPasso, g.Voos[0].Atrasado), "o portao atrasado continua atrasado");
+
+            Sim p = EstacoesPerfisTests.Pronta(ClimaFalhasTests.ComFalha(TipoFalha.Pane));
+            RegrasTests.Run(p, 21f);
+            p.Avioes[0].Desgaste = 85;
+            Assert.IsNotNull(ClimaFalhasTests.Espera(p, Ev.Pane));
+            Sim q = Sim.Load(p.Save("x", T), p.T, p.Seed);
+            Assert.AreEqual((true, p.Avioes[0].Falhou), (q.Avioes[0].Pane, q.Avioes[0].Falhou), "a pane volta e nao sorteia de novo");
+
+            Sim r = EstacoesPerfisTests.Pronta(ClimaFalhasTests.ComFalha(TipoFalha.Rejeicao));
+            RegrasTests.Run(r, 21f);
+            r.Avioes[0].Desgaste = 85;
+            Assert.IsNotNull(ClimaFalhasTests.Espera(r, Ev.Rejeicao));
+            Sim u = Sim.Load(r.Save("x", T), r.T, r.Seed);
+            Assert.AreEqual((r.Avioes[0].SaiEm, r.PistaAte), (u.Avioes[0].SaiEm, u.PistaAte), "a rejeicao continua de onde estava");
+
+            Sim v = EstacoesPerfisTests.Pronta(ClimaFalhasTests.ComFalha(TipoFalha.Retorno));
+            RegrasTests.Run(v, 21f);
+            v.Avioes[0].Desgaste = 85;
+            Assert.IsNotNull(ClimaFalhasTests.Espera(v, Ev.Decolou));
+            Sim w = Sim.Load(v.Save("x", T), v.T, v.Seed);
+            Assert.AreEqual((v.Avioes[0].Retorno, v.Avioes[0].Chega), (w.Avioes[0].Retorno, w.Avioes[0].Chega), "o retorno continua no ar");
+            Assert.IsNotNull(ClimaFalhasTests.Espera(w, Ev.PousoSeguro, 60f), "e pousa");
+        }
+
+        [Test]
+        public void LixoDaFaseC4_ViraPadraoLimitado()
+        {
+            Sim s = EstacoesPerfisTests.Pronta(ClimaFalhasTests.ComFalha(TipoFalha.Pane));
+            RegrasTests.Run(s, 21f);
+            string p = SaveEnvelope.Unwrap(s.Save("x", T)).Payload + "falha.0=1,-9,999999999,999999999\nfalha.1=x,y\npista=999999999\nva.0=-5\nva.1=999999\n";
+            Sim b = Sim.Load(SaveEnvelope.Wrap(p, "x", T), s.T, s.Seed);
+            Assert.IsFalse(b.SaveRefused);
+            Assert.AreEqual((-1, 0L, 0L), (b.Avioes[0].Falhou, b.Avioes[0].SaiEm, b.Avioes[0].Retorno), "sem voo fechado nem aviao no ar");
+            Assert.LessOrEqual(b.PistaAte, b.Steps + (long)(s.T.PistaBloqueioSeg * Sim.Hz));
+            Assert.Less(b.Voos[1].FechaPasso, b.OndaPassos, "portao nunca passa da virada");
+            Assert.AreEqual(s.Voos[0].FechaPasso, b.Voos[0].FechaPasso, "portao nunca fecha antes da hora");
         }
 
         /// <summary>Fechar e reabrir no meio de cada onda, com rotas, viagem, rota longa e os 4 incidentes em jogo: 20 ondas iguais a sem fechar.</summary>

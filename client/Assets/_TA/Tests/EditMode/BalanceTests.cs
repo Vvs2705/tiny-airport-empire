@@ -2,6 +2,7 @@ using System;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using TA.Core;
 
@@ -17,21 +18,23 @@ namespace TA.Tests
     public class BalanceTests
     {
         public const int Sementes = 200, Ondas = 10, OndasFaseC = 20;
+        /// <summary>Sementes ao mesmo tempo: os 4 nucleos do runner do CI, tambem no PC (7,7 GB de RAM).</summary>
+        public const int Threads = 4;
 
         public struct Linha
         {
             public BotProfile P; public double Embarque, EmbarqueP10, Receita, Moves, Taps; public double[] Marco;
-            public double SemTrip, Inspecoes, Hangares, Checagens, Trocas, Incidentes, Reacoes;
+            public double SemTrip, Inspecoes, Hangares, Checagens, Trocas, Incidentes, Reacoes, Climas, Falhas, Reparos;
         }
 
-        public static Linha Rodar(BotProfile p, Tuning t = null, int sementes = Sementes, int ondas = Ondas)
+        public static Linha Rodar(BotProfile p, Tuning t = null, int sementes = Sementes, int ondas = Ondas, int threads = Threads)
         {
             var l = new Linha { P = p, Marco = new double[3] };
             var emb = new double[sementes];
             var marcos = new int[3];
             // ponytail: cada semente tem o seu Sim e o Tuning so e' lido: rodam em paralelo (o job do CI tem teto de 20 min) e somam na ordem de sempre
             var rs = new Bot.Resultado[sementes];
-            System.Threading.Tasks.Parallel.For(0, sementes, i => rs[i] = Bot.Medir(p, i + 1, ondas, t));
+            Parallel.For(0, sementes, new ParallelOptions { MaxDegreeOfParallelism = threads }, i => rs[i] = Bot.Medir(p, i + 1, ondas, t));
             for (int seed = 1; seed <= sementes; seed++)
             {
                 Bot.Resultado r = rs[seed - 1];
@@ -39,7 +42,7 @@ namespace TA.Tests
                 double k = 1.0 / sementes;
                 l.Embarque += r.Embarque * k; l.Receita += r.Receita * k; l.Moves += r.Moves * k; l.Taps += r.Taps * k;
                 l.SemTrip += r.SemTrip * k; l.Inspecoes += r.Inspecoes * k; l.Hangares += r.Hangares * k; l.Checagens += r.Checagens * k; l.Trocas += r.Trocas * k;
-                l.Incidentes += r.Incidentes * k; l.Reacoes += r.Reacoes * k;
+                l.Incidentes += r.Incidentes * k; l.Reacoes += r.Reacoes * k; l.Climas += r.Climas * k; l.Falhas += r.Falhas * k; l.Reparos += r.Reparos * k;
                 for (int m = 0; m < 3; m++) if (r.MarcoEm[m] >= 0) { l.Marco[m] += r.MarcoEm[m]; marcos[m]++; }
             }
             for (int m = 0; m < 3; m++) l.Marco[m] = marcos[m] > 0 ? l.Marco[m] / marcos[m] : -1;
@@ -183,6 +186,23 @@ namespace TA.Tests
         {
             t.Rotas = Tabelas.Rotas.Take(2).ToArray();
             t.Aeroportos = Tabelas.Aeroportos.Take(1).ToArray();
+            return SemFaseC4(t);
+        }
+
+        /// <summary>O jogo da Fase C3: clima, demanda e falhas desligados. Tem de repetir a tabela da main, numero a numero.</summary>
+        public static Tuning SemFaseC4(Tuning t = null)
+        {
+            t = t ?? new Tuning();
+            t.RegraClima = t.RegraEpocas = t.RegraPicos = t.RegraFalhas = false;
+            return t;
+        }
+
+        /// <summary>Tudo aberto, com a Fase C4 ligada desde o comeco: o que a Fase C4 mede.</summary>
+        public static Tuning AbertoC4(int aero)
+        {
+            Tuning t = AbertoC3(aero);
+            t.RegraClima = t.RegraEpocas = t.RegraPicos = t.RegraFalhas = true;
+            t.ClimaMarco = 0;
             return t;
         }
 
@@ -202,7 +222,7 @@ namespace TA.Tests
             var t = new Tuning { Abre = new int[8], PerfilMarco = new int[6], AeroportoInicial = aero };
             t.Rotas = Tabelas.Rotas.Select(r => { Rota c = r.Copia(); c.Marco = 0; return c; }).ToArray();
             t.Aeroportos = Tabelas.Aeroportos.Select(a => { Aeroporto c = a.Copia(); c.Marco = 0; return c; }).ToArray();
-            return t;
+            return SemFaseC4(t);
         }
 
         static BotProfile Sem(string nome, bool rotas, bool viaja, bool incidentes)
@@ -212,13 +232,14 @@ namespace TA.Tests
             return p;
         }
 
-        static void Portao(string sistema, Tuning t, BotProfile pl, BotProfile au, ref string falhas, bool regra = true, bool portao = true)
+        static (Linha, Linha) Portao(string sistema, Tuning t, BotProfile pl, BotProfile au, ref string falhas, bool regra = true, bool portao = true, int ondas = OndasFaseC, int sementes = Sementes)
         {
             var ci = CultureInfo.InvariantCulture;
-            Linha a = Rodar(pl, t, Sementes, OndasFaseC), b = Rodar(au, t, Sementes, OndasFaseC);
+            Linha a = Rodar(pl, t, sementes, ondas), b = Rodar(au, t, sementes, ondas);
             double g = a.Receita / b.Receita;
             TestContext.Out.WriteLine(string.Format(ci, "| {0} | {1:0.0}% | {2:0.0}% | {3:0} | {4:0} | {5:0.000} | {6:0.0} | {7:0.0} |", sistema, a.Embarque * 100, b.Embarque * 100, a.Receita, b.Receita, g, a.Incidentes, a.Reacoes));
             if (portao && regra && g < 1.10) falhas += " " + sistema + "=" + g.ToString("0.000", ci);
+            return (a, b);
         }
 
         /// <summary>Portao do GDD §5.13 por sistema da Fase C3 (CONTRATO_FASE_C3 §7), 200 sementes x 20 ondas: rotas e incidentes em cada aeroporto
@@ -248,6 +269,70 @@ namespace TA.Tests
                 Portao("so " + (TipoIncidente)tipo, t, reage, comRotas, ref falhas, true, false);
             }
             Assert.IsEmpty(falhas, "GDD §5.13: sistema com regra precisa de ganho >= 1,10");
+        }
+
+        /// <summary>O ano inteiro: as 4 estacoes do ano passam na medicao.</summary>
+        public const int OndasAno = 32;
+
+        static BotProfile C4(string nome, bool clima, bool falhas, bool planeja = true, bool viaja = false, bool segue = false)
+        {
+            BotProfile p = Sem(nome, true, viaja, true);
+            p.Clima = clima; p.Falhas = falhas; p.Planeja = planeja; p.Segue = segue;
+            return p;
+        }
+
+        /// <summary>O jogo com so um sistema da Fase C4 ligado, tudo aberto, no aeroporto `aero`.</summary>
+        static Tuning SoC4(int aero, bool clima, bool epocas, bool falhas)
+        {
+            Tuning t = AbertoC4(aero);
+            t.RegraClima = clima; t.RegraEpocas = epocas; t.RegraFalhas = falhas; t.RegraPicos = false;
+            return t;
+        }
+
+        [Test]
+        public void Antes_FaseC4()
+        {
+            Tuning t = SemFaseC4();
+            Linha bom = Rodar(BotProfile.Bom, t), lento = Rodar(BotProfile.Lento, t), parado = Rodar(BotProfile.Parado, t);
+            Imprime("antes da Fase C4 (a main da Fase C3)", new[] { bom, lento, parado });
+            Assert.AreEqual((6827, 3629, 4788), ((int)Math.Round(bom.Receita), (int)Math.Round(lento.Receita), (int)Math.Round(parado.Receita)), "com tudo desligado, a tabela da main");
+        }
+
+        /// <summary>Portao do GDD §5.13 por sistema da Fase C4 (CONTRATO_FASE_C4 §8), 200 sementes x 1 ano, tudo aberto, um sistema por vez.</summary>
+        [Test]
+        public void Portao_FaseC4_PorSistema()
+        {
+            TestContext.Out.WriteLine("| sistema | emb. planejador | emb. automatico | receita planejador | receita automatico | ganho | incidentes | reacoes |\n|---|---|---|---|---|---|---|---|");
+            string falhas = "";
+            for (int a = 1; a < 3; a++)
+                Portao("clima em " + Tabelas.Aeroportos[a].Nome, SoC4(a, true, false, false), C4("reage", true, false), C4("segura", false, false), ref falhas, Tuning.Padrao.RegraClima, true, OndasAno);
+            for (int a = 0; a < 3; a++)
+                Portao("falhas em " + Tabelas.Aeroportos[a].Nome, SoC4(a, false, false, true), C4("cuida", false, true), C4("voa no aviso", false, false, false), ref falhas, Tuning.Padrao.RegraFalhas, true, OndasAno);
+            Assert.IsEmpty(falhas, "GDD §5.13: sistema com regra precisa de ganho >= 1,10");
+        }
+
+        /// <summary>O que nao tem portao proprio (CONTRATO_FASE_C4 §8): cada clima sozinho, o ganho marginal das falhas e a demanda por estacao.</summary>
+        [Test]
+        public void Medida_FaseC4()
+        {
+            TestContext.Out.WriteLine("| linha | emb. planejador | emb. automatico | receita planejador | receita automatico | ganho | incidentes | reacoes |\n|---|---|---|---|---|---|---|---|");
+            string nada = "";
+            Portao("clima em Vale Verde, o aeroporto de ensino", SoC4(0, true, false, false), C4("reage", true, false), C4("segura", false, false), ref nada, false, false, OndasAno);
+            Tuning campanha = new Tuning { RegraFalhas = false, RegraPicos = false };
+            Portao("clima na partida inteira", campanha, C4("reage", true, false, true, true), C4("segura", false, false, true, true), ref nada, false, false, OndasAno * 2);
+            Tuning epocas = SoC4(0, false, true, false);
+            Portao("estacoes do ano (demanda): segue a estacao", epocas, C4("segue", false, false, true, true, true), C4("fica", false, false, true, true), ref nada, false, false, OndasAno * 4);
+            for (int a = 0; a < 3; a++)
+                Portao("so o reparo pago em " + Tabelas.Aeroportos[a].Nome, SoC4(a, false, false, true), C4("repara", false, true), C4("nao repara", false, false), ref nada, false, false, OndasAno);
+            for (int a = 0; a < 3; a++)
+                Portao("manutencao sem falhas em " + Tabelas.Aeroportos[a].Nome, SoC4(a, false, false, false), C4("cuida", false, false), C4("voa no aviso", false, false, false), ref nada, false, false, OndasAno);
+            foreach (Clima c in Tabelas.Climas)
+            {
+                int col = Array.IndexOf(Tabelas.Climas, c);
+                Tuning t = SoC4(2, true, false, false);
+                t.Aeroportos = t.Aeroportos.Select(x => { Aeroporto k = x.Copia(); k.Clima = Enumerable.Range(0, 4).Select(_ => Enumerable.Range(0, 5).Select(i => i == col ? 0.4f : 0f).ToArray()).ToArray(); return k; }).ToArray();
+                Portao("so " + c.Tipo, t, C4("reage", true, false), C4("segura", false, false), ref nada, false, false);
+            }
         }
 
         /// <summary>TA-6 (GDD §5.7): nenhuma rota domina. As 2 vagas presas em cada rota, sem incidente, no mesmo aeroporto: a melhor rende no
