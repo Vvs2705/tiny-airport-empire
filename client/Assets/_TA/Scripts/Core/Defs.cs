@@ -69,6 +69,17 @@ namespace TA.Core
         ReparoIniciado,     // A = estacao, B = custo (0 = mecanico na estacao)                   -> incident_repair_started
         Reparado,           // A = estacao                                                        -> incident_repaired
         Priorizado,         // A = voo (grupo de conexao passa a frente)                          -> incident_group_prioritized
+        // Fase C4 (CONTRATO_FASE_C4): clima e falhas de aviao
+        Previsto,           // A = TipoIncidente, B = onda (previsao da onda seguinte)            -> weather_forecast
+        Atrasado,           // A = voo, B = s de atraso do portao                                 -> gate_delayed
+        Degelou,            // A = aviao, B = voo                                                 -> deicing_done
+        Pane,               // A = aviao, B = voo                                                 -> aircraft_fault
+        PaneReparo,         // A = aviao, B = custo (reparo pago no lugar da inspecao)            -> aircraft_fault_repair_started
+        PaneReparada,       // A = aviao                                                          -> aircraft_fault_repaired
+        Rejeicao,           // A = aviao, B = voo (abortou a decolagem; a pista bloqueia)         -> takeoff_rejected
+        RetornoPedido,      // A = aviao (bombeiros e ambulancia em prontidao)                    -> return_requested
+        PousoSeguro,        // A = aviao                                                          -> safe_landing
+        Remarcados,         // A = aviao (os passageiros do voo foram remarcados)                 -> pax_rebooked
     }
 
     /// <summary>Funcoes da tripulacao (GDD §5.11). Indice vai no save.</summary>
@@ -118,6 +129,9 @@ namespace TA.Core
         public bool AvisouTrip;
         /// <summary>Rota do voo que pegou e a onda em que volta a ter voo (rota longa: fica fora da onda seguinte).</summary>
         public int Rota, VoltaOnda;
+        /// <summary>Fase C4: em pane (parado ate o reparo), voo que ja falhou (sem novo sorteio), passo a partir do qual decola depois de rejeitar
+        /// e passo em que pede para voltar (0 = nao esta voltando).</summary>
+        public bool Pane; public int Falhou = -1; public long SaiEm, Retorno;
         public bool Pendente => Desgaste >= 100;
         public bool PatioPronto { get { foreach (int f in Falta) if (f > 0) return false; return true; } }
     }
@@ -203,6 +217,8 @@ namespace TA.Core
         /// entra na seguranca e paga Tuning.ConexaoTarifa x; Prioridade = o jogador priorizou (fura a fila). Adiantado = embarca com a pista
         /// fechada (frente fria).</summary>
         public int Grupo, GrupoChega; public bool GrupoConexao, Prioridade, Adiantado;
+        /// <summary>Clima: o jogador atrasou o portao (FechaPasso ja mudou) e o voo nao leva o bonus de pontualidade.</summary>
+        public bool Atrasado;
         public int Base => Total - Grupo;
     }
 
@@ -302,13 +318,27 @@ namespace TA.Core
         public int RotaFixa = -1;
         /// <summary>Chance de incidente por ponto de risco das rotas da onda, teto da chance, ondas sem incidente depois de um e s de aviso.</summary>
         public float RiscoChance = 0.1f, IncidenteTeto = 0.8f, AvisoSeg = 30f; public int IncidenteFolga = 1;
-        /// <summary>Frente fria: a pista fecha FrenteAntes s antes do portao, por FrenteSeg s (TA-4). 48 s: depois do pouso da vaga 2 e da
-        /// decolagem da vaga 1, para atingir so o voo sorteado.</summary>
-        public float FrenteAntes = 48f, FrenteSeg = 60f;
         /// <summary>Falha de equipamento: FalhaFator x mais devagar por FalhaSeg s; reparo de ReparoCusto Cash em ReparoSeg s.</summary>
         public int FalhaFator = 5, ReparoCusto = 30; public float FalhaSeg = 60f, ReparoSeg = 6f;
         /// <summary>Grupos extras, em fracao dos passageiros da onda. Atraso de conexao: ConexaoAntes s antes do portao, tarifa ConexaoTarifa x.</summary>
         public float PicoExtra = 0.35f, ConexaoExtra = 0.25f, ConexaoAntes = 30f; public int ConexaoTarifa = 3;
+
+        // ---- Fase C4 (CONTRATO_FASE_C4, hipoteses) ----
+        /// <summary>Portao de design do GDD §5.13 por sistema. Tudo false = o jogo da Fase C3 (a frente fria volta aos pesos do aeroporto). A demanda
+        /// por estacao do ano ficou so visual: ganho 0,985 (BALANCE.md D-C4a). Os picos do dia nao tem escolha propria: so nao podem quebrar os portoes.</summary>
+        public bool RegraClima = true, RegraEpocas = false, RegraPicos = true, RegraFalhas = true;
+        /// <summary>Ondas por dia (1 onda = 3 h de jogo), dias por estacao do ano, hora em que a onda 0 comeca e marco que abre clima e demanda.</summary>
+        public int DiaOndas = 8, EpocaDias = 1, ClimaMarco = 1; public float HoraInicial = 6f;
+        /// <summary>Fator de passageiros de cada onda do dia, a partir das 06h: picos de manha e no fim da tarde.</summary>
+        public float[] DemandaHora = { 1.25f, 1f, 0.9f, 1f, 1.25f, 1f, 0.75f, 0.85f };
+        /// <summary>As linhas de clima (Rotas.cs) e os s que o portao atrasado fecha depois de reabrir.</summary>
+        public Clima[] Climas = Tabelas.Climas; public float AtrasoFolga = 20f;
+        /// <summary>Falha por voo com o desgaste no aviso, e os pesos de pane, rejeicao e retorno.</summary>
+        public float FalhaAviaoChance = 0.4f; public int[] FalhaAviaoPesos = { 3, 2, 1 };
+        public int PaneCusto = 30; public float PaneSeg = 8f;
+        /// <summary>Rejeicao: o aviao sai RejeicaoSeg s depois. Retorno: pede RetornoPede s depois de decolar e pousa RetornoVolta s depois disso.
+        /// Os dois deixam a pista bloqueada por PistaBloqueioSeg s.</summary>
+        public float RejeicaoSeg = 40f, PistaBloqueioSeg = 20f, RetornoPede = 15f, RetornoVolta = 25f;
     }
 
     /// <summary>Historias do TA-3 (GDD §5.9). A v0.1 tem 1. Id = indice (vai no album do save): so cresce no fim.</summary>

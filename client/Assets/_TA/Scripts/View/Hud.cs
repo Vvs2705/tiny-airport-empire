@@ -108,7 +108,7 @@ namespace TA
                 r.gameObject.AddComponent<Button>().onClick.AddListener(() => AbreVoo(ff));
                 var l = new Linha();
                 l.Chip = Art.Img(r, "Chip", Art.Mala(), Art.VooCor[f], new Vector2(0f, 0.45f), new Vector2(0.05f, 0.98f));
-                l.Voo = Art.NewText(r, "Voo", 34, new Vector2(0.06f, 0.5f), new Vector2(0.42f, 0.98f), TextAnchor.MiddleLeft);
+                l.Voo = Art.NewText(r, "Voo", 34, new Vector2(0.06f, 0.5f), new Vector2(0.42f, 0.98f), TextAnchor.MiddleLeft); l.Voo.font = Art.Titulo();
                 l.Fecha = Art.NewText(r, "Fecha", 30, new Vector2(0.42f, 0.5f), new Vector2(0.59f, 0.98f), TextAnchor.MiddleLeft);
                 l.Status = Art.NewText(r, "Status", 28, new Vector2(0.59f, 0.5f), new Vector2(0.83f, 0.98f), TextAnchor.MiddleLeft);
                 l.ABordo = Art.NewText(r, "ABordo", 30, new Vector2(0.83f, 0.5f), new Vector2(1f, 0.98f), TextAnchor.MiddleRight);

@@ -28,7 +28,7 @@ namespace TA.Core
         /// dia (nem pendente nem em checagem). Regra desligada no Tuning = nao segura.</summary>
         public bool Pronto(int aviao) => aviao >= 0 && aviao < Avioes.Length && Pronto(Avioes[aviao]);
 
-        bool Pronto(Aviao a) => a.NoPatio && a.Hangar == 0 && a.VooId >= 0 && a.FechouEm < 0
+        bool Pronto(Aviao a) => a.NoPatio && a.Hangar == 0 && a.VooId >= 0 && a.FechouEm < 0 && !a.Pane
             && (!T.RegraPatio || a.Falta[(int)Servico.Desembarque] == 0 && a.Falta[(int)Servico.Limpeza] == 0)
             && (!T.RegraManutencao || !a.Pendente && a.Check == 0)
             && (!T.RegraTripulacao || TripCompleta(a));
@@ -59,7 +59,8 @@ namespace TA.Core
             foreach (Aviao a in Avioes)
             {
                 if (a.Hangar > 0) { if (--a.Hangar == 0) { a.Desgaste = 0; Encosta(a, true); Emit(Ev.HangarFeito, a.Id); } }
-                else if (!a.NoPatio && a.Chega >= 0 && Steps >= a.Chega && !PistaFechada) Encosta(a, false);
+                else if (!a.NoPatio && a.Chega >= 0 && (a.Retorno > 0 ? Steps >= a.Chega : Steps >= a.Chega + EsperaPista && !PistaFechada && Steps >= PistaAte)) Encosta(a, false);
+                if (a.Retorno > 0 && Steps == a.Retorno) Emit(Ev.RetornoPedido, a.Id);
             }
             EscalaAuto();
             Servicos();
@@ -71,6 +72,7 @@ namespace TA.Core
         void Encosta(Aviao a, bool doHangar)
         {
             a.NoPatio = true; a.Chega = Steps;
+            if (a.Retorno > 0) PousoDeRetorno(a);
             for (int s = 0; s < 4; s++) { a.Falta[s] = doHangar ? 0 : ServicoPassos((Servico)s); a.Fazendo[s] = false; }
             Desembarca(a, true);
             Liga(a);
@@ -79,6 +81,7 @@ namespace TA.Core
 
         void Servicos()
         {
+            if (PatioParado) return;
             int livres = EquipePatio;
             foreach (Aviao a in Avioes) for (int s = 0; s < 4; s++) if (a.Fazendo[s]) livres--;
             // primeiro o que segura o embarque (desembarque e limpeza), depois combustivel e bagagem; avioes por ordem de chegada
@@ -120,13 +123,14 @@ namespace TA.Core
                     a.Desgaste = Math.Max(0, a.Desgaste - (a.Inspecao ? T.InspecaoTira : T.CheckTira));
                     a.Inspecao = false;
                     Emit(Ev.ChecagemFeita, a.Id, a.Desgaste);
+                    if (a.Pane) { a.Pane = false; Emit(Ev.PaneReparada, a.Id); }
                 }
             if (!T.RegraManutencao) return;
             // o padrao: aviao pendente no patio recebe a inspecao obrigatoria assim que o mecanico esta livre (sem Cash; custa tempo)
             foreach (Aviao a in Avioes)
-                if (a.NoPatio && a.Pendente && a.Check == 0 && a.FechouEm < 0 && MecanicoLivre)
+                if (a.NoPatio && (a.Pendente || a.Pane) && a.Check == 0 && a.FechouEm < 0 && MecanicoLivre)
                 {
-                    a.Check = PassosOficina(T.InspecaoSeg); a.Inspecao = true; a.Checou = true;
+                    a.Check = a.Pane ? Passos(T.InspecaoSeg) : PassosOficina(T.InspecaoSeg); a.Inspecao = true; a.Checou = true;
                     Emit(Ev.ChecagemIniciada, a.Id, 0, 1);
                 }
         }
@@ -153,7 +157,7 @@ namespace TA.Core
         bool NoHorario(Voo v)
         {
             Aviao a = Avioes[v.Indice];
-            return !PistaFechada && (!T.RegraPatio || a.VooId == v.Id && a.PatioPronto);
+            return !PistaFechada && !v.Atrasado && EsperaDecolagem(a) == 0 && (!T.RegraPatio || a.VooId == v.Id && a.PatioPronto);
         }
 
         /// <summary>Decola quando embarcou (portao fechado) e o patio terminou: conta o trecho da tripulacao e soma o desgaste.</summary>
@@ -163,6 +167,9 @@ namespace TA.Core
             foreach (Aviao a in Avioes)
             {
                 if (!a.NoPatio || a.VooId < 0 || a.FechouEm < 0 || T.RegraPatio && !a.PatioPronto) continue;
+                if (Steps < PistaAte || Steps < a.SaiEm || Steps < a.FechouEm + EsperaDecolagem(a) || RejeitouDecolagem(a)) continue;
+                if (ClimaAgora?.Degelo > 0) Emit(Ev.Degelou, a.Id, a.VooId);
+                TipoFalha falha = FalhaDe(a);
                 Emit(Ev.Decolou, a.Id, a.VooId, (int)Math.Round((Steps - a.FechouEm) * (double)Step));
                 foreach (Tripulante t in Tripulacao) if (t.Aviao == a.Id) t.Trechos++;
                 if (T.RegraManutencao)
@@ -174,8 +181,9 @@ namespace TA.Core
                 }
                 for (int s = 0; s < 4; s++) { a.Falta[s] = 0; a.Fazendo[s] = false; }
                 a.VoltaOnda = a.VooId / 2 + Efeito(a.Rota).Cada;
-                a.NoPatio = false; a.VooId = -1; a.FechouEm = -1;
+                a.NoPatio = false; a.VooId = -1; a.FechouEm = -1; a.SaiEm = 0;
                 a.Chega = Steps + Passos(TrechoSeg(a.Rota));
+                if (falha == TipoFalha.Retorno) DecolouComRetorno(a);
             }
         }
 
@@ -233,7 +241,7 @@ namespace TA.Core
         public bool PodeChecagem(int aviao)
         {
             Aviao a = AntesDoEmbarque(aviao);
-            return a != null && T.RegraManutencao && !a.Checou && a.Check == 0 && !a.Pendente && a.Desgaste > 0 && MecanicoLivre && Cash >= T.CheckCusto;
+            return a != null && T.RegraManutencao && !a.Checou && a.Check == 0 && !a.Pendente && !a.Pane && a.Desgaste > 0 && MecanicoLivre && Cash >= T.CheckCusto;
         }
 
         public bool PodeHangar(int aviao) => AntesDoEmbarque(aviao) != null && T.RegraManutencao && Cash >= T.HangarCusto;
@@ -262,7 +270,7 @@ namespace TA.Core
             Cash -= T.HangarCusto;
             Desembarca(a, false);
             for (int s = 0; s < 4; s++) { a.Falta[s] = 0; a.Fazendo[s] = false; }
-            a.Check = 0; a.NoPatio = false; a.VooId = -1; a.FechouEm = -1;
+            a.Check = 0; a.NoPatio = false; a.VooId = -1; a.FechouEm = -1; a.Pane = false;
             a.Hangar = Passos(T.HangarSeg);
             Emit(Ev.HangarIniciado, a.Id, T.HangarCusto);
             return true;
