@@ -529,6 +529,7 @@ namespace TA
                         Vector2 b = e == (int)Estacao.Seguranca ? Em(e, 1f, SegA[i] + BeltX) : Balcao(e, i);
                         _diag.WriteLine(string.Format(inv, "0,balcao#{0}.{1},{2:0.000},0,{3:0.000},0", e, i, b.x, b.y));
                     }
+            for (int i = 0; i < _cadeiras.Count; i++) _diag.WriteLine(string.Format(inv, "0,cadeira#{0},{1:0.000},0,{2:0.000},0", i, _cadeiras[i].x, _cadeiras[i].y));
             DiagCaixas(inv);
         }
 

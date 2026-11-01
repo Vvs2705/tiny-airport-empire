@@ -199,7 +199,7 @@ def mede(arquivo, conta, cobertura):
                 fixas += partes_fixas(nome, *vals)
             elif tipo == "movel":
                 medidas[nome] = [float(r[c]) for c in ("x", "y", "z", "sx", "sy", "sz")]
-            elif tipo != "balcao":
+            elif tipo not in ("balcao", "cadeira"):
                 por_t[float(r["t"])].append(r)
     tempos = sorted(por_t)
     casa, longe, em_casa = {}, defaultdict(int), {}
