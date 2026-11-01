@@ -52,6 +52,16 @@ namespace TA.Tests
             b.Secundario("Mover");
             Assert.IsTrue(b.B.interactable);
             Assert.IsFalse(b.Icone.gameObject.activeSelf);
+
+            b.Principal("Continuar", Art.Compra);
+            Assert.IsTrue(b.B.interactable);
+            Assert.IsFalse(b.Rotulo.gameObject.activeSelf);
+            Assert.AreEqual("Continuar", b.Valor.text);
+
+            b.Video("Dobrar", 1200);
+            Assert.IsTrue(b.B.interactable);
+            Assert.AreEqual(Art.Video, b.Fundo.color);
+            Assert.AreEqual("+" + Textos.Num(1200), b.Valor.text);
             Object.DestroyImmediate(raiz);
         }
     }

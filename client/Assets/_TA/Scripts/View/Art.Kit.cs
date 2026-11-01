@@ -71,6 +71,21 @@ namespace TA
             Valor.text = rotulo; Valor.color = Art.Azul;
         }
 
+        /// <summary>Acao gratis em destaque, uma linha em branco sobre a cor: seguir, coletar.</summary>
+        public void Principal(string rotulo, Color fundo)
+        {
+            Arruma(false, fundo, null, Color.white, true, true);
+            Valor.text = rotulo; Valor.color = Color.white;
+        }
+
+        /// <summary>Recompensa por anuncio: azul, com o ganho ao lado da moeda.</summary>
+        public void Video(string rotulo, long ganho)
+        {
+            Arruma(true, Art.Video, Art.Moeda(), Color.white, true, true);
+            Rotulo.text = rotulo; Rotulo.color = Color.white;
+            Valor.text = "+" + Textos.Num(ganho); Valor.color = Color.white;
+        }
+
         void Arruma(bool duasLinhas, Color fundo, Sprite icone, Color corIcone, bool contorno, bool ativo)
         {
             Fundo.color = fundo;
