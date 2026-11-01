@@ -219,6 +219,7 @@ namespace TA
                 _nome[k].text = Textos.Funcionario[k];
             }
             GentePatio();
+            Clima3D();
         }
 
         // ------------------------------------------------------------------ quadro a quadro
@@ -237,6 +238,7 @@ namespace TA
             Salas3D(s);
             Patio(s, dt);
             AndaPatio(dt);
+            ClimaPasso(s, dt);
         }
 
         /// <summary>Largura da tela em m no enquadramento: mais que isso, o corpo do adulto (0,45 m na folha) fica abaixo de 28 px na foto 540 x 960 (ART_BIBLE §3).</summary>
@@ -289,6 +291,8 @@ namespace TA
             else if (_vista == "ponte") { _alvo = new Vector3(10.2f, 0f, 11.6f); _tam = 4.6f; }
             else if (_vista == "escada") { _alvo = new Vector3(21f, 0f, 14f); _tam = 4.2f; }
             else if (_vista == "chegadas") { _alvo = new Vector3(4.6f, 0f, 10.2f); _tam = 3.6f; }
+            else if (_vista == "calcada") { _alvo = new Vector3(-1.45f, 0f, 3.25f); _tam = 4.4f; }
+            else if (_vista == "pista") { _alvo = new Vector3(11f, 0f, 26f); _tam = 15f; }
             else if (_vista != null && _vista.Length == 5 && _vista.StartsWith("sala")) { _alvo = V3(Centro(_vista[4] - '0')); _tam = 4.4f; }
         }
 
