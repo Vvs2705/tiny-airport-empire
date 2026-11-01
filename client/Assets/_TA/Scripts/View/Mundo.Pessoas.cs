@@ -35,7 +35,7 @@ namespace TA
             public Vector2 Pos;
             public readonly List<Vector2> Caminho = new List<Vector2>();
             public int Zona = -1, Estande = -1;   // Estande >= 0: indo ao aviao desse estande ou vindo dele (Mundo.Embarque)
-            public bool Saindo, Andou, Cima, Atende, NoBalcao;
+            public bool Saindo, Andou, Cima, Atende, NoBalcao, SoMao, Despachou;   // SoMao, Despachou: Mundo.Malas.cs
             public float Dir = 1f, Escala = 1f;
         }
 
@@ -155,6 +155,7 @@ namespace TA
                 _livres.Push(b);
             }
             AgentesPortao(s, dt);
+            MalasPasso(s, dt);
         }
 
         void Liga(Pax p, int e, Vector2 alvo, Sim s, bool noBalcao, bool bravo, int vaga = -1)
@@ -166,10 +167,12 @@ namespace TA
                 if (_livres.Count > 0) { b = _livres.Pop(); Veste(b, ator); } else b = NovoBoneco(ator);
                 b.T.gameObject.SetActive(true);
                 b.Pos = Calcada + new Vector2(-0.4f * (p.Indice % 3), 0.3f * (p.Indice % 4) - 0.45f);
-                b.Zona = -1; b.Estande = -1; b.Saindo = false; b.Caminho.Clear(); b.NoBalcao = false; b.VelAtual = 0f; b.Senta = 0f; b.Cadeira = b.Vaga = -1;
+                b.Zona = -1; b.Estande = -1; b.Saindo = false; b.Caminho.Clear(); b.NoBalcao = false; b.VelAtual = 0f; b.Senta = 0f; b.Cadeira = b.Vaga = -1; b.SoMao = b.Despachou = false;
                 b.Coracao.enabled = p.Historia;
                 _pax[p.Id] = b;
             }
+            if (IndoAoBalcao(b, p, e, vaga, noBalcao)) return;
+            if (b.SoMao != b.Despachou && e != (int)Estacao.Seguranca) SoMao(b, p, b.Despachou);   // a bandeja devolveu a mala mesmo se o quadro pulou
             if (b.Zona != e)
             {
                 b.Caminho.Clear();
