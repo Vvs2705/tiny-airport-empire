@@ -39,8 +39,8 @@ namespace TA
         readonly TextMesh[] _numero = new TextMesh[4];
         readonly SpriteRenderer[] _doc = new SpriteRenderer[4];
 
-        /// <summary>O boneco sai do chão para a câmera atrás da bancada e das máquinas.</summary>
-        static float FrenteAtras => 0.3f;
+        /// <summary>O boneco sai do chão para a câmera atrás da bancada e das máquinas e, menos, na frente do guichê: a folha deita para trás e entraria na peça.</summary>
+        const float FrenteAtras = 0.3f, FrenteGuiche = 0.16f;
 
         /// <summary>Bancada de um guichê no nível `n` da Velocidade (a malha do Tripo entra no lugar quando existir): corpo, tampo, monitor, teclado e impressora;
         /// o nível 1 ganha 2º monitor e divisória de vidro, o 2 ganha tampo de pedra e faixa de luz na frente.</summary>
@@ -260,12 +260,14 @@ namespace TA
             foreach (Renderer r in g.GetComponentsInChildren<Renderer>(true)) if (r.name == "malha") Cor(r, c);
         }
 
-        /// <summary>Pinta: quanto o boneco em `p` sai do chão para a câmera. Só atrás da bancada do check-in e das máquinas da segurança.</summary>
+        /// <summary>Pinta: quanto o boneco em `p` sai do chão para a câmera. Perto da bancada do check-in e atrás das máquinas da segurança.</summary>
         static float FrentePosto(Vector2 p)
         {
             int e = SalaEm(p);
-            bool atras = e == SalaSeg ? AtrasDaLinha(p) : e == SalaCheckIn && Vector2.Dot(p - Balcao(e, 0), Salas[e].N) > 0.02f;
-            return atras ? FrenteAtras : 0f;
+            if (e == SalaSeg) return AtrasDaLinha(p) ? FrenteAtras : 0f;
+            if (e != SalaCheckIn) return 0f;
+            float d = Vector2.Dot(p - Balcao(e, 0), Salas[e].N);
+            return d > 0.02f ? FrenteAtras : d > -0.45f ? FrenteGuiche : 0f;
         }
 
         // ------------------------------------------------------------------ o roteiro do atendimento
