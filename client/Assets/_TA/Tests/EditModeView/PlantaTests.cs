@@ -51,7 +51,7 @@ namespace TA.Tests
                 foreach (Vector2 q in r)
                 {
                     Assert.IsTrue(Mathf.Approximately(ant.x, q.x) || Mathf.Approximately(ant.y, q.y), de + ": em diagonal");
-                    if (q.y < 5.6f) Assert.IsTrue(Mathf.Approximately(q.x, lugar.x) || Mathf.Approximately(q.x, de.x), de + ": cortou as cadeiras em " + q);
+                    if (q.y < 6f) Assert.IsTrue(Mathf.Approximately(q.x, lugar.x) || Mathf.Approximately(q.x, de.x), de + ": cortou as cadeiras em " + q);
                     ant = q;
                 }
             }
@@ -63,6 +63,21 @@ namespace TA.Tests
             var r = new List<Vector2>();
             Mundo.PelasPortas(4, 1, r);   // a volta da bagagem passa pelo check-in
             CollectionAssert.AreEqual(new[] { new Vector2(2f, 4f), new Vector2(4f, 2f) }, r);
+        }
+
+        [Test]
+        public void Fila60_CabeNoPisoDaSala_SemEncostarNaParede()
+        {
+            const float folga = Mundo.Corredor * 0.5f + 0.1f;   // meia pessoa da parede
+            for (int e = 0; e < 8; e++)
+                for (int k = 0; k < 60; k++)
+                {
+                    Vector2 p = Mundo.Fila(e, k);
+                    Assert.AreEqual(e, Mundo.SalaEm(p), e + " lugar " + k);
+                    float x = Mathf.Repeat(p.x, Mundo.Lado), z = Mathf.Repeat(p.y, Mundo.Lado);
+                    Assert.That(x, Is.InRange(folga, Mundo.Lado - folga), e + " lugar " + k);
+                    Assert.That(z, Is.InRange(folga, Mundo.Lado - folga), e + " lugar " + k);
+                }
         }
     }
 }
