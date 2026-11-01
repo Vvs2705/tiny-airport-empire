@@ -107,3 +107,21 @@ A decisão do jogador seria a escala: quem voa agora e quem fica na sala para de
 **Estado em 2026-10-29:** linhas 1 a 6 feitas neste PR; a 7 fica com a saída do `verify.sh full` no PR.
 
 **Tela (2026-10-30):** quadro da tripulação e troca da escala ao tocar no voo, ícone do serviço e anel de progresso em cima do avião, veículo por serviço com vaga e mão única, mecânico saindo da oficina, hangar, aviso de 80%, decisão entre checagem e hangar e os eventos novos no diário CSV. Os aviões seguem `sim.Avioes`: cada um no seu estande, com o pouso começando antes da hora para encostar quando o núcleo encosta. Só o desembarque no estande G é sem veículo (pela ponte). `PodeChecagem`, `PodeHangar` e `PodeEscala` são a única adição ao núcleo: as mesmas travas das intenções, para a tela perguntar antes de oferecer.
+
+**Dia a dia na tela (2026-10-30, pedido do Vinicius):** só apresentação, nenhum tempo do núcleo mudou.
+
+- **Garagem:** a leste, aberta para o sul, com pátio de manobra na frente, 6 vagas cobertas e 3 pintadas. Cada veículo tem vaga e faixa própria; os estandes ficaram 1 m mais ao norte e o remoto 1,5 m mais a leste, para a rua de serviço passar na frente dos narizes e a taxiway passar atrás da cauda do jato. Veículo vai ao avião quando ele encosta e espera lá; sai quando o serviço acaba, ou vai direto ao outro avião.
+- **Postos:** quem trabalha fica atrás do balcão e atende; posto sem ninguém mostra um X.
+- **Segurança:** bandeja, raio-x, pórtico, mala de volta e, em 1 de cada 4 passageiros (fixo pelo id), vistoria com o scanner de mão. No nível 2 de malha, a cabine de corpo inteiro (`PorticoMalha`).
+- **Andar das pessoas:** caminho nos eixos do mundo (os 4 rumos da folha), passando reto pelas portas, chegada à fila pela fileira de trás, fitas que abrem conforme a fila cresce, partida e chegada suaves e cadência ligada à velocidade. O funcionário anda pelas portas e chega depois da `Tuning.Caminhada` quando a sala é longe: a tela não teleporta, e o núcleo continua igual.
+
+| Medida (`diag_pessoas.py`, onda 3, 8 salas; antes 165 s de jogo, depois 350 s) | Antes | Depois |
+|---|---|---|
+| Andando de lado | 28,6% | 5,6% |
+| Teletransporte (saltos acima de 6 m/s) | 24 | 0 |
+| Pé deslizando (fora da cadência da folha) | 71,9% | 4,1% |
+| Atravessando balcão | 3,6% | 0,2% |
+| Trocas de rumo por 10 m | 7,9 | 5,4 |
+| Veículos com caixas sobrepostas | 41,6% das amostras | 0,65% das amostras |
+
+Resíduo dos veículos: escada e ônibus saindo juntos do lado esquerdo do jato (21 amostras de 3.362) e 1 toque ao recuar da vaga. Fica para a frente de física, que mede também contra paredes e telhados.

@@ -77,6 +77,7 @@ namespace TA
         public static Sprite Sacola() => Get("sacola", (x, y) => (Mathf.Abs(x) < 0.62f && y > -0.85f && y < 0.25f) || (x * x + (y - 0.3f) * (y - 0.3f) <= 0.19f && x * x + (y - 0.3f) * (y - 0.3f) >= 0.09f && y > 0.25f));
         public static Sprite Bilhete() => Get("bilhete", (x, y) => Mathf.Abs(x) < 0.85f && Mathf.Abs(y) < 0.5f && !(Mathf.Abs(x - 0.35f) < 0.05f && Mathf.Abs(y) % 0.3f < 0.15f));
         public static Sprite Radio() => Get("radio", (x, y) => (Mathf.Abs(x) < 0.42f && y > -0.85f && y < 0.4f) || (x > 0.14f && x < 0.3f && y >= 0.4f && y < 0.9f));
+        public static Sprite Xis() => Get("xis", (x, y) => SegD(x, y, -0.7f, -0.7f, 0.7f, 0.7f) < 0.2f || SegD(x, y, -0.7f, 0.7f, 0.7f, -0.7f) < 0.2f);
         public static Sprite IconeServico(int s) { switch (s) { case 0: return Pessoa(); case 1: return Talher(); case 2: return Gota(); default: return Mala(); } }
         public static Sprite IconePerfil(int p) { switch (p) { case 0: return Bilhete(); case 1: return Escudo(); case 2: return Sacola(); case 3: return Mala(); case 4: return Chave(); default: return Radio(); } }
 
