@@ -175,7 +175,7 @@
 
 | Peça | Pasta (`arte/tripo/`) | Uso no jogo | Rota |
 |---|---|---|---|
-| `mala_rodinha` | `mala_rodinha_hd/` | mão do passageiro | malha |
+| `mala_rodinha` | `mala_rodinha_hd/` | mão do passageiro (folhas) e mala solta na balança, esteira, bandeja e carrinho | malha, textura em cinza para tingir |
 | `mochila` | `mochila_hd/` | costas | malha |
 | `radio` | `radio_hd/` | mão do despachante | malha |
 | `scanner_mao` | `scanner_mao_hd/` | mão da segurança | malha |
@@ -211,7 +211,7 @@
 | `sofa_lounge` | `sofa_lounge_hd/` | lounge VIP (Aurora) | malha |
 | `mesa_lounge` | `mesa_lounge_hd/` | lounge VIP | malha |
 | `bar_lounge` | `bar_lounge_hd/` | lounge VIP | malha |
-| `balanca_bagagem` | `balanca_bagagem_hd/` | check-in | malha |
+| `balanca_bagagem` | `balanca_bagagem_hd/` | postos da sala de bagagem | malha |
 | `caixa_registradora` | `caixa_registradora_hd/` | loja | malha |
 | `bebedouro` | `bebedouro_hd/` | terminal | malha |
 | `cadeira_rodas` | `cadeira_rodas_hd/` | assistência | malha |

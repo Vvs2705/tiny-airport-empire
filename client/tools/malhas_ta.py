@@ -79,7 +79,23 @@ PECAS = {
     # a sala de espera do portao
     "catraca_embarque": (1200, 512, 0.7),
     "cordao_fila": (800, 256, 1.0),
+    # a mala solta (balanca, esteira, bandeja, carrinho)
+    "mala_rodinha": (500, 256, -0.42),
+    "balanca_bagagem": (1000, 256, 0.6),
 }
+
+
+# a View pinta na cor do voo (_Color x textura): a textura guarda so o sombreado
+TINGIDAS = {"mala_rodinha"}
+
+
+def cinza(img):
+    px = list(img.pixels)
+    lum = [0.3 * px[i] + 0.59 * px[i + 1] + 0.11 * px[i + 2] for i in range(0, len(px), 4)]
+    k = 0.85 / (sum(lum) / len(lum))
+    for n, v in enumerate(lum):
+        px[n * 4] = px[n * 4 + 1] = px[n * 4 + 2] = min(1.0, v * k)
+    img.pixels = px
 
 
 def die(msg):
@@ -172,6 +188,8 @@ def peca(nome, src, out):
     if img is None:
         die(nome + ": sem textura base")
     img.scale(px, px)
+    if nome in TINGIDAS:
+        cinza(img)
     img.filepath_raw, img.file_format = png, "PNG"
     img.save()
     ob.name = nome

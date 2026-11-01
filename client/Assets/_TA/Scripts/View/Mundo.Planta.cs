@@ -177,7 +177,9 @@ namespace TA
                 _arco[e, i] = Billboard("Arco" + e + i, Art.Arc(0f), Art.Good, 0.32f);
                 _vazio[e, i] = Billboard("Vazio" + e + i, Art.Xis(), Art.A(Art.Off, 0.85f), 0.22f);
                 if (e == (int)Estacao.Seguranca) Seguranca3D(i);
+                if (e == SalaMalas) Balanca3D(i);
             }
+            if (e == SalaMalas) Esteira3D();
             if (e == Portao) Espera3D();
             else if (e != (int)Estacao.Manutencao && e != (int)Estacao.Despacho)   // oficina e despacho nao tem fila de passageiros
             {
