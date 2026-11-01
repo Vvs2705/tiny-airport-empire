@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 
 namespace TA.Core
 {
@@ -20,6 +21,8 @@ namespace TA.Core
         public bool Objetivos;
         /// <summary>Missoes = joga pelas missoes abertas (CONTRATO_FASE_C6 §6). Sem ele o bot nunca olha as missoes, e recebe o que cumprir sem querer.</summary>
         public bool Missoes;
+        /// <summary>Compra = produtos creditados no 1o passo (o bot faz o papel do servidor). Gasta = gasta as Gems: booster sempre, pacote de Cash com pouco Cash (CONTRATO_FASE_D1 §7).</summary>
+        public string[] Compra; public bool Gasta;
 
         public static readonly BotProfile Bom = new BotProfile { Name = "Bom", Decide = 1f, Move = true, Planeja = true, Equipe = true, Rotas = true, Viaja = true, Incidentes = true, Clima = true, Falhas = true };
         public static readonly BotProfile Lento = new BotProfile { Name = "Lento", Decide = 2.5f, Move = true, Planeja = true, Equipe = true, Rotas = true, Viaja = true, Incidentes = true, Clima = true, Falhas = true };
@@ -38,7 +41,19 @@ namespace TA.Core
         public static readonly BotProfile LentoMissionario = new BotProfile { Name = "LentoMissionario", Decide = 2.5f, Move = true, Planeja = true, Equipe = true, Rotas = true, Viaja = true, Incidentes = true, Clima = true, Falhas = true, Missoes = true };
         public static readonly BotProfile Completo = new BotProfile { Name = "Completo", Decide = 1f, Move = true, Planeja = true, Equipe = true, Rotas = true, Viaja = true, Incidentes = true, Clima = true, Falhas = true, Objetivos = true, Missoes = true };
         public static readonly BotProfile LentoCompleto = new BotProfile { Name = "LentoCompleto", Decide = 2.5f, Move = true, Planeja = true, Equipe = true, Rotas = true, Viaja = true, Incidentes = true, Clima = true, Falhas = true, Objetivos = true, Missoes = true };
+        /// <summary>Portao da Fase D1: o Guiado que gasta o que ganhou, o que compra uma vez e o que o dinheiro nunca falta.</summary>
+        public static readonly BotProfile GastaGanho = Comprador("GastaGanho");
+        public static readonly BotProfile BoasVindas = Comprador("BoasVindas", "welcome_bundle_01");
+        public static readonly BotProfile PacoteGrande = Comprador("PacoteGrande", "gems_pack_large");
+        public static readonly BotProfile Baleia = Comprador("Baleia", Enumerable.Repeat("gems_pack_large", 200).ToArray());
         public static readonly BotProfile[] All = { Bom, Lento, Parado };
+
+        static BotProfile Comprador(string nome, params string[] compra)
+        {
+            BotProfile p = Guiado;
+            p.Name = nome; p.Compra = compra; p.Gasta = true;
+            return p;
+        }
     }
 
     /// <summary>
@@ -85,9 +100,20 @@ namespace TA.Core
             if (P.Clima && s.T.RegraClima) ReageClima(s);
             if (P.Segue) SegueEpoca(s);
             if (P.Falhas) foreach (Aviao a in s.Avioes) if (a.Pane && s.ReparaAviao(a.Id)) Reparos++;
+            if (P.Gasta) Gasta(s);
         }
 
         bool _rotaFixa;
+        int _comprou;
+
+        /// <summary>Fase D1: o maximo que a compra acelera. Cash nunca falta enquanto houver Gems, e o 2x fica sempre ligado.</summary>
+        void Gasta(Sim s)
+        {
+            const long Folga = 5000;
+            for (; _comprou < P.Compra.Length; _comprou++) s.Creditar("bot:" + _comprou, P.Compra[_comprou]);
+            for (int i = 0; i < s.T.ItensGems.Length; i++)
+                if (s.T.ItensGems[i].Tipo == TipoItem.Booster || s.T.ItensGems[i].Tipo == TipoItem.PacoteCash && s.Cash < Folga) s.Gastar(i);
+        }
 
         /// <summary>
         /// Fase C5: faz o que o objetivo ativo pede; cadeia fechada, vai ao proximo aeroporto com cadeia aberta. O que o bot de sempre ja faz
@@ -447,8 +473,8 @@ namespace TA.Core
         }
 
         /// <summary>Joga `ondas` ondas inteiras com o perfil `p` e a semente `seed`, sem render. `reabre` = fecha e reabre o jogo (Save ->
-        /// Load) no meio de cada onda: o resultado tem de ser o mesmo de sem fechar (retomada do -autoplay).</summary>
-        public static Resultado Medir(BotProfile p, int seed, int ondas, Tuning t = null, bool reabre = false)
+        /// Load) no meio de cada onda: o resultado tem de ser o mesmo de sem fechar (retomada do -autoplay). `ateFechar` = para quando a campanha fecha.</summary>
+        public static Resultado Medir(BotProfile p, int seed, int ondas, Tuning t = null, bool reabre = false, bool ateFechar = false)
         {
             var s = new Sim(t, seed);
             var bot = new Bot(p);
@@ -457,7 +483,7 @@ namespace TA.Core
             for (int i = 0; i < r.ConquistaEm.Length; i++) r.ConquistaEm[i] = -1;
             double soma = 0;
             long passos = (long)ondas * s.OndaPassos;
-            while (s.Steps < passos)
+            while (s.Steps < passos && !(ateFechar && s.CampanhaCompleta))
             {
                 if (reabre && s.Steps % s.OndaPassos == s.OndaPassos / 2) s = Sim.Load(s.Save("autoplay", 1000 + s.Steps), t, seed);
                 bot.Step(s);
