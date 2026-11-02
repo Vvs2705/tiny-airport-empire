@@ -81,6 +81,7 @@ namespace TA
             BuildTelas(_canvas);
             BuildOperacao(_canvas);
             BuildTour(_canvas);
+            if (Ajustes.TextoMaior) AplicaTexto();
         }
 
         /// <summary>Texto em px, preso ao canto superior esquerdo do pai.</summary>

@@ -360,7 +360,7 @@ namespace TA
                 Color cor = st.Estado == Estado.Critico ? Art.Bad : st.Estado == Estado.Atencao ? Art.Warn : Art.Good;
                 bool destino = Arrastando >= 0 && s.Staff[Arrastando].Em != st.Tipo;
                 if (destino) cor = Color.Lerp(Art.Good, Color.white, sob == e ? 0.6f : 0f);
-                float pulso = st.Estado == Estado.Normal && !destino ? 0.55f : 0.6f + 0.4f * Mathf.PingPong(Time.unscaledTime * 2f, 1f);
+                float pulso = st.Estado == Estado.Normal && !destino ? 0.55f : 0.6f + 0.4f * Ajustes.Vai(Time.unscaledTime * 2f);
                 foreach (Renderer m in _moldura[e]) { Cor(m, cor * pulso); m.transform.localScale = Escalada(m.transform.localScale, destino ? 0.2f : 0.12f); }
                 for (int i = 0; i < 4; i++)
                 {
@@ -387,7 +387,7 @@ namespace TA
                     Vector3 pm = V3(Em(e, FrenteD, 0f), 0.95f);
                     _mao[e].transform.position = pm;
                     _mao[e].transform.rotation = _cam.transform.rotation;
-                    _mao[e].transform.localScale = Vector3.one * (0.55f + 0.1f * Mathf.PingPong(Time.unscaledTime * 3f, 1f));
+                    _mao[e].transform.localScale = Vector3.one * (0.55f + 0.1f * Ajustes.Vai(Time.unscaledTime * 3f));
                     _mao[e].sortingOrder = Ordem(pm) + 9;
                 }
                 string nome = fechada ? Textos.Estacao[e] + " " + Textos.FechadaCurto : Textos.Estacao[e];

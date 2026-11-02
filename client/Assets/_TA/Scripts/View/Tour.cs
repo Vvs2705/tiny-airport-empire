@@ -218,7 +218,7 @@ namespace TA
             float w = Screen.width, h = Screen.height, pad = 10f;
             _tourBorda.rectTransform.anchorMin = new Vector2((r.xMin - pad) / w, (r.yMin - pad) / h);
             _tourBorda.rectTransform.anchorMax = new Vector2((r.xMax + pad) / w, (r.yMax + pad) / h);
-            float bob = 0.012f * Mathf.Sin(Time.unscaledTime * 6f);
+            float bob = 0.012f * Mathf.Sin(Time.unscaledTime * 6f) * Ajustes.Mov;
             float sy = alvoEmCima ? (r.yMin - pad) / h - 0.07f + bob : (r.yMax + pad) / h + 0.01f + bob;
             _tourSeta.rectTransform.anchorMin = new Vector2(r.center.x / w - 0.04f, sy);
             _tourSeta.rectTransform.anchorMax = new Vector2(r.center.x / w + 0.04f, sy + 0.06f);

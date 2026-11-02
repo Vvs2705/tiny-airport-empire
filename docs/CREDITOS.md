@@ -1,6 +1,6 @@
 # Créditos e licenças de terceiros
 
-A tela de créditos do jogo ainda não existe; quando existir (GDD: configurações), ela sai desta lista.
+A tela de créditos do jogo (Pausa › Configurações › Créditos, `Textos.CreditosTexto`) mostra esta lista: item novo aqui entra lá também.
 
 ## Fontes
 
