@@ -29,7 +29,7 @@ namespace TA
     ///                 anda r s reais na -speed e so entao grava, na velocidade v (padrao 1): o pushback e a decolagem no GIF.
     ///                 Com -recordinc, os r s contam do aviso do incidente ou da pane.
     ///   -demo         contrata os 3 e, 1,5 s depois, manda a Ana do check-in para a loja (o -record da caminhada e da troca de uniforme).
-    ///   -cenario nome oficina = abre tudo, cada um na sua sala (salas = o mesmo, para medir; frota = o mesmo, com o +1 veiculo); desgaste = o aviao do 1o voo pousa com 85%; hangar = o mesmo, e o manda ao
+    ///   -cenario nome postos = 4 postos no check-in e na seguranca, 1 e 2 deles com gente; oficina = abre tudo, cada um na sua sala (salas = o mesmo, para medir; frota = o mesmo, com o +1 veiculo); desgaste = o aviao do 1o voo pousa com 85%; hangar = o mesmo, e o manda ao
     ///                 hangar assim que encostar (o -record da manutencao).
     ///   -vista nome   perto | patio | geral: enquadramento das fotos e do -record (Mundo.Vista).
     ///   -perigo k     o perigo k em toda onda (PoePerigo), para fotografar o aviso.
@@ -403,6 +403,14 @@ namespace TA
                 for (int p = Sim.MaxFuncionarios; p < Sim.MaxEquipe; p++) Sim.Hire((Perfil)p);
                 yield return null;
                 for (int i = 0; i < Sim.Staff.Count; i++) Sim.Move(i, Funcionario.Casa(Sim.Staff[i].Perfil));
+                yield break;
+            }
+            if (nome == "postos")
+            {
+                foreach (Estacao e in new[] { Estacao.CheckIn, Estacao.Seguranca })
+                    while (Sim.Buy(e, Melhoria.Capacidade)) { }
+                while (Sim.Hire()) { }
+                Sim.Move(2, Estacao.Seguranca);
                 yield break;
             }
             Sim.Avioes[0].Desgaste = 85;

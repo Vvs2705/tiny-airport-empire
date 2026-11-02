@@ -153,7 +153,7 @@ namespace TA
             Parede(new Vector2(m.x + Interno, m.y), new Vector2(m.x + Interno, m.y + Interno));   // leste
             for (int i = 0; i < 4; i++)
             {
-                Vector2 b = e == (int)Estacao.Seguranca ? Em(e, SegMaquinaD, SegA[i] + BeltX) : Balcao(e, i);
+                Vector2 b = MesaEm(e, i);
                 Transform t = Peca(BalcaoMalha[e], V3(b), Rumo(-s.N), BalcaoEscala[e]);   // de frente para a fila
                 if (t != null)
                 {
@@ -169,6 +169,11 @@ namespace TA
                         _mesa[e, i, n] = tn != null ? tn.gameObject : null;
                     }
                 }
+                else if (e == SalaCheckIn)
+                {
+                    _telas[i] = new List<Renderer>();
+                    for (int n = 0; n < NivelMalha.Length; n++) _mesa[e, i, n] = Bancada3D(i, n);
+                }
                 else
                 {
                     bool longoX = Mathf.Abs(s.N.y) > 0.5f;
@@ -176,10 +181,12 @@ namespace TA
                 }
                 _arco[e, i] = Billboard("Arco" + e + i, Art.Arc(0f), Art.Good, 0.24f);
                 _vazio[e, i] = Billboard("Vazio" + e + i, Art.Xis(), Art.A(Art.Off, 0.85f), 0.22f);
-                if (e == (int)Estacao.Seguranca) Seguranca3D(i);
+                if (e == SalaSeg) Seguranca3D(i);
+                if (e == SalaSeg || e == SalaCheckIn) Posto3D(e, i);
                 if (e == SalaMalas) Balanca3D(i);
             }
             if (e == SalaMalas) Esteira3D();
+            if (e == SalaCheckIn) Esteiras3D();
             if (e == Portao) Espera3D();
             else if (e != (int)Estacao.Manutencao && e != (int)Estacao.Despacho)   // oficina e despacho nao tem fila de passageiros
             {
