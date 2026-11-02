@@ -553,12 +553,19 @@ namespace TA
             foreach (MeshFilter f in _raiz.GetComponentsInChildren<MeshFilter>(true))
             {
                 Transform t = f.name == "malha" ? f.transform.parent : f.transform;
-                if (t.name.StartsWith("Sombra") || !vistas.Add(t) || anda.Exists(m => t.IsChildOf(m))) continue;
+                if (t.name.StartsWith("Sombra") || t.name == "Fixos" || !vistas.Add(t) || anda.Exists(m => t.IsChildOf(m))) continue;
                 Bounds b = Caixa(t);
                 if (b.max.y + t.position.y < 0.1f) continue;   // pista, faixa, piso: sem altura, ninguem atravessa
                 Vector3 c = t.position + Quaternion.Euler(0f, t.eulerAngles.y, 0f) * b.center;
                 _diag.WriteLine(string.Format(inv, "0,fixa#{0},{1:0.000},{2:0.000},{3:0.000},{4:0.00},{5:0.000},{6:0.000},{7:0.000},{8}", t.name, c.x, b.min.y + t.position.y, c.z, t.eulerAngles.y, b.size.x, b.size.y, b.size.z, _diagFixas.Count));
                 _diagFixas.Add(t);
+            }
+            foreach (Fundido f in _fundidos)   // a malha fundida (Fixos) tem a caixa da sala inteira: cada bloco dela, com a vez do pai
+            {
+                if (f.B.max.y < 0.1f) continue;
+                Vector3 c = f.Pai.TransformPoint(f.B.center);
+                _diag.WriteLine(string.Format(inv, "0,fixa#{0},{1:0.000},{2:0.000},{3:0.000},0,{4:0.000},{5:0.000},{6:0.000},{7}", NomeFundido(f.Cor), c.x, c.y - f.B.extents.y, c.z, f.B.size.x, f.B.size.y, f.B.size.z, _diagFixas.Count));
+                _diagFixas.Add(f.Pai);
             }
         }
 

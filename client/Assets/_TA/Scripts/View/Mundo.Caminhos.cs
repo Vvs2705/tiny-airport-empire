@@ -27,6 +27,19 @@ namespace TA
         static readonly int[] _grade = new int[GradeN * GradeN], _busca = new int[GradeN * GradeN];   // _grade: -1 = peça, 0 = livre, n = n passos desde a saída
         static readonly List<Vector2> _curvas = new List<Vector2>();
 
+        /// <summary>Bloco que o Funde juntou na malha da sua cor (parede, poste da fila, painel), com a caixa no pai.</summary>
+        struct Fundido { public Transform Pai; public Bounds B; public Color Cor; }
+        readonly List<Fundido> _fundidos = new List<Fundido>();
+
+        /// <summary>Fixo: guarda a caixa do bloco antes de fundir, para a rota e o -diag.</summary>
+        void Guarda(PrimitiveType tipo, Vector3 centro, Vector3 tam, Color cor)
+        {
+            Bounds b = Primitiva(tipo).bounds;
+            _fundidos.Add(new Fundido { Pai = _cont != null ? _cont : _raiz, B = new Bounds(centro + Vector3.Scale(b.center, tam), Vector3.Scale(b.size, tam)), Cor = cor });
+        }
+
+        static string NomeFundido(Color c) => c == CorParede || c == CorCapa ? "Parede" : c == Fita ? "Poste" : "Fixo";
+
         /// <summary>Na carga: a caixa de cada peça da sala com altura de corpo. Lê a malha, como o DiagCaixas, e só os filhos da sala: veículo e avião
         /// nascem na origem, dentro do check-in, antes de irem para o pátio.</summary>
         void LePecas()
@@ -38,7 +51,7 @@ namespace TA
                 foreach (MeshFilter f in _sala[e].GetComponentsInChildren<MeshFilter>(true))
                 {
                     Transform t = f.name == "malha" ? f.transform.parent : f.transform;
-                    if (!vistas.Add(t) || SemCorpo.Contains(t.name)) continue;
+                    if (!vistas.Add(t) || SemCorpo.Contains(t.name) || t.name == "Fixos") continue;
                     Bounds b = Caixa(t);
                     if (b.max.y + t.position.y < 0.1f || b.min.y + t.position.y > Gente) continue;
                     Quaternion q = Quaternion.Euler(0f, t.eulerAngles.y, 0f);
@@ -46,6 +59,12 @@ namespace TA
                     var p = new Barreira { Go = t.gameObject, C = new Vector2(c.x, c.z), U = new Vector2(u.x, u.z), L = b.extents.z, W = b.extents.x };
                     if (t.name == "cordao_fila") p.L = 0.01f;   // a caixa é a da diagonal da malha, mais larga que o corredor da fila; a corda é um fio
                     _barreiras[e].Add(p);
+                }
+                foreach (Fundido f in _fundidos)
+                {
+                    if (!f.Pai.IsChildOf(_sala[e]) || f.B.max.y < 0.1f || f.B.min.y > Gente) continue;
+                    Vector3 c = f.Pai.TransformPoint(f.B.center);
+                    _barreiras[e].Add(new Barreira { Go = f.Pai.gameObject, C = new Vector2(c.x, c.z), U = Vector2.up, L = f.B.extents.z, W = f.B.extents.x });
                 }
             }
         }

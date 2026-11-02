@@ -483,6 +483,16 @@ Mesma receita do §2.4, peça a peça pela interface. A hora é a do zip e o id 
 | guiche_checkin_n2 | 15:13 | — | `27b1dc24-33a8-4687-9087-0e178452b0d3` (export) | — | — | `guiche_checkin_n2_hd/guiche_checkin_n2_hd.zip` | 8.1 MiB | `f3a29862ccc69c241532dae6a207a3e8bd4adec34188d85063fb235469eef592` | `7fb6607c80a0ac77f262c97594d3712f8f566149131d8cf51fd4aaa14d0f6702` |
 | guiche_checkin_n3 | 15:20 | — | `7c5c3133-2c3e-47cb-bc1c-170fe31d41c7` (export) | — | — | `guiche_checkin_n3_hd/guiche_checkin_n3_hd.zip` | 8.9 MiB | `2df31afd82ad845298e571f04a55f4e6bc7b3f1fe19c8ec358381ae3f56ec651` | `e00fd2d4637fa0002ecc9a203a0d4268e5f22fd83f2a9d583499814cc059bc2a` |
 | painel_guiche | 15:28 | — | `a1e5c2cc-0863-4d41-af8d-f933dae87012` (export) | — | — | `painel_guiche_hd/painel_guiche_hd.zip` | 6.6 MiB | `964cf71e3ac46185105ed78e9d30be4dffee1ccde08de476a2ca150ba7a1bbde` | `0ecd8a4490872b8ac3fb1985a7d19ac33be56482d7b9b88b622e2b51706deb91` |
+### 2.8 Conta nova, 2026-11-01: postos da loja, da oficina e do despacho
+
+Peças pedidas pela frente `ta-planta` e geradas pelo coordenador. SHA-256 informados por ele na entrega.
+
+| Peça | Arquivo | Tamanho | SHA-256 do zip | SHA-256 do FBX |
+|---|---|---|---|---|
+| balcao_loja | `balcao_loja_hd/balcao_loja_hd.zip` | 10.3 MiB | `9cfbcf16e5dd68e8bfd98bb2dc276ab32fdfcfaf8cfccf7176875037d0acdbc8` | `5fbd29119cfc7a56ea80902e5b63479b53d758fa3a62f08e92f08e59ae7eb7f2` |
+| bancada_oficina | `bancada_oficina_hd/bancada_oficina_hd.zip` | 9.2 MiB | `adc0867bb97845eb2a1584385eb1367fd92f2a4d2e6b6b147e680b7388f61ae6` | `cec02b3c3a45200d32aed1ce94d8920b9ef491abb37bab925aa1657d6ad4f71c` |
+| mesa_despacho | `mesa_despacho_hd/mesa_despacho_hd.zip` | 10.0 MiB | `402cafb189731cfd519a3a332021b9623741ecf5e8dca5f80dcfda835ae378df` | `929d2bd0e774a27365f27b0f583cd743f541a1ba203870913764e727d65cf61c` |
+| pneus_empilhados | `pneus_empilhados_hd/pneus_empilhados_hd.zip` | 9.8 MiB | `2d525322696d9b7585480be5f3029d6ade88bb555013f97800ce10eb567e0270` | `3261279f234943f1862af9243ed1f131432ead8d356cc9df7966110f8222a65f` |
 
 ## 3. Marca e arte de instalação (imagem, sem modelo 3D)
 
@@ -597,6 +607,30 @@ Nada aqui gasta crédito: tudo sai dos arquivos HD do §2 por script, no Blender
 | `terminal_vale_verde` | 43119 → 5999 | 9.00 × 7.17 × 6.71 | 1024 px | `4e5a6f2aee8620d8a0a8fba87fdc849323cd2f6c5e46d81e5769435f3ee4a7fe` |
 | `torre_controle` | 42898 → 3000 | 2.18 × 2.20 × 5.43 | 512 px | `7f1bd1163cd61974528253ce82c32cf16c7fc58e8a9d48dd3a7b9c92447fc27a` |
 | `vaso_planta` | 47330 → 800 | 0.50 × 0.47 × 0.60 | 256 px | `a2d5c2cc7572ec013bc73e89e2822d331160d6f97dc39247e367eba9d3d009f1` |
+| `balcao_loja` | 44489 → 1498 | 0.68 × 0.30 × 0.44 | 512 px | `0b0951734d56e01fcb196ac5a8da08205525917fb7043231e859766c68c68952` |
+| `bancada_oficina` | 42541 → 1500 | 0.68 × 0.22 × 0.34 | 512 px | `fa4e2456f3388be4a06b389ac3e185163459c781be083e5fbfaca59801f820b1` |
+| `mesa_despacho` | 42402 → 1498 | 0.68 × 0.30 × 0.39 | 512 px | `39e617247a098492f4e21db801cba5c887fb48081d26c643e891261902753f02` |
+| `pneus_empilhados` | 47528 → 800 | 0.40 × 0.25 × 0.34 | 256 px | `3934e3fe5919883dfe12bdadc3abcbd408b00af24323f243ad7043650650fafa` |
+| `vitrine_loja` | 42835 → 1499 | 0.68 × 0.68 × 0.59 | 512 px | `2d6be993ee1640c7627b871436d08617151f545ee699cdb8e70bb0263e93a9ea` |
+| `vitrine_cafe` | 45444 → 1500 | 0.68 × 0.55 × 0.82 | 512 px | `943b4aa1ce274f434cd01e51d4ba4646150211e1bee9a0ccb73b9a9e9c4e18de` |
+| `bar_lounge` | 44946 → 1999 | 0.68 × 0.72 × 0.64 | 512 px | `52b5de8a5352b122d2ce161e6aebfa2207fca59af8aaf29a24fee4105548e873` |
+| `prateleiras_loja` | 43383 → 2000 | 0.56 × 0.23 × 0.62 | 512 px | `0215e29277b980b849fd315ceed7422c997f405c36b10d08f322316fd354a11b` |
+| `maquina_venda` | 45629 → 1200 | 0.40 × 0.23 × 0.62 | 512 px | `d12ddd2a91a1228f7cc00ca97a40102e327217d19809e94601d45f26bd6c1e57` |
+| `mesas_alimentacao` | 47801 → 1800 | 0.75 × 0.62 × 0.36 | 512 px | `74843c8e59f67e335995f0b25086e58008d77776971080a7e1f0778ad696e96e` |
+| `barreira_obra` | 46200 → 600 | 0.70 × 0.35 × 0.61 | 256 px | `11680b353197b52987b92c49fb60120ba47bc7111da624c832702b778a32c538` |
+| `banco` | 45326 → 798 | 0.80 × 0.45 × 0.48 | 256 px | `6835a3ed326bdfe93f1722c04066356c664656f3df289771415dfe34dde605b1` |
+| `bebedouro` | 47883 → 600 | 0.32 × 0.33 × 0.42 | 256 px | `70ccc09c0580e7423f087a4a1dae948f56cd548c522808149835975670201e34` |
+| `lixeira_terminal` | 46786 → 498 | 0.37 × 0.66 × 0.30 | 256 px | `290d6b4f78c85ee3a43babeea7dce5c09dd6864309350464b0d436cfd87770d9` |
+| `caixa_registradora` | 42826 → 500 | 0.16 × 0.09 × 0.12 | 256 px | `c63866ba03ccb9c59fb3ab6221dc598a32cf0ab5d18b936fa2e788cae2492701` |
+| `carrinho_cafe` | 47024 → 1200 | 0.50 × 0.43 × 0.56 | 512 px | `aac342d889c641349ff13a159cbddd27e4b710f32021c25ef806677c446ed1d0` |
+| `carrinho_limpeza` | 42012 → 1000 | 0.30 × 0.19 × 0.36 | 256 px | `0ac67331948394ed7a85d04f3aa7b09bffa1a1f58df9682144f39e9126c225dc` |
+| `caixa_ferramentas` | 46836 → 600 | 0.25 × 0.16 × 0.20 | 256 px | `968ec3ff9f3c6d6ce583816d39866474073251ee638fa5ffd1dd5012395aa79f` |
+| `cavalete_manutencao` | 47996 → 800 | 0.50 × 0.32 × 0.50 | 256 px | `30995e354f555165b04a34323a4cf1624b8a6236ad0765e70613577925da6a31` |
+| `escada_manutencao` | 44714 → 800 | 0.28 × 0.41 × 0.60 | 256 px | `52de90ea4801495f97c199a6525d10f820dbc13d3f725eeca8d4c9721f453595` |
+| `gerador_solo` | 45911 → 1200 | 0.55 × 0.70 × 0.51 | 256 px | `c554de70160b7906e13b48a1e4dbdca5e116ed7acf3fa55cbd6ac5ded551f5ef` |
+| `sofa_lounge` | 47131 → 1200 | 0.80 × 0.45 × 0.48 | 512 px | `db4b8ceb45598917aed1d245dc260f8f1c9180135d7edb159a0fdf79bc532618` |
+| `mesa_lounge` | 48158 → 800 | 0.35 × 0.35 × 0.30 | 256 px | `6c8180011f2086134c39411003ec06e81dfefab514a6f48b9d7363b071c6db6e` |
+| `placa_direcao` | 45815 → 600 | 0.38 × 0.13 × 0.60 | 256 px | `2f10c62dda5a6e9489bd64e4ed91b894b4506bb90c3b756040bb431599a58b35` |
 
 ### 5.2 Clipes de animação (fora do git, `arte/mixamo/ta_pax` e `ta_func`)
 
