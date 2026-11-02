@@ -1,16 +1,16 @@
 # LITTLE TERMINAL
 ## GDD Mestre de Produção, Tecnologia, Segurança e Publicação
 
-**Versão:** 1.3 (dia a dia, estações do ano, clima e falhas de avião), revisão de 30/10/2026 sobre a 1.2 e a 1.1 de 29/10/2026 e a 1.0 de 26/10/2026. O que mudou e por quê está no §26.
+**Versão:** 1.4 (estado de 02/11/2026: nome decidido, compras com Gems e servidor, telas e alinhamento com o código), revisão de 02/11/2026 sobre a 1.3 de 30/10/2026, a 1.2 e a 1.1 de 29/10/2026 e a 1.0 de 26/10/2026. O que mudou e por quê está no §26.
 **Projeto:** Tiny Airport Empire (repositório `Vvs2705/tiny-airport-empire`).
 **GDD de origem:** [`GDD_ORIGEM.md`](GDD_ORIGEM.md), que reúne o produto, a revisão competitiva de 09/10/2026 e as lições do Dungeon Courier de 16/10/2026. Neste documento ele aparece citado como "Origem §N".
-**Nome comercial recomendado:** Little Terminal, provisório até a busca de marca no INPI, USPTO e EUIPO e a busca exata nas duas lojas (Origem §52).
+**Nome comercial:** Little Terminal, decidido em 01/11/2026 (D-03; busca de marca em [`NOME.md`](NOME.md)). **appId Android:** `br.com.vstack.littleterminal`. O nome do repositório e dos arquivos internos segue Tiny Airport Empire.
 **Motor:** Unity **6000.3.27f1 LTS**, a mesma versão do Dungeon Courier desde 22/10/2026. Fica fixa quando o projeto for criado.
 **Plataformas:** Android primeiro. O iOS depende de macOS e de conta Apple (§0.3).
 **Orientação:** retrato.
 **Modelo comercial:** Free-to-Play, com anúncios recompensados opcionais. Compras digitais só entram com validação no servidor (§7.4).
-**Prazo operacional da v1.0:** 29/10/2026. **É inviável:** a auditoria do §0.3 deu **NO-GO**. A nova data é a decisão D-02 (§23.2).
-**Status:** especificação de produto. D-01 aprovada em 29/10/2026: Fases A e B autorizadas (§23.2). A Fase A cria só o esqueleto vazio em `client/` (§17.2); **nenhuma funcionalidade do jogo está implementada**, e não há arte nem conta de loja para este jogo.
+**Prazo operacional da v1.0:** 29/10/2026. **É inviável:** a auditoria do §0.3 deu **NO-GO**. A nova data é a decisão D-02 (§23.2), decidida em 01/11/2026: sem data fixa, assim que a Play Console sair (previsão 25/11/2026) e a regressão fechar.
+**Status (02/11/2026):** especificação de produto **com o jogo em desenvolvimento**: a `main` tem 44 PRs. O núcleo das Fases B e C e a Fase D1 (Gems) estão implementados e testados, a tela cobre o dia a dia do aeroporto e a arte do Tripo está no jogo. Faltam as telas de aeroportos, rotas, metas, passe e loja, o servidor de compras, os anúncios reais, as 20 histórias, o inglês, o áudio ligado e a medida em aparelho. O estado de cada entrega está no §21 e em [`ESTADO_DO_PROJETO.md`](ESTADO_DO_PROJETO.md); ainda não existe conta de loja (Play Console, previsão 25/11/2026).
 
 > **Regra de verdade:** este GDD descreve o produto que deve existir. Uma funcionalidade só pode ser marcada como concluída depois de estar implementada, testada no projeto real e registrada com evidência. Este documento, sozinho, não comprova que qualquer funcionalidade já exista.
 
@@ -59,6 +59,8 @@ O que a Origem previa e este GDD **não** põe no lançamento está listado no �
 
 ## 0.3. Auditoria de 29/10/2026: resultado NO-GO para 29/10
 
+> **Histórico.** Esta seção é o retrato de 29/10/2026 e não foi reescrita. O estado de hoje está no §21 e em [`ESTADO_DO_PROJETO.md`](ESTADO_DO_PROJETO.md): o projeto Unity existe, o nome e o appId foram decididos em 01/11/2026, e o que ainda trava o envio é a Play Console.
+
 Primeira auditoria feita pelo Claude no commit `59f0bb9` da `main`, conforme o §1.
 
 | Pré-requisito do §0 | Achado | Evidência |
@@ -82,7 +84,7 @@ Mesmo com o código pronto, o envio Android só é possível depois de a Play Co
 
 | Tema | v1.0 colada | Regra do estúdio ou Origem | Como fica nesta versão |
 |---|---|---|---|
-| Moedas | Cash + Gems + XP + pontos de temporada | 1 moeda no MVP (estúdio; Origem §8) | **v0.1 só com Cash.** Gems só no lançamento e só se D-05 aprovar IAP com validação (§6.1). XP e pontos de temporada são barras de progresso, não moedas: não se compram nem se gastam |
+| Moedas | Cash + Gems + XP + pontos de temporada | 1 moeda no MVP (estúdio; Origem §8) | **v0.1 só com Cash.** Gems só no lançamento e só se D-05 aprovar IAP com validação (§6.1); D-05 e D-07 foram aprovadas em 01/11/2026 e o núcleo está no PR #43. XP e pontos de temporada são barras de progresso, não moedas: não se compram nem se gastam |
 | Rede de anúncios | AdMob, UMP, ATT, SSV | LevelPlay na conta V-STACK; anúncio não personalizado para todos, sem `AD_ID` (estúdio; Origem, Monetização) | **LevelPlay, não personalizado, sem `AD_ID`.** Sem rastreamento, não há pedido de ATT. A recompensa por anúncio nunca dá Gems nem direito pago, então o callback local basta; SSV só quando houver backend (§7.2) |
 | Interstitial | nenhum no lançamento | desligado na v0.1 (estúdio) | **Nenhum.** Resolve o conflito 2 da Origem: o §26 da Origem ("poucos, em transições") deixa de valer |
 | Item aleatório pago | proibido | proibido (estúdio; ECA Digital, Lei 15.211/2025, art. 20) | igual; a base legal foi acrescentada (§7.1, §9.2) |
@@ -96,7 +98,7 @@ Mesmo com o código pronto, o envio Android só é possível depois de a Play Co
 | Testes | unidade + PlayMode | `coretests` (dotnet), bot `-autoplay`, EditMode, `verify.sh` | Mesmos casos, rodando no portão do estúdio (§16.0) |
 | Créditos do Tripo | "usar os créditos existentes" | só com aval explícito do Vinicius, por lote | **Aval por lote,** com saldo, prompt e SHA em `docs/PROVENIENCIA.md` (§10.2) |
 | Plano de datas | 26/10 a 29/10 | — | substituído por fases com portões (§17.3) |
-| Rota de arte (v1.2) | — | personagem e objeto pelo pipeline do DC, em sprite pré-renderizado (estúdio) | **Híbrida, a confirmar (D-18):** prédios, aviões e veículos entram como malha low-poly em tempo real, porque são corpos rígidos, sem skinning; é como fazem as referências do COMPETITIVO §g. Pessoas seguem em sprite pré-renderizado, desenhado num quad no mundo 3D, com o uniforme numa máscara separada (§10.2). Motivo: avião taxiando e veículo fazendo curva pediriam dezenas de direções em sprite |
+| Rota de arte (v1.2) | — | personagem e objeto pelo pipeline do DC, em sprite pré-renderizado (estúdio) | **Híbrida (D-18, aprovada em 01/11/2026):** prédios, aviões e veículos entram como malha low-poly em tempo real, porque são corpos rígidos, sem skinning; é como fazem as referências do COMPETITIVO §g. Pessoas seguem em sprite pré-renderizado, desenhado num quad no mundo 3D, com o uniforme numa máscara separada (§10.2). Motivo: avião taxiando e veículo fazendo curva pediriam dezenas de direções em sprite |
 
 ---
 
@@ -547,6 +549,17 @@ O padrão visual é o dos líderes do gênero (COMPETITIVO §g): tudo se mexe, e
 - **Câmera:** ortográfica, em ângulo isométrico fixo, com pan e zoom por gesto. Tocar num prédio abre o painel dele.
 - **Desempenho (K3 ampliado):** p10 ≥ 30 FPS num Android de entrada, com 60 pessoas, 2 aviões em movimento e 6 veículos de pátio na tela.
 
+**Estado da tela em 02/11/2026** (só apresentação; nenhuma regra mudou):
+
+- **Escala (PR #32):** o adulto tem 0,5 m, a sala fica na grade de 4 m e há corredor de 0,6 m entre as salas, com régua em pessoas (balcão 3,4; porta 2,2; corredor 3). A câmera mantém o corpo do adulto em 28 px na foto 540×960. O `COMPETITIVO.md` §h.8 propunha salas de 8 × 8 m com adulto de 1 m; entrou a opção de adulto menor, sem mexer nas salas.
+- **Postos com gente (PRs #26 e #42):** guichê com balança, esteira e número no check-in; segurança com pórtico, cabine de corpo inteiro, esteira com bandeja e raio-x; posto sem gente fica apagado, com cordão e placa; o gesto de quem atende e de quem é atendido segue o tempo do serviço.
+- **Malas (PR #37):** a mala é despachada no balcão, anda pela esteira até o carrinho do avião e o passageiro segue só com a mala de mão; na segurança ela vai deitada na bandeja.
+- **Sala de espera do portão (PR #31):** quem espera senta, levanta quando o embarque abre e forma a serpentina diante do pódio, com agentes de embarque.
+- **Ponte (PR #29):** a pessoa sobe a rampa e some no túnel; no estande remoto, escada e passarela; o avião espera o último do trilho.
+- **Física do pátio (PR #33):** garagem e hangar com a boca para o lado certo, 2 ruas de mão única e vez entre veículos; de 469 cruzamentos de peça para 0 em 5 cenários (`diag_caixas.py`).
+- **Clima, incidentes e falhas (PRs #36 e #44):** véu de chuva, tempestade, vento, neblina e neve, pista com X, totem na sala do incidente e avião em pane com cones.
+- **Em aberto:** pessoa ainda atravessa parede ou móvel (1.862 encontros caíram para 237 em 01/11/2026; a meta é 0; frente `ta-caminhos`); a organização das 8 salas está no segundo PR da frente `ta-planta`; o K3 só foi medido no PC (p10 de 58,7 FPS) e o aparelho de entrada fica para o último passo (D-24).
+
 **Portão de design (a mesma régua do TA-2):** tripulação e manutenção só ganham regra no núcleo se o bot mostrar que elas geram decisão. O bot que escala e manda ao hangar na hora certa precisa render ≥ 1,10 × o bot que deixa tudo no automático, com as mesmas sementes. Se não render, o sistema fica só visual (o avião é atendido e a tripulação embarca, sem regra), e o design volta para revisão (TA-8).
 
 ## 5.14. Clima, estações do ano e falhas de avião
@@ -581,6 +594,8 @@ O aeroporto tem dia a dia: amanhece, tem hora de pico, muda de estação do ano,
 
 **Portão de design:** clima, estações do ano e falhas passam pelo portão do §5.13, um sistema por vez. O que não render ≥ 1,10 fica só visual. Medido em 31/10/2026: clima 1,161 e 1,147; falhas 1,134, 1,131 e 1,124; demanda por estação 1,000, só visual. Os picos do dia não têm escolha própria e ficam ligados porque não quebram os portões.
 
+**Estado em 02/11/2026:** relógio do jogo, 5 climas com previsão, estações do ano e 3 falhas de avião estão no núcleo (PR #28) e, na tela, o aviso, a previsão no quadro e o cenário (PRs #36 e #44). **Divergência:** a demanda por estação do ano ficou só visual (D-C4a): as estações mudam a chance de cada clima, mas nenhuma tela mostra a estação. **Vale o código.**
+
 ---
 
 # 6. ECONOMIA, RECOMPENSAS E EQUILÍBRIO
@@ -604,7 +619,7 @@ Não criar uma moeda para cada sistema. Toda moeda precisa ter função visível
 - Limitar valores e validar todas as operações de saldo.
 - Usar inteiros ou valores decimais controlados para recompensas; não depender de comparações frágeis de float para validar propriedade de item.
 - Alterações de preço e balanceamento precisam ser versionadas e testadas em saves antigos.
-- O balanceamento sai do bot (`-autoplay` e `client/tools/econsim`, perfis F2P, Slow e AdWatcher) e é registrado em `docs/BALANCE.md`. A duração real se mede com gente: no Forge, a pessoa foi 1,7–3,7× mais lenta que o bot.
+- O balanceamento sai do bot (`-autoplay`, o `Bot.cs` com os perfis Bom, Lento e Parado, os testes `[Explicit]` do `BalanceTests` e o CI `balanco.yml`; o `econsim` do DC não foi copiado) e é registrado em `docs/BALANCE.md`. A duração real se mede com gente: no Forge, a pessoa foi 1,7–3,7× mais lenta que o bot.
 
 ## 6.3. Progresso offline
 
@@ -635,6 +650,8 @@ Não criar uma moeda para cada sistema. Toda moeda precisa ter função visível
 
 **Ritmo proposto (HIPÓTESE, a validar no bot):** 150 pontos por nível, 4 500 no total. Fontes em 28 dias: 3 diárias × 40 pontos, 5 semanais × 150 e 10 objetivos sazonais × 100, num máximo de 7 360 pontos. Quem joga 5 dias por semana chega a cerca de 5 400 e fecha o passe; quem joga 3 dias por semana chega perto do nível 19. A tabela completa de recompensas por nível fica em `docs/TEMPORADA_S1.md`, pronta antes da Fase C terminar.
 
+**Estado em 02/11/2026:** a trilha gratuita de 30 níveis está sendo feita no núcleo (frente `ta-passe`, sem PR ainda), e a trilha premium só tem o produto `season_pass_s1` no catálogo (PR #43), sem regra. **Divergência:** `docs/TEMPORADA_S1.md`, citado acima e no P-07, não existe; a tabela de recompensas e a duração da temporada vão para o contrato da frente. Os números do ritmo continuam hipótese: **vale o que o bot medir**, e este parágrafo se atualiza quando o PR entrar.
+
 ## 6.5. Missões e campanhas
 
 **Campanha principal:** 30 objetivos, 10 por aeroporto, listados em `docs/CAMPANHA.md` antes da Fase C.
@@ -655,6 +672,8 @@ Cada objetivo tem:
 **Conquistas:** 20 permanentes. Não devem depender de uma oferta paga ou de um anúncio específico.
 
 **Campanha sazonal:** objetivos adicionais ligados ao passe e ao evento, sem substituir o progresso principal. Deve ter início, fim, recompensas e comportamento de retorno documentados.
+
+**Estado em 02/11/2026:** campanha (PR #30), missões e conquistas (PR #40) estão no núcleo e ainda sem tela (frente `ta-metas-tela`, em andamento). **Divergência:** o dia da missão é o **dia do jogo** (8 ondas, ou 24 minutos jogados), não o dia do calendário às 04:00 do texto acima (D-C6a, `CONTRATO_FASE_C6.md` §2): nada de hora de parede dentro da simulação, reprodutível no bot e imune a mexer no relógio do aparelho. **Vale o código.** Se o dono preferir o calendário, a troca é uma linha, e o portão do §5.13 precisa ser medido de novo. As conquistas não pagam Cash (D-C6d). Fechar a cadeia de objetivos de um aeroporto paga 100 Gems, 300 na campanha inteira (`CONTRATO_FASE_D1.md` §1).
 
 ---
 
@@ -699,7 +718,7 @@ Formatos de lançamento:
 
 ## 7.3. Catálogo inicial de compras
 
-**Só existe se D-05 aprovar IAP.** Os IDs abaixo são propostas de nomenclatura, não IDs já criados. O agente deve consultar o projeto e as lojas antes de registrar produtos. Não criar duplicatas se já houver IDs estáveis. Na Google Play, um ID de produto criado não pode ser reaproveitado, então os IDs se decidem uma vez, aqui.
+**D-05 aprovou a opção (b) em 01/11/2026:** compras com Gems e validação em servidor. Se o servidor não passar no §16.6, as compras reais não abrem e o jogo lança só com o anúncio recompensado (opção a). Os IDs abaixo já estão fixos no código (`Tabelas.Produtos`, PR #43, sem campo de preço), mas **ainda não foram criados na Play Console**, que não existe (previsão 25/11/2026). O agente consulta o projeto e as lojas antes de registrar produtos e não cria duplicatas. Na Google Play, um ID de produto criado não pode ser reaproveitado, então os IDs se decidem uma vez, aqui.
 
 | Produto | ID sugerido | Tipo | Conteúdo |
 |---|---|---|---|
@@ -720,6 +739,8 @@ Regras:
 - A loja mostra "Restaurar compras" onde aplicável, estado de carregamento, falha, cancelamento e compra pendente.
 - Não oferecer "remover anúncios" enquanto o jogo não tiver anúncios forçados; isso venderia um benefício inexistente.
 - Não adicionar assinatura recorrente no lançamento sem necessidade comprovada e sem implementar cancelamento, estado de renovação, recuperação e comunicação claros.
+
+**Estado em 02/11/2026:** no núcleo (PR #43, `CONTRATO_FASE_D1.md`): Gems no save (schema 8), o catálogo de 7 produtos, os 3 sumidouros do §6.1 e o crédito idempotente por id de transação, o ponto que o servidor vai usar; sem compra, os 30 objetivos fecham em 200 de 200 sementes. **Faltam:** a tela da loja (`ta-loja`), o Unity IAP em modo de teste, o servidor de validação (`ta-servidor`, Cloud Run) e a restauração pela loja. **O 2× de receita por vídeo continua** (D-22), opcional, por 5 minutos e até 3 por dia (`Anuncios.cs`), e não se acumula com o booster de Gems do mesmo efeito (`CONTRATO_FASE_D1.md` §3). O anúncio real (LevelPlay) depende de criar o app na conta da V-STACK.
 
 ## 7.4. Fluxo seguro de compra
 
@@ -939,7 +960,7 @@ Se houver criação de conta, oferecer processo de exclusão de conta dentro do 
 
 ## 10.2. Pipeline de assets
 
-**Rota híbrida (D-18, v1.2):**
+**Rota híbrida (D-18, v1.2; aprovada em 01/11/2026):**
 - **Corpos rígidos:** prédios, estações, aviões e veículos saem do Tripo, são decimados no Blender (low-poly, material simples, pivô no chão) e entram no Unity como malha em tempo real. Assim eles se movem em qualquer direção.
 - **Pessoas:** seguem o pipeline do estúdio (Origem, "Arte e animação"): Tripo → Auto Rig/Mixamo → Blender → `render_sprites.py` → sprites pré-renderizados no ângulo da câmera, sem skinning no aparelho. Cada sprite é desenhado num quad no mundo 3D, com o uniforme numa máscara separada, que o jogo tinge com a cor do setor.
 
@@ -961,6 +982,8 @@ Arte crua paga (zips do Tripo, FBX, `.blend` com modelo) fica fora do git, no ch
 **Malha decimada (decisão A, Vinicius, 29/10):** também fica fora do git. Ela é gerada por `client/tools/malhas_ta.py` em `client/Assets/_TA/ArtLocal/Resources/Malhas/`, pasta ignorada; o build sai deste PC, e um clone sem a pasta mostra as primitivas da v0.1. Os sprites das pessoas são render, não o modelo, e entram no git (`client/Assets/_TA/Resources/Sprites/`). A alternativa B (repositório privado com as malhas no git) fica para quando o lançamento pedir CI com build.
 
 Interface pintada (logo, ícones, retratos) sai do gerador de imagens grátis, sobre fundo liso e recortada por script.
+
+**Estado em 02/11/2026:** os Lotes 1 a 11 do Tripo estão gerados e exportados, com proveniência em `docs/PROVENIENCIA.md`, e a arte está no jogo (PR #21), com malha nos corpos rígidos e sprite nas pessoas; as malhas seguem fora do git (decisão A). O plano pago do Tripo vale até 29/11/2026. Os termos do Tripo (§3.2) proíbem extrair conteúdo com ferramentas automáticas, e os Lotes 3 a 10 usaram fila de script de página: o risco está no §23.1, e peça nova se gera pela interface, sem script.
 
 **Créditos estimados (HIPÓTESE, preço da Origem: modelo HD 45, rig 20):**
 
@@ -1065,6 +1088,8 @@ As 8 variantes de aeronave, os 6 uniformes e as roupas dos passageiros saem por 
 - Licenças e origem de todas as faixas/efeitos devem ser registradas em `docs/PROVENIENCIA.md`.
 - Áudio não pode bloquear o loop de gameplay se arquivos falharem; usar fallback silencioso.
 - Primeira opção: áudio sintetizado por script (`audio_gen.py` do DC), sem custo de licença. O motor de avião é o risco: testar cedo e, se soar pobre, usar uma faixa licenciada e registrada.
+
+**Estado em 02/11/2026:** 8 sons em 13 arquivos e 3 músicas saem do `audio_gen.py` (PR #19, registrados em `PROVENIENCIA.md` §3.1), e `Audio.cs` tem volumes separados, fallback silencioso e a volta do segundo plano em rampa de 2,5 s. **Nada toca ainda:** falta ligar a classe em `Game.cs`, `Mundo.cs` e na pausa (frente `ta-audio`); o dono ouve antes de valer. **Vale o §12; o código está atrás.**
 
 ---
 
@@ -1411,9 +1436,13 @@ Bloqueia a submissão:
 
 ### Fase 0 — Decisões
 
+*Estado em 02/11/2026: D-01 a D-24 respondidas em 29/10 e 01/11/2026 (§23.2); sobram D-17 (envio final) e a revisão jurídica do D-10.*
+
 - As decisões D-01 a D-14 do §23.2 que travam código: começar o projeto, nome e appId, monetização, idiomas e países.
 
 ### Fase A — Auditoria e estabilização
+
+*Estado em 02/11/2026: feita (PRs #4 e #16), com `verify.sh quick|full|android` e o CI.*
 
 - Descobrir versão do Unity, plataforma, branch, cena inicial, scripts, pacotes, serviços, build settings, assets e testes. **Feito em 29/10 (§0.3): não há projeto.**
 - Gerar matriz de requisitos (`docs/CONTRATO_LANCAMENTO.md`) e contrato da v0.1 (`docs/CONTRATO_V01.md`).
@@ -1423,6 +1452,8 @@ Bloqueia a submissão:
 - Produzir inventário de assets que faltam.
 
 ### Fase B — Core jogável
+
+*Estado em 02/11/2026: feita no núcleo e na tela (PRs #5 e #7), com TA-1 e TA-2 medidos pelo bot. Falta o K2 com gente (20 pessoas, D-24).*
 
 - Quadro de partidas.
 - Fluxo de passageiros/estações.
@@ -1434,6 +1465,8 @@ Bloqueia a submissão:
 - **Portão:** os números do §4.2 no bot e o K2 com gente. Se o slot idle ainda estiver em validação, os criativos do TA-1 e do TA-3 gravados do greybox entram no mesmo teste de criativos (Origem §53).
 
 ### Fase C — Conteúdo e progressão
+
+*Estado em 02/11/2026: núcleo inteiro na `main` (PRs #12, #18, #23, #28, #30 e #40); tela do dia a dia, do pátio, do clima e dos avisos (PRs #24 a #44); arte do Tripo no jogo (PR #21). Faltam: telas de aeroportos, rotas e metas (a de metas em andamento), 19 das 20 histórias, o passe (núcleo gratuito em andamento), 10 das 12 aeronaves no pátio, o áudio ligado e a estação do ano na tela.*
 
 - Três aeroportos.
 - Rotas, aeronaves e funcionários.
@@ -1447,6 +1480,8 @@ Bloqueia a submissão:
 
 ### Fase D — Monetização e segurança
 
+*Estado em 02/11/2026: só o núcleo das Gems (D1, PR #43). Faltam: Unity IAP, servidor, LevelPlay real, consentimento e a tela de configurações (em andamento), telemetria e os testes do §16.3 e §16.6.*
+
 - Unity IAP configurado.
 - Validação server-side.
 - Catálogo de produtos nas lojas.
@@ -1456,6 +1491,8 @@ Bloqueia a submissão:
 - Testes de compra, restauração, anúncios e abuso.
 
 ### Fase E — Release candidate
+
+*Estado em 02/11/2026: não iniciada. A Play Console (previsão 25/11/2026) é o que a trava.*
 
 - Build de release.
 - Testes de regressão.
@@ -1479,14 +1516,16 @@ O plano de 26/10 a 29/10 da v1.0 foi substituído. A auditoria (§0.3) mostrou q
 
 Somando, a ordem de grandeza é de 7 a 12 semanas até o pacote Android, contando com o reuso do Forge e do DC. A Origem §53 estimava 3–4 semanas só para o APK do MVP. A estimativa se refaz no fim da Fase B, com a velocidade real. A Play Console (previsão 2026-11-25) só trava as Fases D e E.
 
+**Medido em 02/11/2026:** as Fases A e B entraram em 29/10/2026 (PRs #4, #5 e #7) e o núcleo da C entre 29/10 e 01/11/2026, bem abaixo das ordens de grandeza acima, porque as frentes rodam em paralelo. O que não acelera é a Play Console (25/11/2026) e a medida com gente.
+
 ---
 
 # 18. CHECKLIST DE BUILD E PUBLICAÇÃO
 
 ## 18.1. Identidade e versão
 
-- [ ] Nome final aprovado após verificação de colisão (INPI, USPTO, EUIPO e lojas).
-- [ ] Package ID Android (`br.com.vstack.<nome>`) e Bundle ID iOS aprovados e estáveis.
+- [x] Nome final aprovado após verificação de colisão (INPI, TMview/EUIPO, WIPO e lojas; o USPTO direto foi inconclusivo, `NOME.md`), em 01/11/2026.
+- [x] Package ID Android `br.com.vstack.littleterminal` aprovado e estável (01/11/2026); Bundle ID iOS fora do lançamento (D-04).
 - [ ] Ícone final conforme os requisitos da loja.
 - [ ] Version name e build number incrementados.
 - [ ] Orientação retrato configurada.
@@ -1617,27 +1656,27 @@ O vídeo deve usar captura real do jogo. Se usar mockup de edição, não aprese
 
 # 21. MATRIZ DE PRIORIDADE E ESTADO
 
-Estado auditado em 29/10/2026 no commit `59f0bb9` (§0.3). A evidência comum a todas as linhas é `git ls-files`: o repositório só tem documentos e pastas vazias.
+Estado atualizado em 02/11/2026 sobre a `main` em `dd82ecf` (44 PRs). Em 29/10/2026 (`59f0bb9`, §0.3) o repositório só tinha documentos, e todas as linhas estavam `NÃO INICIADO` ou `BLOQUEADO`, menos P-01. A evidência de cada linha são os PRs citados e [`CONTRATO_LANCAMENTO.md`](CONTRATO_LANCAMENTO.md) §1. `CONCLUÍDO COM EVIDÊNCIA` só aparece quando a entrega inteira da linha está na `main`.
 
-| ID | Entrega | Prioridade | Evidência exigida | Estado em 29/10 | Depende de |
+| ID | Entrega | Prioridade | Evidência exigida | Estado em 02/11 | Depende de |
 |---|---|---|---|---|---|
-| P-01 | Projeto abre e compila na versão Unity fixada | Bloqueador | Log de build | `EM ANDAMENTO` (D-01 aprovada em 29/10; Fase A: esqueleto e `verify.sh full`) | D-01 aprovada; o PR da Fase A (`docs/CONTRATO_LANCAMENTO.md`) |
-| P-02 | Loop completo de voo | Bloqueador | Teste PlayMode + vídeo/captura | `NÃO INICIADO` | P-01 |
-| P-03 | Quadro de partidas e deadlines | Bloqueador | Testes de estado/tempo | `NÃO INICIADO` | P-01 |
-| P-04 | Equipe móvel | Bloqueador | Teste funcional e de usabilidade | `NÃO INICIADO` | P-01; playtest com gente |
-| P-05 | Três aeroportos e campanha | Obrigatório | Checklist de conteúdo e testes | `NÃO INICIADO` | Fase B; `docs/CAMPANHA.md` |
-| P-06 | Rotas, aeronaves, incidentes e histórias | Obrigatório | Catálogo validado e testes | `NÃO INICIADO` | Fase B; D-13 |
-| P-07 | Passe de temporada completo | Obrigatório | Catálogo, progressão e sandbox | `NÃO INICIADO` | `docs/TEMPORADA_S1.md`; trilha premium depende de D-05 |
-| P-08 | Compras seguras e restore | Bloqueador | Validação sandbox/server-side | `BLOQUEADO` | núcleo feito (`CONTRATO_FASE_D1.md`); servidor (D-06) e Play Console (D-U-N-S, previsão 2026-11-25) |
-| P-09 | Anúncios recompensados e limites | Bloqueador se monetização ativa | Modo de teste + teste de callback | `BLOQUEADO` | app no LevelPlay, que depende do nome e do appId (D-03) |
-| P-10 | Save/migração/offline | Bloqueador | Testes de corrupção, tempo e reload | `NÃO INICIADO` | P-01 |
-| P-11 | Privacidade e declarações de loja | Bloqueador | URLs e formulários revisados | `BLOQUEADO` | D-03, D-09, D-10, D-11, D-12; Play Console |
-| P-12 | Artes finais e áudio | Obrigatório | Revisão dentro do jogo | `BLOQUEADO` | D-14 (aval dos lotes do Tripo); D-03 para logo e ícone |
-| P-13 | Performance mobile | Bloqueador | Relatório de profiling | `NÃO INICIADO` | P-02; aparelho de entrada |
-| P-14 | AAB/IPA assinados | Bloqueador | Artefatos e hashes | `BLOQUEADO` | AAB: P-01 e D-03 (a chave de upload leva o nome); envio: Play Console. IPA: macOS e conta Apple (D-04) |
-| P-15 | Página de loja e criativos | Obrigatório | Pacote final | `BLOQUEADO` | D-03; build real para gravar |
-| P-16 | Telemetria e crash reporting | Obrigatório | Eventos verificados em ambiente de teste | `NÃO INICIADO` | D-11 |
-| P-17 | Proteção anti-fraude e segredos | Bloqueador | Checklist de segurança | `NÃO INICIADO` | P-08 para a parte de compras |
+| P-01 | Projeto abre e compila na versão Unity fixada | Bloqueador | Log de build | `CONCLUÍDO COM EVIDÊNCIA` (PR #4; `verify.sh full` verde em todo PR de jogo até o #44) | — |
+| P-02 | Loop completo de voo | Bloqueador | Teste PlayMode + vídeo/captura | `CONCLUÍDO COM EVIDÊNCIA` (testes do núcleo e `-autoplay`, PRs #5 e #7; fotos e GIFs nos PRs #26, #29, #31, #37 e #42) | — |
+| P-03 | Quadro de partidas e deadlines | Bloqueador | Testes de estado/tempo | `CONCLUÍDO COM EVIDÊNCIA` (TA-1: Bom 96,1% e Lento 73,0%; PRs #5 e #35) | — |
+| P-04 | Equipe móvel | Bloqueador | Teste funcional e de usabilidade | `EM ANDAMENTO` (teste funcional e TA-2 de 1,426 feitos, PRs #5 e #23) | playtest com gente: K2 com 20 pessoas (D-24) |
+| P-05 | Três aeroportos e campanha | Obrigatório | Checklist de conteúdo e testes | `EM ANDAMENTO` (núcleo: PRs #23 e #30; faltam as telas de aeroportos e de metas) | `ta-rotas-tela`, `ta-metas-tela`; `docs/CAMPANHA.md` já existe |
+| P-06 | Rotas, aeronaves, incidentes e histórias | Obrigatório | Catálogo validado e testes | `EM ANDAMENTO` (rotas e incidentes no núcleo e o aviso na tela: PRs #23, #36 e #44; faltam a tela de rotas, 10 aeronaves no pátio e 19 histórias) | `ta-rotas-tela`, `ta-avioes`, `ta-historias`; D-13 decidida |
+| P-07 | Passe de temporada completo | Obrigatório | Catálogo, progressão e sandbox | `EM ANDAMENTO` (trilha gratuita no núcleo, frente `ta-passe`, sem PR; o produto premium só existe no catálogo, PR #43) | contrato da `ta-passe` no lugar de `docs/TEMPORADA_S1.md`; trilha premium: Play Console |
+| P-08 | Compras seguras e restore | Bloqueador | Validação sandbox/server-side | `BLOQUEADO` (núcleo feito, PR #43) | servidor (D-06, `ta-servidor`) e Play Console (D-U-N-S, previsão 2026-11-25) |
+| P-09 | Anúncios recompensados e limites | Bloqueador se monetização ativa | Modo de teste + teste de callback | `BLOQUEADO` (regras no núcleo; D-03 e o appId decididos, PR #39) | criar o app no LevelPlay, na conta da V-STACK, e integrar o SDK |
+| P-10 | Save/migração/offline | Bloqueador | Testes de corrupção, tempo e reload | `CONCLUÍDO COM EVIDÊNCIA` (`SaveTests` e `ExploitTests`: corrupção, relógio, reload e migração do schema 1 ao 8; PRs #5 a #43). Restaurar compras é do P-08 | — |
+| P-11 | Privacidade e declarações de loja | Bloqueador | URLs e formulários revisados | `EM ANDAMENTO` (frente `ta-config`: política, suporte e exclusão de dados, sem PR; D-09 a D-12 decididas, PR #38) | revisão jurídica (sem responsável), GitHub Pages ligado após o merge e Play Console |
+| P-12 | Artes finais e áudio | Obrigatório | Revisão dentro do jogo | `EM ANDAMENTO` (arte do Tripo no jogo, PR #21; áudio gerado e sem ligação, PR #19) | ícone aplicado ao build, variantes de aeronave, `ta-audio`; D-14 aprovada |
+| P-13 | Performance mobile | Bloqueador | Relatório de profiling | `NÃO INICIADO` (K3 só no PC: p10 de 58,7 FPS; aparelho de entrada por último, D-24) | P-02; aparelhos dos amigos do dono |
+| P-14 | AAB/IPA assinados | Bloqueador | Artefatos e hashes | `BLOQUEADO` (appId e chave de upload feitos, PR #39; falta o AAB de release) | AAB: Play Console e a cópia segura da chave. IPA: fora do lançamento (D-04) |
+| P-15 | Página de loja e criativos | Obrigatório | Pacote final | `BLOQUEADO` | build real para gravar; Play Console |
+| P-16 | Telemetria e crash reporting | Obrigatório | Eventos verificados em ambiente de teste | `EM ANDAMENTO` (diário CSV com os eventos do §15.1; D-11 decidida, PR #38) | SDK do Unity Analytics (`ta-telemetria`) |
+| P-17 | Proteção anti-fraude e segredos | Bloqueador | Checklist de segurança | `EM ANDAMENTO` (crédito idempotente e sem token no disco, PR #43; `checa_repo` contra segredos, PR #16) | servidor de validação (P-08) |
 | P-18 | Teste de regressão final | Bloqueador | Relatório com todos os testes críticos | `NÃO INICIADO` | todas as anteriores |
 
 Estados permitidos:
@@ -1680,14 +1719,14 @@ O texto abaixo deve ser utilizado como instrução operacional para o Claude, ju
 
 ## 23.1. Riscos
 
-- **Prazo curto:** maior risco. A auditoria de 29/10 confirmou: não há projeto, e 29/10 é inviável (§0.3).
+- **Prazo curto:** maior risco. A auditoria de 29/10 confirmou: não há projeto, e 29/10 é inviável (§0.3). Em 02/11/2026 o projeto existe; o prazo real é o da Play Console (D-02).
 - **Contas das lojas:** a Play Console da V-STACK depende do D-U-N-S (previsão 2026-11-25); a burocracia de conta leva ~30 dias úteis. O iOS depende de macOS e de conta Apple, e este PC é Windows.
 - **Validação do formato:** o jogo está NO-GO nesta rodada e só entra se o slot idle validar (Origem §51 e §53). Gastar o escopo completo antes da prova do bot (TA-1, TA-2) arrisca construir um diferencial que não funciona.
 - **Assets gerados:** modelos podem ter artefatos, escala inconsistente ou termos de uso incompatíveis; revisar antes de integrar.
 - **Compra sem backend:** risco de fraude; não ativar compras reais sem validação adequada.
 - **SDKs:** dependências podem exigir versões específicas do Unity/Android/iOS; não atualizar às cegas.
 - **Revisão das lojas:** depende das plataformas; submissão não garante aprovação na mesma data.
-- **Nome:** "Little Terminal" é recomendação provisória; pesquisar colisões, marcas, package ID e domínio antes de fixar.
+- **Nome:** decidido em 01/11/2026 (D-03). Sobram: a busca direta no USPTO foi inconclusiva (coberta por TMview e WIPO) e o registro da marca no INPI ainda não foi pedido (`NOME.md`).
 - **Nomes de companhias e aeroportos:** os nomes fictícios podem colidir com companhias reais (§0.4).
 - **Temporada e ofertas:** datas erradas ou recompensas não definidas geram reclamações e problemas de revisão.
 - **Dados pessoais:** SDKs de anúncios e analytics podem coletar dados além do esperado; revisar cada SDK.
@@ -1695,6 +1734,10 @@ O texto abaixo deve ser utilizado como instrução operacional para o Claude, ju
 - **Anti-cheat:** sem autoridade server-side não existe proteção completa contra manipulação do cliente.
 - **PC de 7,7 GB:** um processo pesado por vez (Unity, emulador, Blender ou Docker); isso alonga as Fases C e E.
 - **Escopo versus prazo:** não confundir documento completo com implementação pronta.
+- **Termos do Tripo:** o texto de 2025-07-11 (§3.2) proíbe extrair conteúdo com ferramentas automáticas, e os Lotes 3 a 10 foram gerados com fila de script de página (`PROVENIENCIA.md` §4). Precisa de leitura jurídica antes de publicar.
+- **Plano do Tripo até 29/11/2026:** sem plano, o export fica bloqueado (custou 6.318 créditos em 29/10/2026).
+- **Pessoa atravessando peça e desempenho sem medida em aparelho:** 237 encontros em 01/11/2026 (meta 0) e K3 só no PC; o celular de teste entra no último passo (D-24).
+- **Política de privacidade sem URL:** o GitHub Pages está desligado e o texto precisa de revisão jurídica (D-10, sem responsável) antes de a loja aceitar o envio.
 
 ## 23.2. Decisões que precisam ser confirmadas pelo responsável
 
@@ -1796,7 +1839,7 @@ O projeto recebe **`GO PARA SUBMISSÃO`** somente quando:
 
 Caso contrário, o estado é `NO-GO`, com lista explícita de bloqueios e plano de correção.
 
-**Estado em 29/10/2026: `NO-GO`.** Os bloqueios estão no §0.3 e no §21; o plano, no §17.3; as decisões, no §23.2.
+**Estado em 02/11/2026: `NO-GO`.** O projeto existe e roda, mas não há Play Console, servidor de compras, anúncio real, medida com gente nem build de loja. Os bloqueios estão no §21 e em [`ESTADO_DO_PROJETO.md`](ESTADO_DO_PROJETO.md) (§7 a §9); o plano, no §17.3; as decisões, no §23.2.
 
 **Não confundir urgência com qualidade, e não transformar segurança em item opcional.**
 
@@ -1881,6 +1924,44 @@ Testes: os invariantes do §5.14 entram como testes negativos no `CONTRATO_FASE_
 | 4 | §15.1 | 9 eventos novos | diário e telemetria |
 | 5 | §23.2 (D-21) | decisão registrada, com a recomendação | a regra de um sistema novo passa pelo portão do §5.13 |
 | 6 | COMPETITIVO, TA-4 e TA-9 | o clima e as falhas com escolha viram diferencial | só um mid-core tem clima, e ninguém do gênero liga falha à manutenção do jogador |
+
+## v1.4 — 02/11/2026 (Claude; pedido do Vinicius, aprovação do texto: **pendente**)
+
+Motivo: o Vinicius pediu (02/11/2026) "uma atualização no github do estado atual do projeto, o que ainda está em andamento e vai ser feito ou corrigido; outro time vai ler o documento; atualize o GDD para estar compatível com o que estamos fazendo".
+
+Impacto: nenhum em regra de design, guardrail, monetização, privacidade ou segurança. Muda o estado de cada entrega e o registro das decisões de 01/11/2026 e das divergências entre o código e o texto. Testes: só documentos; `verify.sh quick` verde.
+
+| # | Onde | Mudança | Motivo |
+|---|---|---|---|
+| 1 | cabeçalho | versão 1.4; nome Little Terminal e appId `br.com.vstack.littleterminal` decididos; status: jogo em desenvolvimento, com 44 PRs | o cabeçalho ainda dizia "nenhuma funcionalidade implementada" |
+| 2 | §0.3 | nota de que a auditoria é histórica | o estado de hoje está no §21 |
+| 3 | §0.4 | D-18 aprovada; Gems com D-05 e D-07 aprovadas | decisões de 01/11/2026 |
+| 4 | §5.13, §5.14 | estado da tela: escala de 0,5 m, postos com gente, malas, sala de espera, ponte, física do pátio, clima; o que está em aberto | pedido do Vinicius |
+| 5 | §6.2 | o balanço sai do `Bot.cs`, do `BalanceTests` e do CI; o `econsim` não existe | o texto citava uma ferramenta que não foi copiada |
+| 6 | §6.4, §6.5 | estado do passe, da campanha, das missões e das conquistas; dia da missão = dia do jogo | PRs #30 e #40 e a frente `ta-passe` |
+| 7 | §7.3 | compras opção B (Gems e servidor), IDs fixos no código, 2× por vídeo mantido (D-22) | D-05 a D-07 e D-22; PR #43 |
+| 8 | §10.2 | D-18 aprovada; estado da arte; risco dos termos do Tripo | decisão de 01/11/2026 e `PROVENIENCIA.md` §4 |
+| 9 | §12 | áudio sintetizado e ainda sem ligação | PR #19 |
+| 10 | §17.2, §17.3 | estado de cada fase em 02/11/2026 | o texto descrevia o plano, não o andamento |
+| 11 | §18.1 | nome e Package ID Android marcados como feitos | PR #39 |
+| 12 | §21, §25 | estado de P-01 a P-18 em 02/11/2026 | a matriz estava em 29/10/2026 |
+| 13 | §23.1 | nome deixa de ser risco aberto; entram os termos do Tripo, o plano até 29/11, pessoa × peça e a política sem URL | riscos de hoje |
+
+**Onde o código e este documento divergem, e qual vale** (registrado em 02/11/2026):
+
+| # | Tema | O que o texto dizia | O que o código faz | Vale | Onde |
+|---|---|---|---|---|---|
+| 1 | Dia da missão (§6.5) | vira às 04:00 no fuso gravado | dia do jogo: 8 ondas ou 24 min jogados | o código | PR #40; `CONTRATO_FASE_C6.md` D-C6a |
+| 2 | Tripulação (§5.11, D-19) | com regra no lançamento | regra desligada (só visual): o portão do §5.13 mediu 1,02 | o código; o próprio §5.13 manda deixar só visual | PR #12; `BALANCE.md` D-C2 |
+| 3 | Bônus do especialista (§5.5) | cada perfil com seu bônus | desligado: portão 1,00 e derruba o TA-2 | o código | PR #18; `BALANCE.md` D-C2a |
+| 4 | Estações do ano (§5.14, D-21) | mudam a demanda | só mudam a chance de cada clima; a estação não aparece na tela | o código | PR #28; `BALANCE.md` D-C4a |
+| 5 | Escala das salas (`COMPETITIVO.md` §h.8) | salas de 8 × 8 m, adulto de 1 m | grade de 4 m, adulto de 0,5 m, corredor de 0,6 m | o código | PR #32 |
+| 6 | Ferramenta de balanço (§6.2) | `client/tools/econsim` | `Bot.cs`, `BalanceTests` e `balanco.yml` | o código; texto corrigido | PRs #5 e #16 |
+| 7 | Tabela do passe (§6.4, P-07) | `docs/TEMPORADA_S1.md`, 28 dias, 150 pontos por nível | o arquivo não existe; a trilha gratuita está em medição | a decidir quando o PR da `ta-passe` entrar; vale o que o bot medir | em andamento |
+| 8 | Histórias e aeronaves (§4.1) | 20 histórias e 8 variantes de aeronave | 1 história e 2 aeronaves no pátio | o texto; é trabalho a fazer | `ta-historias`, `ta-avioes` |
+| 9 | Idiomas (D-08) | pt-BR e en no lançamento | `Textos.cs` só tem pt-BR | o texto; é trabalho a fazer | `ta-ingles` |
+| 10 | Áudio (§12) | efeitos e música no jogo | gerados e sem chamada | o texto; é trabalho a fazer | PR #19; `ta-audio` |
+| 11 | Gems (§6.1) | "só se D-05 aprovar" | aprovadas; no save (schema 8); a cadeia de um aeroporto fechada paga 100 Gems | a decisão e o código | PR #43; `CONTRATO_FASE_D1.md` |
 
 ---
 
