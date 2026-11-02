@@ -177,6 +177,50 @@ namespace TA
             Adiantar = L("Adiantar"), Atrasar = L("Atrasar"), Priorizar = L("Priorizar"), Reparar = L("Reparar"),
             AtrasoNao = L("Não dá para atrasar: o clima passa da virada da onda."), MecanicoOcupado = L("O mecânico está ocupado."), PousoSeguro = L("Pouso seguro. Passageiros remarcados.");
 
+        // ---------- metas: campanha, missoes e conquistas (docs/CAMPANHA.md e docs/MISSOES.md; o nome e' o da tabela do nucleo) ----------
+        public static readonly string[] AeroportoNome = System.Array.ConvertAll(Tabelas.Aeroportos, a => L(a.Nome));
+        public static readonly string Metas = L("Metas"), Campanha = L("Campanha"), Missoes = L("Missões"), Conquistas = L("Conquistas"),
+            Diarias = L("DIÁRIAS"), Semanais = L("SEMANAIS"), Feito = L("Feito"), Feita = L("Feita"), Premio = L("Prêmio"), Selo = L("Selo");
+        public static string NomeMeta(Objetivo o) => L(o.Nome);
+        public static string Conta(long a, long b) => Num(a) + "/" + Num(b);
+        public static string NovasEm(int ondas) => L("Novas em ") + ondas + (ondas == 1 ? L(" onda") : L(" ondas"));
+        static string Cash(long c) => c > 0 ? " · +" + Num(c) + L(" Cash") : "";
+        public static string ObjetivoFeito(string nome, long cash) => L("Objetivo feito: ") + nome + Cash(cash);
+        public static string MissaoFeita(string nome, long cash) => L("Missão feita: ") + nome + Cash(cash);
+        public static string ConquistaNova(string nome) => L("Conquista: ") + nome + "!";
+        static string Plural(int n, string um, string varios) => Num(n) + " " + (n == 1 ? um : varios);
+
+        /// <summary>O que a meta pede, em uma frase: a coluna Condição do CAMPANHA.md e do MISSOES.md, montada de Meta, Arg e Alvo.</summary>
+        public static string MetaTexto(Objetivo o)
+        {
+            int n = o.Alvo, a = o.Arg;
+            switch (o.Meta)
+            {
+                case Meta.Embarcados: return L("Embarque ") + Plural(n, L("passageiro"), L("passageiros"));
+                case Meta.Equipe: return n == 1 ? L("Contrate 1 pessoa") : L("Tenha ") + n + L(" pessoas na equipe");
+                case Meta.Movidos: return L("Mova alguém ") + Plural(n, L("vez"), L("vezes")) + L(" para uma fila em alerta");
+                case Meta.Velocidade: return L("Velocidade ") + n + " " + EstacaoNo[a];
+                case Meta.Capacidade: return L("Capacidade ") + n + " " + EstacaoNo[a];
+                case Meta.Historias: return L("Embarque ") + Plural(n, L("passageiro"), L("passageiros")) + L(" com história");
+                case Meta.Atendidos: return L("Atenda ") + Plural(n, L("passageiro"), L("passageiros")) + " " + EstacaoNo[a];
+                case Meta.Climas: return L("Resolva ") + Plural(n, L("clima"), L("climas"));
+                case Meta.Incidentes: return L("Resolva ") + Plural(n, L("incidente"), L("incidentes"));
+                case Meta.Cheios: return L("Faça ") + Plural(n, L("voo lotado"), L("voos lotados")) + (a >= 0 ? L(" para ") + Destino[a] : "");
+                case Meta.Voos: return L("Faça ") + Plural(n, L("voo"), L("voos")) + (a >= 0 ? L(" para ") + Destino[a] : "");
+                case Meta.Seguidos: return L("Faça ") + n + L(" voos lotados seguidos");
+                case Meta.Pontuais: return L("Ganhe ") + Num(n) + L(" bônus de pontualidade");
+                case Meta.Checagens: return L("Faça ") + Plural(n, L("checagem rápida"), L("checagens rápidas"));
+                case Meta.Hangar: return L("Faça ") + Plural(n, L("revisão no hangar"), L("revisões no hangar"));
+                case Meta.Marco: return L("Leve o terminal ao nível ") + (n + 1);
+                case Meta.Chegou: return L("Viaje para ") + AeroportoNome[a];
+                case Meta.Melhorias: return L("Compre ") + Plural(n, L("melhoria"), L("melhorias"));
+                case Meta.Passageiros: return L("Embarque ") + Num(n) + L(" passageiros no total");
+                case Meta.Rotas: return L("Abra ") + Plural(n, L("rota"), L("rotas"));
+                case Meta.Campanha: return L("Feche ") + Plural(n, L("objetivo"), L("objetivos")) + L(" da campanha");
+                default: return L("Feche ") + Plural(n, L("missão"), L("missões"));   // Missoes
+            }
+        }
+
         // ---------- tutorial (GDD_ORIGEM "Onboarding", passos 1-12) ----------
         // Titulo = o que fazer; texto = por que, em uma ou duas frases. Seta: use o guillemet U+00BB; a seta U+2192 nao existe nas fontes. Passos 10 a 12 = evento.
         public static readonly string Lara = L("Lara, Chefe de Terminal");

@@ -260,7 +260,7 @@ namespace TA
             m.Rt.SetAsLastSibling();
         }
 
-        /// <summary>Abre uma tela pelo nome (botoes e a flag -tela): melhorias, mover, cofre, anuncio, pausa, album, config, excluir. "jogo" = nenhuma.</summary>
+        /// <summary>Abre uma tela pelo nome (botoes e a flag -tela): melhorias, mover, cofre, anuncio, pausa, album, config, excluir, metas, missoes, conquistas. "jogo" = nenhuma.</summary>
         public void AbreTela(string nome)
         {
             switch (nome)
@@ -276,6 +276,7 @@ namespace TA
                 case "tripulacao": Abre(_trip); break;
                 case "patio": Abre(_patio); break;
                 case "voo": AbreVoo(0); break;
+                case "metas": case "missoes": case "conquistas": AbreMetas(nome); break;
             }
         }
 
@@ -404,10 +405,11 @@ namespace TA
         /// </summary>
         internal string PisoTela()
         {
-            for (int i = _modais.Count - 1; i >= 0; i--)   // a de cima: folha criada depois fica na frente
+            Modal m = null;   // a de cima: Abre poe a folha por ultimo entre as irmas
+            foreach (Modal x in _modais)
+                if (x.Rt.gameObject.activeSelf && (m == null || x.Rt.GetSiblingIndex() > m.Rt.GetSiblingIndex())) m = x;
+            if (m != null)
             {
-                Modal m = _modais[i];
-                if (!m.Rt.gameObject.activeSelf) continue;
                 float texto = float.MaxValue, alvo = float.MaxValue;
                 int cortes = 0;
                 string menor = "", cortado = "";
