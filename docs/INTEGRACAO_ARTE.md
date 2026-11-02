@@ -16,9 +16,12 @@
 
 | Peça | Pasta (`arte/tripo/`) | Uso no jogo | Rota |
 |---|---|---|---|
-| `balcao_checkin` | `balcao_checkin_hd/` | estação check-in, nível 1 | malha |
-| `balcao_checkin_n2` | `balcao_checkin_n2_hd/` | estação check-in, nível 2 | malha |
-| `balcao_checkin_n3` | `balcao_checkin_n3_hd/` | estação check-in, nível 3 | malha |
+| `guiche_checkin` | `guiche_checkin_hd/` | estação check-in, nível 1 | malha |
+| `guiche_checkin_n2` | `guiche_checkin_n2_hd/` | estação check-in, nível 2 | malha |
+| `guiche_checkin_n3` | `guiche_checkin_n3_hd/` | estação check-in, nível 3 | malha |
+| `balcao_checkin` | `balcao_checkin_hd/` | fora de uso desde o guichê (2026-11-01) | sem uso |
+| `balcao_checkin_n2` | `balcao_checkin_n2_hd/` | fora de uso desde o guichê (2026-11-01) | sem uso |
+| `balcao_checkin_n3` | `balcao_checkin_n3_hd/` | fora de uso desde o guichê (2026-11-01) | sem uso |
 | `raio_x` | `raio_x_hd/` | estação segurança, nível 1 | malha |
 | `raio_x_n2` | `raio_x_n2_hd/` | estação segurança, nível 2 | malha |
 | `raio_x_n3` | `raio_x_n3_hd/` | estação segurança, nível 3 | malha |

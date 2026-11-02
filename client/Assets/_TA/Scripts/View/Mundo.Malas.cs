@@ -15,7 +15,7 @@ namespace TA
     public sealed partial class Mundo
     {
         const int SalaMalas = (int)Estacao.Bagagem, MaxMalas = 16, MaxPilha = 6;
-        const float EscalaMala = 0.5f, EscalaBalanca = 0.5f, EscalaBalcaoMala = 0.5f, EscalaBandeja = 0.35f, MeiaMala = 0.21f, MeiaEspessura = 0.07f;
+        const float EscalaMala = 0.5f, EscalaBalanca = 0.5f, EscalaBalcaoMala = 0.5f, EscalaBandeja = 0.56f, MeiaMala = 0.21f, MeiaEspessura = 0.07f;
         /// <summary>Esteira: velocidade (m/s de jogo), altura, largura, distância da parede, lado da balança a partir do posto, a fachada do
         /// terminal e o tempo da mala na balança (s de jogo).</summary>
         const float VelEsteira = 0.9f, AltEsteira = 0.12f, LargEsteira = 0.16f, DEsteira = 0.12f, LadoBalanca = 0.4f, TerminalZ = 10.75f, Pesando = 1.4f;
@@ -31,7 +31,7 @@ namespace TA
 
         readonly Stack<Mala> _malasLivres = new Stack<Mala>();
         readonly List<Mala> _naEsteira = new List<Mala>();
-        readonly Mala[] _balanca = new Mala[4];
+        readonly Mala[] _balanca = new Mala[8];   // 4 da sala de bagagem e, depois, os 4 guichês do check-in (Mundo.Postos.cs)
         readonly GameObject[] _postoMala = new GameObject[4];
         readonly Dictionary<Veiculo, Mala[]> _pilha = new Dictionary<Veiculo, Mala[]>();
         /// <summary>Malas que já entraram no terminal, por avião, e se ele estava no pátio no quadro anterior (zera quando parte).</summary>
@@ -39,10 +39,10 @@ namespace TA
         readonly bool[] _pousado = new bool[2];
         int _malasCriadas;
 
-        /// <summary>Malha da mala (pai = `T`, pivô nas rodinhas) ou um bloco sem a pasta ArtLocal.</summary>
+        /// <summary>Malha da mala (pai = `T`, pivô nas rodinhas; o tamanho é a escala de `T`) ou um bloco sem a pasta ArtLocal.</summary>
         Mala NovaMala(string nome)
         {
-            var m = new Mala { T = Peca("mala_rodinha", Vector3.zero, 0f, EscalaMala) };
+            var m = new Mala { T = Peca("mala_rodinha", Vector3.zero, 0f) };
             if (m.T == null) { m.R = Bloco(nome, PrimitiveType.Cube, Vector3.zero, new Vector3(0.22f, 0.42f, 0.14f), Color.white); m.T = m.R.transform; }
             else m.R = m.T.GetComponentInChildren<Renderer>();
             m.T.gameObject.SetActive(false);
@@ -74,13 +74,14 @@ namespace TA
             return a - Mathf.Sign(a) * LadoBalanca;
         }
 
-        public static Vector2 PontoBalanca(int i) => Balcao(SalaMalas, i) + Salas[SalaMalas].T * (ABalanca(i) - Posto(SalaMalas, i));
+        public static Vector2 PontoBalanca(int i) => i >= 4 ? BalancaChk(i - 4) : Balcao(SalaMalas, i) + Salas[SalaMalas].T * (ABalanca(i) - Posto(SalaMalas, i));
         public static Vector2 BalcaoMala(int i) => Balcao(SalaMalas, i);
 
         /// <summary>Da balança do posto `i` até a fachada do terminal: esteira do posto, esteira da parede, boca no meio dela.</summary>
         public static void RotaMala(List<Vector2> r, int i)
         {
             r.Clear();
+            if (i >= 4) { RotaChk(r, i - 4); return; }
             r.Add(Em(SalaMalas, DEsteira, ABalanca(i)));
             r.Add(Em(SalaMalas, DEsteira, 0f));
             r.Add(new Vector2(Salas[SalaMalas].Out.x, TerminalZ));
@@ -119,13 +120,13 @@ namespace TA
         }
 
         /// <summary>Trecho reto: a lona escura em cima da borda clara, um pouco mais larga e mais baixa.</summary>
-        void Esteira(Vector2 a, Vector2 b)
+        void Esteira(Vector2 a, Vector2 b, float alt = AltEsteira, float larg = LargEsteira)
         {
             Vector2 c = (a + b) * 0.5f;
             bool x = Mathf.Abs(b.x - a.x) > Mathf.Abs(b.y - a.y);
-            float l = Vector2.Distance(a, b) + LargEsteira;
-            Bloco("EsteiraBorda", PrimitiveType.Cube, V3(c, (AltEsteira - 0.02f) * 0.5f), x ? new Vector3(l, AltEsteira - 0.02f, LargEsteira + 0.06f) : new Vector3(LargEsteira + 0.06f, AltEsteira - 0.02f, l), CorBorda);
-            Bloco("EsteiraLona", PrimitiveType.Cube, V3(c, AltEsteira * 0.5f), x ? new Vector3(l, AltEsteira, LargEsteira) : new Vector3(LargEsteira, AltEsteira, l), CorEsteira);
+            float l = Vector2.Distance(a, b) + larg;
+            Bloco("EsteiraBorda", PrimitiveType.Cube, V3(c, (alt - 0.02f) * 0.5f), x ? new Vector3(l, alt - 0.02f, larg + 0.06f) : new Vector3(larg + 0.06f, alt - 0.02f, l), CorBorda);
+            Bloco("EsteiraLona", PrimitiveType.Cube, V3(c, alt * 0.5f), x ? new Vector3(l, alt, larg) : new Vector3(larg, alt, l), CorEsteira);
         }
 
         // ------------------------------------------------------------------ quadro a quadro
@@ -134,7 +135,8 @@ namespace TA
         /// segue. True = ainda indo, a rota fica como está.</summary>
         bool IndoAoBalcao(Boneco b, Pax p, int e, int vaga, bool noBalcao)
         {
-            if (e == SalaMalas && noBalcao) b.Vaga = vaga;
+            if (SeguraNoPosto(b, p, e)) return true;
+            if (e != Portao && noBalcao) b.Vaga = vaga;
             if (b.Zona != SalaMalas || !b.NoBalcao || b.Despachou) return false;
             if (b.Caminho.Count == 0) { Pousa(b, p); return false; }
             return e != SalaMalas;
@@ -144,7 +146,7 @@ namespace TA
         {
             b.Despachou = true;
             SoMao(b, p, true);
-            int i = b.Vaga - VagaPosto;
+            int i = b.Vaga - VagaPosto + (b.Zona == SalaCheckIn ? 4 : 0);
             if (_balanca[i] != null) Solta(i);
             Mala m = _malasLivres.Count > 0 ? _malasLivres.Pop() : _malasCriadas++ < MaxMalas ? NovaMala("Mala") : null;
             if (m == null) return;
@@ -170,11 +172,9 @@ namespace TA
         void MalasPasso(Sim s, float dt)
         {
             int postos = s.St(Estacao.Bagagem).Postos;
-            for (int i = 0; i < 4; i++)
-            {
-                _postoMala[i].SetActive(i < postos);
+            for (int i = 0; i < 4; i++) _postoMala[i].SetActive(i < postos);
+            for (int i = 0; i < _balanca.Length; i++)
                 if (_balanca[i] != null && (_balanca[i].Espera -= dt) <= 0f) Solta(i);
-            }
             for (int k = _naEsteira.Count - 1; k >= 0; k--)
             {
                 Mala m = _naEsteira[k];

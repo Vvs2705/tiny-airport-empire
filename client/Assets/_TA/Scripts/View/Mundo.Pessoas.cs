@@ -28,9 +28,9 @@ namespace TA
             public Transform T;
             public SpriteRenderer Sombra, Corpo, Coracao, Humor;
             public SpriteSheet Folha;
-            public int Andar, Parado, Atender, Sentado, Sentar, Clip = -1;
-            public float Tempo, Vel, VelAtual, Senta;
-            public int Cadeira = -1, Vaga = -1;   // Mundo.Espera.cs
+            public int Andar, Parado, Atender, Sentado, Sentar, Digita, Pega, Etiqueta, Bastao, TelaRaioX, Entrega, PoeMala, Gesto = -1, Clip = -1;   // Gesto: Mundo.Postos.cs
+            public float Tempo, Vel, VelAtual, Senta, GestoT, RotT, RotDur;   // RotT, RotDur: Mundo.Postos.cs
+            public int Cadeira = -1, Vaga = -1, Etapa;   // Mundo.Espera.cs; Etapa: Mundo.Seguranca.cs
             public Color Tinta = Color.white;
             public Vector2 Pos;
             public readonly List<Vector2> Caminho = new List<Vector2>();
@@ -97,6 +97,7 @@ namespace TA
                 return;
             }
             b.Andar = f.Pick("Walk"); b.Parado = f.Pick("Idle"); b.Atender = f.Pick("Atende", "Idle"); b.Sentado = f.Pick("Senta"); b.Sentar = f.Pick("Sentar");
+            b.Digita = f.Pick("Digita", "Atende"); b.Pega = f.Pick("Pega", "Atende"); b.Etiqueta = f.Pick("Etiqueta", "Atende"); b.Bastao = f.Pick("Bastao", "Atende"); b.TelaRaioX = f.Pick("Tela", "Atende"); b.Entrega = f.Pick("Entrega"); b.PoeMala = f.Pick("PoeMala");
         }
 
         /// <summary>Olhar na direcao `d` do chao: para cima/baixo e esquerda/direita na tela (a folha tem as 2 diagonais da esquerda).</summary>
@@ -119,17 +120,20 @@ namespace TA
                 if (e == Portao) FilaPortao(s, st);
                 else for (int k = 0; k < st.Fila.Count; k++) Liga(st.Fila[k], e, Fila(e, k), s, false, st.Estado == Estado.Critico && k < 3);
                 bool seg = st.Tipo == Estacao.Seguranca;
+                Reparte(s, st);
                 int agentes = seg ? s.Presentes(st.Tipo) : 0;
                 for (int i = 0; i < 4; i++)
                 {
-                    bool ocupado = i < st.Atendendo.Count;
+                    Pax p = _noPosto[e, i];
+                    bool ocupado = p != null;
                     _arco[e, i].enabled = ocupado;
-                    if (!ocupado) { if (seg) BandejaPasso(i, null, 0f, false, Vector2.zero); continue; }
-                    Pax p = st.Atendendo[i];
-                    float f = 1f - p.Resto / (float)Mathf.Max(1, p.Total);
-                    Vector2 alvo = seg ? PontoSeguranca(p, i, f, i < agentes) : NoBalcao(e, i);
+                    if (!ocupado && e == SalaCheckIn) _doc[i].enabled = false;
+                    if (!ocupado) { if (seg) BandejaPasso(i, null, 0f, i < agentes); continue; }
+                    float f = Avanca(s, p, e, dt);
+                    Vector2 alvo = seg ? ParadaDe(p, i, f, i < agentes) : e == SalaCheckIn && DespachaAqui(s, p) ? PeBalanca(i) : NoBalcao(e, i);
                     Liga(p, e, alvo, s, true, false, VagaPosto + i);
-                    if (seg) BandejaPasso(i, p, f, i < agentes, _pax[p.Id].Pos);
+                    if (seg) { BandejaPasso(i, p, f, i < agentes); alvo = _pax[p.Id].Pos; }
+                    else GestoPax(s, _pax[p.Id], p, e, i, f);
                     _arco[e, i].sprite = Art.Arc(f);
                     Vector3 pa = V3(alvo, 0.82f);
                     _arco[e, i].transform.position = pa;
@@ -144,6 +148,7 @@ namespace TA
                 if (!_vistos.Contains(kv.Key) && !b.Saindo) Sai(kv.Key, b);
                 if (!Sentando(b, dt)) Anda(b, VelPax, dt);
                 Pinta(b);
+                b.Gesto = -1;
                 if (b.Saindo && b.Caminho.Count == 0) _sair.Add(kv.Key);
             }
             foreach (int id in _sair)
@@ -167,7 +172,7 @@ namespace TA
                 if (_livres.Count > 0) { b = _livres.Pop(); Veste(b, ator); } else b = NovoBoneco(ator);
                 b.T.gameObject.SetActive(true);
                 b.Pos = Calcada + new Vector2(-0.4f * (p.Indice % 3), 0.3f * (p.Indice % 4) - 0.45f);
-                b.Zona = -1; b.Estande = -1; b.Saindo = false; b.Caminho.Clear(); b.NoBalcao = false; b.VelAtual = 0f; b.Senta = 0f; b.Cadeira = b.Vaga = -1; b.SoMao = b.Despachou = false;
+                b.Zona = -1; b.Estande = -1; b.Saindo = false; b.Caminho.Clear(); b.NoBalcao = false; b.VelAtual = 0f; b.Senta = 0f; b.Cadeira = b.Vaga = -1; b.Etapa = 0; b.RotT = b.RotDur = 0f; b.SoMao = b.Despachou = false;
                 b.Coracao.enabled = p.Historia;
                 _pax[p.Id] = b;
             }
@@ -175,8 +180,9 @@ namespace TA
             if (b.SoMao != b.Despachou && e != (int)Estacao.Seguranca) SoMao(b, p, b.Despachou);   // a bandeja devolveu a mala mesmo se o quadro pulou
             if (b.Zona != e)
             {
-                b.Caminho.Clear();
-                RotaPessoa(b.Caminho, b.Pos, b.Zona, e, alvo, !noBalcao);
+                Vector2 de = b.Pos;
+                if (!FimDaLinha(b, ref de)) b.Caminho.Clear();
+                RotaPessoa(b.Caminho, de, b.Zona, e, alvo, !noBalcao);
                 b.Zona = e;
                 b.Vaga = vaga;
             }
@@ -210,6 +216,7 @@ namespace TA
             int z = Mathf.Clamp(b.Zona, 0, 5);
             Vector2 p = b.Pos;
             if (z == Portao) SaiDaFileira(b, ref p);
+            if (!_embarcou.Contains(id)) VoltaDaLinha(b, ref p);
             if (!_embarcou.Contains(id)) PelaPorta(b.Caminho, ref p, Salas[z].In);   // um passo para fora da porta
             else Embarca(b, ref p, id / 500 % 2);
         }
@@ -250,15 +257,15 @@ namespace TA
         {
             float alfa = 1f;
             Vector3 p = b.Estande >= 0 ? NoTrilho(b, out alfa) : V3(b.Pos);
-            b.T.position = p - _cam.transform.forward * (b.Zona == Portao && b.Vaga >= VagaPosto ? FrentePodio : b.Senta * FrenteSentado);
+            b.T.position = p - _cam.transform.forward * (FrentePosto(b.Pos) + (b.Zona == Portao && b.Vaga >= VagaPosto ? FrentePodio : b.Senta * FrenteSentado));
             b.T.rotation = _cam.transform.rotation;
             b.T.localScale = new Vector3(b.Escala, b.Escala, 1f);
             if (b.Folha != null)
             {
-                int clip = b.Senta >= 1f ? b.Sentado : b.Senta > 0f ? b.Sentar : b.Andou ? b.Andar : b.Atende ? b.Atender : b.Parado;
+                int clip = b.Senta >= 1f ? b.Sentado : b.Senta > 0f ? b.Sentar : b.Andou ? b.Andar : b.Gesto >= 0 ? b.Gesto : b.Atende ? b.Atender : b.Parado;
                 if (clip != b.Clip) { b.Clip = clip; b.Tempo = 0f; }
                 b.Tempo += _g.DtJogo * (b.Andou ? Mathf.Clamp(b.Vel / PassoNatural, 0.35f, CadenciaMax) : 1f);
-                int quadro = clip == b.Sentar && b.Senta > 0f ? Mathf.RoundToInt(b.Senta * (b.Folha.Quadros(clip) - 1)) : b.Folha.FrameAt(clip, b.Tempo);
+                int quadro = clip == b.Sentar && b.Senta > 0f ? Mathf.RoundToInt(b.Senta * (b.Folha.Quadros(clip) - 1)) : clip == b.Gesto && b.GestoT >= 0f ? Mathf.RoundToInt(b.GestoT * (b.Folha.Quadros(clip) - 1)) : b.Folha.FrameAt(clip, b.Tempo);
                 b.Corpo.sprite = b.Folha.Frame(clip, b.Cima ? 1 : 0, quadro);
                 b.Corpo.flipX = b.Dir > 0f;
             }
@@ -290,6 +297,7 @@ namespace TA
                     _colete[k] = (int)f.Em; _rotaPara[k] = f.Em; b.Pos = Lugar(s, f, out _); _troca[k] = Troca;
                 }
                 b.Atende = false;
+                b.Gesto = -1;
                 if (Arrastando == k) { b.Andou = false; }   // o arrasto posiciona
                 else
                 {
@@ -307,7 +315,8 @@ namespace TA
                     if (b.Caminho.Count == 0)
                     {
                         Olha(b, -Salas[(int)f.Em].N);   // de frente para a fila
-                        b.Atende = posto < s.St(f.Em).Atendendo.Count;
+                        b.Atende = _noPosto[(int)f.Em, posto] != null;
+                        GestoFunc(b, (int)f.Em, posto);
                         if (_colete[k] != (int)f.Em) { _colete[k] = (int)f.Em; _troca[k] = Troca; }   // chegou: veste o uniforme do setor
                     }
                 }
@@ -352,7 +361,7 @@ namespace TA
             bool x = Mathf.Repeat(porta.x, Lado) < 0.01f;   // porta em parede norte-sul: atravessa em x
             Vector2 n = x ? Vector2.right : Vector2.up;
             if (Vector2.Dot(porta - p, n) < 0f) n = -n;
-            Eixos(r, ref p, porta - n * 0.45f, x);
+            Eixos(r, ref p, porta - n * Mathf.Min(0.45f, Vector2.Dot(porta - p, n)), x);   // quem sai rente a parede ja esta depois do passo
             p = porta + n * 0.45f;
             r.Add(p);
         }
@@ -364,7 +373,7 @@ namespace TA
             _portas.Clear();
             if (de < 0) { _portas.Add(Salas[0].In); de = 0; }
             PelasPortas(de, para, _portas);
-            foreach (Vector2 porta in _portas) PelaPorta(r, ref p, porta);
+            foreach (Vector2 porta in _portas) { CruzaLinha(r, ref p, porta); PelaPorta(r, ref p, porta); }
             if (para == Portao) { RotaSala(r, ref p, alvo); return; }
             Sala s = Salas[para];
             bool normalX = Mathf.Abs(s.N.x) > 0.5f;
@@ -373,7 +382,8 @@ namespace TA
                 float d = Vector2.Dot(s.Out - alvo, s.N) - Corredor * 0.5f, a = Vector2.Dot(alvo - s.Out, s.T);
                 Eixos(r, ref p, Em(para, Mathf.Min(d + FilaLinha, Interno - 0.15f), a), !normalX);
             }
-            Eixos(r, ref p, alvo, normalX);
+            CruzaLinha(r, ref p, alvo);
+            Eixos(r, ref p, alvo, normalX || (para == SalaSeg && AtrasDaLinha(alvo)));
         }
 
         // ------------------------------------------------------------------ gente do patio
