@@ -388,7 +388,7 @@ namespace TA
                 float d = Vector2.Dot(s.Out - alvo, s.N) - Corredor * 0.5f, a = Vector2.Dot(alvo - s.Out, s.T);
                 Contorna(r, ref p, Em(para, Mathf.Min(d + FilaLinha, Interno - 0.15f), a), !normalX);
             }
-            CruzaLinha(r, ref p, alvo);
+            Atravessa(r, ref p, alvo);
             Contorna(r, ref p, alvo, normalX || (para == SalaSeg && AtrasDaLinha(alvo)));
         }
 
@@ -401,7 +401,7 @@ namespace TA
             _portas.Clear();
             if (de < 0) { _portas.Add(Salas[0].In); de = 0; }
             PelasPortas(de, para, _portas);
-            foreach (Vector2 porta in _portas) { CruzaLinha(r, ref p, porta); PelaPorta(r, ref p, porta); }
+            foreach (Vector2 porta in _portas) { Atravessa(r, ref p, porta); PelaPorta(r, ref p, porta); }
         }
 
         // ------------------------------------------------------------------ gente do patio

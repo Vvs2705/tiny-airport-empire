@@ -60,10 +60,10 @@ namespace TA
                     if (t.name == "cordao_fila") p.L = 0.01f;   // a caixa é a da diagonal da malha, mais larga que o corredor da fila; a corda é um fio
                     _barreiras[e].Add(p);
                 }
-                foreach (Fundido f in _fundidos)
+                foreach (Fundido f in _fundidos)   // bloco fixo nunca anda: vale onde está, mesmo fora da sala (a parede fica de pé com a sala fechada)
                 {
-                    if (!f.Pai.IsChildOf(_sala[e]) || f.B.max.y < 0.1f || f.B.min.y > Gente) continue;
                     Vector3 c = f.Pai.TransformPoint(f.B.center);
+                    if (SalaEm(new Vector2(c.x, c.z)) != e || f.B.max.y < 0.1f || f.B.min.y > Gente) continue;
                     _barreiras[e].Add(new Barreira { Go = f.Pai.gameObject, C = new Vector2(c.x, c.z), U = Vector2.up, L = f.B.extents.z, W = f.B.extents.x });
                 }
             }
@@ -96,9 +96,14 @@ namespace TA
         static bool Livre(int e, Vector2 a, Vector2 b, float f)
         {
             foreach (Barreira c in _barreiras[e])
-                if (c.Go.activeInHierarchy && Bate(c, a, b, f)) return false;
+                if (c.Go.activeInHierarchy && FolgaDe(c, f) >= 0f && Bate(c, a, b, FolgaDe(c, f))) return false;
             return true;
         }
+
+        /// <summary>Onde a rota começa: quem já está dentro de uma peça (o cordão do posto que fechou com ela ali) sai sem barreira; quem está colado
+        /// numa peça sai rente, sem atravessá-la.</summary>
+        static Vector2 _de;
+        static float FolgaDe(Barreira c, float f) => Bate(c, _de, _de, 0f) ? -1f : Bate(c, _de, _de, f) ? 0f : f;
 
         static bool EmL(int e, Vector2 p, Vector2 q, bool xPorUltimo)
         {
@@ -110,12 +115,13 @@ namespace TA
         public static void Contorna(List<Vector2> r, ref Vector2 p, Vector2 q, bool xPorUltimo)
         {
             int e = SalaEm(p);
+            _de = p;
             bool grade = e >= 0 && e == SalaEm(q) && _barreiras[e] != null;
             if (!grade || EmL(e, p, q, xPorUltimo)) { Eixos(r, ref p, q, xPorUltimo); return; }
             if (EmL(e, p, q, !xPorUltimo)) { Eixos(r, ref p, q, !xPorUltimo); return; }
-            for (int i = 0; i < Folgas.Length; i++)
-                if (Busca(r, e, ref p, q, Folgas[i], i == Folgas.Length - 1)) return;
-            Eixos(r, ref p, q, xPorUltimo);
+            foreach (float f in Folgas)
+                if (Busca(r, e, ref p, q, f, false)) return;
+            if (!Busca(r, e, ref p, q, Folgas[0], true)) Eixos(r, ref p, q, xPorUltimo);   // q dentro de peça: para no lugar livre mais perto, sem encostar
         }
 
         /// <summary>`q`, ou o ponto mais perto dele ao longo de `lado` que não encosta em peça: a fileira de cadeiras chega perto da linha da porta.</summary>
@@ -144,15 +150,16 @@ namespace TA
             }
             foreach (Barreira c in _barreiras[e])
             {
-                if (!c.Go.activeInHierarchy) continue;
-                float raio = Mathf.Sqrt(c.L * c.L + c.W * c.W) + f;
+                float g = FolgaDe(c, f);
+                if (!c.Go.activeInHierarchy || g < 0f) continue;
+                float raio = Mathf.Sqrt(c.L * c.L + c.W * c.W) + g;
                 int x0 = Mathf.Max(0, Mathf.FloorToInt((c.C.x - raio - o.x) / Celula)), x1 = Mathf.Min(GradeN - 1, Mathf.CeilToInt((c.C.x + raio - o.x) / Celula));
                 int z0 = Mathf.Max(0, Mathf.FloorToInt((c.C.y - raio - o.y) / Celula)), z1 = Mathf.Min(GradeN - 1, Mathf.CeilToInt((c.C.y + raio - o.y) / Celula));
                 for (int z = z0; z <= z1; z++)
                     for (int x = x0; x <= x1; x++)
                     {
                         Vector2 m = Ponto(e, x + z * GradeN);
-                        if (Bate(c, m, m, f)) _grade[x + z * GradeN] = -1;
+                        if (Bate(c, m, m, g)) _grade[x + z * GradeN] = -1;
                     }
             }
             int ini = MaisPerto(e, p, false);
@@ -227,7 +234,25 @@ namespace TA
             if (n > 0) b.Caminho.RemoveAt(n - 1);
             int e = SalaEm(alvo);
             if (e >= 0) AteASala(b.Caminho, ref p, e, e);
-            Contorna(b.Caminho, ref p, alvo, xPorUltimo);
+            _de = p;
+            if (e >= 0 && SalaEm(p) == e && _barreiras[e] != null && !Livre(e, p, alvo, Folgas[0])) Contorna(b.Caminho, ref p, alvo, xPorUltimo);
+            else b.Caminho.Add(alvo);   // em reta, como a fila sempre andou: o L refeito a cada passo da fila virava escada
+        }
+
+        /// <summary>CruzaLinha (Mundo.Seguranca.cs), se a raia que ela escolhe está livre: o posto vazio fecha a raia dele com o cordão. Senão, o Contorna
+        /// acha outra pela grade.</summary>
+        static void Atravessa(List<Vector2> r, ref Vector2 p, Vector2 alvo)
+        {
+            int n = r.Count, e = SalaEm(p);
+            Vector2 q = p;
+            CruzaLinha(r, ref q, alvo);
+            if (e >= 0 && _barreiras[e] != null)
+            {
+                _de = p;
+                for (int i = n; i < r.Count; i++)
+                    if (!Livre(e, i == n ? p : r[i - 1], r[i], 0f)) { r.RemoveRange(n, r.Count - n); return; }
+            }
+            p = q;
         }
     }
 }
