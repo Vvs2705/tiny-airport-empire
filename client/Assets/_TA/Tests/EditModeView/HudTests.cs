@@ -47,6 +47,24 @@ namespace TA.Tests
             Assert.LessOrEqual(Largura(Art.Font(), Hud.MenorTexto, Textos.Historia[0]), Hud.LargNota);
         }
 
+        [Test]
+        public void Metas_TodaLinhaDizOQuePedeECabeNoCartao()
+        {
+            var faixa = new System.Collections.Generic.List<Objetivo>(Tabelas.Diarias);
+            foreach (Objetivo[] c in Tabelas.Objetivos) faixa.AddRange(c);
+            var todas = new System.Collections.Generic.List<Objetivo>(faixa);
+            todas.AddRange(Tabelas.Conquistas);
+            foreach (Objetivo o in Tabelas.Semanais) { todas.Add(o); if (o.E != null) todas.Add(o.E); }
+            foreach (Objetivo o in todas)
+            {
+                string c = Textos.MetaTexto(o);
+                if (o.Meta != Meta.Marco && o.Meta != Meta.Chegou) StringAssert.Contains(Textos.Num(o.Alvo), c, o.Id);
+                Assert.LessOrEqual(Largura(Art.Font(), Hud.MenorTexto, c), 1.8f * Hud.LargCondicao, o.Id + ": " + c);   // 2 linhas, com folga da quebra
+                if (o.Nome.Length > 0) Assert.LessOrEqual(Largura(Art.Titulo(), Hud.MenorTexto, Textos.NomeMeta(o)), Hud.LargCondicao, o.Id);
+            }
+            foreach (Objetivo o in faixa) Assert.LessOrEqual(Largura(Art.Titulo(), Hud.MenorTexto, Textos.NomeMeta(o)), Hud.LargNomeFaixa, o.Id);
+        }
+
         static Sim SimLigado()
         {
             var s = new Sim(new Tuning(), 1);
