@@ -11,7 +11,7 @@ namespace TA
     /// Mundo (o aeroporto com os bonecos, Mundo.cs): tela mais alta so da mais mundo. No alto, a barra (Cash, relogio, onda, nivel, pausa) e o quadro
     /// de partidas (TA-1: voo, destino, hora de fechamento e situacao, com a cor do voo que esta na mala dos passageiros, o a bordo, o que pede
     /// atencao e a barra do tempo que falta; cada linha e um botao que abre o voo). Embaixo, os atalhos (contratar ou equipe, melhorias, patio,
-    /// tripulacao, 2x renda). So le o Sim e manda intencao pelo Game. Telas modais (Hud.Telas.cs e Hud.Operacao.cs) e tutorial (Tour.cs) seguram
+    /// tripulacao, 2x renda), com a faixa da meta da vez logo acima (Hud.Metas.cs). So le o Sim e manda intencao pelo Game. Telas modais (Hud.Telas.cs e Hud.Operacao.cs) e tutorial (Tour.cs) seguram
     /// o relogio (Bloqueia).
     /// </summary>
     public sealed partial class Hud : MonoBehaviour
@@ -80,6 +80,7 @@ namespace TA
             BuildAlerta();
             BuildTelas(_canvas);
             BuildOperacao(_canvas);
+            BuildMetas(_canvas);
             BuildTour(_canvas);
         }
 
@@ -251,6 +252,7 @@ namespace TA
             Art.Rotulo(_receita).text = boost ? Textos.Tempo(s.BoostLeft / (float)Sim.Hz) : Textos.Receita2x(s.Anuncios.HojeDe(Anuncio.Receita), s.T.BoostPorDia);
             if (_toastT > 0f && (_toastT -= Time.unscaledDeltaTime) <= 0f) _toastFundo.gameObject.SetActive(false);
             PintaAlerta(s);
+            PintaMetas(s);
             PintaTelas();
             PintaTour();
         }
