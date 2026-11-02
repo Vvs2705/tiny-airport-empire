@@ -206,9 +206,9 @@ namespace TA
         // Configuracoes, privacidade e suporte (GDD §9.3 e §11.1, D-12). A politica e a pagina do idioma: o en aponta para /privacy/.
         public const string EmailSuporte = "suporte@vstack-solutions.com.br";
         public static readonly string UrlPrivacidade = L("https://vvs2705.github.io/tiny-airport-empire/privacidade/");
-        public static readonly string Configuracoes = L("Configurações"), ConfigLegenda = L("Som, acessibilidade, privacidade e suporte"),
+        public static readonly string Configuracoes = L("Configurações"), ConfigLegenda = L("Som, acessibilidade e privacidade"),
             Musica = L("Música"), Efeitos = L("Efeitos sonoros"), Vibracao = L("Vibração"), VibracaoLegenda = L("Liga ou desliga a vibração"),
-            ReduzirMovimento = L("Reduzir movimento"), MovimentoLegenda = L("Sem balanço, tremor nem pisca-pisca"),
+            ReduzirMovimento = L("Reduzir movimento"), MovimentoLegenda = L("Sem balanço, tremor nem pulso"),
             TextoMaior = L("Texto maior"), TextoMaiorLegenda = L("Letras maiores onde couber"), Ligado = L("Ligado"), Desligado = L("Desligado"),
             Idioma = L("Idioma"), IdiomaNome = L("Português (Brasil)"), EmUso = L("Em uso"),
             Privacidade = L("Política de privacidade"), PrivacidadeLegenda = L("O que o jogo guarda e por quê"),

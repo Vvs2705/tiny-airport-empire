@@ -404,8 +404,9 @@ namespace TA
         /// </summary>
         internal string PisoTela()
         {
-            foreach (Modal m in _modais)
+            for (int i = _modais.Count - 1; i >= 0; i--)   // a de cima: folha criada depois fica na frente
             {
+                Modal m = _modais[i];
                 if (!m.Rt.gameObject.activeSelf) continue;
                 float texto = float.MaxValue, alvo = float.MaxValue;
                 int cortes = 0;

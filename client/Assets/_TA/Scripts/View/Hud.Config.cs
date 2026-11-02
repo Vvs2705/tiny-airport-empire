@@ -66,7 +66,7 @@ namespace TA
 
             ItemVolume(lista, 0, Textos.Musica, Art.Radio());
             ItemVolume(lista, 1, Textos.Efeitos, Art.Alerta());
-            _vibrar = ItemPausa(lista, "Vibrar", Art.Radio(), Art.EstacaoCor[1], Textos.Vibracao, Textos.VibracaoLegenda, "",
+            _vibrar = ItemPausa(lista, "Vibrar", Art.Raio(), Art.EstacaoCor[1], Textos.Vibracao, Textos.VibracaoLegenda, "",
                 it => { Ajustes.Vibrar = !Ajustes.Vibrar; Ajustes.Grava(); });
             _movimento = ItemPausa(lista, "Movimento", Art.Seta(), Art.EstacaoCor[2], Textos.ReduzirMovimento, Textos.MovimentoLegenda, "",
                 it => { Ajustes.ReduzMovimento = !Ajustes.ReduzMovimento; Ajustes.Grava(); });
@@ -75,7 +75,7 @@ namespace TA
             ItemPausa(lista, "Idioma", Art.Aviao(), Art.EstacaoCor[4], Textos.Idioma, Textos.IdiomaNome, "", it => { }).Btn.Maximo(Textos.EmUso);
             ItemPausa(lista, "Privacidade", Art.Escudo(), Art.EstacaoCor[5], Textos.Privacidade, Textos.PrivacidadeLegenda, Textos.Abrir,
                 it => Application.OpenURL(Textos.UrlPrivacidade));
-            ItemPausa(lista, "Suporte", Art.Bilhete(), Art.EstacaoCor[0], Textos.Suporte, Textos.EmailSuporte, Textos.Escrever,
+            ItemPausa(lista, "Suporte", Art.Balao(), Art.EstacaoCor[0], Textos.Suporte, Textos.EmailSuporte, Textos.Escrever,
                 it => Application.OpenURL("mailto:" + Textos.EmailSuporte + "?subject=" + Uri.EscapeDataString("Little Terminal " + Application.version)));
             Item cr = NovoItem(lista, "Creditos", Art.Estrela(), Art.Coin, null, 340f, 20f);
             cr.Nome.text = Textos.Creditos; cr.Linha.text = Textos.Versao(Application.version); cr.Info.text = Textos.CreditosTexto;
@@ -99,12 +99,14 @@ namespace TA
             it.Nome.text = nome;
             Art.Fixa((RectTransform)it.Btn.B.transform, new Vector2(1f, 0.5f), new Vector2(-24f, 0f), new Vector2(118f, 146f));
             it.Btn.Secundario("+");
+            Art.Toque(it.Btn.B, 14f, 0f);   // 146 px de toque, sem encostar no -
             _volumeMenos[k] = BotaoDoCartao(it.Rt, () => Volume(k, -1));
-            Art.Fixa((RectTransform)_volumeMenos[k].B.transform, new Vector2(1f, 0.5f), new Vector2(-152f, 0f), new Vector2(118f, 146f));
+            Art.Fixa((RectTransform)_volumeMenos[k].B.transform, new Vector2(1f, 0.5f), new Vector2(-170f, 0f), new Vector2(118f, 146f));
             _volumeMenos[k].Secundario("−");
+            Art.Toque(_volumeMenos[k].B, 14f, 0f);
             _volumeBarra[k] = Art.NovaBarraNivel(it.Rt, "Volume", Degraus, Vector2.up, Vector2.one);
             var r = (RectTransform)_volumeBarra[k].Pai;
-            r.offsetMin = new Vector2(172f, -150f); r.offsetMax = new Vector2(-306f, -126f);
+            r.offsetMin = new Vector2(172f, -150f); r.offsetMax = new Vector2(-324f, -126f);
             _volumeItem[k] = it;
         }
 
