@@ -204,7 +204,7 @@ namespace TA.Tests
         public static Tuning SemFaseC4(Tuning t = null)
         {
             t = t ?? new Tuning();
-            t.RegraClima = t.RegraEpocas = t.RegraPicos = t.RegraFalhas = t.RegraCampanha = t.RegraMissoes = false;
+            t.RegraClima = t.RegraEpocas = t.RegraPicos = t.RegraFalhas = t.RegraCampanha = t.RegraMissoes = t.RegraPasse = false;
             return t;
         }
 
@@ -353,7 +353,7 @@ namespace TA.Tests
         [Test]
         public void Antes_FaseC5()
         {
-            var t = new Tuning { RegraCampanha = false, RegraMissoes = false, RegraDespesas = false };
+            var t = new Tuning { RegraCampanha = false, RegraMissoes = false, RegraPasse = false, RegraDespesas = false };
             Linha bom = Rodar(BotProfile.Bom, t), lento = Rodar(BotProfile.Lento, t), parado = Rodar(BotProfile.Parado, t);
             Imprime("antes da Fase C5 (a main da Fase C4)", new[] { bom, lento, parado });
             Assert.AreEqual((6279, 3872, 4702), ((int)Math.Round(bom.Receita), (int)Math.Round(lento.Receita), (int)Math.Round(parado.Receita)), "sem pagar, a tabela da fase anterior");
@@ -418,7 +418,7 @@ namespace TA.Tests
         [Test]
         public void Antes_FaseC6()
         {
-            var t = new Tuning { RegraMissoes = false, RegraDespesas = false };
+            var t = new Tuning { RegraMissoes = false, RegraPasse = false, RegraDespesas = false };
             Linha bom = Rodar(BotProfile.Bom, t), lento = Rodar(BotProfile.Lento, t), parado = Rodar(BotProfile.Parado, t);
             Imprime("antes da Fase C6 (a main da Fase C5)", new[] { bom, lento, parado });
             Assert.AreEqual((6586, 3534, 4660), ((int)Math.Round(bom.Receita), (int)Math.Round(lento.Receita), (int)Math.Round(parado.Receita)), "sem pagar, a tabela da fase anterior");
@@ -500,7 +500,7 @@ namespace TA.Tests
         [Test]
         public void Antes_FaseD1()
         {
-            Tuning t = SemC8(new Tuning());
+            Tuning t = SemC8(new Tuning { RegraPasse = false });
             Linha bom = Rodar(BotProfile.Bom, t), lento = Rodar(BotProfile.Lento, t), parado = Rodar(BotProfile.Parado, t);
             Imprime("Fase D1, sem gastar Gems (a main da Fase C6)", new[] { bom, lento, parado });
             Assert.AreEqual((6740, 4219, 4709), ((int)Math.Round(bom.Receita), (int)Math.Round(lento.Receita), (int)Math.Round(parado.Receita)), "a tabela da fase anterior");
@@ -556,6 +556,41 @@ namespace TA.Tests
             TestContext.Out.WriteLine("| onda | pacote de Cash (media) |\n|---|---|");
             for (int m = 0; m < marcas.Length; m++)
                 TestContext.Out.WriteLine("| " + marcas[m] + " | " + Math.Round(Enumerable.Range(0, Amostra).Average(i => (double)pacote[i, m])) + " |");
+        }
+
+        /// <summary>Uma temporada inteira em ondas: os dias do jogo da 1a temporada, de 8 ondas cada.</summary>
+        public static int OndasTemporada => Tabelas.Temporadas[0].Dias * Tuning.Padrao.DiaOndas;
+
+        const string CabecaPasse = "| bot | fecham os 30 | dia em que fecha | p90 | pior | nivel no fim | p10 | Cash do passe | embarque |\n|---|---|---|---|---|---|---|---|---|";
+
+        /// <summary>Uma temporada por semente: o dia do jogo em que a trilha gratuita fecha e ate onde chega quem nao fecha.</summary>
+        static Bot.Resultado[] MedePasse(BotProfile p)
+        {
+            var rs = new Bot.Resultado[Sementes];
+            Parallel.For(0, Sementes, new ParallelOptions { MaxDegreeOfParallelism = Threads }, i => rs[i] = Bot.Medir(p, i + 1, OndasTemporada));
+            double[] dia = rs.Where(r => r.PasseEm >= 0).Select(r => r.PasseEm / (double)Tuning.Padrao.DiaOndas).OrderBy(d => d).ToArray();
+            int[] nivel = rs.Select(r => r.Niveis).OrderBy(n => n).ToArray();
+            TestContext.Out.WriteLine(string.Format(CultureInfo.InvariantCulture, "| {0} | {1}/{2} | {3:0.0} | {4:0.0} | {5:0.0} | {6:0.0} | {7} | {8:0} | {9:0.0}% |", p.Name, dia.Length, Sementes,
+                dia.DefaultIfEmpty(-1).Average(), dia.Length > 0 ? dia[dia.Length * 9 / 10] : -1, dia.Length > 0 ? dia[dia.Length - 1] : -1, nivel.Average(), nivel[Sementes / 10],
+                rs.Average(r => r.PagoPasse), rs.Average(r => r.Embarque) * 100));
+            return rs;
+        }
+
+        /// <summary>Portao do passe (CONTRATO_FASE_C7 §6): sem compra, a trilha gratuita fecha numa temporada. O LentoCompleto, o bot mais lento que
+        /// joga pela campanha e pelas missoes, fecha os 30 niveis em todas as sementes.</summary>
+        [Test]
+        public void Portao_FaseC7_Passe()
+        {
+            TestContext.Out.WriteLine(CabecaPasse);
+            Assert.AreEqual(Sementes, MedePasse(BotProfile.LentoCompleto).Count(r => r.PasseEm >= 0), "sem compra, fecha os 30 numa temporada");
+        }
+
+        /// <summary>Os outros bots, sem portao: quem joga tudo, quem so faz as missoes ou a campanha e quem nunca olha para elas.</summary>
+        [Test]
+        public void Medida_FaseC7()
+        {
+            TestContext.Out.WriteLine(CabecaPasse);
+            foreach (BotProfile p in new[] { BotProfile.Completo, BotProfile.Missionario, BotProfile.Guiado, BotProfile.Bom, BotProfile.Lento, BotProfile.Parado }) MedePasse(p);
         }
 
         /// <summary>TA-6 (GDD §5.7): nenhuma rota domina. As 2 vagas presas em cada rota, sem incidente, no mesmo aeroporto: a melhor rende no

@@ -776,7 +776,89 @@ As 26 travas novas entram no `mutacao.py`. Resultado em 2026-11-01: **26 de 26 m
 - **Cosméticos:** só há 2 à venda, mais a pintura do pacote de boas-vindas. Todos pedem arte, e a loja precisa mostrar a imagem real (GDD §7.5).
 - **Pacote de boas-vindas:** 1 000 Cash no começo adiantam 0,2 onda em Vale Verde. Ver se a pessoa sente esse empurrão.
 
-## 12. Fase C8: despesas e relatório do dia (2026-11-03, `CONTRATO_FASE_C8.md`)
+## 12. Fase C7: passe de temporada, trilha gratuita (2026-11-02, `CONTRATO_FASE_C7.md`)
+
+Uma temporada de 28 dias do jogo (224 ondas, 11,2 h jogadas) e 30 níveis de 100 pontos. O ponto vem do voo que partiu (2), da diária (25), da semanal (70) e do objetivo da campanha (20). O prêmio é o da tabela do `PASSE.md` e paga sozinho no nível.
+
+### D-C7a. A temporada é do jogo
+
+Pela mesma razão da D-C6a: nada de hora de parede na simulação. O bot mede a temporada inteira, o relógio do aparelho não abre nem fecha nada e faltar um dia não existe. O custo: a temporada não é a mesma para todo mundo, e não dá para anunciar "termina domingo". Detalhes no contrato.
+
+### D-C7d. O primeiro ritmo não fechava
+
+A 1ª tabela (diária 20, semanal 50, objetivo 15) fechava em **163 de 200** sementes com o LentoCompleto, no dia 26,1 em média e no 27,9 no pior. Medi as fontes em 60 sementes: o pior LentoCompleto faz 300 voos, 50 diárias, 13 semanais e os 30 objetivos, 2 700 pontos. Com diária 25, semanal 70 e objetivo 20, o mesmo jogo dá 3 360, e o pior das 200 fecha no dia 23,9.
+
+| bot (60 sementes, 224 ondas) | voos | diárias (de 84) | semanais (de 20) | objetivos (de 30) |
+|---|---|---|---|---|
+| Completo | 289 | 69,0 | 19,1 | 30,0 |
+| LentoCompleto | 309 | 60,2 | 17,0 | 30,0 |
+| Missionário | 281 | 68,0 | 19,1 | 23,2 |
+| Guiado | 269 | 53,0 | 14,8 | 30,0 |
+| Bom | 260 | 50,6 | 13,3 | 13,1 |
+| Lento | 302 | 44,1 | 13,1 | 20,1 |
+
+Só 260 a 310 dos 448 voos possíveis partem com gente: com um avião fora na rota longa, a onda sai com 1 voo. O voo pesa pouco de propósito: o ponto vem sobretudo de missão.
+
+### Portão do passe (200 sementes, a temporada inteira)
+
+| bot | fecham os 30 | dia em que fecha | p90 | pior | nível no fim | p10 | Cash do passe | embarque |
+|---|---|---|---|---|---|---|---|---|
+| **LentoCompleto** | **200 de 200** | **20,0** | 21,8 | **23,9** | 30,0 | 30 | 28 300 | 77,7% |
+| Completo | 200 de 200 | 18,2 | 19,4 | 19,9 | 30,0 | 30 | 28 300 | 89,2% |
+| Missionário | 200 de 200 | 19,3 | 20,4 | 21,9 | 30,0 | 30 | 28 300 | 89,6% |
+| Guiado | 200 de 200 | 23,0 | 25,1 | 26,9 | 30,0 | 30 | 28 300 | 90,4% |
+| Bom | 84 de 200 | 26,6 | 27,6 | 27,9 | 28,9 | 27 | 27 000 | 90,7% |
+| Lento | 111 de 200 | 27,0 | 27,9 | 27,9 | 29,3 | 28 | 27 517 | 79,2% |
+| Parado | 0 de 200 | — | — | — | 18,2 | 17 | 10 483 | 53,6% |
+
+**Passa.** Sem compra, quem joga pela campanha e pelas missões fecha os 30 com 4 a 10 dias de folga. Quem nunca olha para elas chega ao nível 27 a 29 e fecha em parte das sementes, no fim. O Parado, que não mexe na equipe, para no 18. O dia é o do jogo, contado do 0.
+
+### Os portões de antes, com o passe pagando
+
+| portão | a Fase D1 | com o passe |
+|---|---|---|
+| TA-1 Bom | 95,0% | 95,5% |
+| TA-1 Lento | 78,8% | 80,6% |
+| TA-2 (Bom / Parado) | 1,431 | 1,824 |
+| Fase C (Planejador / Automático) | 1,152 | 1,176 |
+| Fase C5 (Guiado / Bom, 20 ondas) | 1,114 | 1,380 |
+| Fase C6 (Missionário / Bom, 20 ondas) | 1,147 | 1,438 |
+| Fase D1 (a Baleia fecha a campanha em) | 0,990 | 0,996 do tempo |
+| Fases C2, C3 e C4 e TA-6 | verdes | verdes, número a número: medem com o passe desligado (`SemFaseC4`), como já faziam com as missões |
+
+**TA-2 e os portões da campanha e das missões sobem por causa do 2×.** O tempo do passe dobra a receita de quem chega antes aos níveis 2 e 5, e chega antes quem mexe na equipe, faz missão e fecha objetivo. Com o passe desligado, a tabela é a da Fase D1, número a número (`Antes_FaseD1`: Bom 6 740, Lento 4 219, Parado 4 709). A decisão de mover vale o mesmo de antes: agora o número mede também o passe. A campanha não acelera: o Guiado fecha os 30 objetivos na onda 51,3, contra 51,6.
+
+### Prova de mutação (`MUTACAO_TESTES="FullyQualifiedName~PasseTests|FullyQualifiedName~ExploitTests|FullyQualifiedName~SaveTests|FullyQualifiedName~ComprasTests" python client/tools/mutacao.py "passe:" "booster sobrevive"`)
+
+As 16 travas novas entram no `mutacao.py`, e a do booster da Fase D1 muda de trecho, porque o teto do 2× no save passou a ser `BoostTeto`. Resultado em 2026-11-03: **17 de 17 mortos**. A 1ª rodada deu 16: o mutante do cosmético tirava o corpo do `foreach` e não compilava. Troquei por um corpo vazio e repeti esse. Das travas anteriores, só a do booster rodou de novo.
+
+| trava retirada | testes que caíram |
+|---|---|
+| recompensa fixa, sem semente | 4, entre eles `Invariante_C7_RecompensaFixa_ForaDo2xEDoCofre` |
+| regra desligada não paga | 8, entre eles `RegraDesligada_ContaEMostra_NaoPaga` |
+| Cash fora do 2× e do cofre | `Invariante_C7_RecompensaFixa_ForaDo2xEDoCofre`, `Nivel_PagaSozinhoUmaVez_NoValorDaTabela` |
+| níveis pagos vão no save | 5, entre eles `Invariante_C7_PagaUmaVez_FecharEAbrirNaoPagaDeNovo` |
+| pagos do save limitados | `LixoDoPasse_ViraPadraoLimitado` |
+| pontos do save limitados | `LixoDoPasse_ViraPadraoLimitado` |
+| dia do save limitado | `LixoDoPasse_ViraPadraoLimitado` |
+| a próxima temporada abre no dia em que chega | `Temporada_ViraNoFimDosDias_EFechaSemAProxima` e mais 1 |
+| dia do jogo, nunca o do aparelho | 5, entre eles `Invariante_C7_RelogioDoAparelhoNaoMexeNaTemporada` |
+| a virada zera os níveis pagos | `DuasTemporadas_ASegundaAbreNoDiaEmQueAPrimeiraFecha` |
+| a virada não tira Cash nem cosmético | `Invariante_C7_ViradaNaoTiraNada` e mais 1 |
+| offline, anúncio e compra não dão ponto | 3, entre eles `Invariante_C7_PontoNaoSeCompra` |
+| voo perdido não tira ponto | `Invariante_C7_VooPerdido_NaoTiraPonto` e mais 1 |
+| tempo soma ao 2×, com teto | `Tempo_SomaAo2xQueCorre` |
+| cosmético sobrevive a reabrir | `Cosmetico_FicaNaPosse_EVaiNoSave` |
+| regra desligada não dá cosmético | `RegraDesligada_ContaEMostra_NaoPaga` |
+| booster sobrevive a reabrir (Fase D1, trecho novo) | 7, entre eles `Booster_2xPor30Min_SemAcumular` |
+
+### Para medir com gente
+
+- **O passe fecha cedo para quem joga tudo.** O Completo termina no dia 18 e passa 10 dias sem barra. Se incomodar, subir os pontos por nível e medir de novo. A trilha premium pode ocupar esse fim.
+- **Cash do passe sem destino.** São 28 300 Cash, quase todo depois do fim do catálogo (perto da onda 20). Só os primeiros níveis compram progresso; o valor que sobra está no 2× e nos 3 cosméticos, que pedem arte.
+- **A barra é entendida?** A tela precisa dizer que ponto não se compra, que nada expira e quantos dias do jogo faltam. Ver se "dia do jogo" confunde quem espera o calendário (D-C7a).
+
+## 13. Fase C8: despesas e relatório do dia (2026-11-03, `CONTRATO_FASE_C8.md`)
 
 Salário por perfil, por função da tripulação e por pessoa de pátio, e manutenção por estação ativa e por nível, cobrados no fechamento do dia do jogo (8 ondas). Faltou caixa: o Cash vai a zero e para, contratar e melhorar pausam até o caixa cobrir a conta, e o fechamento seguinte perdoa o resto. **Antes** = a conta desligada (`RegraDespesas = false`), medida no mesmo código: repete a `main` da Fase D1 número a número (`Antes_FaseD1`). **Depois** = o `Tuning` padrão.
 
@@ -856,7 +938,7 @@ O bot compra o que couber assim que pode, e no fim do dia 0 o caixa está perto 
 
 **Passa.** Todos os portões seguem verdes. O que mais cai é o dos aeroportos, pelo motivo da D-C8c. A campanha e as missões sobem porque a receita do Bom, que não persegue nada, cai 533 em 20 ondas, e a do Guiado fica igual (+90).
 
-**Com o passe (PR #49, ainda fora da `main`), medido juntando os dois branches:** o LentoCompleto fecha os 30 níveis da trilha gratuita em **200 de 200** sementes, no dia 19,9 em média (p90 21,5, pior 23,4), contra 20,0 (21,8 e 23,9) sem a conta. TA-2 1,843, campanha 1,395 e missões 1,451, contra 1,824, 1,380 e 1,438 do PR #49. Quem nunca olha para as missões fecha o passe em menos sementes: Bom 79 de 200 (eram 84) e Lento 99 de 200 (eram 111). O passe não promete nada a eles.
+**Com o passe (§12, PR #49):** o LentoCompleto fecha os 30 níveis da trilha gratuita em **200 de 200** sementes, no dia 19,9 em média (p90 21,5, pior 23,4), contra 20,0 (21,8 e 23,9) sem a conta. TA-2 1,843, campanha 1,395 e missões 1,451, contra 1,824, 1,380 e 1,438 do §12. Quem nunca olha para as missões fecha o passe em menos sementes: Bom 79 de 200 (eram 84) e Lento 99 de 200 (eram 111). O passe não promete nada a eles.
 
 ### Prova de mutação (`MUTACAO_TESTES="FullyQualifiedName~DespesasTests|FullyQualifiedName~SaveTests|FullyQualifiedName~ExploitTests" python client/tools/mutacao.py despesa`)
 

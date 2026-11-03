@@ -4,7 +4,7 @@ using System.Text;
 
 namespace TA.Core
 {
-    /// <summary>De onde veio o Cash do dia (CONTRATO_FASE_C8 §3). Premios = campanha e missoes; Cofre = offline e o rewarded do cofre; Compras = Cash de
+    /// <summary>De onde veio o Cash do dia (CONTRATO_FASE_C8 §3). Premios = campanha, missoes e passe; Cofre = offline e o rewarded do cofre; Compras = Cash de
     /// produto e de pacote de Gems. Indice vai no save: so cresce no fim.</summary>
     public enum Fonte { Tarifas, Bagagem, Loja, Alimentacao, Bonus, Premios, Cofre, Compras }
 
@@ -105,7 +105,7 @@ namespace TA.Core
             Hoje = new DiaConta { Dia = DiaJogo };
         }
 
-        /// <summary>Schema 9 (CONTRATO_FASE_C8 §5): a conta atrasada, o dia em curso e os fechados. Linha: dia, pago, 8 receitas, 4 despesas.</summary>
+        /// <summary>Schema 10 (CONTRATO_FASE_C8 §5): a conta atrasada, o dia em curso e os fechados. Linha: dia, pago, 8 receitas, 4 despesas.</summary>
         void SalvaDespesas(StringBuilder sb)
         {
             Kv(sb, "atrasada", Atrasada);
@@ -115,7 +115,7 @@ namespace TA.Core
             for (int i = 0; i < Historico.Count; i++) Linha("dc." + i, Historico[i]);
         }
 
-        /// <summary>Le o schema 9, com tudo limitado. O schema 8 nao tem as chaves: relatorio vazio, nada atrasado, e o dia em curso comeca a contar no 1o passo.</summary>
+        /// <summary>Le o schema 10, com tudo limitado. O schema 9 nao tem as chaves: relatorio vazio, nada atrasado, e o dia em curso comeca a contar no 1o passo.</summary>
         void CarregaDespesas(Dictionary<string, string> kv)
         {
             DiaConta Le(string k, int min)

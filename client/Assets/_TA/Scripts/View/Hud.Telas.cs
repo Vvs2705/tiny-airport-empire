@@ -197,10 +197,10 @@ namespace TA
             RectTransform lp = NovoResumo(_pausa, Textos.Embarcados, Art.Pessoas(), Art.Azul, out _pausaResumo);
             Art.Margem((RectTransform)lp.parent, 24f, 186f, 24f, 184f);
             ItemPausa(lp, "Config", Art.Chave(), Art.EstacaoCor[6], Textos.Configuracoes, Textos.ConfigLegenda, Textos.Abrir, it => { Fecha(_pausa); AbreTela("config"); });
-            ItemPausa(lp, "Tutorial", Art.Mao(), Art.EstacaoCor[0], Textos.ReverTutorial, Textos.TutorialLegenda, Textos.Rever, it => { Fecha(_pausa); ReverTour(); });
+            ItemPausa(lp, "Tutorial", Art.Mao(), Art.EstacaoCor[0], Textos.ReverTutorial, Textos.TutorialLegenda, Textos.Rever, it => { Fecha(_pausa); _g.Pausa(false); ReverTour(); });
             _pausaDiario = ItemPausa(lp, "Diario", Art.Bilhete(), Art.EstacaoCor[3], Textos.ExportarDiario, Textos.DiarioLegenda, Textos.Exportar, it => it.Linha.text = _g.ExportarDiario());
             ItemPausa(lp, "Album", Art.Estrela(), Art.EstacaoCor[1], Textos.Album, Textos.AlbumLegenda, Textos.Abrir, it => { Fecha(_pausa); AbreTela("album"); });
-            BotaoDoPe(_pausa.F.Corpo, Vector2.zero, new Vector2(1f, 0f), () => Fecha(_pausa)).Principal(Textos.Continuar, Art.Compra);
+            BotaoDoPe(_pausa.F.Corpo, Vector2.zero, new Vector2(1f, 0f), () => { Fecha(_pausa); _g.Pausa(false); }).Principal(Textos.Continuar, Art.Compra);
 
             _album = NovaFolhaModal(canvas, "Album", Textos.Album, Art.Estrela(), 560f);
             RectTransform lh = NovoResumo(_album, Textos.HistoriasNome, Art.Estrela(), Art.Coin, out _albumResumo);
@@ -267,7 +267,7 @@ namespace TA
             {
                 case "melhorias": Abre(_melhorias); break;
                 case "mover": if (S.Staff.Count > 0) AbreMover(0); break;
-                case "pausa": _pausaDiario.Linha.text = Textos.DiarioLegenda; Abre(_pausa); break;
+                case "pausa": _g.Pausa(true); _pausaDiario.Linha.text = Textos.DiarioLegenda; Abre(_pausa); break;   // fechar no X fica na pausa operacional
                 case "album": Abre(_album); break;
                 case "config": Abre(_config); break;
                 case "excluir": Abre(_config); Abre(_excluir); break;
@@ -277,6 +277,7 @@ namespace TA
                 case "patio": Abre(_patio); break;
                 case "voo": AbreVoo(0); break;
                 case "metas": case "missoes": case "conquistas": AbreMetas(nome); break;
+                case "fichapax": case "fichafunc": case "fichaestacao": case "fichatrip": FichaDev(nome); break;
             }
         }
 
@@ -408,13 +409,14 @@ namespace TA
             Modal m = null;   // a de cima: Abre poe a folha por ultimo entre as irmas
             foreach (Modal x in _modais)
                 if (x.Rt.gameObject.activeSelf && (m == null || x.Rt.GetSiblingIndex() > m.Rt.GetSiblingIndex())) m = x;
-            if (m != null)
+            RectTransform raiz = m != null ? m.Rt : _ficha.gameObject.activeSelf ? _ficha : null;   // sem modal, a ficha do toque
+            if (raiz != null)
             {
                 float texto = float.MaxValue, alvo = float.MaxValue;
                 int cortes = 0;
                 string menor = "", cortado = "";
                 var g = new TextGenerator();
-                foreach (Text t in m.Rt.GetComponentsInChildren<Text>())
+                foreach (Text t in raiz.GetComponentsInChildren<Text>())
                 {
                     if (t.text.Length == 0) continue;
                     g.Populate(t.text, t.GetGenerationSettings(t.rectTransform.rect.size));
@@ -422,7 +424,7 @@ namespace TA
                     if (px < texto) { texto = px; menor = t.text; }
                     if (g.characterCountVisible < t.text.Length) { cortes++; cortado = t.text; }
                 }
-                foreach (Button b in m.Rt.GetComponentsInChildren<Button>())
+                foreach (Button b in raiz.GetComponentsInChildren<Button>())
                 {
                     if (b.name == "ToqueFora") continue;
                     Transform hit = b.transform.Find("AreaDeToque");

@@ -292,7 +292,7 @@ Este é o conteúdo planejado para a versão de lançamento. Não é uma lista d
 
 ### Frentes de gestão da v1.5 (A a I)
 
-Entram no lançamento por decisão de 03/11/2026 (D-25), com o essencial do GDD de direção. **Cada uma é um PR** e só conta como feita pelo critério de 10 itens do §0.5. Hoje **nenhuma existe no código** (conferido na `main` em 03/11/2026: não há salário nem despesa, velocidade de jogo, ficha ao tocar, candidatos, vestiário, banheiro, esteira de restituição, satisfação nem painel de operações). O estado de cada uma está no [`CONTRATO_LANCAMENTO.md`](CONTRATO_LANCAMENTO.md) §1, com a letra na coluna do §4.1.
+Entram no lançamento por decisão de 03/11/2026 (D-25), com o essencial do GDD de direção. **Cada uma é um PR** e só conta como feita pelo critério de 10 itens do §0.5. Hoje **nenhuma existe no código** (conferido na `main` em 03/11/2026: não há salário nem despesa, velocidade de jogo, ficha ao tocar, candidatos, vestiário, banheiro, esteira de restituição, satisfação nem painel de operações). Depois disso, a B e a C entraram parciais (`ta-velocidade` e `ta-ficha`). O estado de cada uma está no [`CONTRATO_LANCAMENTO.md`](CONTRATO_LANCAMENTO.md) §1, com a letra na coluna do §4.1.
 
 | | Frente | O que entrega | Direção | O que a frente não pode quebrar |
 |---|---|---|---|---|
@@ -723,7 +723,7 @@ Não criar uma moeda para cada sistema. Toda moeda precisa ter função visível
 
 **Ritmo proposto (HIPÓTESE, a validar no bot):** 150 pontos por nível, 4 500 no total. Fontes em 28 dias: 3 diárias × 40 pontos, 5 semanais × 150 e 10 objetivos sazonais × 100, num máximo de 7 360 pontos. Quem joga 5 dias por semana chega a cerca de 5 400 e fecha o passe; quem joga 3 dias por semana chega perto do nível 19. A tabela completa de recompensas por nível fica em `docs/TEMPORADA_S1.md`, pronta antes da Fase C terminar.
 
-**Estado em 03/11/2026:** a trilha gratuita de 30 níveis está no núcleo, no PR #49 (aberto e ainda não mesclado, então não conta; frente `ta-passe`), e a trilha premium só tem o produto `season_pass_s1` no catálogo (PR #43), sem regra. **Divergência:** `docs/TEMPORADA_S1.md`, citado acima e no P-07, não existe; a tabela de recompensas e a duração da temporada vão para o contrato da frente. Os números do ritmo continuam hipótese: **vale o que o bot medir**, e este parágrafo se atualiza quando o PR entrar.
+**Medido na Fase C7 (2026-11-02, frente `ta-passe`):** a temporada corre em 28 dias do jogo, não do calendário (D-C7a), com 100 pontos por nível. Voo que partiu dá 2, diária 25, semanal 70 e objetivo da campanha 20. Sem compra, o bot mais lento que joga pelas missões fecha os 30 em 200 de 200 sementes (`BALANCE.md` §12). A tabela ficou em `docs/PASSE.md`, no lugar do `TEMPORADA_S1.md`, que não chegou a existir. Regras em `CONTRATO_FASE_C7.md`. A trilha premium só tem o produto `season_pass_s1` no catálogo (PR #43) e o ponto de entrada no núcleo, sem regra.
 
 ## 6.5. Missões e campanhas
 
@@ -1742,10 +1742,10 @@ Estado atualizado em 03/11/2026 sobre a `main` em `49e1597` (48 PRs; o #49 está
 | P-04 | Equipe móvel | Bloqueador | Teste funcional e de usabilidade | `EM ANDAMENTO` (teste funcional e TA-2 de 1,426 feitos, PRs #5 e #23) | playtest com gente: K2 com 20 pessoas (D-24) |
 | P-05 | Três aeroportos e campanha | Obrigatório | Checklist de conteúdo e testes | `EM ANDAMENTO` (núcleo: PRs #23 e #30; tela de metas: PR #46; falta a tela de aeroportos) | `ta-rotas-tela`; `docs/CAMPANHA.md` já existe |
 | P-06 | Rotas, aeronaves, incidentes e histórias | Obrigatório | Catálogo validado e testes | `EM ANDAMENTO` (rotas e incidentes no núcleo e o aviso na tela: PRs #23, #36 e #44; faltam a tela de rotas, 10 aeronaves no pátio e 19 histórias) | `ta-rotas-tela`, `ta-avioes`, `ta-historias`; D-13 decidida |
-| P-07 | Passe de temporada completo | Obrigatório | Catálogo, progressão e sandbox | `EM ANDAMENTO` (trilha gratuita no núcleo no PR #49, aberto e não mesclado, frente `ta-passe`; o produto premium só existe no catálogo, PR #43) | contrato da `ta-passe` no lugar de `docs/TEMPORADA_S1.md`; trilha premium: Play Console |
+| P-07 | Passe de temporada completo | Obrigatório | Catálogo, progressão e sandbox | `EM ANDAMENTO` (trilha gratuita no núcleo, PR #49, frente `ta-passe`: `CONTRATO_FASE_C7.md` e `docs/PASSE.md`; o produto premium só existe no catálogo, PR #43) | tela (`ta-passe-tela`); trilha premium: Play Console |
 | P-08 | Compras seguras e restore | Bloqueador | Validação sandbox/server-side | `BLOQUEADO` (núcleo feito, PR #43) | servidor (D-06, `ta-servidor`) e Play Console (D-U-N-S, previsão 2026-11-25) |
 | P-09 | Anúncios recompensados e limites | Bloqueador se monetização ativa | Modo de teste + teste de callback | `BLOQUEADO` (regras no núcleo; D-03 e o appId decididos, PR #39) | criar o app no LevelPlay, na conta da V-STACK, e integrar o SDK |
-| P-10 | Save/migração/offline | Bloqueador | Testes de corrupção, tempo e reload | `CONCLUÍDO COM EVIDÊNCIA` (`SaveTests` e `ExploitTests`: corrupção, relógio, reload e migração do schema 1 ao 8; PRs #5 a #43). Restaurar compras é do P-08 | — |
+| P-10 | Save/migração/offline | Bloqueador | Testes de corrupção, tempo e reload | `CONCLUÍDO COM EVIDÊNCIA` (`SaveTests` e `ExploitTests`: corrupção, relógio, reload e migração do schema 1 ao 9; PRs #5 a #43 e #49). Restaurar compras é do P-08 | — |
 | P-11 | Privacidade e declarações de loja | Bloqueador | URLs e formulários revisados | `EM ANDAMENTO` (tela de configurações, política em pt-BR e inglês, suporte e exclusão de dados: PR #48; D-09 a D-12 decididas, PR #38) | revisão jurídica (sem responsável), consentimento e Play Console; o GitHub Pages já está ligado |
 | P-12 | Artes finais e áudio | Obrigatório | Revisão dentro do jogo | `EM ANDAMENTO` (arte do Tripo no jogo, PR #21; áudio gerado e sem ligação, PR #19) | ícone aplicado ao build, variantes de aeronave, `ta-audio`; D-14 aprovada |
 | P-13 | Performance mobile | Bloqueador | Relatório de profiling | `NÃO INICIADO` (K3 só no PC: p10 de 58,7 FPS; aparelho de entrada por último, D-24) | P-02; aparelhos dos amigos do dono |
@@ -1754,7 +1754,7 @@ Estado atualizado em 03/11/2026 sobre a `main` em `49e1597` (48 PRs; o #49 está
 | P-16 | Telemetria e crash reporting | Obrigatório | Eventos verificados em ambiente de teste | `EM ANDAMENTO` (diário CSV com os eventos do §15.1; D-11 decidida, PR #38) | SDK do Unity Analytics (`ta-telemetria`) |
 | P-17 | Proteção anti-fraude e segredos | Bloqueador | Checklist de segurança | `EM ANDAMENTO` (crédito idempotente e sem token no disco, PR #43; `checa_repo` contra segredos, PR #16) | servidor de validação (P-08) |
 | P-18 | Teste de regressão final | Bloqueador | Relatório com todos os testes críticos | `NÃO INICIADO` | todas as anteriores, inclusive P-19 |
-| P-19 | Gestão do aeroporto: despesas e salários, velocidades, ficha ao tocar, contratação e demissão, vestiário, limpeza e banheiro, satisfação com motivo, esteira de restituição e painel de operações (§4.1, A a I) | Obrigatório | Critério de pronto em 10 itens (§0.5) em cada frente, mais o portão do §5.13 nas que mexem em número | `NÃO INICIADO` (nenhuma das 9 existe no código em 03/11/2026) | ordem A, B, C e H; D, E, F e G; I (§4.1); P-02 e P-04 |
+| P-19 | Gestão do aeroporto: despesas e salários, velocidades, ficha ao tocar, contratação e demissão, vestiário, limpeza e banheiro, satisfação com motivo, esteira de restituição e painel de operações (§4.1, A a I) | Obrigatório | Critério de pronto em 10 itens (§0.5) em cada frente, mais o portão do §5.13 nas que mexem em número | `EM ANDAMENTO`: B (velocidades) `parcial`, frente `ta-velocidade`; C (ficha ao tocar) `parcial`, frente `ta-ficha`: ficha de passageiro, funcionário, tripulante e sala; as outras 7 não existem no código (03/11/2026) | ordem A, B, C e H; D, E, F e G; I (§4.1); P-02 e P-04 |
 
 Estados permitidos:
 

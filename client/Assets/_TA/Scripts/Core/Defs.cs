@@ -89,6 +89,8 @@ namespace TA.Core
         CompraCreditada,    // A = produto, B = Gems, C = Cash                                    -> purchase_succeeded_server_verified
         GemsGastas,         // A = item, B = preco, C = Cash do pacote, s do booster ou 1         -> gems_spent
         GemsGanhas,         // A = aeroporto, B = Gems (cadeia fechada)                           -> gems_earned
+        // Fase C7 (CONTRATO_FASE_C7): passe de temporada, trilha gratuita
+        PasseNivel,         // A = temporada, B = nivel (1..30), C = Cash, s de 2x ou 1 cosmetico   -> season_reward_claimed
         // Fase C8 (CONTRATO_FASE_C8): despesas
         DiaFechado,         // A = dia do jogo, B = Cash pago, C = o que faltou (> 0 = pausa)    -> day_closed
         ContaQuitada,       // A = dia do jogo, B = Cash (a conta atrasada; a pausa acabou)       -> day_bill_paid_late
@@ -375,6 +377,12 @@ namespace TA.Core
         /// <summary>Booster: 2x renda por BoosterSeg s de jogo (so anda com o jogo aberto).</summary>
         public int BoosterSeg = 1800;
 
+        // ---- Fase C7 (CONTRATO_FASE_C7, hipoteses) ----
+        /// <summary>Paga o passe (false = so visual: conta e mostra, sem pagar), as temporadas (Sim.Passe.cs), os pontos de cada nivel e o
+        /// que cada fonte da: voo que partiu, diaria, semanal e objetivo da campanha.</summary>
+        public bool RegraPasse = true;
+        public Temporada[] Temporadas = Tabelas.Temporadas;
+        public int PassePontosNivel = 100, PasseVoo = 2, PasseDiaria = 25, PasseSemanal = 70, PasseObjetivo = 20;
         // ---- Fase C8 (CONTRATO_FASE_C8, hipoteses) ----
         /// <summary>Cobra a conta no fechamento do dia (false = so o relatorio, o jogo da Fase D1).</summary>
         public bool RegraDespesas = true;

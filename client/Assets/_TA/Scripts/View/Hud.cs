@@ -81,6 +81,7 @@ namespace TA
             BuildTelas(_canvas);
             BuildOperacao(_canvas);
             BuildMetas(_canvas);
+            BuildFicha();   // por cima da faixa da meta
             BuildTour(_canvas);
             if (Ajustes.TextoMaior) AplicaTexto();
         }
@@ -119,9 +120,9 @@ namespace TA
             Faixa(topo, 300f, 0f, Vector2.zero, Vector2.right);
             Icone(topo, "Moeda", Art.Moeda(), Color.white, 20f, 16f, 80f);
             _cash = Texto(topo, "Cash", Tipo.Titulo, Color.white, 112f, 12f, 370f, 88f);
-            Icone(topo, "IconeRelogio", Art.Relogio(), Art.Placa, 498f, 24f, 64f);
-            _relogio = Texto(topo, "Relogio", Tipo.Secao, Color.white, 576f, 6f, 360f, 56f);
-            _onda = Texto(topo, "Onda", Tipo.Legenda, Art.Suave, 576f, 60f, 360f, 46f);
+            BuildVelocidade(topo);   // no lugar do icone do relogio (Hud.Velocidade.cs)
+            _relogio = Texto(topo, "Relogio", Tipo.Secao, Color.white, 614f, 6f, 322f, 56f);
+            _onda = Texto(topo, "Onda", Tipo.Legenda, Art.Suave, 614f, 60f, 322f, 46f);
             Button pausa = Art.NewButton(topo, Textos.Pausa, 44, Art.AzulLuz, Vector2.one, Vector2.one, () => AbreTela("pausa"));
             Art.Fixa((RectTransform)pausa.transform, Vector2.one, new Vector2(-20f, 0f), new Vector2(112f, 112f));
             Art.Toque(pausa, 18f, 18f);
@@ -249,11 +250,13 @@ namespace TA
             _contratar.B.gameObject.SetActive(!equipe);
             if (!equipe) _contratar.Preco(Textos.ContratarCurto, s.CustoContratar(), s.Cash);
             bool boost = s.BoostLeft > 0;
-            _receita.interactable = !boost && s.Anuncios.Pode(Anuncio.Receita) && Anuncios.Veto(Arrastando, TourAberto, ModalAberto) == null;
+            _receita.interactable = !boost && s.Anuncios.Pode(Anuncio.Receita) && Anuncios.Veto(Arrastando, TourAberto, ModalAberto || _g.Velocidade == 0) == null;
             Art.Rotulo(_receita).text = boost ? Textos.Tempo(s.BoostLeft / (float)Sim.Hz) : Textos.Receita2x(s.Anuncios.HojeDe(Anuncio.Receita), s.T.BoostPorDia);
             if (_toastT > 0f && (_toastT -= Time.unscaledDeltaTime) <= 0f) _toastFundo.gameObject.SetActive(false);
             PintaAlerta(s);
+            PintaVelocidade();
             PintaMetas(s);
+            PintaFicha(s);
             PintaTelas();
             PintaTour();
         }

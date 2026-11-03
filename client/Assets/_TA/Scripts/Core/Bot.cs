@@ -471,6 +471,8 @@ namespace TA.Core
             public int Objetivos; public long Recompensas; public int[] ObjetivoEm;
             /// <summary>Fase C6: diarias e semanais feitas, Cash pago por elas, conquistas e a onda em que cada uma fechou (-1 = nao fechou).</summary>
             public int Diarias, Semanais, Conquistas; public long PagoMissoes; public int[] ConquistaEm;
+            /// <summary>Fase C7: niveis do passe pagos, o Cash deles e a onda em que a trilha gratuita fechou (-1 = nao fechou).</summary>
+            public int Niveis, PasseEm; public long PagoPasse;
             /// <summary>Fase C8: Cash pago nas contas do dia e dias fechados com falta de caixa (pausa).</summary>
             public long Despesas; public int Apertos;
         }
@@ -481,7 +483,7 @@ namespace TA.Core
         {
             var s = new Sim(t, seed);
             var bot = new Bot(p);
-            var r = new Resultado { MarcoEm = new[] { -1f, -1f, -1f }, ChegouEm = new[] { 0, -1, -1 }, ObjetivoEm = new int[30], ConquistaEm = new int[s.T.Conquistas.Length] };
+            var r = new Resultado { MarcoEm = new[] { -1f, -1f, -1f }, ChegouEm = new[] { 0, -1, -1 }, ObjetivoEm = new int[30], ConquistaEm = new int[s.T.Conquistas.Length], PasseEm = -1 };
             for (int i = 0; i < 30; i++) r.ObjetivoEm[i] = -1;
             for (int i = 0; i < r.ConquistaEm.Length; i++) r.ConquistaEm[i] = -1;
             double soma = 0;
@@ -507,6 +509,12 @@ namespace TA.Core
                         case Ev.ObjetivoConcluido: r.Objetivos++; r.Recompensas += e.C; r.ObjetivoEm[e.A * 10 + e.B] = s.Onda; break;
                         case Ev.MissaoConcluida: if (e.A == 0) r.Diarias++; else r.Semanais++; r.PagoMissoes += e.C; break;
                         case Ev.ConquistaFeita: r.Conquistas++; r.ConquistaEm[e.A] = s.Onda; break;
+                        case Ev.PasseNivel:
+                            Nivel n = s.T.Temporadas[e.A].Gratis[e.B - 1];
+                            r.Niveis++;
+                            if (n.Premio == Premio.Cash) r.PagoPasse += e.C;
+                            if (e.B == s.T.Temporadas[e.A].Gratis.Length && r.PasseEm < 0) r.PasseEm = s.Onda;
+                            break;
                         case Ev.DiaFechado: r.Despesas += e.B; if (e.C > 0) r.Apertos++; break;
                         case Ev.ContaQuitada: r.Despesas += e.B; break;
                     }

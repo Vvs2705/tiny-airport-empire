@@ -11,7 +11,7 @@ namespace TA.Tests
         const long T = 1700000000;
 
         /// <summary>Migrar nao paga a campanha: para comparar com jogar ate ali, os dois sem o Cash dela (CONTRATO_FASE_C5 §5).</summary>
-        static readonly Tuning SemC5 = new Tuning { RegraCampanha = false, RegraMissoes = false, RegraDespesas = false };
+        static readonly Tuning SemC5 = new Tuning { RegraCampanha = false, RegraMissoes = false, RegraPasse = false, RegraDespesas = false };
 
         static Sim Jogado(float seg, int seed = 7, Tuning t = null)
         {
@@ -67,7 +67,7 @@ namespace TA.Tests
             Sim s = Sim.Load(SaveEnvelope.Wrap(payload, "x", 1));
             Assert.IsFalse(s.SaveRefused);
             Assert.AreEqual((0L, 0L, 0, 0.0), (s.Cash, s.TotalEmbarcados, s.Album, s.RateEma));
-            Assert.AreEqual(s.T.BoosterSeg * Sim.Hz, s.BoostLeft);
+            Assert.AreEqual(2 * s.T.BoosterSeg * Sim.Hz, s.BoostLeft, "o booster mais o tempo do passe");
             Assert.AreEqual((5, 2, 4), (s.St(Estacao.CheckIn).Vel, s.St(Estacao.CheckIn).Cap, s.St(Estacao.CheckIn).Postos));
             Assert.AreEqual(Sim.MaxFuncionarios, s.Staff.Count);
             Assert.AreEqual((Estacao.Portao, 75), (s.Staff[0].Em, s.Staff[0].Andando));
@@ -296,9 +296,9 @@ namespace TA.Tests
             "0,0,0,0,1800,0\nvr.1=6,46,0,0,0,0,3300,0\nav.0=5,15\nav.1=5,15\nstt.0=1,31,5.666665818542242\nstt.1=1,30,6.0000005178153515\nreparo=0\nin" +
             "cw=14\ncamp.0=6,10,0,0,3,0,1,0,1,3,0\ncamp.1=1,0,1,28,21,2,0,0,0,0,0\ncamp.2=0,0,0,0,0,0,0,0,0,0,0\n";
 
-        static readonly Tuning SemC6 = new Tuning { RegraMissoes = false, RegraDespesas = false };
+        static readonly Tuning SemC6 = new Tuning { RegraMissoes = false, RegraPasse = false, RegraDespesas = false };
         /// <summary>O save antigo nunca pagou conta: o jogo de comparacao e' o do codigo novo sem cobrar (a cobranca tem teste proprio, MigracaoDoSchema8).</summary>
-        static readonly Tuning SemC8 = new Tuning { RegraDespesas = false };
+        static readonly Tuning SemC8 = new Tuning { RegraDespesas = false, RegraPasse = false };
 
         /// <summary>CONTRATO_FASE_C6 §5: com as missoes sem pagar, migrar da o mesmo jogo que jogar ate ali com o codigo novo, e os dois seguem iguais.</summary>
         [Test]
@@ -387,6 +387,8 @@ namespace TA.Tests
             "=1,0\nmd.0=14,4,0,1\nmd.1=12,30,0,1\nmd.2=6,300,0,1\nms.0=4,30,1,0\nms.1=2,10,0,0\nms.2=3,20,0,0\nms.3=1,0,5,0\nms.4=0,988,0,0\ncq=34848,0,0,30,30,27," +
             "0,24,55,0,203,241,25,0,1,1,0,0,0,0,6\n";
 
+        static readonly Tuning SemC7 = new Tuning { RegraPasse = false, RegraDespesas = false };
+
         /// <summary>CONTRATO_FASE_D1 §5: o schema 7 nao tem as chaves: saldo 0, nada comprado, e o jogo e' o mesmo de jogar ate ali com o codigo novo.</summary>
         [Test]
         public void MigracaoDoSchema7_SaveReal_DaOMesmoJogoQueJogarComOCodigoNovo()
@@ -401,7 +403,7 @@ namespace TA.Tests
             StringAssert.Contains("\nschema=" + Sim.Schema + "\n", texto);
             StringAssert.Contains("\ngems=0\n", texto);
             Assert.AreEqual(SemEma(n.Save("0.8.0", U)), SemEma(texto), "migrar = jogar ate ali com o codigo novo");
-            Assert.AreEqual(texto, Sim.Load(texto, SemC8, 7).Save("0.8.0", U), "ida e volta estavel no schema 9");
+            Assert.AreEqual(texto, Sim.Load(texto, SemC8, 7).Save("0.8.0", U), "ida e volta estavel no schema 10");
 
             Sim c = Sim.Load(V07, SemC8, 7);
             Assert.AreEqual(Credito.Creditado, c.Creditar("GPA.1", "gems_pack_small"));
@@ -412,6 +414,85 @@ namespace TA.Tests
             var b2 = new Bot(BotProfile.Bom);
             for (int i = 0; i < 1800 * Sim.Hz; i++) { b1.Step(m); b2.Step(n); }
             Assert.AreEqual(SemEma(n.Save("0.8.0", U + 1)), SemEma(m.Save("0.8.0", U + 1)));
+        }
+
+        /// <summary>Save real gravado pelo codigo do schema 8 (commit dd82ecf, 2026-11-02: semente 7, bot Bom, 2.790 s, dia do jogo 1): sem passe.</summary>
+        const string V08 = "sha256=29b97100394a7ee3bf52e2e4ce915637819a806a1ec9ca5c92e09c8ba616bd9a\nschema=8\ncontent=0.8.0\nat=1800000000\nt=83700\ncash=6108\nseed=7\nonda=15\n" +
+            "emb=988\nperd=26\nalbum=1\nbst=0\nema=9.377462242256783\nsaved=1800000000\nclaim=0\nclaimcash=0\ndia=0\nest.0=5,2\nfila.0=15501;15502;15503;15504;1550" +
+            "5;15506;15507;15508;15509;15510;15511;15512;15513;15514;15515;15516;15517;15518;15519;15520;15521;15522;15523;15524;15525;15526;15527;15528;15529;1553" +
+            "0;15531;15532;15533;15534\nat.0=15044:2;15045:32;15500:62\nest.1=5,2\nat.1=15042:21;15043:51\nest.2=0,0\nest.3=5,2\nfila.3=15007;15017;15011;15020;150" +
+            "18;15022;15015;15023;15014;15024;15019;15026;15028;15021;15029;15025;15031;15027;15033;15030;15036;15032;15035;15034;15037;15038;15039;15040;15041\nes" +
+            "t.4=5,2\nest.5=5,2\nest.6=0,0\nest.7=0,0\nfunc.0=1,3,0,0\nfunc.1=1,3,0,1\nfunc.2=4,1,0,3\nfunc.3=5,3,0,2\nfunc.4=1,3,0,4\nfunc.5=7,3,0,5\nvoo.0=46,13," +
+            "182,1,0\nvoo.1=35,0,0,0,0\naviao.0=89,82200,1,30,-1,0,0,1,0,0\nsrv.0=0:0,0:0,0:0,0:0\naviao.1=99,83700,0,-1,-1,0,0,1,0,0\nsrv.1=0:0,0:0,0:0,0:0\ntrip." +
+            "0=0,1,3872,0\ntrip.1=0,1,5400,1\ntrip.2=0,3,1499,-1\ntrip.3=1,1,3842,0\ntrip.4=1,1,5400,1\ntrip.5=1,3,1499,-1\npatio=3\npatioatraso=8\naero=1,3,-1\nro" +
+            "tas=127\nprog=6,6\nvr.0=6,46,0,0,0,0,1800,0\nvr.1=6,46,0,0,0,0,3300,0\nav.0=6,15\nav.1=6,15\nstt.0=1,31,5.666665818542242\nstt.1=0,-1,27.5333347395062" +
+            "45\nstt.3=1,30,8.099999587982893\nreparo=0\nincw=13\ncamp.0=6,10,0,0,3,0,1,0,1,3,0\ncamp.1=1,0,1,40,40,3,0,0,0,0,0\ncamp.2=0,0,0,0,0,0,0,0,0,0,0\nmiss" +
+            "=1,0\nmd.0=14,4,0,1\nmd.1=12,30,0,1\nmd.2=6,300,0,1\nms.0=4,30,1,0\nms.1=2,10,0,0\nms.2=3,20,0,0\nms.3=1,0,5,0\nms.4=0,988,0,0\ncq=34848,0,0,30,30,27," +
+            "0,24,55,0,203,241,25,0,1,1,0,0,0,0,6\ngems=0\n";
+
+        /// <summary>CONTRATO_FASE_C7 §5: o schema 8 nao tem a chave: a 1a temporada abre no dia do jogo de agora, com 0 pontos e os 28 dias
+        /// inteiros; com o passe sem pagar, migrar da o mesmo jogo que jogar ate ali com o codigo novo, e os dois seguem iguais.</summary>
+        [Test]
+        public void MigracaoDoSchema8_SaveReal_DaOMesmoJogoQueJogarComOCodigoNovo()
+        {
+            const long U = 1800000000;
+            Sim m = Sim.Load(V08, SemC7, 7);
+            Assert.IsFalse(m.SaveRefused, "schema 8 migra, nao e' recusado");
+            Assert.AreEqual((6108L, 83700L, 1, "s1", 28, 0), (m.Cash, m.Steps, m.DiaJogo, m.Temporada.Id, m.DiasRestantesPasse, m.PontosPasse));
+
+            Sim n = Jogado(2790f, 7, SemC7);
+            string texto = m.Save("0.9.0", U);
+            StringAssert.Contains("\nschema=" + Sim.Schema + "\n", texto);
+            StringAssert.Contains("\npasse=0,1,0,0\n", texto);
+            Assert.AreEqual(SemEma(n.Save("0.9.0", U)), SemEma(texto), "migrar = jogar ate ali com o codigo novo");
+            Assert.AreEqual(texto, Sim.Load(texto, SemC7, 7).Save("0.9.0", U), "ida e volta estavel no schema 10");
+
+            var b1 = new Bot(BotProfile.Bom);
+            var b2 = new Bot(BotProfile.Bom);
+            for (int i = 0; i < 1800 * Sim.Hz; i++) { b1.Step(m); b2.Step(n); }
+            Assert.AreEqual(SemEma(n.Save("0.9.0", U + 1)), SemEma(m.Save("0.9.0", U + 1)));
+        }
+
+        /// <summary>Com o passe pagando: o save migrado conta do zero, paga o nivel quando fecha e reabrir nao paga de novo.</summary>
+        [Test]
+        public void MigracaoDoSchema8_ComOPasse_ContaDoZeroEPagaUmaVez()
+        {
+            Sim m = Sim.Load(V08, null, 7);
+            var b = new Bot(BotProfile.Bom);
+            int niveis = 0;
+            for (int i = 0; i < 1800 * Sim.Hz; i++) { b.Step(m); niveis += m.Events.Count(e => e.Tipo == Ev.PasseNivel); }
+            Assert.Greater(m.NivelPasse, 0);
+            Assert.AreEqual(m.NivelPasse, niveis);
+            Sim r = Sim.Load(m.Save("0.9.0", 1800000001));
+            r.Tick(Sim.Step);
+            Assert.IsFalse(r.Events.Any(e => e.Tipo == Ev.PasseNivel), "reabrir nao paga de novo");
+        }
+
+        [Test]
+        public void LixoDoPasse_ViraPadraoLimitado()
+        {
+            Sim a = Sim.Load(SaveEnvelope.Wrap("t=90\npasse=99,5,999,999\n", "x", 1));
+            Assert.IsNull(a.Temporada, "temporada fora da tabela: passe fechado");
+            Sim b = Sim.Load(SaveEnvelope.Wrap("t=90\npasse=0,99999,999999,999\n", "x", 1));
+            Assert.AreEqual(("s1", 28, 3000, 30), (b.Temporada.Id, b.DiasRestantesPasse, b.PontosPasse, b.NivelPasse), "dia no futuro vira hoje; pontos no teto");
+            b.Tick(Sim.Step);
+            Assert.IsFalse(b.Events.Any(e => e.Tipo == Ev.PasseNivel), "pagos no teto: nada a pagar");
+            Sim c = Sim.Load(SaveEnvelope.Wrap("t=90\npasse=-3,-7,-5,-1\n", "x", 1));
+            Assert.AreEqual(("s1", 28, 0), (c.Temporada.Id, c.DiasRestantesPasse, c.PontosPasse));
+            c.PontosPasse = 100;
+            c.Tick(Sim.Step);
+            Assert.AreEqual(1, c.Events.Single(e => e.Tipo == Ev.PasseNivel).B, "pagos negativo vira 0");
+            Sim d = Sim.Load(SaveEnvelope.Wrap("t=200000\npasse=0,0,250,9\n", "x", 1));   // dia 4 do jogo, temporada aberta no dia 0
+            Assert.AreEqual((24, 2), (d.DiasRestantesPasse, d.NivelPasse));
+            d.Tick(Sim.Step);
+            Assert.IsFalse(d.Events.Any(e => e.Tipo == Ev.PasseNivel), "pagos acima do nivel caem para o nivel: nada a pagar");
+            d.PontosPasse = 300;
+            d.Tick(Sim.Step);
+            Assert.AreEqual(3, d.Events.Single(e => e.Tipo == Ev.PasseNivel).B, "e o nivel 3 paga quando fecha");
+            Sim e = Sim.Load(SaveEnvelope.Wrap("t=2000000\npasse=0,0,0,0\n", "x", 1));   // dia 46: o inicio gravado e' antigo demais
+            Assert.AreEqual(0, e.DiasRestantesPasse, "a temporada vira no 1o passo");
+            e.Tick(Sim.Step);
+            Assert.IsNull(e.Temporada);
         }
 
         [Test]
@@ -546,23 +627,9 @@ namespace TA.Tests
             Assert.IsNull(Sim.Load(SaveEnvelope.Wrap(inc, "x", 1)).Inc, "incidente fora do relogio: nenhum");
         }
 
-        /// <summary>O save sem o hash, sem a media da renda, sem o estado das estacoes (2 s depois de reabrir ele e' o mesmo) e sem a campanha
-        /// (migrar comeca do zero, jogar nao): o V02 foi gravado
+        /// <summary>O save sem o hash, sem a media da renda, sem o estado das estacoes (2 s depois de reabrir ele e' o mesmo) e sem a campanha,
+        /// as missoes e o passe (migrar comeca do zero, jogar nao): o V02 foi gravado
         /// no .NET e o Mono do Unity difere no ultimo digito do double. Em jogo o save e' lido pelo mesmo runtime que gravou (IdaEVolta cobre o ema).</summary>
-        /// <summary>Save real gravado pelo codigo do schema 8 (commit 49e1597, 2026-11-03: semente 7, bot Bom, 2.790 s): sem relatorio e sem conta.</summary>
-        const string V08 = "sha256=29b97100394a7ee3bf52e2e4ce915637819a806a1ec9ca5c92e09c8ba616bd9a\nschema=8\ncontent=0.8.0\nat=1800000000\nt=83700\ncash=6108\nseed=7\nonda=15\n" +
-            "emb=988\nperd=26\nalbum=1\nbst=0\nema=9.377462242256783\nsaved=1800000000\nclaim=0\nclaimcash=0\ndia=0\nest.0=5,2\nfila.0=15501;15502;15503;15504;1550" +
-            "5;15506;15507;15508;15509;15510;15511;15512;15513;15514;15515;15516;15517;15518;15519;15520;15521;15522;15523;15524;15525;15526;15527;15528;15529;1553" +
-            "0;15531;15532;15533;15534\nat.0=15044:2;15045:32;15500:62\nest.1=5,2\nat.1=15042:21;15043:51\nest.2=0,0\nest.3=5,2\nfila.3=15007;15017;15011;15020;150" +
-            "18;15022;15015;15023;15014;15024;15019;15026;15028;15021;15029;15025;15031;15027;15033;15030;15036;15032;15035;15034;15037;15038;15039;15040;15041\nes" +
-            "t.4=5,2\nest.5=5,2\nest.6=0,0\nest.7=0,0\nfunc.0=1,3,0,0\nfunc.1=1,3,0,1\nfunc.2=4,1,0,3\nfunc.3=5,3,0,2\nfunc.4=1,3,0,4\nfunc.5=7,3,0,5\nvoo.0=46,13," +
-            "182,1,0\nvoo.1=35,0,0,0,0\naviao.0=89,82200,1,30,-1,0,0,1,0,0\nsrv.0=0:0,0:0,0:0,0:0\naviao.1=99,83700,0,-1,-1,0,0,1,0,0\nsrv.1=0:0,0:0,0:0,0:0\ntrip." +
-            "0=0,1,3872,0\ntrip.1=0,1,5400,1\ntrip.2=0,3,1499,-1\ntrip.3=1,1,3842,0\ntrip.4=1,1,5400,1\ntrip.5=1,3,1499,-1\npatio=3\npatioatraso=8\naero=1,3,-1\nro" +
-            "tas=127\nprog=6,6\nvr.0=6,46,0,0,0,0,1800,0\nvr.1=6,46,0,0,0,0,3300,0\nav.0=6,15\nav.1=6,15\nstt.0=1,31,5.666665818542242\nstt.1=0,-1,27.5333347395062" +
-            "45\nstt.3=1,30,8.099999587982893\nreparo=0\nincw=13\ncamp.0=6,10,0,0,3,0,1,0,1,3,0\ncamp.1=1,0,1,40,40,3,0,0,0,0,0\ncamp.2=0,0,0,0,0,0,0,0,0,0,0\nmiss" +
-            "=1,0\nmd.0=14,4,0,1\nmd.1=12,30,0,1\nmd.2=6,300,0,1\nms.0=4,30,1,0\nms.1=2,10,0,0\nms.2=3,20,0,0\nms.3=1,0,5,0\nms.4=0,988,0,0\ncq=34848,0,0,30,30,27," +
-            "0,24,55,0,203,241,25,0,1,1,0,0,0,0,6\ngems=0\n";
-
         /// <summary>CONTRATO_FASE_C8 §5: o schema 8 nao tem as chaves. Abrir nao cobra nada; o dia em curso comeca a contar no 1o passo e a 1a conta
         /// sai quando ele vira. Com a regra desligada, migrar = jogar ate ali com o codigo novo.</summary>
         [Test]
@@ -575,7 +642,7 @@ namespace TA.Tests
             string texto = m.Save("0.9.0", U);
             StringAssert.Contains("\nschema=" + Sim.Schema + "\n", texto);
             StringAssert.Contains("\natrasada=0\nhoje=-1,0,", texto);
-            Assert.AreEqual(texto, Sim.Load(texto, null, 7).Save("0.9.0", U), "ida e volta estavel no schema 9");
+            Assert.AreEqual(texto, Sim.Load(texto, null, 7).Save("0.9.0", U), "ida e volta estavel no schema 10");
 
             Sim n = Jogado(2790f, 7, SemC8);
             Assert.AreEqual(SemEma(n.Save("0.9.0", U)), SemEma(Sim.Load(V08, SemC8, 7).Save("0.9.0", U)), "migrar = jogar ate ali com o codigo novo");
@@ -592,7 +659,7 @@ namespace TA.Tests
         }
 
         static string SemEma(string save) =>
-            string.Join("\n", save.Split('\n').Where(l => !l.StartsWith("ema=") && !l.StartsWith("sha256=") && !l.StartsWith("stt.") && !l.StartsWith("camp.") && !l.StartsWith("miss=") && !l.StartsWith("md.") && !l.StartsWith("ms.") && !l.StartsWith("cq=")
+            string.Join("\n", save.Split('\n').Where(l => !l.StartsWith("ema=") && !l.StartsWith("sha256=") && !l.StartsWith("stt.") && !l.StartsWith("camp.") && !l.StartsWith("miss=") && !l.StartsWith("md.") && !l.StartsWith("ms.") && !l.StartsWith("cq=") && !l.StartsWith("passe=")
                 && !l.StartsWith("atrasada=") && !l.StartsWith("hoje=") && !l.StartsWith("dc.")));
 
         [Test]

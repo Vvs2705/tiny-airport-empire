@@ -254,6 +254,7 @@ namespace TA.Tests
             Assert.Greater(s.TotalPerdidos, 0, "ha voo perdido para repor");
             string antes = SoOJogo(s);
             Assert.AreEqual(Credito.Creditado, s.Creditar("a", Grande));
+            s.BoostLeft = 0;   // o 2x do passe pode estar ligado, e o booster so se compra com ele parado
             for (int i = 0; i < s.T.ItensGems.Length; i++) Assert.IsTrue(s.Gastar(i), s.T.ItensGems[i].Id);
             foreach (Produto p in s.T.Produtos) s.Creditar("b" + p.Id, p.Id);
             Assert.AreEqual(antes, SoOJogo(s));

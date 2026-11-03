@@ -20,8 +20,8 @@ namespace TA
     /// Flags (CONTRATO_V01 §7; todas, menos -autoplay, so com -testsession, que nao le nem grava save nem diario e usa a semente 1):
     ///   -autoplay N   sem render: o bot joga N ondas (Bom, Lento, Parado; retomada no meio da onda), loga AUTOPLAY OK|FAIL e sai 0/1.
     ///                 Usar com -batchmode -nographics (client/tools/verify.sh full).
-    ///   -bot          o bot Bom joga na tela.        -speed N   multiplica o dt (0,1..20).
-    ///   -tela nome    jogo | melhorias | mover | cofre | anuncio | pausa | album | config | excluir | equipe | tripulacao | patio | voo | metas | missoes | conquistas | passoN (tutorial, passo N).
+    ///   -bot          o bot Bom joga na tela.        -speed N   multiplica o dt (0,1..20).   -vel V   comeca em V (0 = pausa, 1..3 = 1x..3x).
+    ///   -tela nome    jogo | melhorias | mover | cofre | anuncio | pausa | pausada (sem o menu) | album | config | excluir | equipe | tripulacao | patio | voo | metas | missoes | conquistas | fichapax | fichafunc | fichaestacao | fichatrip (Hud.FichaDev) | passoN (tutorial, passo N).
     ///   -textomaior, -reduzmovimento   ligam o ajuste so nesta sessao (o -testsession nao le as preferencias do PC).
     ///   -onda K       comeca na onda K (1 = a 1a).   -passageiros N   estresse: N passageiros por onda (60 = o K3).
     ///   -tutorial     liga o tutorial no -testsession (sem gravar; com -bot o ENTENDI se aperta sozinho).
@@ -46,9 +46,14 @@ namespace TA
         public Sim Sim { get; private set; }
         /// <summary>s de jogo do ultimo quadro (0 com o relogio parado): o Mundo anda os bonecos no tempo do jogo.</summary>
         public float DtJogo { get; private set; }
+        /// <summary>Velocidade do relogio (GDD de direcao §5): 0 = pausa operacional (o relogio e o mundo param; telas e melhorias seguem
+        /// abertas), 1x, 2x ou 3x. Abre em 1x e nao vai no save: o cofre offline conta o tempo real fora (Sim.ApplyOffline), nao esta.</summary>
+        public int Velocidade { get; private set; } = 1;
+        int _retoma = 1;   // a velocidade de antes da pausa
         Hud _hud;
         Bot _bot;
         float _speed = 1f;
+        Action<Evento> _le;
         bool _headless, _test, _apagado;   // _apagado: Excluir meus dados, nada mais grava
         string _save, _diario, _instalacao, _sessao;
         long _ultimoSave;
@@ -73,6 +78,8 @@ namespace TA
             _test = Arg("-testsession") != null;
             if (_test) Application.runInBackground = true;   // fotos e gravacao nao param quando a janela perde o foco
             _speed = _test ? Mathf.Clamp(ArgF("-speed", 1f), 0.1f, 20f) : 1f;
+            if (_test && int.TryParse(Arg("-vel"), NumberStyles.Integer, Inv, out int vel)) Velocidade = Mathf.Clamp(vel, 0, 3);
+            _le = e => { Trata(e); _hud.M.Evento(e); };
             string dir = Application.persistentDataPath;
             _save = Path.Combine(dir, "save.txt");
             _diario = Path.Combine(dir, "diario.csv");
@@ -135,15 +142,36 @@ namespace TA
         {
             if (_headless) return;
             float dt = Time.deltaTime * _speed;
-            bool para = _hud.Bloqueia;
-            if (!para) _bot?.Pensa(Sim, dt);
-            DtJogo = para ? 0f : dt;
-            Sim.Tick(DtJogo);
-            foreach (Evento e in Sim.Events) { Trata(e); _hud.M.Evento(e); }
+            int v = _hud.Bloqueia ? 0 : Velocidade;
+            if (v > 0) _bot?.Pensa(Sim, dt * v);
+            DtJogo = dt * v;
+            Anda(Sim, dt, v, _le);
             string oferta = Sim.Anuncios.Oferta(Anuncio.Receita);
             if (oferta != null && oferta != _ofertaLogada) { _ofertaLogada = oferta; Diario("rewarded_ad_offered", (int)Anuncio.Receita); }
             if (Sim.Steps - _ultimoSave >= 5 * Sim.Hz) Grava();
             if (Time.unscaledTime - _ultimoFlush > 5f) Flush();
+        }
+
+        /// <summary>Um quadro do relogio na velocidade v (0 = parado): v Ticks com o dt real, e o passo fixo nao muda. A 3x o quadro roda 3x os
+        /// passos, cada Tick com o teto do MaxFrame, e o jogo e o mesmo do 1x para a mesma semente (VelocidadeTests). Cada Tick tira os eventos
+        /// que o anterior mostrou: `le` trata os de cada um. Parado, um Tick(0) entrega as intencoes (comprar, contratar, mover).</summary>
+        public static void Anda(Sim s, float dt, int v, Action<Evento> le)
+        {
+            for (int i = 0; i < Math.Max(1, v); i++)
+            {
+                s.Tick(v > 0 ? dt : 0f);
+                foreach (Evento e in s.Events) le(e);
+            }
+        }
+
+        /// <summary>O botao de velocidade: 1x, 2x, 3x e de novo 1x; na pausa, continua na velocidade de antes.</summary>
+        public void ProximaVelocidade() => Velocidade = Velocidade == 0 ? _retoma : Velocidade % 3 + 1;
+
+        /// <summary>Pausa operacional (o II e o Continuar da pausa): o relogio e o mundo param, mas as telas e as melhorias seguem abertas.</summary>
+        public void Pausa(bool pausa)
+        {
+            if (pausa && Velocidade > 0) { _retoma = Velocidade; Velocidade = 0; }
+            else if (!pausa && Velocidade == 0) Velocidade = _retoma;
         }
 
         void OnApplicationPause(bool pausado)
@@ -356,6 +384,7 @@ namespace TA
         void AbreTelaDev(string tela)
         {
             if (tela.StartsWith("passo", StringComparison.Ordinal) && int.TryParse(tela.Substring(5), out int p)) { _hud.MostraPasso(p); return; }
+            if (tela == "pausada") { Pausa(true); return; }   // a pausa operacional, como fica depois do X do menu
             if (tela == "cofre")
             {
                 Sim.RateEma = Math.Max(Sim.RateEma, 2.0);
@@ -425,6 +454,7 @@ namespace TA
                 for (int p = Sim.MaxFuncionarios; p < Sim.MaxEquipe; p++) Sim.Hire((Perfil)p);
                 yield return null;
                 for (int i = 0; i < Sim.Staff.Count; i++) Sim.Move(i, Funcionario.Casa(Sim.Staff[i].Perfil));
+                if (int.TryParse(Arg("-velposto"), out int vel)) foreach (Station st in Sim.Estacoes) st.Vel = vel;   // foto dos postos por nivel
                 yield break;
             }
             if (nome == "postos")

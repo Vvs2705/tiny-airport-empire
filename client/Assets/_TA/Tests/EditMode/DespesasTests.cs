@@ -151,6 +151,8 @@ namespace TA.Tests
                         case Ev.Venda: vendas += e.B; break;
                         case Ev.Bonus: bonus += e.B; break;
                         case Ev.ObjetivoConcluido: case Ev.MissaoConcluida: premios += e.C; break;
+                        case Ev.PasseNivel: if (s.T.Temporadas[e.A].Gratis[e.B - 1].Premio == Premio.Cash) premios += e.C; break;
+                        case Ev.PasseNivel: if (s.T.Temporadas[e.A].Gratis[e.B - 1].Premio == Premio.Cash) premios += e.C; break;
                         case Ev.DiaFechado: pago += e.B; fechados++; break;
                         case Ev.ContaQuitada: pago += e.B; break;
                     }
