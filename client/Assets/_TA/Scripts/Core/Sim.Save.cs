@@ -332,7 +332,7 @@ namespace TA.Core
                 var p = (Perfil)Math.Max(0, Math.Min(MaxEquipe - 1, f.Length >= 4 ? f[3] : i));
                 if (s.Contratado(p) || f.Length < 4 && i >= MaxFuncionarios) break;   // perfil repetido ou sem perfil acima da v0.1: lixo
                 Estacao em = s.Est(f[0]), de = s.Est(f[1]);
-                s.Staff.Add(new Funcionario { Id = i, Perfil = p, Em = em, De = de, Andando = Math.Max(0, Math.Min((int)Math.Round(s.T.Caminhada * Hz), f[2])) });
+                s.Staff.Add(new Funcionario { Id = i, Perfil = p, Em = em, De = de, Andando = Math.Max(0, Math.Min(s.AndandoMax(em, de), f[2])) });
             }
             int onda = (int)Get(kv, "onda", -1);
             bool bate = onda >= 0 && onda == (int)(s.Steps / s.OndaPassos);   // onda que nao bate com o relogio: comeca a dele

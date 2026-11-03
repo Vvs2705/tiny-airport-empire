@@ -9,8 +9,8 @@ namespace TA
     /// para a camera, com o uniforme ou a mala numa mascara que o shader tinge pela cor do vertice (SpriteTinta).
     ///  - Passageiros (4 corpos) com a mala na cor do voo; andam pela fila, vao ao balcao, seguem pelas portas e embarcam pela ponte; quem
     ///    perde o voo sai pela porta. Na fila critica, os 3 da frente mostram o balao de irritacao.
-    ///  - Funcionarios (os 6 perfis): andam de sala em sala pelas portas no tempo da Tuning.Caminhada e, ao chegar, o uniforme assenta na
-    ///    cor do setor (0,35 s); atras do balcao, "atende" quando o posto dele tem passageiro.
+    ///  - Funcionarios (os 6 perfis): andam de sala em sala pelas portas; mudar de setor passa pelo vestiario (Mundo.Vestiario.cs), onde o
+    ///    uniforme assenta na cor do setor novo (0,35 s); atras do balcao, "atende" quando o posto dele tem passageiro.
     ///  - Patio (com o uniforme da funcao): a equipe de patio (uma pessoa por sim.EquipePatio) vai ate o servico que comecou; o mecanico sai da
     ///    oficina e vai ao aviao em checagem; a tripulacao escalada anda da sala ate o aviao e volta (GDD §5.11); o despachante sinaliza o estande G.
     ///  - Pool: os bonecos de passageiro voltam para a pilha e trocam de folha ao renascer (nada se cria ou destroi no quadro quente).
@@ -293,22 +293,50 @@ namespace TA
                 _nome[k].enabled = existe;
                 if (!existe) continue;
                 Funcionario f = s.Staff[k];
-                if (_colete[k] < 0)   // contratado: aparece ja de uniforme, no lugar dele
+                if (_colete[k] < 0)   // contratado: aparece ja de uniforme, no lugar dele (save no meio da transferencia: no armario)
                 {
-                    _colete[k] = (int)f.Em; _rotaPara[k] = f.Em; b.Pos = Lugar(s, f, out _); _troca[k] = Troca;
+                    _colete[k] = (int)s.Veste(f); _rotaPara[k] = f.Em; b.Pos = f.Andando > 0 && f.De != f.Em ? VestLugar(k) : Lugar(s, f, out _); _troca[k] = Troca;
                 }
                 b.Atende = false;
                 b.Gesto = -1;
+                Transferencia fase = s.Fase(f);
                 if (Arrastando == k) { b.Andou = false; }   // o arrasto posiciona
+                else if (fase == Transferencia.Encerrando)   // termina o atendimento no posto antigo antes de sair (Mundo.Vestiario.cs)
+                {
+                    Anda(b, VelFunc, dt);   // quem ainda chegava ao posto antigo termina o caminho
+                    if (b.Caminho.Count == 0)
+                    {
+                        Olha(b, -Salas[(int)f.De].N);
+                        b.Atende = _noPosto[(int)f.De, _posto[k]] != null;
+                        GestoFunc(b, (int)f.De, _posto[k]);
+                    }
+                }
+                else if (_colete[k] != (int)f.Em)   // uniforme de outro setor: vai ao armario e so troca la dentro, quando o nucleo diz que acabou
+                {
+                    if (!_rotaVest[k])
+                    {
+                        _rotaVest[k] = true; _rotaPara[k] = (Estacao)(-1);
+                        b.Caminho.Clear();
+                        int de = SalaEm(b.Pos);
+                        RotaVestiario(b.Caminho, b.Pos, de < 0 ? (int)f.De : de, k);
+                    }
+                    Anda(b, VelFunc, dt);
+                    if (b.Caminho.Count == 0)
+                    {
+                        Olha(b, Vector2.right);   // de frente para o armario
+                        if (s.Veste(f) == f.Em) { _colete[k] = (int)f.Em; _troca[k] = Troca; }
+                    }
+                }
                 else
                 {
                     Vector2 lugar = Lugar(s, f, out int posto);
                     if (_rotaPara[k] != f.Em)   // anda pelas portas ate o setor novo; a sala distante leva mais que a Tuning.Caminhada do nucleo, sem teletransporte
                     {
-                        _rotaPara[k] = f.Em;
+                        _rotaPara[k] = f.Em; _rotaVest[k] = false;
                         b.Caminho.Clear();
                         int de = SalaEm(b.Pos);
-                        RotaPessoa(b.Caminho, b.Pos, de < 0 ? (int)f.De : de, (int)f.Em, lugar, false);
+                        if (NoVestiario(b.Pos) || NoCorredor(b.Pos)) RotaDoVestiario(b.Caminho, b.Pos, (int)f.Em, lugar);
+                        else RotaPessoa(b.Caminho, b.Pos, de < 0 ? (int)f.De : de, (int)f.Em, lugar, false);
                     }
                     else if (b.Caminho.Count == 0 && (lugar - b.Pos).sqrMagnitude > 4e-4f) b.Caminho.Add(lugar);
                     else if (b.Caminho.Count > 0) b.Caminho[b.Caminho.Count - 1] = lugar;
@@ -318,7 +346,7 @@ namespace TA
                         Olha(b, -Salas[(int)f.Em].N);   // de frente para a fila
                         b.Atende = _noPosto[(int)f.Em, posto] != null;
                         GestoFunc(b, (int)f.Em, posto);
-                        if (_colete[k] != (int)f.Em) { _colete[k] = (int)f.Em; _troca[k] = Troca; }   // chegou: veste o uniforme do setor
+                        _posto[k] = posto;
                     }
                 }
                 float t = _troca[k] > 0f ? 1f - _troca[k] / Troca : 1f;

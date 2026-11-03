@@ -106,6 +106,7 @@ namespace TA
             Bloco("Saguao", PrimitiveType.Cube, new Vector3(6f, -0.08f, 4f), new Vector3(12.6f, 0.1f, 8.6f), CorCorredor);
             Bloco("SaguaoLeste", PrimitiveType.Cube, new Vector3(16.1f, -0.08f, 6f), new Vector3(8f, 0.1f, 4.6f), CorCorredor);
             for (int e = 0; e < Salas.Length; e++) { Sala3D(e); Obra(e); }
+            Vestiario3D();
             Capachos();
             Funde();
             Ponte3D();

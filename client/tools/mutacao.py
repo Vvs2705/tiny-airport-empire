@@ -723,6 +723,48 @@ MUTANTES = [
         "else if (v > 0) _posse.Add(n.Id);",
         "else _posse.Add(n.Id);",
     ),
+    (
+        "vestiario: mudar de setor passa pelo vestiario",
+        "Sim.cs",
+        "f.Andando = destino == veste ? Passos(T.Caminhada) : encerra + TransferePassos;",
+        "f.Andando = destino == veste ? Passos(T.Caminhada) : encerra + Passos(T.Caminhada);",
+    ),
+    (
+        "vestiario: voltar ao setor do uniforme e so a caminhada",
+        "Sim.cs",
+        "f.Andando = destino == veste ? Passos(T.Caminhada) : encerra + TransferePassos;",
+        "f.Andando = encerra + TransferePassos;",
+    ),
+    (
+        "vestiario: quem sai termina o atendimento",
+        "Sim.Vestiario.cs",
+        "if (!T.RegraVestiario || s.Atendendo.Count < Presentes(e)) return 0;",
+        "if (true) return 0;",
+    ),
+    (
+        "vestiario: o outro no posto cobre o atendimento",
+        "Sim.Vestiario.cs",
+        "if (!T.RegraVestiario || s.Atendendo.Count < Presentes(e)) return 0;",
+        "if (!T.RegraVestiario || s.Atendendo.Count == 0) return 0;",
+    ),
+    (
+        "vestiario: o uniforme so muda no fim da troca",
+        "Sim.Vestiario.cs",
+        "return t == Transferencia.Nenhuma || t == Transferencia.IndoPosto ? f.Em : f.De;",
+        "return f.Em;",
+    ),
+    (
+        "vestiario: a fase sai do Andando",
+        "Sim.Vestiario.cs",
+        "return f.Andando <= troca ? Transferencia.Trocando : f.Andando <= troca + volta ? Transferencia.IndoVestiario : Transferencia.Encerrando;",
+        "return Transferencia.Trocando;",
+    ),
+    (
+        "vestiario: o save guarda a transferencia inteira",
+        "Sim.Vestiario.cs",
+        "int AndandoMax(Estacao em, Estacao de) => de == em ? Passos(T.Caminhada) : TransferePassos + TempoBase(de);",
+        "int AndandoMax(Estacao em, Estacao de) => Passos(T.Caminhada);",
+    ),
 ]
 
 
