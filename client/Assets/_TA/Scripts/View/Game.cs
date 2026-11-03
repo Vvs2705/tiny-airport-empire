@@ -21,7 +21,8 @@ namespace TA
     ///   -autoplay N   sem render: o bot joga N ondas (Bom, Lento, Parado; retomada no meio da onda), loga AUTOPLAY OK|FAIL e sai 0/1.
     ///                 Usar com -batchmode -nographics (client/tools/verify.sh full).
     ///   -bot          o bot Bom joga na tela.        -speed N   multiplica o dt (0,1..20).
-    ///   -tela nome    jogo | melhorias | mover | cofre | anuncio | pausa | album | equipe | tripulacao | patio | voo | metas | missoes | conquistas | passoN (tutorial, passo N).
+    ///   -tela nome    jogo | melhorias | mover | cofre | anuncio | pausa | album | config | excluir | equipe | tripulacao | patio | voo | metas | missoes | conquistas | passoN (tutorial, passo N).
+    ///   -textomaior, -reduzmovimento   ligam o ajuste so nesta sessao (o -testsession nao le as preferencias do PC).
     ///   -onda K       comeca na onda K (1 = a 1a).   -passageiros N   estresse: N passageiros por onda (60 = o K3).
     ///   -tutorial     liga o tutorial no -testsession (sem gravar; com -bot o ENTENDI se aperta sozinho).
     ///   -shot f.png [-shotdelay s] [-shotescala n] [-rola f]   espera s s reais (padrao 1), abre a -tela, fotografa em n x a janela (loga PISO: menor texto e menor alvo da tela; -rola 0 = fim da lista, 1 = topo) e sai 0.
@@ -48,7 +49,7 @@ namespace TA
         Hud _hud;
         Bot _bot;
         float _speed = 1f;
-        bool _headless, _test;
+        bool _headless, _test, _apagado;   // _apagado: Excluir meus dados, nada mais grava
         string _save, _diario, _instalacao, _sessao;
         long _ultimoSave;
         float _ultimoFlush;
@@ -78,6 +79,8 @@ namespace TA
             _instalacao = PlayerPrefs.GetString("ta_instalacao", "");
             if (_instalacao.Length == 0) { _instalacao = Guid.NewGuid().ToString("N"); PlayerPrefs.SetString("ta_instalacao", _instalacao); PlayerPrefs.Save(); }
             _sessao = Guid.NewGuid().ToString("N").Substring(0, 8);
+            Ajustes.Carrega(!_test);
+            if (_test) { Ajustes.TextoMaior = Arg("-textomaior") != null; Ajustes.ReduzMovimento = Arg("-reduzmovimento") != null; }
 
             int status;
             if (_test)
@@ -195,6 +198,22 @@ namespace TA
             Grava();
         }
 
+        /// <summary>Configuracoes > Excluir meus dados, ja confirmado: apaga o save, o diario e todo o PlayerPrefs (preferencias, tutorial e o
+        /// id da instalacao) e fecha o jogo; ao abrir de novo, comeca do zero. Nada mais grava depois disso, nem na saida.</summary>
+        public void ApagaDados()
+        {
+            _apagado = true;
+            _buf.Clear();
+            if (!_test)
+            {
+                foreach (string f in new[] { _save, _save + ".tmp", _diario })
+                    try { File.Delete(f); } catch (Exception e) { Debug.LogWarning("TA apagar: " + e.Message); }
+                PlayerPrefs.DeleteAll();
+                PlayerPrefs.Save();
+            }
+            Application.Quit();
+        }
+
         public string ExportarDiario()
         {
             Diario("diary_export");
@@ -259,7 +278,7 @@ namespace TA
         /// <summary>Uma linha do diario (bufferizada; Flush a cada 5 s, na pausa e ao sair). -testsession nao escreve.</summary>
         public void Diario(string evento, long a = 0, long b = 0, long c = 0)
         {
-            if (Sim == null) return;
+            if (Sim == null || _apagado) return;
             if (_test)
             {
                 // -testsession nao grava diario; o tutorial vai para o log (prova dos passos jogaveis com -tutorial -bot)
@@ -276,7 +295,7 @@ namespace TA
         void Flush()
         {
             _ultimoFlush = Time.unscaledTime;
-            if (_buf.Length == 0) return;
+            if (_buf.Length == 0 || _apagado) return;
             try
             {
                 bool novo = !File.Exists(_diario) || new FileInfo(_diario).Length == 0;
@@ -294,7 +313,7 @@ namespace TA
         void Grava()
         {
             _ultimoSave = Sim.Steps;
-            if (_test || Sim.SaveRefused) return;
+            if (_test || _apagado || Sim.SaveRefused) return;
             string texto = Sim.Save(Application.version, Agora);
             if (texto == null) return;
             if (Sim.ClockWentBack > 0) Diario("clock_back", Sim.ClockWentBack);
