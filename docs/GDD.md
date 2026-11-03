@@ -1,20 +1,23 @@
 # LITTLE TERMINAL
 ## GDD Mestre de Produção, Tecnologia, Segurança e Publicação
 
-**Versão:** 1.4 (estado de 02/11/2026: nome decidido, compras com Gems e servidor, telas e alinhamento com o código), revisão de 02/11/2026 sobre a 1.3 de 30/10/2026, a 1.2 e a 1.1 de 29/10/2026 e a 1.0 de 26/10/2026. O que mudou e por quê está no §26.
+**Versão:** 1.5 (estado de 03/11/2026: mistura com o GDD de direção v0.1, com 9 frentes de gestão no lançamento e um roteiro pós-lançamento), revisão de 03/11/2026 sobre a 1.4 de 02/11/2026, a 1.3 de 30/10/2026, a 1.2 e a 1.1 de 29/10/2026 e a 1.0 de 26/10/2026. O que mudou e por quê está no §26.
 **Projeto:** Tiny Airport Empire (repositório `Vvs2705/tiny-airport-empire`).
 **GDD de origem:** [`GDD_ORIGEM.md`](GDD_ORIGEM.md), que reúne o produto, a revisão competitiva de 09/10/2026 e as lições do Dungeon Courier de 16/10/2026. Neste documento ele aparece citado como "Origem §N".
+**GDD de direção:** [`GDD_DIRECAO_v0.1.md`](GDD_DIRECAO_v0.1.md), o documento do Vinicius de 03/11/2026 para um simulador de construção, gestão e operação bem maior que este tycoon. Ele é **direção, não escopo**: o que vale para o lançamento está aqui (§4.1), e o resto está no roteiro do §4.4. Neste documento ele aparece citado como "Direção §N".
 **Nome comercial:** Little Terminal, decidido em 01/11/2026 (D-03; busca de marca em [`NOME.md`](NOME.md)). **appId Android:** `br.com.vstack.littleterminal`. O nome do repositório e dos arquivos internos segue Tiny Airport Empire.
 **Motor:** Unity **6000.3.27f1 LTS**, a mesma versão do Dungeon Courier desde 22/10/2026. Fica fixa quando o projeto for criado.
 **Plataformas:** Android primeiro. O iOS depende de macOS e de conta Apple (§0.3).
 **Orientação:** retrato.
 **Modelo comercial:** Free-to-Play, com anúncios recompensados opcionais. Compras digitais só entram com validação no servidor (§7.4).
 **Prazo operacional da v1.0:** 29/10/2026. **É inviável:** a auditoria do §0.3 deu **NO-GO**. A nova data é a decisão D-02 (§23.2), decidida em 01/11/2026: sem data fixa, assim que a Play Console sair (previsão 25/11/2026) e a regressão fechar.
-**Status (02/11/2026):** especificação de produto **com o jogo em desenvolvimento**: a `main` tem 44 PRs. O núcleo das Fases B e C e a Fase D1 (Gems) estão implementados e testados, a tela cobre o dia a dia do aeroporto e a arte do Tripo está no jogo. Faltam as telas de aeroportos, rotas, metas, passe e loja, o servidor de compras, os anúncios reais, as 20 histórias, o inglês, o áudio ligado e a medida em aparelho. O estado de cada entrega está no §21 e em [`ESTADO_DO_PROJETO.md`](ESTADO_DO_PROJETO.md); ainda não existe conta de loja (Play Console, previsão 25/11/2026).
+**Status (03/11/2026):** especificação de produto **com o jogo em desenvolvimento**: a `main` tem 48 PRs (do #1 ao #48; o #49, do passe de temporada, está aberto e não conta). O núcleo das Fases B e C e a Fase D1 (Gems) estão implementados e testados, a tela cobre o dia a dia do aeroporto, as metas (PR #46) e as configurações (PR #48), e a arte do Tripo está no jogo. Faltam as telas de aeroportos, rotas, passe e loja, o servidor de compras, os anúncios reais, as 20 histórias, o inglês, o áudio ligado, a medida em aparelho e as 9 frentes de gestão do §4.1 (A a I), das quais **nenhuma existe ainda no código**. O estado de cada entrega está no §21 e em [`ESTADO_DO_PROJETO.md`](ESTADO_DO_PROJETO.md); ainda não existe conta de loja (Play Console, previsão 25/11/2026).
 
 > **Regra de verdade:** este GDD descreve o produto que deve existir. Uma funcionalidade só pode ser marcada como concluída depois de estar implementada, testada no projeto real e registrada com evidência. Este documento, sozinho, não comprova que qualquer funcionalidade já exista.
 
 > **Precedência:** as regras do estúdio (`~/.claude/estudio/REGRAS_JOGOS_ESTUDIO.md`) e o `CLAUDE.md` do repositório valem por cima deste documento. Este documento vale por cima do GDD de origem. O que ele não cobre continua valendo da Origem: tutorial passo a passo, rota de arte, clipes de animação, flags de teste e invariantes. Os conflitos entre os três estão resolvidos ou apontados no §0.4.
+
+> **O que mudou na v1.5 (03/11/2026).** O Vinicius trouxe um GDD de direção (v0.1), um simulador de gestão bem maior que este tycoon de 8 estações fixas, e aprovou misturar os dois ("pode seguir desta forma", D-25). O lançamento ganha **9 frentes** com o essencial do novo (§4.1, A a I) e o resto vira **roteiro pós-lançamento** (§4.4). Valem desde já **seis regras de direção** (§0.5). Ficam como estavam: retrato, pessoas em sprite (D-18), ondas com dia e noite e compras opção B. Só documentos: nenhum número, regra de núcleo ou guardrail muda. O que mudou, linha a linha, está no §26.
 
 ---
 
@@ -99,6 +102,20 @@ Mesmo com o código pronto, o envio Android só é possível depois de a Play Co
 | Créditos do Tripo | "usar os créditos existentes" | só com aval explícito do Vinicius, por lote | **Aval por lote,** com saldo, prompt e SHA em `docs/PROVENIENCIA.md` (§10.2) |
 | Plano de datas | 26/10 a 29/10 | — | substituído por fases com portões (§17.3) |
 | Rota de arte (v1.2) | — | personagem e objeto pelo pipeline do DC, em sprite pré-renderizado (estúdio) | **Híbrida (D-18, aprovada em 01/11/2026):** prédios, aviões e veículos entram como malha low-poly em tempo real, porque são corpos rígidos, sem skinning; é como fazem as referências do COMPETITIVO §g. Pessoas seguem em sprite pré-renderizado, desenhado num quad no mundo 3D, com o uniforme numa máscara separada (§10.2). Motivo: avião taxiando e veículo fazendo curva pediriam dezenas de direções em sprite |
+| Escopo de gestão (v1.5) | — | GDD de direção v0.1 (03/11/2026): simulador completo de construção, gestão e operação, com 24 h, turnos, construção livre, serviços especializados e operação internacional | **Mistura aprovada em 03/11/2026 (D-25):** 9 frentes de gestão no lançamento (§4.1, A a I) e o resto no roteiro pós-lançamento (§4.4). Mantidos: retrato, pessoas em sprite (D-18), ondas com dia e noite e compras opção B. O tempo contínuo de 24 h, os turnos e a construção livre ficam para depois |
+
+## 0.5. Regras de direção (valem desde 03/11/2026)
+
+Vêm do GDD de direção ([`GDD_DIRECAO_v0.1.md`](GDD_DIRECAO_v0.1.md), "Direção §N") e valem **já**, em toda frente, nova ou em andamento. Código que quebra uma delas é defeito, não decisão.
+
+1. **O que parece operacional tem função, ou é decoração.** Balcão, esteira, banheiro, veículo, posto, botão: se o jogador vê e parece funcionar, tem papel na simulação; se não tem, aparece claramente como decoração (Direção §27).
+2. **Critério de pronto em 10 itens, para tudo que for novo** (Direção §22). Uma funcionalidade só é `feito` no §21 e no [`CONTRATO_LANCAMENTO.md`](CONTRATO_LANCAMENTO.md) quando tem: (1) a regra de gameplay implementada; (2) tela de consulta ou de controle, quando precisa; (3) representação visual coerente; (4) animação ou retorno visual adequado; (5) requisitos e custos definidos; (6) integração com as estações e os departamentos relacionados; (7) estado salvo e restaurado; (8) testes das regras principais; (9) nenhum bloqueio de navegação conhecido; (10) validação em build e, quando fizer diferença, em aparelho Android (o aparelho de teste só entra no último passo, D-24).
+   - *Banheiro:* não está pronto porque o modelo 3D foi colocado. Precisa de capacidade, acesso, consumo, sujeira, limpeza, manutenção, efeito na satisfação, tela e save.
+   - *Funcionário de limpeza:* não está pronto porque existe um personagem de uniforme. Precisa ser contratado, escalado, receber a tarefa, achar o lugar, limpar, atualizar o ambiente e responder a ordens.
+3. **A animação segue o estado.** O que se vê corresponde ao estado lógico da entidade: ninguém começa a trabalhar antes de a tarefa ser aceita, e a animação nunca é a única confirmação de que algo terminou (a regra e a tela confirmam também; Direção §7.4).
+4. **Ninguém atravessa nada.** Pessoa não atravessa parede, balcão nem equipamento (Direção §7.4). A meta é zero; o estado da medida está em [`ESTADO_DO_PROJETO.md`](ESTADO_DO_PROJETO.md) §7 (frente `ta-caminhos`).
+5. **A loja vem depois do ciclo principal.** Unity IAP, tela da loja e servidor de compras entram depois do ciclo principal e das frentes A a I (ordem no §4.1 e no §17.3). Nenhum sistema essencial exige pagamento (Direção §12).
+6. **Nenhuma despesa leva a uma derrota inevitável.** Salário, conta ou qualquer despesa nova nunca deixa o jogador sem saída: sempre existe uma jogada que recupera o caixa. Perder voo continua custando só a receita dele (§5.4). Como todo sistema novo, a regra é medida no bot e passa pelo portão do §5.13 antes de ligar (D-21).
 
 ---
 
@@ -273,6 +290,24 @@ Este é o conteúdo planejado para a versão de lançamento. Não é uma lista d
 - Telemetria de eventos essenciais, crash reporting e painel mínimo de saúde.
 - Arte final, UI, ícone, screenshots e materiais de loja sem placeholders.
 
+### Frentes de gestão da v1.5 (A a I)
+
+Entram no lançamento por decisão de 03/11/2026 (D-25), com o essencial do GDD de direção. **Cada uma é um PR** e só conta como feita pelo critério de 10 itens do §0.5. Hoje **nenhuma existe no código** (conferido na `main` em 03/11/2026: não há salário nem despesa, velocidade de jogo, ficha ao tocar, candidatos, vestiário, banheiro, esteira de restituição, satisfação nem painel de operações). O estado de cada uma está no [`CONTRATO_LANCAMENTO.md`](CONTRATO_LANCAMENTO.md) §1, com a letra na coluna do §4.1.
+
+| | Frente | O que entrega | Direção | O que a frente não pode quebrar |
+|---|---|---|---|---|
+| A | Despesas e salários, com fechamento do dia | O aeroporto paga salários e despesas, e cada dia termina com um fechamento: receita, despesa e saldo | §12 | Nenhuma despesa leva a derrota inevitável (§0.5, regra 6): o caixa nunca deixa o jogador sem saída. Número novo passa pelo portão do §5.13 e entra no `BALANCE.md` antes de ligar (D-21) |
+| B | Velocidades 1x, 2x e 3x | O jogador escolhe a velocidade do tempo, além da pausa que já existe | §5 | O núcleo segue em passo fixo e determinístico: a velocidade só muda quantos passos rodam por segundo real, e a mesma semente dá o mesmo resultado (o bot confere). O 2× por vídeo e o cofre contam segundo de jogo: a frente decide e registra o que acontece com eles em 2x e 3x |
+| C | Ficha ao tocar | Tocar em pessoa, equipamento ou sala abre uma ficha com nome, função, estado, tarefa atual, destino, necessidades, ações permitidas e alertas | §3.4 | Só mostra o que o núcleo sabe: campo sem dado não aparece (§0.5, regra 1) |
+| D | Contratação com 3 candidatos e demissão | O jogador compara 3 candidatos e contrata um; pode demitir, e a escala, o custo e a cobertura do posto se atualizam | §9.2 | Os 6 perfis fixos, sem traço sorteado (TA-5, §5.5) continuam valendo: a frente decide como os 3 candidatos convivem com eles, sem sorteio pago (§7.1). O jogador vê quem é antes de pagar, e nenhuma moeda paga troca a lista |
+| E | Transferência pelo vestiário | Mudar a pessoa de estação deixa de ser instantâneo: ela termina a tarefa, vai ao vestiário, troca o uniforme do setor, anda até o novo posto e só então começa; o tempo de preparação aparece | §9.3 | O TA-2 (mover rende ≥ +10%; hoje 1,426, `BALANCE.md` §7) tem de passar de novo no bot com o tempo de troca. A validação de qualificação e de treinamento (Direção §9.3, passos 3 e 4) fica fora desta frente (§4.4) |
+| F | Limpeza e banheiro | Banheiro com capacidade, acesso, uso, sujeira e manutenção; funcionário de limpeza contratado e escalado, que recebe a tarefa, vai ao local, limpa e atualiza o ambiente | §10, §22 | Os dois exemplos de pronto do §0.5. A sujeira e a fila do banheiro alimentam a satisfação (G) e o salário entra nas despesas (A). A "Limpeza" do pátio (serviço do avião, PR #12) já existe e é outra coisa |
+| G | Satisfação com motivo | A satisfação do passageiro e a do aeroporto sobem e descem por motivos que a tela diz (por exemplo espera, limpeza, banheiro e pontualidade) | §8.4 | Satisfação é leitura e bônus: não é moeda (§6.1) e não pune além da receita do voo (§5.4). Só aparece motivo de sistema que existe |
+| H | Esteira de restituição | Quem chega desembarca, espera a mala numa esteira, retira e sai | §8.3 | Hoje o núcleo só tem passageiro de partida (a esteira que existe é a do despacho): a frente inclui o desembarque mínimo de quem chega, e a esteira tem capacidade e atende fila de verdade (§0.5, regra 1). Imigração e alfândega ficam para depois (§4.4) |
+| I | Painel de operações com relatório do dia | Painel com chegadas e partidas, atrasos, portões, aviões em solo, tarefas críticas e áreas congestionadas, mais o relatório do dia: receita, despesa, saldo e satisfação com seus motivos | §15 | Só lê o que A, G e as demais calculam: não cria regra. Todo alerta abre o local, a pessoa, o voo ou a sala relacionada |
+
+**Ordem (03/11/2026):** primeiro A, B, C e H; depois D, E, F e G; por último I. Em seguida vêm a loja e o servidor (Fase D) e, então, a lista antiga de frentes (`ESTADO_DO_PROJETO.md` §8). As 9 frentes se somam ao §4.1: nada saiu da lista acima.
+
 **Regra de execução:** a lista define o produto, mas o prazo não substitui a auditoria. O agente deve medir o que existe, reutilizar o que estiver pronto e apontar os itens impossíveis de concluir com evidência, em vez de marcá-los como concluídos sem implementação.
 
 ## 4.2. Versões: a v0.1 vem antes do lançamento
@@ -312,6 +347,44 @@ Nada aqui foi cortado em silêncio. Cada item volta como atualização, se a dec
 | §22, §23 | eventos (Rush Hour, Air Show, Cargo Week, Holiday) e Event Airport | o lançamento tem os 4 incidentes do §5.8 e a campanha sazonal do §6.5 |
 | §27 | boosters pagos | só o bônus por anúncio do §7.2 e, se houver Gems, o booster do §6.1 |
 | §37 | social e ranking | sem chat e sem ranking no lançamento (§9.1) |
+
+## 4.4. Roteiro pós-lançamento (v1.5)
+
+O GDD de direção descreve um simulador bem maior que o lançamento. O que a mistura de 03/11/2026 **não** põe no lançamento fica aqui, na ordem de prioridade dele (Direção §20), como direção de trabalho para as atualizações. **Nada desta seção é escopo de lançamento e nada dela conta no contrato** ([`CONTRATO_LANCAMENTO.md`](CONTRATO_LANCAMENTO.md)): entrar no lançamento exige decisão registrada no §23.2, com data. A Direção §20 manda não abrir muitos sistemas P2 e P3 enquanto o fluxo básico estiver incompleto; vale aqui também.
+
+| Faixa | Item | O que é | Antes dele | Limite |
+|---|---|---|---|---|
+| Base (P0 da Direção) | Construção livre | Colocar prédios e módulos, paredes e divisórias, balcões, corredores, ampliar salas, definir áreas restritas e realocar objetos (Direção §6.3) | frentes A a I prontas | O lançamento tem 8 salas fixas e o mapa que cresce por terrenos (§5.13). Grade, modular ou livre (Direção §25, item 5) continua pendente. Toda instalação funcional precisa de espaço, acesso, fluxo e equipe |
+| Base (P0 da Direção) | Início com hangar | A campanha começa no hangar inicial: hangar, pista simples, avião pequeno, escritório e operação mínima (Direção §13, passo 1) | construção livre | No lançamento a campanha começa em Vale Verde (§5.10) |
+| P1 | Contratos com companhias | Companhias com identidade, frota, rotas, frequência e requisitos; o contrato depende de infraestrutura, pontualidade, qualidade e volume (Direção §11) | A, G e I | Companhias fictícias, sem marca real (§0.4, D-13) |
+| P1 | Totens e informações | Totem de autoatendimento e de informação ao passageiro (Direção §8.2 e §10) | C e construção livre | Totem é equipamento funcional: precisa de função (§0.5, regra 1) |
+| P1 | Turnos de 24 h e fadiga | Aeroporto aberto o dia todo, com dia e noite contínuos, turnos, intervalos, folgas, fadiga e recuperação (Direção §5 e §9.5) | A, B, D e E | No lançamento ficam as ondas com dia e noite (§5.14). Direção §25, item 1 (24 h ou dias de operação), pendente |
+| P1 | Supervisores | Distribuem tarefas e cobrem necessidades dentro de limites que o jogador define; não decidem nada estratégico nem financeiro (Direção §9.5) | D e turnos | Existem para evitar microgerenciamento cansativo (Direção §24) |
+| P1 | Qualificações e treinamento | O funcionário só atua no que está habilitado e equipado; o treinamento fecha a lacuna (Direção §9.3 e §9.4) | D e E | Sem sorteio de traço (TA-5, §5.5) |
+| P2 | Polícia | Atende ocorrências, patrulha e apoia passageiros (Direção §10.1) | incidentes, painel de operações (I) | Segurança abstrata e voltada à gestão (Direção §14) |
+| P2 | K9 | Unidade de cão e condutor, com canil, descanso e escala (Direção §10.1) | polícia | Só patrulha e inspeção simulada, de forma segura e abstrata; nenhum procedimento sensível do mundo real |
+| P2 | Bombeiros e saúde | **Só prontidão:** o departamento existe, tem equipe e equipamento, e a tela mostra se está pronto | incidentes, painel de operações (I) | **Sem incêndio, morte ou queda** (§5.14, §5.8): nenhuma ocorrência dessas é simulada |
+| P2 | Carga | Armazéns, docas, triagem, empilhadeiras e contratos (Direção §10) | contratos com companhias | — |
+| P2 | Estacionamento e transporte terrestre | Vagas, cancelas, totens, táxis, ônibus e locadoras (Direção §10) | construção livre | — |
+| P3 | Imigração e alfândega | Controle na chegada de voo internacional (Direção §8.3, passos 3 e 6) | esteira de restituição (H) e construção livre | Só a partir do aeroporto internacional (Direção §13, passo 5) |
+| P3 | Conexões internacionais, múltiplos terminais e automação avançada | Hub com vários terminais e alto volume (Direção §13, passo 6 e §20) | os itens acima | — |
+
+**Mantido do lançamento, sem mudar com a mistura:** retrato; pessoas em sprite pré-renderizado e mundo em malha 3D (D-18); ondas com dia e noite (§5.14); 8 estações fixas e mapa por terrenos; compras opção B, com Gems e validação em servidor (D-05 a D-07).
+
+**Como ficam as 10 decisões pendentes do GDD de direção (Direção §25):**
+
+| # | Pendente na Direção | Resposta na v1.5 |
+|---|---|---|
+| 1 | Tempo contínuo de 24 h ou dias de operação | Lançamento: ondas com dia e noite (§5.14). As 24 h contínuas e os turnos estão no roteiro acima |
+| 2 | Velocidades finais | Pausa, 1x, 2x e 3x (frente B) |
+| 3 | Retrato ou paisagem | Retrato, mantido |
+| 4 | Personagens 2D pré-renderizados ou 3D estilizados | Pessoas em sprite pré-renderizado, mundo em malha 3D (D-18) |
+| 5 | Construção em grade, modular ou livre | Fora do lançamento: o mapa cresce por terrenos (§5.13). Construção livre no roteiro; a forma segue pendente |
+| 6 | Nível de controle direto sobre tarefas | Pendente. No lançamento o jogador move gente entre as estações (§5.5) e não dá ordem de tarefa |
+| 7 | Profundidade de torre, pista e tráfego | Pendente e fora do lançamento; o despacho e o controle de pista são a 8ª estação (§5.6) |
+| 8 | Departamentos do primeiro lançamento × atualizações | Resolvido: 8 estações e as 9 frentes no lançamento (§4.1); o resto no roteiro acima |
+| 9 | Modelo comercial final | Compras opção B e anúncio recompensado opcional (D-05 a D-07), com a loja depois do ciclo principal (§0.5). Nenhum sistema essencial exige pagamento |
+| 10 | Escopo da simulação offline | Mantido: 2 h, como trava no código (§6.3) |
 
 ---
 
@@ -673,7 +746,7 @@ Cada objetivo tem:
 
 **Campanha sazonal:** objetivos adicionais ligados ao passe e ao evento, sem substituir o progresso principal. Deve ter início, fim, recompensas e comportamento de retorno documentados.
 
-**Estado em 02/11/2026:** campanha (PR #30), missões e conquistas (PR #40) estão no núcleo e ainda sem tela (frente `ta-metas-tela`, em andamento). **Divergência:** o dia da missão é o **dia do jogo** (8 ondas, ou 24 minutos jogados), não o dia do calendário às 04:00 do texto acima (D-C6a, `CONTRATO_FASE_C6.md` §2): nada de hora de parede dentro da simulação, reprodutível no bot e imune a mexer no relógio do aparelho. **Vale o código.** Se o dono preferir o calendário, a troca é uma linha, e o portão do §5.13 precisa ser medido de novo. As conquistas não pagam Cash (D-C6d). Fechar a cadeia de objetivos de um aeroporto paga 100 Gems, 300 na campanha inteira (`CONTRATO_FASE_D1.md` §1).
+**Estado em 03/11/2026:** campanha (PR #30), missões e conquistas (PR #40) estão no núcleo e na tela de metas (PR #46: abas Campanha, Missões e Conquistas e a faixa da meta da vez no HUD). **Divergência:** o dia da missão é o **dia do jogo** (8 ondas, ou 24 minutos jogados), não o dia do calendário às 04:00 do texto acima (D-C6a, `CONTRATO_FASE_C6.md` §2): nada de hora de parede dentro da simulação, reprodutível no bot e imune a mexer no relógio do aparelho. **Vale o código.** Se o dono preferir o calendário, a troca é uma linha, e o portão do §5.13 precisa ser medido de novo. As conquistas não pagam Cash (D-C6d). Fechar a cadeia de objetivos de um aeroporto paga 100 Gems, 300 na campanha inteira (`CONTRATO_FASE_D1.md` §1).
 
 ---
 
@@ -1466,7 +1539,7 @@ Bloqueia a submissão:
 
 ### Fase C — Conteúdo e progressão
 
-*Estado em 02/11/2026: núcleo inteiro na `main` (PRs #12, #18, #23, #28, #30 e #40); tela do dia a dia, do pátio, do clima e dos avisos (PRs #24 a #44); arte do Tripo no jogo (PR #21). Faltam: telas de aeroportos, rotas e metas (a de metas em andamento), 19 das 20 histórias, o passe (núcleo gratuito em andamento), 10 das 12 aeronaves no pátio, o áudio ligado e a estação do ano na tela.*
+*Estado em 03/11/2026: núcleo inteiro na `main` (PRs #12, #18, #23, #28, #30 e #40); tela do dia a dia, do pátio, do clima, dos avisos e das metas (PRs #24 a #46); arte do Tripo no jogo (PR #21). Faltam: telas de aeroportos e de rotas, 19 das 20 histórias, o passe (núcleo gratuito no PR #49, aberto), 10 das 12 aeronaves no pátio, o áudio ligado, a estação do ano na tela e as 9 frentes de gestão A a I (§4.1), que ainda não começaram.*
 
 - Três aeroportos.
 - Rotas, aeronaves e funcionários.
@@ -1476,11 +1549,12 @@ Bloqueia a submissão:
 - Campanha de 30 objetivos.
 - Histórias, conquistas e missões.
 - Passe de temporada completo.
+- Frentes de gestão A a I (§4.1, v1.5), na ordem do §4.1 e cada uma com o critério de pronto em 10 itens do §0.5.
 - Arte e áudio integrados.
 
 ### Fase D — Monetização e segurança
 
-*Estado em 02/11/2026: só o núcleo das Gems (D1, PR #43). Faltam: Unity IAP, servidor, LevelPlay real, consentimento e a tela de configurações (em andamento), telemetria e os testes do §16.3 e §16.6.*
+*Estado em 03/11/2026: o núcleo das Gems (D1, PR #43) e a tela de configurações com a política de privacidade, o suporte e a exclusão de dados (PR #48). Faltam: Unity IAP, a tela da loja, servidor, LevelPlay real, consentimento, telemetria e os testes do §16.3 e §16.6. Por decisão de 03/11/2026 (§0.5, regra 5), a loja e o servidor vêm depois das frentes A a I.*
 
 - Unity IAP configurado.
 - Validação server-side.
@@ -1510,11 +1584,13 @@ O plano de 26/10 a 29/10 da v1.0 foi substituído. A auditoria (§0.3) mostrou q
 | 0 | D-01 a D-14 respondidas | Vinicius | — |
 | A | esqueleto copiado, `verify.sh full` verde, contratos escritos | D-01, D-03 | 2–4 dias |
 | B | §4.2 cumprido (bot + K2 com gente) | A | 1–2 semanas |
-| C | 30 objetivos, 3 aeroportos, temporada e arte integrados, `verify.sh full` verde | B, Lotes 1 e 2 aprovados | 3–5 semanas |
+| C | 30 objetivos, 3 aeroportos, temporada e arte integrados, frentes A a I (§4.1), `verify.sh full` verde | B, Lotes 1 e 2 aprovados | 3–5 semanas, **sem as frentes A a I** |
 | D | §16.3 e §16.6 passando em sandbox | C; D-05, D-06; Play Console para os produtos | 1–2 semanas |
 | E | §25 atendido | D; Play Console; para iOS, macOS e conta Apple | 1 semana |
 
 Somando, a ordem de grandeza é de 7 a 12 semanas até o pacote Android, contando com o reuso do Forge e do DC. A Origem §53 estimava 3–4 semanas só para o APK do MVP. A estimativa se refaz no fim da Fase B, com a velocidade real. A Play Console (previsão 2026-11-25) só trava as Fases D e E.
+
+**Ordem a partir de 03/11/2026 (D-25):** A, B, C e H; depois D, E, F e G; por último I; em seguida a loja e o servidor (Fase D); e então a lista antiga de frentes (`ESTADO_DO_PROJETO.md` §8). As frentes A a I não têm estimativa de duração: ela se refaz depois da A, com a velocidade real.
 
 **Medido em 02/11/2026:** as Fases A e B entraram em 29/10/2026 (PRs #4, #5 e #7) e o núcleo da C entre 29/10 e 01/11/2026, bem abaixo das ordens de grandeza acima, porque as frentes rodam em paralelo. O que não acelera é a Play Console (25/11/2026) e a medida com gente.
 
@@ -1656,7 +1732,7 @@ O vídeo deve usar captura real do jogo. Se usar mockup de edição, não aprese
 
 # 21. MATRIZ DE PRIORIDADE E ESTADO
 
-Estado atualizado em 02/11/2026 sobre a `main` em `dd82ecf` (44 PRs). Em 29/10/2026 (`59f0bb9`, §0.3) o repositório só tinha documentos, e todas as linhas estavam `NÃO INICIADO` ou `BLOQUEADO`, menos P-01. A evidência de cada linha são os PRs citados e [`CONTRATO_LANCAMENTO.md`](CONTRATO_LANCAMENTO.md) §1. `CONCLUÍDO COM EVIDÊNCIA` só aparece quando a entrega inteira da linha está na `main`.
+Estado atualizado em 03/11/2026 sobre a `main` em `49e1597` (48 PRs; o #49 está aberto e não conta). Em 29/10/2026 (`59f0bb9`, §0.3) o repositório só tinha documentos, e todas as linhas estavam `NÃO INICIADO` ou `BLOQUEADO`, menos P-01. A evidência de cada linha são os PRs citados e [`CONTRATO_LANCAMENTO.md`](CONTRATO_LANCAMENTO.md) §1. `CONCLUÍDO COM EVIDÊNCIA` só aparece quando a entrega inteira da linha está na `main`.
 
 | ID | Entrega | Prioridade | Evidência exigida | Estado em 02/11 | Depende de |
 |---|---|---|---|---|---|
@@ -1664,20 +1740,21 @@ Estado atualizado em 02/11/2026 sobre a `main` em `dd82ecf` (44 PRs). Em 29/10/2
 | P-02 | Loop completo de voo | Bloqueador | Teste PlayMode + vídeo/captura | `CONCLUÍDO COM EVIDÊNCIA` (testes do núcleo e `-autoplay`, PRs #5 e #7; fotos e GIFs nos PRs #26, #29, #31, #37 e #42) | — |
 | P-03 | Quadro de partidas e deadlines | Bloqueador | Testes de estado/tempo | `CONCLUÍDO COM EVIDÊNCIA` (TA-1: Bom 96,1% e Lento 73,0%; PRs #5 e #35) | — |
 | P-04 | Equipe móvel | Bloqueador | Teste funcional e de usabilidade | `EM ANDAMENTO` (teste funcional e TA-2 de 1,426 feitos, PRs #5 e #23) | playtest com gente: K2 com 20 pessoas (D-24) |
-| P-05 | Três aeroportos e campanha | Obrigatório | Checklist de conteúdo e testes | `EM ANDAMENTO` (núcleo: PRs #23 e #30; faltam as telas de aeroportos e de metas) | `ta-rotas-tela`, `ta-metas-tela`; `docs/CAMPANHA.md` já existe |
+| P-05 | Três aeroportos e campanha | Obrigatório | Checklist de conteúdo e testes | `EM ANDAMENTO` (núcleo: PRs #23 e #30; tela de metas: PR #46; falta a tela de aeroportos) | `ta-rotas-tela`; `docs/CAMPANHA.md` já existe |
 | P-06 | Rotas, aeronaves, incidentes e histórias | Obrigatório | Catálogo validado e testes | `EM ANDAMENTO` (rotas e incidentes no núcleo e o aviso na tela: PRs #23, #36 e #44; faltam a tela de rotas, 10 aeronaves no pátio e 19 histórias) | `ta-rotas-tela`, `ta-avioes`, `ta-historias`; D-13 decidida |
-| P-07 | Passe de temporada completo | Obrigatório | Catálogo, progressão e sandbox | `EM ANDAMENTO` (trilha gratuita no núcleo, frente `ta-passe`: `CONTRATO_FASE_C7.md` e `docs/PASSE.md`; o produto premium só existe no catálogo, PR #43) | tela (`ta-passe-tela`); trilha premium: Play Console |
+| P-07 | Passe de temporada completo | Obrigatório | Catálogo, progressão e sandbox | `EM ANDAMENTO` (trilha gratuita no núcleo, PR #49, frente `ta-passe`: `CONTRATO_FASE_C7.md` e `docs/PASSE.md`; o produto premium só existe no catálogo, PR #43) | tela (`ta-passe-tela`); trilha premium: Play Console |
 | P-08 | Compras seguras e restore | Bloqueador | Validação sandbox/server-side | `BLOQUEADO` (núcleo feito, PR #43) | servidor (D-06, `ta-servidor`) e Play Console (D-U-N-S, previsão 2026-11-25) |
 | P-09 | Anúncios recompensados e limites | Bloqueador se monetização ativa | Modo de teste + teste de callback | `BLOQUEADO` (regras no núcleo; D-03 e o appId decididos, PR #39) | criar o app no LevelPlay, na conta da V-STACK, e integrar o SDK |
-| P-10 | Save/migração/offline | Bloqueador | Testes de corrupção, tempo e reload | `CONCLUÍDO COM EVIDÊNCIA` (`SaveTests` e `ExploitTests`: corrupção, relógio, reload e migração do schema 1 ao 9; PRs #5 a #43 e a `ta-passe`). Restaurar compras é do P-08 | — |
-| P-11 | Privacidade e declarações de loja | Bloqueador | URLs e formulários revisados | `EM ANDAMENTO` (frente `ta-config`: política, suporte e exclusão de dados, sem PR; D-09 a D-12 decididas, PR #38) | revisão jurídica (sem responsável), GitHub Pages ligado após o merge e Play Console |
+| P-10 | Save/migração/offline | Bloqueador | Testes de corrupção, tempo e reload | `CONCLUÍDO COM EVIDÊNCIA` (`SaveTests` e `ExploitTests`: corrupção, relógio, reload e migração do schema 1 ao 9; PRs #5 a #43 e #49). Restaurar compras é do P-08 | — |
+| P-11 | Privacidade e declarações de loja | Bloqueador | URLs e formulários revisados | `EM ANDAMENTO` (tela de configurações, política em pt-BR e inglês, suporte e exclusão de dados: PR #48; D-09 a D-12 decididas, PR #38) | revisão jurídica (sem responsável), consentimento e Play Console; o GitHub Pages já está ligado |
 | P-12 | Artes finais e áudio | Obrigatório | Revisão dentro do jogo | `EM ANDAMENTO` (arte do Tripo no jogo, PR #21; áudio gerado e sem ligação, PR #19) | ícone aplicado ao build, variantes de aeronave, `ta-audio`; D-14 aprovada |
 | P-13 | Performance mobile | Bloqueador | Relatório de profiling | `NÃO INICIADO` (K3 só no PC: p10 de 58,7 FPS; aparelho de entrada por último, D-24) | P-02; aparelhos dos amigos do dono |
 | P-14 | AAB/IPA assinados | Bloqueador | Artefatos e hashes | `BLOQUEADO` (appId e chave de upload feitos, PR #39; falta o AAB de release) | AAB: Play Console e a cópia segura da chave. IPA: fora do lançamento (D-04) |
 | P-15 | Página de loja e criativos | Obrigatório | Pacote final | `BLOQUEADO` | build real para gravar; Play Console |
 | P-16 | Telemetria e crash reporting | Obrigatório | Eventos verificados em ambiente de teste | `EM ANDAMENTO` (diário CSV com os eventos do §15.1; D-11 decidida, PR #38) | SDK do Unity Analytics (`ta-telemetria`) |
 | P-17 | Proteção anti-fraude e segredos | Bloqueador | Checklist de segurança | `EM ANDAMENTO` (crédito idempotente e sem token no disco, PR #43; `checa_repo` contra segredos, PR #16) | servidor de validação (P-08) |
-| P-18 | Teste de regressão final | Bloqueador | Relatório com todos os testes críticos | `NÃO INICIADO` | todas as anteriores |
+| P-18 | Teste de regressão final | Bloqueador | Relatório com todos os testes críticos | `NÃO INICIADO` | todas as anteriores, inclusive P-19 |
+| P-19 | Gestão do aeroporto: despesas e salários, velocidades, ficha ao tocar, contratação e demissão, vestiário, limpeza e banheiro, satisfação com motivo, esteira de restituição e painel de operações (§4.1, A a I) | Obrigatório | Critério de pronto em 10 itens (§0.5) em cada frente, mais o portão do §5.13 nas que mexem em número | `NÃO INICIADO` (nenhuma das 9 existe no código em 03/11/2026) | ordem A, B, C e H; D, E, F e G; I (§4.1); P-02 e P-04 |
 
 Estados permitidos:
 
@@ -1737,7 +1814,7 @@ O texto abaixo deve ser utilizado como instrução operacional para o Claude, ju
 - **Termos do Tripo:** o texto de 2025-07-11 (§3.2) proíbe extrair conteúdo com ferramentas automáticas, e os Lotes 3 a 10 foram gerados com fila de script de página (`PROVENIENCIA.md` §4). Precisa de leitura jurídica antes de publicar.
 - **Plano do Tripo até 29/11/2026:** sem plano, o export fica bloqueado (custou 6.318 créditos em 29/10/2026).
 - **Pessoa atravessando peça e desempenho sem medida em aparelho:** 237 encontros em 01/11/2026 (meta 0) e K3 só no PC; o celular de teste entra no último passo (D-24).
-- **Política de privacidade sem URL:** o GitHub Pages está desligado e o texto precisa de revisão jurídica (D-10, sem responsável) antes de a loja aceitar o envio.
+- **Política de privacidade sem revisão jurídica:** a política existe em pt-BR e inglês (PR #48) e o GitHub Pages está ligado (status `built` em 03/11/2026), mas o texto precisa de revisão jurídica (D-10, sem responsável) antes de a loja aceitar o envio.
 
 ## 23.2. Decisões que precisam ser confirmadas pelo responsável
 
@@ -1769,6 +1846,7 @@ As de D-01 a D-14 travam o início ou uma fase; as outras podem esperar.
 | D-22 | 2× de receita por vídeo (§7.2) | manter, opcional, 5 min, até 3 por dia. **Decidida pelo Vinicius em 2026-11-01:** mantido; vale sobre a nota do `COMPETITIVO.md` §g | — |
 | D-23 | 5º incidente: volta ao portão por aviso técnico (`COMPETITIVO.md` §h, prioridade 14) | testar depois das frentes atuais. **Decidida pelo Vinicius em 2026-11-01:** testar; só entra se passar no §5.13 | §4.3 |
 | D-24 | Medição com gente e em aparelho | K2 com gente, K3 em Android de entrada. **Decidida pelo Vinicius em 2026-11-01:** K2 com pelo menos 20 pessoas reais; K3 nos aparelhos dos amigos dele, com o APK; POCO F4 só no último passo de tudo | Fases B e E |
+| D-25 | Mistura do GDD de direção v0.1 com este GDD: as frentes A a I no lançamento e o resto como roteiro pós-lançamento (§4.1, §4.4) | misturar: 9 frentes com o essencial da gestão no lançamento, a loja depois do ciclo principal e o resto da direção como roteiro. **Aprovada pelo Vinicius em 2026-11-03: "pode seguir desta forma".** Mantidos: retrato, sprites (D-18), ondas com dia e noite e compras opção B (D-05 a D-07) | §0.5, §4.1, §4.4, P-19 |
 
 ---
 
@@ -1839,7 +1917,7 @@ O projeto recebe **`GO PARA SUBMISSÃO`** somente quando:
 
 Caso contrário, o estado é `NO-GO`, com lista explícita de bloqueios e plano de correção.
 
-**Estado em 02/11/2026: `NO-GO`.** O projeto existe e roda, mas não há Play Console, servidor de compras, anúncio real, medida com gente nem build de loja. Os bloqueios estão no §21 e em [`ESTADO_DO_PROJETO.md`](ESTADO_DO_PROJETO.md) (§7 a §9); o plano, no §17.3; as decisões, no §23.2.
+**Estado em 03/11/2026: `NO-GO`.** O projeto existe e roda, mas não há Play Console, servidor de compras, anúncio real, medida com gente nem build de loja, e as 9 frentes de gestão (§4.1) ainda não existem. Os bloqueios estão no §21 e em [`ESTADO_DO_PROJETO.md`](ESTADO_DO_PROJETO.md) (§7 a §9); o plano, no §17.3; as decisões, no §23.2.
 
 **Não confundir urgência com qualidade, e não transformar segurança em item opcional.**
 
@@ -1962,6 +2040,26 @@ Impacto: nenhum em regra de design, guardrail, monetização, privacidade ou seg
 | 9 | Idiomas (D-08) | pt-BR e en no lançamento | `Textos.cs` só tem pt-BR | o texto; é trabalho a fazer | `ta-ingles` |
 | 10 | Áudio (§12) | efeitos e música no jogo | gerados e sem chamada | o texto; é trabalho a fazer | PR #19; `ta-audio` |
 | 11 | Gems (§6.1) | "só se D-05 aprovar" | aprovadas; no save (schema 8); a cadeia de um aeroporto fechada paga 100 Gems | a decisão e o código | PR #43; `CONTRATO_FASE_D1.md` |
+
+## v1.5 — 03/11/2026 (Claude; mistura aprovada pelo Vinicius em 03/11/2026 com "pode seguir desta forma"; aprovação do texto: **pendente**)
+
+Motivo: o Vinicius trouxe o GDD de direção v0.1 ([`GDD_DIRECAO_v0.1.md`](GDD_DIRECAO_v0.1.md)), um simulador de gestão bem maior que este tycoon de 8 estações fixas, e aprovou misturar os dois: o lançamento ganha 9 frentes com o essencial do novo, e o resto vira roteiro pós-lançamento.
+
+Impacto: **só documentos.** Nenhum número, regra do núcleo, guardrail, monetização, privacidade ou segurança muda. O escopo do lançamento **cresce** (9 linhas novas no contrato, todas `falta`), e por isso a porcentagem do contrato cai (`ESTADO_DO_PROJETO.md` §10) sem que nada tenha piorado. Testes: `verify.sh quick` verde.
+
+| # | Onde | Mudança | Motivo |
+|---|---|---|---|
+| 1 | cabeçalho | versão 1.5; nota de mudança; link para o GDD de direção; status de 03/11/2026 (48 PRs) | a mistura e o estado de hoje |
+| 2 | §0.4 | linha "Escopo de gestão (v1.5)" | onde o GDD de direção entra na reconciliação |
+| 3 | §0.5 (nova) | seis regras de direção: operacional tem função ou é decoração; critério de pronto em 10 itens; animação segue o estado; ninguém atravessa nada; loja depois do ciclo principal; nenhuma despesa leva a derrota inevitável | Direção §7.4, §22 e §27, mais o pedido do Vinicius |
+| 4 | §4.1 | as frentes A a I, cada uma com o que entrega e o que não pode quebrar, e a ordem | escopo de lançamento da mistura |
+| 5 | §4.4 (nova) | roteiro pós-lançamento (P1 a P3 da Direção) e a resposta às 10 decisões pendentes da Direção §25 | o resto do GDD de direção, sem entrar no lançamento |
+| 6 | §6.4, §6.5 | passe no PR #49 (aberto); tela de metas no PR #46 | estado de 03/11/2026 |
+| 7 | §17.2, §17.3 | frentes A a I na Fase C; ordem de 03/11; estado das Fases C e D | a loja deixa de ser a próxima frente |
+| 8 | §21, §25 | estado de 03/11/2026; P-19 nova (`NÃO INICIADO`); P-05, P-07 e P-11 atualizadas | matriz em dia |
+| 9 | §23.2 | D-25 | decisão registrada |
+
+**O que cada frente precisa decidir** (apontado aqui para não se perder; nenhum item foi decidido nesta versão): o que acontece com o 2× por vídeo e com o cofre em 2x e 3x (B); como os 3 candidatos convivem com os 6 perfis fixos (D); o tempo de troca no vestiário sem derrubar o TA-2 (E); o desembarque mínimo que dá função à esteira de restituição (H).
 
 ---
 

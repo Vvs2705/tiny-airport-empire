@@ -15,6 +15,21 @@ jobs:
   portoes:
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    # 4 partes em paralelo: juntos, os portões passaram de 45 min com o passe (C7). "resto" pega todo Portao que
+    # não está nas 3 primeiras, então portão novo entra sozinho; divida de novo quando uma parte chegar perto do teto.
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - parte: ta
+            filtro: FullyQualifiedName~BalanceTests.Portao_TA|FullyQualifiedName~BalanceTests.Portao_FaseC_
+          - parte: c2c3
+            filtro: FullyQualifiedName~BalanceTests.Portao_FaseC2|FullyQualifiedName~BalanceTests.Portao_FaseC3
+          - parte: c4c5
+            filtro: FullyQualifiedName~BalanceTests.Portao_FaseC4|FullyQualifiedName~BalanceTests.Portao_FaseC5
+          - parte: resto
+            filtro: FullyQualifiedName~BalanceTests.Portao&FullyQualifiedName!~Portao_TA&FullyQualifiedName!~Portao_FaseC_&FullyQualifiedName!~Portao_FaseC2&FullyQualifiedName!~Portao_FaseC3&FullyQualifiedName!~Portao_FaseC4&FullyQualifiedName!~Portao_FaseC5
+    name: portoes (${{ matrix.parte }})
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-dotnet@v6
@@ -23,7 +38,7 @@ jobs:
       - name: Portões do bot
         run: |
           set -o pipefail
-          dotnet test client/tools/coretests -nologo --filter "FullyQualifiedName~BalanceTests.Portao" --logger "console;verbosity=normal" | tee portoes.log
+          dotnet test client/tools/coretests -nologo --filter "${{ matrix.filtro }}" --logger "console;verbosity=normal" | tee portoes.log
           grep -Eq '^ *Passed: +[1-9]' portoes.log   # filtro que nao casa teste nenhum sai 0: sem isto o job ficaria verde sem portao
       - name: Tabela no resumo
         if: always()
