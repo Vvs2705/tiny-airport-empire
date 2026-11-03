@@ -458,7 +458,7 @@ namespace TA.Core
         public bool Hire(Perfil p)
         {
             long c = CustoContratar(p);
-            if (c < 0 || Cash < c || Pausado) return false;
+            if (!PodeComprar(c)) return false;
             Cash -= c;
             var f = new Funcionario { Id = Staff.Count, Perfil = p, Em = Lugar() };
             f.De = f.Em;
@@ -497,7 +497,7 @@ namespace TA.Core
         public bool Buy(Estacao e, Melhoria m)
         {
             long c = Custo(e, m);
-            if (c < 0 || Cash < c || Pausado) return false;
+            if (!PodeComprar(c)) return false;
             Cash -= c;
             if (m == Melhoria.Velocidade) St(e).Vel++; else { St(e).Cap++; St(e).Postos++; }
             Emit(Ev.Melhorou, (int)e, (int)m, Nivel(e, m));

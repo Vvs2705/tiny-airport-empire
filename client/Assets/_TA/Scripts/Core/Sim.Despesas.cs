@@ -46,6 +46,9 @@ namespace TA.Core
         public long Atrasada { get; private set; }
         public bool Pausado => Atrasada > 0;
 
+        /// <summary>Contratacao ou melhoria (Hire, HireTripulante, HirePatio, Buy, BuyPatio): tem preco, o caixa cobre e nao ha conta atrasada.</summary>
+        bool PodeComprar(long c) => c >= 0 && Cash >= c && !Pausado;
+
         /// <summary>Quanto a categoria custa por dia agora (a conta do proximo fechamento, se nada mudar). 0 com a regra desligada.</summary>
         public long Folha(Despesa d)
         {

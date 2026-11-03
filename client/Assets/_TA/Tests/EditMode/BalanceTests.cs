@@ -25,6 +25,7 @@ namespace TA.Tests
         {
             public BotProfile P; public double Embarque, EmbarqueP10, Receita, Moves, Taps; public double[] Marco;
             public double SemTrip, Inspecoes, Hangares, Checagens, Trocas, Incidentes, Reacoes, Climas, Falhas, Reparos, Objetivos, Recompensas, Diarias, Semanais, PagoMissoes, Conquistas;
+            public double Despesas, Apertos;
         }
 
         public static Linha Rodar(BotProfile p, Tuning t = null, int sementes = Sementes, int ondas = Ondas, int threads = Threads)
@@ -45,6 +46,7 @@ namespace TA.Tests
                 l.Incidentes += r.Incidentes * k; l.Reacoes += r.Reacoes * k; l.Climas += r.Climas * k; l.Falhas += r.Falhas * k; l.Reparos += r.Reparos * k;
                 l.Objetivos += r.Objetivos * k; l.Recompensas += r.Recompensas * k;
                 l.Diarias += r.Diarias * k; l.Semanais += r.Semanais * k; l.PagoMissoes += r.PagoMissoes * k; l.Conquistas += r.Conquistas * k;
+                l.Despesas += r.Despesas * k; l.Apertos += r.Apertos * k;
                 for (int m = 0; m < 3; m++) if (r.MarcoEm[m] >= 0) { l.Marco[m] += r.MarcoEm[m]; marcos[m]++; }
             }
             for (int m = 0; m < 3; m++) l.Marco[m] = marcos[m] > 0 ? l.Marco[m] / marcos[m] : -1;
@@ -79,6 +81,13 @@ namespace TA.Tests
         /// <summary>As regras da v0.1: tripulacao, patio e manutencao so visuais (o "antes" do BALANCE.md).</summary>
         public static Tuning SemFaseC() => FechaC3(new Tuning { RegraTripulacao = false, RegraPatio = false, RegraManutencao = false });
 
+        /// <summary>O "antes" de cada fase e' o jogo de quando ela entrou: sem a conta do dia (Fase C8). Os portoes rodam com ela.</summary>
+        static Tuning SemC8(Tuning t)
+        {
+            t.RegraDespesas = false;
+            return t;
+        }
+
         static void Imprime(string titulo, Linha[] ls, bool faseC = false)
         {
             TestContext.Out.WriteLine(titulo);
@@ -102,7 +111,7 @@ namespace TA.Tests
         [Test]
         public void Antes_RegrasDaV01()
         {
-            Tuning t = SemFaseC();
+            Tuning t = SemC8(SemFaseC());
             Linha bom = Rodar(BotProfile.Bom, t), lento = Rodar(BotProfile.Lento, t), parado = Rodar(BotProfile.Parado, t);
             Imprime("antes (regras da v0.1)", new[] { bom, lento, parado });
             TestContext.Out.WriteLine(string.Format(CultureInfo.InvariantCulture, "ganho de mover (Bom/Parado) = {0:0.000}", bom.Receita / parado.Receita));
@@ -175,7 +184,7 @@ namespace TA.Tests
         [Test]
         public void Antes_FaseC2()
         {
-            Tuning t = SemFaseC2();
+            Tuning t = SemC8(SemFaseC2());
             Linha bom = Rodar(BotProfile.Bom, t), lento = Rodar(BotProfile.Lento, t), parado = Rodar(BotProfile.Parado, t);
             Imprime("antes da Fase C2 (a main da Fase C)", new[] { bom, lento, parado });
             TestContext.Out.WriteLine(string.Format(CultureInfo.InvariantCulture, "ganho de mover (Bom/Parado) = {0:0.000}", bom.Receita / parado.Receita));
@@ -211,7 +220,7 @@ namespace TA.Tests
         [Test]
         public void Antes_FaseC3()
         {
-            Tuning t = SemFaseC3();
+            Tuning t = SemC8(SemFaseC3());
             Linha bom = Rodar(BotProfile.Bom, t), lento = Rodar(BotProfile.Lento, t), parado = Rodar(BotProfile.Parado, t);
             Imprime("antes da Fase C3 (a main da Fase C2)", new[] { bom, lento, parado });
             TestContext.Out.WriteLine(string.Format(CultureInfo.InvariantCulture, "ganho de mover (Bom/Parado) = {0:0.000}", bom.Receita / parado.Receita));
@@ -294,7 +303,7 @@ namespace TA.Tests
         [Test]
         public void Antes_FaseC4()
         {
-            Tuning t = SemFaseC4();
+            Tuning t = SemC8(SemFaseC4());
             Linha bom = Rodar(BotProfile.Bom, t), lento = Rodar(BotProfile.Lento, t), parado = Rodar(BotProfile.Parado, t);
             Imprime("antes da Fase C4 (a main da Fase C3)", new[] { bom, lento, parado });
             Assert.AreEqual((6827, 3629, 4788), ((int)Math.Round(bom.Receita), (int)Math.Round(lento.Receita), (int)Math.Round(parado.Receita)), "com tudo desligado, a tabela da main");
@@ -344,7 +353,7 @@ namespace TA.Tests
         [Test]
         public void Antes_FaseC5()
         {
-            var t = new Tuning { RegraCampanha = false, RegraMissoes = false };
+            var t = new Tuning { RegraCampanha = false, RegraMissoes = false, RegraDespesas = false };
             Linha bom = Rodar(BotProfile.Bom, t), lento = Rodar(BotProfile.Lento, t), parado = Rodar(BotProfile.Parado, t);
             Imprime("antes da Fase C5 (a main da Fase C4)", new[] { bom, lento, parado });
             Assert.AreEqual((6279, 3872, 4702), ((int)Math.Round(bom.Receita), (int)Math.Round(lento.Receita), (int)Math.Round(parado.Receita)), "sem pagar, a tabela da fase anterior");
@@ -409,7 +418,7 @@ namespace TA.Tests
         [Test]
         public void Antes_FaseC6()
         {
-            var t = new Tuning { RegraMissoes = false };
+            var t = new Tuning { RegraMissoes = false, RegraDespesas = false };
             Linha bom = Rodar(BotProfile.Bom, t), lento = Rodar(BotProfile.Lento, t), parado = Rodar(BotProfile.Parado, t);
             Imprime("antes da Fase C6 (a main da Fase C5)", new[] { bom, lento, parado });
             Assert.AreEqual((6586, 3534, 4660), ((int)Math.Round(bom.Receita), (int)Math.Round(lento.Receita), (int)Math.Round(parado.Receita)), "sem pagar, a tabela da fase anterior");
@@ -487,13 +496,30 @@ namespace TA.Tests
 
         const string CabecaCompras = "| bot | fecham os 30 | Vale Verde | Costa Azul | campanha | p90 | pior | embarque |\n|---|---|---|---|---|---|---|---|";
 
-        /// <summary>Quem nao gasta Gems joga a tabela da fase anterior, numero a numero.</summary>
+        /// <summary>Quem nao gasta Gems joga a tabela da fase anterior, numero a numero. E' tambem o "antes" da Fase C8: sem a conta do dia.</summary>
         [Test]
         public void Antes_FaseD1()
         {
-            Linha bom = Rodar(BotProfile.Bom), lento = Rodar(BotProfile.Lento), parado = Rodar(BotProfile.Parado);
+            Tuning t = SemC8(new Tuning());
+            Linha bom = Rodar(BotProfile.Bom, t), lento = Rodar(BotProfile.Lento, t), parado = Rodar(BotProfile.Parado, t);
             Imprime("Fase D1, sem gastar Gems (a main da Fase C6)", new[] { bom, lento, parado });
             Assert.AreEqual((6740, 4219, 4709), ((int)Math.Round(bom.Receita), (int)Math.Round(lento.Receita), (int)Math.Round(parado.Receita)), "a tabela da fase anterior");
+        }
+
+        /// <summary>Quanto a conta do dia pesa (CONTRATO_FASE_C8 §6), por bot e horizonte: receita, conta paga, a parte da receita, dias fechados com
+        /// falta de caixa (media por partida) e embarque.</summary>
+        [Test]
+        public void Medida_FaseC8()
+        {
+            var ci = CultureInfo.InvariantCulture;
+            TestContext.Out.WriteLine("| bot | ondas | embarque | receita | conta paga | conta / receita | dias com falta |\n|---|---|---|---|---|---|---|");
+            foreach ((BotProfile p, int ondas) in new[] { (BotProfile.Bom, Ondas), (BotProfile.Lento, Ondas), (BotProfile.Parado, Ondas), (BotProfile.Guiado, OndasFaseC),
+                (BotProfile.LentoGuiado, OndasFaseC), (BotProfile.Guiado, 64), (BotProfile.LentoGuiado, 64) })
+            {
+                Linha l = Rodar(p, null, Sementes, ondas);
+                TestContext.Out.WriteLine(string.Format(ci, "| {0} | {1} | {2:0.0}% | {3:0} | {4:0} | {5:0.0}% | {6:0.00} |", p.Name, ondas, l.Embarque * 100, l.Receita, l.Despesas,
+                    100 * l.Despesas / l.Receita, l.Apertos));
+            }
         }
 
         /// <summary>Portao de compras (CONTRATO_FASE_D1 §7): sem compra fecha os 30, e dinheiro sem limite acelera pouco, porque campanha pede embarque, nao Cash.</summary>
