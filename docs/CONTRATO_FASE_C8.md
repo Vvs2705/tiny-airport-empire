@@ -1,10 +1,10 @@
 # Contrato da Fase C8: despesas e relatório do dia no núcleo (2026-11-03)
 
-Fonte da verdade: `GDD.md` §6.1 a §6.3 e §5.13 (portão de design), e o §12 do GDD de direção v0.1 (`GDD_DIRECAO_v0.1.md`), trazido pelo plano de 03/11 (frente A). Continua os contratos das Fases C a D1: nada de lá muda de regra. Fica fora daqui o que o §12 do GDD de direção lista e o jogo ainda não tem: energia, água, limpeza, combustível de veículo, treinamento, contratos, seguros e relatório semanal ou mensal.
+Fonte da verdade: `GDD.md` §0.5 (regra 6: nenhuma despesa leva a derrota inevitável), §4.1 (frente A), §5.13 (portão de design) e §6.1 a §6.3, e o §12 do GDD de direção v0.1 (`GDD_DIRECAO_v0.1.md`). Continua os contratos das Fases C a D1: nada de lá muda de regra. Fica fora daqui o que o §12 do GDD de direção lista e o jogo ainda não tem: energia, água, limpeza, combustível de veículo, treinamento, contratos, seguros e relatório semanal ou mensal.
 
 Todo número é **hipótese**: o bot mede e o `BALANCE.md` registra.
 
-**Medido em 2026-11-03 (`BALANCE.md` §12):** MEDIDA. Mudou regra ou número? Atualize aqui e no `BALANCE.md` no mesmo commit.
+**Medido em 2026-11-03 (`BALANCE.md` §12):** todos os portões seguem verdes com a conta ligada. TA-1: Bom 94,4%, Lento 79,1%. TA-2: 1,411. Aeroportos, o que mais cai: 1,122. Campanha 1,142, missões 1,164. Sem compra, os 30 objetivos fecham em 200 de 200 sementes; junto com o passe do PR #49, a trilha gratuita também. A conta pesa 8% a 11% da receita nas 10 primeiras ondas. **A 1ª tabela era 1,67 × esta e derrubava os aeroportos para 1,078** (D-C8c): o §2 já tem a final. Mudou regra ou número? Atualize aqui e no `BALANCE.md` no mesmo commit.
 
 ## 1. O que entra
 
@@ -60,7 +60,8 @@ Os saves dos schemas 1 a 7 continuam migrando pelo mesmo caminho.
 ## 6. Bot e portões
 
 - **Começo intacto:** com `RegraDespesas` desligada, a tabela do bot é a da Fase D1, número a número (`BalanceTests.Antes_FaseD1`).
-- **Todos os portões seguem verdes com a conta ligada** (200 sementes): TA-1 e TA-2, Fase C, C2, C3, C4, campanha (C5), missões (C6), compras (D1: os 30 objetivos fecham sem compra) e TA-6.
+- **Todos os portões seguem verdes com a conta ligada** (200 sementes): TA-1 e TA-2, Fase C, C2, C3, C4, campanha (C5), missões (C6), compras (D1: os 30 objetivos fecham sem compra), TA-6 e os alcances da campanha e das conquistas. O passe (Fase C7, PR #49) é medido junto quando entrar: a trilha gratuita fecha sem compra.
+- **O bot respeita a pausa** (D-C8d): com a conta atrasada, só olha rota e viagem, como a tela vai deixar.
 - **O peso da conta** sai na tabela, sem portão próprio (`Medida_FaseC8`): receita, conta paga, a parte da receita e os dias com falta de caixa, por bot e horizonte.
 - **Sem portão do §5.13:** a despesa não é um sistema com escolha nova; ela muda o valor das escolhas que já existem (contratar, melhorar). A pergunta "contratar sem demanda dá prejuízo?" fica para a frente D, que traz a demissão.
 
