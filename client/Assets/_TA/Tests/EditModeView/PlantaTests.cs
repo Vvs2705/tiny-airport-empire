@@ -66,6 +66,26 @@ namespace TA.Tests
         }
 
         [Test]
+        public void Mobilia_NaoFechaPortaNemFicaNaFila()
+        {
+            var portas = new List<Vector2>();
+            foreach (Mundo.Mov m in Mundo.Moveis)
+            {
+                Assert.AreEqual(m.E, Mundo.SalaEm(m.P), m.Malha);
+                portas.Clear();
+                for (int para = 0; para < 8; para++)
+                {
+                    var r = new List<Vector2>();
+                    Mundo.PelasPortas(m.E, para, r);
+                    if (r.Count > 0) portas.Add(r[0]);
+                }
+                foreach (Vector2 p in portas) Assert.Greater(Vector2.Distance(m.P, p), 0.5f, m.Malha + " " + m.D + " na porta " + p);
+                if (m.E >= 6) continue;   // oficina e despacho nao tem fila
+                for (int k = 0; k < 60; k++) Assert.Greater(Vector2.Distance(m.P, Mundo.Fila(m.E, k)), 0.2f, m.Malha + " " + m.D + " no lugar " + k);
+            }
+        }
+
+        [Test]
         public void Fila60_CabeNoPisoDaSala_SemEncostarNaParede()
         {
             const float folga = Mundo.Corredor * 0.5f + 0.1f;   // meia pessoa da parede
