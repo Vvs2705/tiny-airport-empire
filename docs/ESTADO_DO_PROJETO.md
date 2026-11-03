@@ -79,7 +79,7 @@ Link de cada PR: `https://github.com/Vvs2705/tiny-airport-empire/pull/<n>`.
 | **Núcleo, Fase D1** | Gems no save (schema 8), catálogo de 7 produtos sem preço, 3 sumidouros, crédito idempotente por id de transação | [#43](https://github.com/Vvs2705/tiny-airport-empire/pull/43) |
 | **Mundo 3D e pessoas** | v0.1 jogável em greybox; troca pela arte do Tripo (malha nos corpos rígidos, sprite nas pessoas); tela das Fases C e C2; dia a dia (garagem, postos, segurança) | [#7](https://github.com/Vvs2705/tiny-airport-empire/pull/7), [#21](https://github.com/Vvs2705/tiny-airport-empire/pull/21), [#24](https://github.com/Vvs2705/tiny-airport-empire/pull/24), [#26](https://github.com/Vvs2705/tiny-airport-empire/pull/26) |
 | **Cenário vivo** | Embarque pela ponte (a pessoa some no túnel), sala de espera do portão com cadeiras e fila, escala de adulto de 0,5 m com corredores, física do pátio (469 cruzamentos de peças para 0 em 5 cenários), mala de verdade do balcão ao avião, postos com gente e gestos de atendimento, clima e incidentes no cenário | [#29](https://github.com/Vvs2705/tiny-airport-empire/pull/29), [#31](https://github.com/Vvs2705/tiny-airport-empire/pull/31), [#32](https://github.com/Vvs2705/tiny-airport-empire/pull/32), [#33](https://github.com/Vvs2705/tiny-airport-empire/pull/33), [#37](https://github.com/Vvs2705/tiny-airport-empire/pull/37), [#42](https://github.com/Vvs2705/tiny-airport-empire/pull/42), [#44](https://github.com/Vvs2705/tiny-airport-empire/pull/44) |
-| **HUD, telas e textos** | Fontes e linguagem visual (Lilita One e Nunito, licença OFL), HUD fixo com quadro de partidas de aeroporto, avisos de perigo, telas modais (Melhorias, Mover, Cofre, Voo, Tripulação, Pátio...), revisão dos textos em pt-BR, tutorial de 12 passos, tela de metas (campanha, missões e conquistas, com a faixa da meta da vez no HUD) e tela de configurações, com a política de privacidade em pt-BR e inglês, o suporte e "excluir meus dados" | [#27](https://github.com/Vvs2705/tiny-airport-empire/pull/27), [#34](https://github.com/Vvs2705/tiny-airport-empire/pull/34), [#35](https://github.com/Vvs2705/tiny-airport-empire/pull/35), [#36](https://github.com/Vvs2705/tiny-airport-empire/pull/36), [#41](https://github.com/Vvs2705/tiny-airport-empire/pull/41), [#46](https://github.com/Vvs2705/tiny-airport-empire/pull/46), [#48](https://github.com/Vvs2705/tiny-airport-empire/pull/48) |
+| **HUD, telas e textos** | Fontes e linguagem visual (Lilita One e Nunito, licença OFL), HUD fixo com quadro de partidas de aeroporto, avisos de perigo, telas modais (Melhorias, Mover, Cofre, Voo, Tripulação, Pátio...), revisão dos textos em pt-BR, tutorial de 12 passos, tela de metas (campanha, missões e conquistas, com a faixa da meta da vez no HUD) e tela de configurações, com a política de privacidade em pt-BR e inglês, o suporte e "excluir meus dados"; velocidade do relógio (pausa operacional, 1x, 2x e 3x; frente `ta-velocidade`) | [#27](https://github.com/Vvs2705/tiny-airport-empire/pull/27), [#34](https://github.com/Vvs2705/tiny-airport-empire/pull/34), [#35](https://github.com/Vvs2705/tiny-airport-empire/pull/35), [#36](https://github.com/Vvs2705/tiny-airport-empire/pull/36), [#41](https://github.com/Vvs2705/tiny-airport-empire/pull/41), [#46](https://github.com/Vvs2705/tiny-airport-empire/pull/46), [#48](https://github.com/Vvs2705/tiny-airport-empire/pull/48) |
 | **Arte do Tripo** | Lotes 1 a 11 gerados e exportados, com proveniência: tripulação, passageiros, pátio, terminais em 3 níveis, aeronaves, 3 aeroportos, incidentes, cabine de raio-x, garagem | [#8](https://github.com/Vvs2705/tiny-airport-empire/pull/8), [#9](https://github.com/Vvs2705/tiny-airport-empire/pull/9), [#10](https://github.com/Vvs2705/tiny-airport-empire/pull/10), [#11](https://github.com/Vvs2705/tiny-airport-empire/pull/11), [#13](https://github.com/Vvs2705/tiny-airport-empire/pull/13), [#14](https://github.com/Vvs2705/tiny-airport-empire/pull/14), [#15](https://github.com/Vvs2705/tiny-airport-empire/pull/15), [#17](https://github.com/Vvs2705/tiny-airport-empire/pull/17), [#20](https://github.com/Vvs2705/tiny-airport-empire/pull/20), [#22](https://github.com/Vvs2705/tiny-airport-empire/pull/22) |
 | **Áudio** | 8 sons em 13 arquivos e 3 músicas, sintetizados por script (sem licença); a classe `Audio.cs` existe, **sem nenhuma chamada no jogo** | [#19](https://github.com/Vvs2705/tiny-airport-empire/pull/19) |
 | **Nome e marca** | "Little Terminal", appId, chave de upload (fora do git), 5 companhias renomeadas, aeroportos mantidos | [#39](https://github.com/Vvs2705/tiny-airport-empire/pull/39) |
@@ -119,10 +119,10 @@ Do mais importante para o menos.
 
 Ordem de trabalho de 2026-11-03, depois da mistura com o GDD de direção (`GDD.md` §4.1 e §4.4) e das frentes abertas do §6. Cada item é uma frente com PR próprio, e toda frente de gestão só fecha com o critério de pronto em 10 itens (`GDD.md` §0.5).
 
-**Gestão do aeroporto (frentes A a I do `GDD.md` §4.1; só a C existe, parcial):**
+**Gestão do aeroporto (frentes A a I do `GDD.md` §4.1; só a B e a C existem, parciais):**
 
 1. **A, despesas e salários,** com fechamento do dia e sem derrota inevitável.
-2. **B, velocidades** 1x, 2x e 3x.
+2. **B, velocidades** 1x, 2x e 3x: no PR da `ta-velocidade` (parcial; falta a validação em build na rodada do Unity da leva).
 3. **C, ficha ao tocar** em pessoa, equipamento e sala: parcial (`ta-ficha`: pessoa e sala); faltam o equipamento e as necessidades.
 4. **H, esteira de restituição** (traz junto o desembarque mínimo de quem chega).
 5. **D, contratação** com 3 candidatos e demissão.
@@ -173,7 +173,7 @@ Nada disso o time de código consegue resolver sozinho.
 
 ## 10. Porcentagem estimada e método
 
-**Aproximadamente 49% do contrato de lançamento** (19,0 de 39 pontos), em 2026-11-03, na `main` em `49e1597`.
+**Aproximadamente 50% do contrato de lançamento** (19,5 de 39 pontos), em 2026-11-03: os 49% da `main` em `49e1597` mais a linha B (velocidades) em `parcial`, com a frente `ta-velocidade`.
 
 **Por que caiu de 57% (2026-11-02).** Não foi regressão: em 2026-11-03 o contrato ganhou **9 linhas**, as frentes de gestão A a I, todas em `falta`. Sobre as 30 linhas de antes, a conta **subiu** de 57% para 63% (19,0 de 30), por três mudanças: a tela de configurações (linha 21, de `falta` para `parcial`, PR #48) e a tela de metas, que fechou as linhas 11, 12 e 13 (de `parcial` para `feito`, PR #46, com `verify.sh full` verde e foto). Em pontos: 17,0 + 0,5 + 3 × 0,5 = 19,0.
 
@@ -182,15 +182,15 @@ Nada disso o time de código consegue resolver sozinho.
 | Estado | Linhas | Pontos |
 |---|---|---|
 | Feito | 12 | 12,0 |
-| Parcial | 13 | 6,5 |
+| Parcial | 14 | 7,0 |
 | Depende | 2 | 0,5 |
-| Falta | 12 | 0,0 |
-| **Total** | **39** | **19,0 → 49%** |
+| Falta | 11 | 0,0 |
+| **Total** | **39** | **19,5 → 50%** |
 
 - **Feito (12):** projeto Unity e portão; equipe móvel; pátio e manutenção; quadro de partidas; fluxo de passageiros; 4 incidentes; campanha de 30 objetivos; missões; 20 conquistas; sem interstitial; offline de 2 h; tutorial de 12 passos.
-- **Falta (11):** passe de temporada; segurança e privacidade ponta a ponta; regressão final; e 8 das 9 frentes de gestão da v1.5 (A despesas e salários, B velocidades, D contratação e demissão, E vestiário, F limpeza e banheiro, G satisfação, H esteira de restituição, I painel de operações).
+- **Falta (10):** passe de temporada; segurança e privacidade ponta a ponta; regressão final; e 7 das 9 frentes de gestão da v1.5 (A despesas e salários, D contratação e demissão, E vestiário, F limpeza e banheiro, G satisfação, H esteira de restituição, I painel de operações).
 - **Depende (2):** anúncios recompensados reais; AAB assinado e enviado.
-- **Parcial (14):** aeroportos; rotas; aeronaves; estações; perfis; tripulação; dia a dia; histórias; loja; save; configurações, política e suporte; telemetria; arte final; ficha ao tocar (C). Uma a uma, estão em `docs/CONTRATO_LANCAMENTO.md` §1, com a evidência de cada PR e o que falta.
+- **Parcial (15):** aeroportos; rotas; aeronaves; estações; perfis; tripulação; dia a dia; histórias; loja; save; configurações, política e suporte; telemetria; arte final; velocidades (B); ficha ao tocar (C). Uma a uma, estão em `docs/CONTRATO_LANCAMENTO.md` §1, com a evidência de cada PR e o que falta.
 
 **O que o número não mostra.** A porcentagem mede **cobertura do contrato**, não esforço restante nem risco. A maior parte do que falta é tela (aeroportos, rotas, passe e loja), as 9 frentes de gestão (nenhuma começada, e cada uma só fecha com o critério de pronto em 10 itens, `GDD.md` §0.5), integração (IAP, servidor, anúncios, telemetria) e medida em aparelho, e quase toda a parte que depende do dono está na janela de 2026-11-25 em diante. As frentes A a I valem 9 linhas do mesmo peso das demais, mas variam muito de tamanho: a conta não diz isso.
 

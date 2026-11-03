@@ -197,10 +197,10 @@ namespace TA
             RectTransform lp = NovoResumo(_pausa, Textos.Embarcados, Art.Pessoas(), Art.Azul, out _pausaResumo);
             Art.Margem((RectTransform)lp.parent, 24f, 186f, 24f, 184f);
             ItemPausa(lp, "Config", Art.Chave(), Art.EstacaoCor[6], Textos.Configuracoes, Textos.ConfigLegenda, Textos.Abrir, it => { Fecha(_pausa); AbreTela("config"); });
-            ItemPausa(lp, "Tutorial", Art.Mao(), Art.EstacaoCor[0], Textos.ReverTutorial, Textos.TutorialLegenda, Textos.Rever, it => { Fecha(_pausa); ReverTour(); });
+            ItemPausa(lp, "Tutorial", Art.Mao(), Art.EstacaoCor[0], Textos.ReverTutorial, Textos.TutorialLegenda, Textos.Rever, it => { Fecha(_pausa); _g.Pausa(false); ReverTour(); });
             _pausaDiario = ItemPausa(lp, "Diario", Art.Bilhete(), Art.EstacaoCor[3], Textos.ExportarDiario, Textos.DiarioLegenda, Textos.Exportar, it => it.Linha.text = _g.ExportarDiario());
             ItemPausa(lp, "Album", Art.Estrela(), Art.EstacaoCor[1], Textos.Album, Textos.AlbumLegenda, Textos.Abrir, it => { Fecha(_pausa); AbreTela("album"); });
-            BotaoDoPe(_pausa.F.Corpo, Vector2.zero, new Vector2(1f, 0f), () => Fecha(_pausa)).Principal(Textos.Continuar, Art.Compra);
+            BotaoDoPe(_pausa.F.Corpo, Vector2.zero, new Vector2(1f, 0f), () => { Fecha(_pausa); _g.Pausa(false); }).Principal(Textos.Continuar, Art.Compra);
 
             _album = NovaFolhaModal(canvas, "Album", Textos.Album, Art.Estrela(), 560f);
             RectTransform lh = NovoResumo(_album, Textos.HistoriasNome, Art.Estrela(), Art.Coin, out _albumResumo);
@@ -267,7 +267,7 @@ namespace TA
             {
                 case "melhorias": Abre(_melhorias); break;
                 case "mover": if (S.Staff.Count > 0) AbreMover(0); break;
-                case "pausa": _pausaDiario.Linha.text = Textos.DiarioLegenda; Abre(_pausa); break;
+                case "pausa": _g.Pausa(true); _pausaDiario.Linha.text = Textos.DiarioLegenda; Abre(_pausa); break;   // fechar no X fica na pausa operacional
                 case "album": Abre(_album); break;
                 case "config": Abre(_config); break;
                 case "excluir": Abre(_config); Abre(_excluir); break;

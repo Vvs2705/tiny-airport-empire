@@ -292,7 +292,7 @@ Este é o conteúdo planejado para a versão de lançamento. Não é uma lista d
 
 ### Frentes de gestão da v1.5 (A a I)
 
-Entram no lançamento por decisão de 03/11/2026 (D-25), com o essencial do GDD de direção. **Cada uma é um PR** e só conta como feita pelo critério de 10 itens do §0.5. Hoje **nenhuma existe no código** (conferido na `main` em 03/11/2026: não há salário nem despesa, velocidade de jogo, ficha ao tocar, candidatos, vestiário, banheiro, esteira de restituição, satisfação nem painel de operações). Depois disso, a C entrou parcial (`ta-ficha`). O estado de cada uma está no [`CONTRATO_LANCAMENTO.md`](CONTRATO_LANCAMENTO.md) §1, com a letra na coluna do §4.1.
+Entram no lançamento por decisão de 03/11/2026 (D-25), com o essencial do GDD de direção. **Cada uma é um PR** e só conta como feita pelo critério de 10 itens do §0.5. Hoje **nenhuma existe no código** (conferido na `main` em 03/11/2026: não há salário nem despesa, velocidade de jogo, ficha ao tocar, candidatos, vestiário, banheiro, esteira de restituição, satisfação nem painel de operações). Depois disso, a B e a C entraram parciais (`ta-velocidade` e `ta-ficha`). O estado de cada uma está no [`CONTRATO_LANCAMENTO.md`](CONTRATO_LANCAMENTO.md) §1, com a letra na coluna do §4.1.
 
 | | Frente | O que entrega | Direção | O que a frente não pode quebrar |
 |---|---|---|---|---|
@@ -1754,7 +1754,7 @@ Estado atualizado em 03/11/2026 sobre a `main` em `49e1597` (48 PRs; o #49 está
 | P-16 | Telemetria e crash reporting | Obrigatório | Eventos verificados em ambiente de teste | `EM ANDAMENTO` (diário CSV com os eventos do §15.1; D-11 decidida, PR #38) | SDK do Unity Analytics (`ta-telemetria`) |
 | P-17 | Proteção anti-fraude e segredos | Bloqueador | Checklist de segurança | `EM ANDAMENTO` (crédito idempotente e sem token no disco, PR #43; `checa_repo` contra segredos, PR #16) | servidor de validação (P-08) |
 | P-18 | Teste de regressão final | Bloqueador | Relatório com todos os testes críticos | `NÃO INICIADO` | todas as anteriores, inclusive P-19 |
-| P-19 | Gestão do aeroporto: despesas e salários, velocidades, ficha ao tocar, contratação e demissão, vestiário, limpeza e banheiro, satisfação com motivo, esteira de restituição e painel de operações (§4.1, A a I) | Obrigatório | Critério de pronto em 10 itens (§0.5) em cada frente, mais o portão do §5.13 nas que mexem em número | `EM ANDAMENTO` (C parcial, `ta-ficha`: ficha de passageiro, funcionário, tripulante e sala; as outras 8 não existiam no código em 03/11/2026) | ordem A, B, C e H; D, E, F e G; I (§4.1); P-02 e P-04 |
+| P-19 | Gestão do aeroporto: despesas e salários, velocidades, ficha ao tocar, contratação e demissão, vestiário, limpeza e banheiro, satisfação com motivo, esteira de restituição e painel de operações (§4.1, A a I) | Obrigatório | Critério de pronto em 10 itens (§0.5) em cada frente, mais o portão do §5.13 nas que mexem em número | `EM ANDAMENTO`: B (velocidades) `parcial`, frente `ta-velocidade`; C (ficha ao tocar) `parcial`, frente `ta-ficha`: ficha de passageiro, funcionário, tripulante e sala; as outras 7 não existem no código (03/11/2026) | ordem A, B, C e H; D, E, F e G; I (§4.1); P-02 e P-04 |
 
 Estados permitidos:
 
