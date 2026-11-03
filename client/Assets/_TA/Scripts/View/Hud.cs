@@ -81,6 +81,7 @@ namespace TA
             BuildTelas(_canvas);
             BuildOperacao(_canvas);
             BuildMetas(_canvas);
+            BuildFicha();   // por cima da faixa da meta
             BuildTour(_canvas);
             if (Ajustes.TextoMaior) AplicaTexto();
         }
@@ -255,6 +256,7 @@ namespace TA
             PintaAlerta(s);
             PintaVelocidade();
             PintaMetas(s);
+            PintaFicha(s);
             PintaTelas();
             PintaTour();
         }
