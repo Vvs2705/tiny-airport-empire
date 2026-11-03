@@ -89,6 +89,8 @@ namespace TA.Core
         CompraCreditada,    // A = produto, B = Gems, C = Cash                                    -> purchase_succeeded_server_verified
         GemsGastas,         // A = item, B = preco, C = Cash do pacote, s do booster ou 1         -> gems_spent
         GemsGanhas,         // A = aeroporto, B = Gems (cadeia fechada)                           -> gems_earned
+        // Fase C7 (CONTRATO_FASE_C7): passe de temporada, trilha gratuita
+        PasseNivel,         // A = temporada, B = nivel (1..30), C = Cash, s de 2x ou 1 cosmetico   -> season_reward_claimed
     }
 
     /// <summary>Funcoes da tripulacao (GDD §5.11). Indice vai no save.</summary>
@@ -371,6 +373,13 @@ namespace TA.Core
         public int PacoteSeg = 600, PacotePiso = 200, PacoteTeto = 10000;
         /// <summary>Booster: 2x renda por BoosterSeg s de jogo (so anda com o jogo aberto).</summary>
         public int BoosterSeg = 1800;
+
+        // ---- Fase C7 (CONTRATO_FASE_C7, hipoteses) ----
+        /// <summary>Paga o passe (false = so visual: conta e mostra, sem pagar), as temporadas (Sim.Passe.cs), os pontos de cada nivel e o
+        /// que cada fonte da: voo que partiu, diaria, semanal e objetivo da campanha.</summary>
+        public bool RegraPasse = true;
+        public Temporada[] Temporadas = Tabelas.Temporadas;
+        public int PassePontosNivel = 100, PasseVoo = 2, PasseDiaria = 25, PasseSemanal = 70, PasseObjetivo = 20;
     }
 
     /// <summary>Historias do TA-3 (GDD §5.9). A v0.1 tem 1. Id = indice (vai no album do save): so cresce no fim.</summary>
