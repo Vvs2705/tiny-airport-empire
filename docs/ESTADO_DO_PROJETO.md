@@ -135,7 +135,7 @@ Ordem de trabalho de 2026-11-03, depois da mistura com o GDD de direção (`GDD.
 
 10. **`ta-loja`:** Unity IAP em modo de teste, tela da loja e Gems no HUD (usa o núcleo da D1).
 11. **`ta-servidor`:** validação de compra no Cloud Run (projeto próprio, sem chave JSON). Se não passar nos testes do GDD §16.6, o jogo lança só com anúncio recompensado (opção A de D-05).
-12. **`ta-rotas-tela`:** tela de aeroportos e de rotas. Hoje o núcleo tem os 3 aeroportos e as 12 rotas e **não existe tela** para o jogador viajar nem programar.
+12. **`ta-rotas-tela`:** tela de aeroportos e de rotas (`Hud.Rotas.cs`): PR aberto em 03/11 com o `quick` verde; falta a rodada da leva (EditMode `RotasTests` e fotos `-tela rotas`, `rotas1` e `rotas2`).
 13. **`ta-avioes`:** 8 variantes visuais de aeronave por rota ou aeroporto (só visual; as peças do Tripo já existem).
 14. **`ta-historias`:** as 20 micro-histórias de passageiros (hoje 1).
 15. **`ta-audio`:** ligar o áudio em `Game.cs`, `Mundo.cs` e na pausa; o dono ouve antes de valer.
