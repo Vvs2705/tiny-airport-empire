@@ -67,11 +67,15 @@ guard() {
   mkdir -p "$OUT"
 }
 
-# Unity em batchmode; o log é apagado antes, então o que estiver nele é desta rodada
+# Unity em batchmode; o log é apagado antes, então o que estiver nele é desta rodada.
+# ponytail: teto por chamada (UNITY_TIMEOUT, padrão 90 min) para um Unity travado não segurar a fila de todos
+# (em 02/11 um EditMode parou 22 h sem gastar CPU).
 run_unity() {
-  local log="$OUT/$1"; shift
+  local log="$OUT/$1" rc; shift
   rm -f "$log"
-  "$UNITY" -batchmode -nographics -projectPath "$CLIENT" -logFile "$log" "$@"
+  timeout -k 30 "${UNITY_TIMEOUT:-5400}" "$UNITY" -batchmode -nographics -projectPath "$CLIENT" -logFile "$log" "$@"; rc=$?
+  [ $rc -eq 124 ] && echo "AVISO: Unity passou de ${UNITY_TIMEOUT:-5400} s e foi encerrado ($log)" >&2
+  return $rc
 }
 
 # o Setup.Apply regrava settings: avisa se mexeu em arquivo versionado (git checkout -- se o gerador não mudou)
