@@ -277,6 +277,7 @@ namespace TA
                 case "patio": Abre(_patio); break;
                 case "voo": AbreVoo(0); break;
                 case "metas": case "missoes": case "conquistas": AbreMetas(nome); break;
+                case "fichapax": case "fichafunc": case "fichaestacao": case "fichatrip": FichaDev(nome); break;
             }
         }
 
@@ -408,13 +409,14 @@ namespace TA
             Modal m = null;   // a de cima: Abre poe a folha por ultimo entre as irmas
             foreach (Modal x in _modais)
                 if (x.Rt.gameObject.activeSelf && (m == null || x.Rt.GetSiblingIndex() > m.Rt.GetSiblingIndex())) m = x;
-            if (m != null)
+            RectTransform raiz = m != null ? m.Rt : _ficha.gameObject.activeSelf ? _ficha : null;   // sem modal, a ficha do toque
+            if (raiz != null)
             {
                 float texto = float.MaxValue, alvo = float.MaxValue;
                 int cortes = 0;
                 string menor = "", cortado = "";
                 var g = new TextGenerator();
-                foreach (Text t in m.Rt.GetComponentsInChildren<Text>())
+                foreach (Text t in raiz.GetComponentsInChildren<Text>())
                 {
                     if (t.text.Length == 0) continue;
                     g.Populate(t.text, t.GetGenerationSettings(t.rectTransform.rect.size));
@@ -422,7 +424,7 @@ namespace TA
                     if (px < texto) { texto = px; menor = t.text; }
                     if (g.characterCountVisible < t.text.Length) { cortes++; cortado = t.text; }
                 }
-                foreach (Button b in m.Rt.GetComponentsInChildren<Button>())
+                foreach (Button b in raiz.GetComponentsInChildren<Button>())
                 {
                     if (b.name == "ToqueFora") continue;
                     Transform hit = b.transform.Find("AreaDeToque");

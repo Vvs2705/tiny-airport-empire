@@ -27,7 +27,7 @@ namespace TA
     ///    da sala: os rotulos escuros da v0.1 tampavam o mundo (foto v01_telas).
     ///  - Pessoas (Mundo.Pessoas.cs) e patio com os avioes e veiculos (Mundo.Patio.cs).
     ///  - Toque na sala = atendimento manual; arrastar o funcionario (alvo de 48 dp no minimo, limiar em dp separado do toque, boneco
-    ///    acima do dedo, salas de destino acesas) ou tocar nele = "mover para".
+    ///    acima do dedo, salas de destino acesas) ou tocar nele = a ficha, com o "mover para" (Hud.Ficha.cs, Mundo.Toca).
     /// </summary>
     public sealed partial class Mundo
     {
@@ -471,13 +471,7 @@ namespace TA
         public void Foca(Estacao e) => _alvo += V3(Chao(ZonaTela(e).center) - Chao(_regiao.center));
 
         /// <summary>Retangulo do funcionario na tela (px), com o alvo minimo de toque; vazio se ainda nao foi contratado.</summary>
-        public Rect FuncTela(int k)
-        {
-            if (k >= S.Staff.Count) return Rect.zero;
-            Vector2 c = Tela(V3(_func[k].Pos, 0.5f * EscalaFunc));
-            float r = Mathf.Max(Dp.Px(Dp.AlvoMinimoDp) * 0.5f, Vector2.Distance(Tela(V3(_func[k].Pos)), Tela(V3(_func[k].Pos, 0.55f))));
-            return new Rect(c.x - r, c.y - r, 2f * r, 2f * r);
-        }
+        public Rect FuncTela(int k) => k >= S.Staff.Count ? Rect.zero : PessoaTela(V3(_func[k].Pos));
 
         // ------------------------------------------------------------------ toque, arrasto, pan e zoom
 
@@ -488,7 +482,7 @@ namespace TA
             return Input.touchCount > 0 ? es.IsPointerOverGameObject(Input.GetTouch(0).fingerId) : es.IsPointerOverGameObject();
         }
 
-        /// <summary>Dedo/mouse no mundo. Toque na sala = atendimento manual; no funcionario = "mover para"; arrastar o funcionario = mover;
+        /// <summary>Dedo/mouse no mundo. Toque = Mundo.Toca (atendimento manual ou a ficha); arrastar o funcionario = mover;
         /// arrastar no vazio = pan; pinca ou roda = zoom.</summary>
         void Entrada()
         {
@@ -543,14 +537,7 @@ namespace TA
                 _falha[quem] = 1f;   // falha: volta tremendo e diz o que fazer
                 _h.Toast(Textos.SoltaFora);
             }
-            else if (quem >= 0) _h.AbreMover(quem);
-            else if (!pan && !longe)
-            {
-                int av = _h.Tutorial ? -1 : AviaoEm(sp);
-                if (av >= 0) { _h.AbreVoo(av); return; }
-                int z = SalaEm(Chao(sp));
-                if (z >= 0) _g.Tap((Estacao)z);
-            }
+            else if (quem >= 0 || (!pan && !longe)) Toca(sp, quem);   // Mundo.Pessoas.cs
         }
     }
 }

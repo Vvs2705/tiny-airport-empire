@@ -223,6 +223,32 @@ namespace TA
             }
         }
 
+        // ---------- ficha ao tocar (GDD de direcao §3.4 e §8.4): quem e, o que faz agora e por que esta assim ----------
+        /// <summary>Etapa do passageiro na fila e no atendimento, na ordem de Estacao (oficina e despacho nao tem passageiro).</summary>
+        public static readonly string[] PaxNaFila = { L("Na fila do check-in"), L("Na fila da segurança"), L("Na fila da loja"), L("Esperando o embarque"), L("Na fila da bagagem"), L("Na fila da alimentação"), "", "" },
+            PaxAtendido = { L("Fazendo o check-in"), L("Na inspeção da segurança"), L("Comprando na loja"), L("Embarcando"), L("Despachando a mala"), L("Pedindo um lanche"), "", "" };
+        /// <summary>Na ordem de TA.Humor: o nome (a linha do topo) e o motivo (a ficha).</summary>
+        public static readonly string[] Humor = { L("Tranquilo"), L("Impaciente"), L("Preocupado"), L("Chateado"), L("Irritado"), L("Furioso"), L("Contente") },
+            HumorPorque = { L("tudo no horário"), L("esperando há muito tempo"), L("o portão fecha logo"), L("o voo atrasou"), L("no ritmo da fila, perde o voo"), L("perdeu o voo"), L("embarcou a tempo") };
+        public static readonly string NaFilaDoEmbarque = L("Na fila do embarque"), IndoAoAviao = L("Indo para o avião"), IndoEmbora = L("Perdeu o voo e vai embora"),
+            ABordoLogo = L("A bordo em instantes"), PortaoFechou = L("O portão fechou antes do embarque"), ComHistoria = L(" · com história"),
+            AtendendoUm = L("Atendendo um passageiro"), ChamandoProximo = L("Chamando o próximo da fila"), EsperandoPax = L("Esperando passageiro"),
+            NaChecagem = L("Ajudando na checagem do avião"), ProntoChecagem = L("Pronto para a próxima checagem"), NoBonus = L("Garantindo o bônus de pontualidade"),
+            NaEspecialidade = L("Está na especialidade"), ACaminho = L("A caminho"), Atendendo = L("Atendendo"), Trabalhando = L("Trabalhando"), Livre = L("Livre"),
+            VoltaSala = L("Voltando para a sala da tripulação"), EscalaNaTela = L("A escala fica na tela Tripulação"),
+            GargaloFalha = L("Gargalo: em falha, atende mais devagar"), GargaloToque = L("Sem equipe: só anda com o seu toque"), GargaloFechada = L("Fechada: ninguém da equipe aqui"),
+            EquipeVindo = L("A equipe está a caminho"), SemGargalo = L("Fluindo: sem gargalo"), Trancada = L("Abre quando o terminal crescer");
+        public static string HumorLinha(int h) => Humor[h] + ": " + HumorPorque[h];
+        public static string NoAeroporto(float seg, float fecha, bool atrasado) => L("No aeroporto há ") + Tempo(seg)
+            + (fecha <= 0f ? "" : (atrasado ? L(" · portão atrasado: fecha em ") : L(" · portão fecha em ")) + Tempo(fecha));
+        public static string ChegaEm(float seg) => L("Chega em ") + Tempo(seg);
+        public static string NaFila(int n) => n + L(" na fila");
+        public static string FuncaoDe(Tripulante t) => t.Funcao == TA.Core.Funcao.Piloto ? L("Piloto") : t.Indice % 2 == 0 ? L("Comissária") : L("Comissário");   // a folha da comissaria vai nos indices pares
+        public static string IndoPara(int voo) => voo >= 0 ? L("Indo para o ") + Voo(voo) : IndoAoAviao;
+        public static string Trechos(int n, int limite) => n + "/" + limite + L(" trechos desde o descanso");
+        public static string GargaloRisco(int voo) => L("Gargalo: a fila não dá conta do ") + Voo(voo);
+        public static string GargaloFolga(int voo) => L("Atenção: folga curta para o ") + Voo(voo);
+
         // ---------- tutorial (GDD_ORIGEM "Onboarding", passos 1-12) ----------
         // Titulo = o que fazer; texto = por que, em uma ou duas frases. Seta: use o guillemet U+00BB; a seta U+2192 nao existe nas fontes. Passos 10 a 12 = evento.
         public static readonly string Lara = L("Lara, Chefe de Terminal");

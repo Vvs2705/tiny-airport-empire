@@ -119,11 +119,11 @@ Do mais importante para o menos.
 
 Ordem de trabalho de 2026-11-03, depois da mistura com o GDD de direção (`GDD.md` §4.1 e §4.4) e das frentes abertas do §6. Cada item é uma frente com PR próprio, e toda frente de gestão só fecha com o critério de pronto em 10 itens (`GDD.md` §0.5).
 
-**Gestão do aeroporto (frentes A a I do `GDD.md` §4.1; nenhuma existe no código):**
+**Gestão do aeroporto (frentes A a I do `GDD.md` §4.1; só a B e a C existem, parciais):**
 
 1. **A, despesas e salários,** com fechamento do dia e sem derrota inevitável.
 2. **B, velocidades** 1x, 2x e 3x: no PR da `ta-velocidade` (parcial; falta a validação em build na rodada do Unity da leva).
-3. **C, ficha ao tocar** em pessoa, equipamento e sala.
+3. **C, ficha ao tocar** em pessoa, equipamento e sala: parcial (`ta-ficha`: pessoa e sala); faltam o equipamento e as necessidades.
 4. **H, esteira de restituição** (traz junto o desembarque mínimo de quem chega).
 5. **D, contratação** com 3 candidatos e demissão.
 6. **E, transferência pelo vestiário** (o TA-2 tem de passar de novo com o tempo de troca).
@@ -188,9 +188,9 @@ Nada disso o time de código consegue resolver sozinho.
 | **Total** | **39** | **19,5 → 50%** |
 
 - **Feito (12):** projeto Unity e portão; equipe móvel; pátio e manutenção; quadro de partidas; fluxo de passageiros; 4 incidentes; campanha de 30 objetivos; missões; 20 conquistas; sem interstitial; offline de 2 h; tutorial de 12 passos.
-- **Falta (11):** passe de temporada; segurança e privacidade ponta a ponta; regressão final; e 8 das 9 frentes de gestão da v1.5 (A despesas e salários, C ficha ao tocar, D contratação e demissão, E vestiário, F limpeza e banheiro, G satisfação, H esteira de restituição, I painel de operações).
+- **Falta (10):** passe de temporada; segurança e privacidade ponta a ponta; regressão final; e 7 das 9 frentes de gestão da v1.5 (A despesas e salários, D contratação e demissão, E vestiário, F limpeza e banheiro, G satisfação, H esteira de restituição, I painel de operações).
 - **Depende (2):** anúncios recompensados reais; AAB assinado e enviado.
-- **Parcial (14):** aeroportos; rotas; aeronaves; estações; perfis; tripulação; dia a dia; histórias; loja; save; configurações, política e suporte; telemetria; arte final; velocidades (B). Uma a uma, estão em `docs/CONTRATO_LANCAMENTO.md` §1, com a evidência de cada PR e o que falta.
+- **Parcial (15):** aeroportos; rotas; aeronaves; estações; perfis; tripulação; dia a dia; histórias; loja; save; configurações, política e suporte; telemetria; arte final; velocidades (B); ficha ao tocar (C). Uma a uma, estão em `docs/CONTRATO_LANCAMENTO.md` §1, com a evidência de cada PR e o que falta.
 
 **O que o número não mostra.** A porcentagem mede **cobertura do contrato**, não esforço restante nem risco. A maior parte do que falta é tela (aeroportos, rotas, passe e loja), as 9 frentes de gestão (nenhuma começada, e cada uma só fecha com o critério de pronto em 10 itens, `GDD.md` §0.5), integração (IAP, servidor, anúncios, telemetria) e medida em aparelho, e quase toda a parte que depende do dono está na janela de 2026-11-25 em diante. As frentes A a I valem 9 linhas do mesmo peso das demais, mas variam muito de tamanho: a conta não diz isso.
 
