@@ -246,5 +246,22 @@ namespace TA
             L("Esse Cash veio do tempo em que você esteve fora. O limite é 2\u00A0h: o que passar disso não conta, então vale voltar antes."),
         };
         public static string TourConta(int n, int total) => n + "/" + total;
+
+        // Configuracoes, privacidade e suporte (GDD §9.3 e §11.1, D-12). A politica e a pagina do idioma: o en aponta para /privacy/.
+        public const string EmailSuporte = "suporte@vstack-solutions.com.br";
+        public static readonly string UrlPrivacidade = L("https://vvs2705.github.io/tiny-airport-empire/privacidade/");
+        public static readonly string Configuracoes = L("Configurações"), ConfigLegenda = L("Som, acessibilidade e privacidade"),
+            Musica = L("Música"), Efeitos = L("Efeitos sonoros"), Vibracao = L("Vibração"), VibracaoLegenda = L("Liga ou desliga a vibração"),
+            ReduzirMovimento = L("Reduzir movimento"), MovimentoLegenda = L("Sem balanço, tremor nem pulso"),
+            TextoMaior = L("Texto maior"), TextoMaiorLegenda = L("Letras maiores onde couber"), Ligado = L("Ligado"), Desligado = L("Desligado"),
+            Idioma = L("Idioma"), IdiomaNome = L("Português (Brasil)"), EmUso = L("Em uso"),
+            Privacidade = L("Política de privacidade"), PrivacidadeLegenda = L("O que o jogo guarda e por quê"),
+            Suporte = L("Suporte"), Escrever = L("Escrever"), Creditos = L("Créditos"),
+            CreditosTexto = L("Fontes Lilita One (© 2011 Juan Montoreano, com o Nome de Fonte Reservado Lilita) e Nunito (© 2014 The Nunito Project Authors), na SIL Open Font License 1.1."),
+            ExcluirDados = L("Excluir meus dados"), ExcluirLegenda = L("Apaga o progresso deste aparelho"), Excluir = L("Excluir"),
+            Cancelar = L("Cancelar"), ApagarTudo = L("Apagar tudo"),
+            ExcluirTexto = L("Apaga deste aparelho o seu progresso, as configurações, o tutorial já visto e o diário de jogo. Não dá para desfazer: o jogo fecha e, ao abrir de novo, começa do zero.\n\nO jogo não guarda seus dados em servidor nosso. Cópias do diário que você exportou ficam onde você as salvou. Para qualquer pedido sobre seus dados, escreva para ") + EmailSuporte + ".";
+        public static string Porcento(float v) => (int)System.Math.Round(v * 100f) + "%";
+        public static string Versao(string v) => L("Little Terminal, da V-STACK · versão ") + v;
     }
 }

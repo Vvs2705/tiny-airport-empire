@@ -10,6 +10,8 @@ conteudo_check.py do Forge). Olha os arquivos versionados e os novos ainda sem c
   proibidos   nada de chave, build ou arte crua no git; nada acima de 10 MB; .gitignore com as travas
   segredos    padroes de token e de chave privada em qualquer arquivo (mostra so o arquivo e o tipo, nunca o valor)
   mapa        todo .cs, .py e .sh citado no docs/MAPA_CODIGO.md
+  privacidade as 2 politicas (docs/privacidade, docs/privacy) com o e-mail de suporte e citando cada pacote que pode coletar dados e
+              cada API de rede do jogo (a politica tem de bater com o codigo, GDD §9.3)
 Aviso, sem falhar: arquivo .cs acima de ~600 linhas (regra do estudio: vira partial).
 """
 
@@ -26,6 +28,9 @@ ASMDEF_CORE = CORE + "TA.Core.asmdef"
 SETUP = "client/Assets/_TA/Editor/Setup.cs"
 MANIFESTO = "client/Packages/manifest.json"
 MAPA = "docs/MAPA_CODIGO.md"
+POLITICAS = ["docs/privacidade/index.html", "docs/privacy/index.html"]
+EMAIL_SUPORTE = "suporte@vstack-solutions.com.br"
+REDE = r"\b(UnityWebRequest|HttpClient|WebClient|TcpClient|UdpClient|ClientWebSocket)\b"
 MAX_BYTES = 10 * 1024 * 1024
 MAX_LINHAS = 600
 
@@ -187,8 +192,48 @@ def checa_mapa(repo):
     for p in sorted(repo):
         codigo = p.endswith(".cs") and p.startswith("client/Assets/_TA/")
         ferramenta = p.startswith("client/tools/") and p.endswith((".py", ".sh"))
-        if (codigo or ferramenta) and not re.search(r"(?<![\w.])" + re.escape(os.path.basename(p)), mapa):
+        if (codigo or ferramenta) and not re.search(
+            r"(?<![\w.])" + re.escape(os.path.basename(p)), mapa
+        ):
             erros.append(f"mapa: {p} nao esta no {MAPA}")
+    return erros
+
+
+def pacote_sem_dados(pacote):
+    return pacote in ("com.unity.test-framework", "com.unity.ugui") or (
+        pacote.startswith("com.unity.modules.")
+        and not re.search(r"analytics|webrequest|unityconnect", pacote)
+    )
+
+
+def checa_privacidade(repo):
+    erros = [
+        f"privacidade: falta {p} (politica no GitHub Pages)"
+        for p in POLITICAS
+        if p not in repo
+    ]
+    if erros:
+        return erros
+    citar = {
+        d
+        for d in json.loads(texto(repo[MANIFESTO]))["dependencies"]
+        if not pacote_sem_dados(d)
+    }
+    for p in (
+        x
+        for x in repo
+        if x.startswith("client/Assets/_TA/Scripts/") and x.endswith(".cs")
+    ):
+        citar.update(re.findall(REDE, sem_comentario(texto(repo[p]))))
+    for p in POLITICAS:
+        html = texto(repo[p])
+        if EMAIL_SUPORTE not in html:
+            erros.append(f"privacidade: {p} sem o e-mail de suporte {EMAIL_SUPORTE}")
+        erros += [
+            f"privacidade: {p} nao cita {c}, que o jogo usa: diga o que ele coleta, para que e com quem"
+            for c in sorted(citar)
+            if c not in html
+        ]
     return erros
 
 
@@ -209,6 +254,7 @@ def checa(repo):
         + checa_proibidos(repo)
         + checa_segredos(repo)
         + checa_mapa(repo)
+        + checa_privacidade(repo)
     )
 
 
@@ -249,6 +295,8 @@ def repo_bom():
         CORE + "TA.Core.asmdef.meta": b"guid: " + b"1" * 32,
         a + "/Resources.meta": b"guid: " + b"2" * 32,
         a + "/Resources/.gitkeep": b"",  # dotfile nao pede .meta, mas a pasta sim
+        POLITICAS[0]: EMAIL_SUPORTE.encode(),
+        POLITICAS[1]: EMAIL_SUPORTE.encode(),
     }
 
 
@@ -322,8 +370,30 @@ def selftest():
         ),
         ("segredos: JWT", lambda r: r.update({"docs/nota.md": falso["jwt"]})),
         ("mapa: ", lambda r: r.update({"client/tools/novo.py": b"x"})),
-        ("mapa: ", lambda r: r.update({MAPA: b"AirportSim.cs Setup.cs verify.sh"})),  # Sim.cs nao pode passar por AirportSim.cs
-        ("segredos: chave do Google", lambda r: r.update({"docs/nota.md": falso["goo"][:-1] + b"- "})),
+        (
+            "mapa: ",
+            lambda r: r.update({MAPA: b"AirportSim.cs Setup.cs verify.sh"}),
+        ),  # Sim.cs nao pode passar por AirportSim.cs
+        (
+            "segredos: chave do Google",
+            lambda r: r.update({"docs/nota.md": falso["goo"][:-1] + b"- "}),
+        ),
+        ("privacidade: falta", lambda r: r.pop(POLITICAS[1])),
+        ("privacidade: ", lambda r: r.update({POLITICAS[0]: b"<p>sem contato</p>"})),
+        (
+            "privacidade: ",
+            lambda r: r.update(
+                {
+                    MANIFESTO: b'{"dependencies": {"com.unity.services.analytics": "6.0.0"}}'
+                }
+            ),
+        ),
+        (
+            "privacidade: ",
+            lambda r: r.update(
+                {CORE + "Sim.cs": b"class Sim { UnityWebRequest w; }\n"}
+            ),
+        ),
     ]
     for esperado, quebra in casos:
         r = dict(base)
