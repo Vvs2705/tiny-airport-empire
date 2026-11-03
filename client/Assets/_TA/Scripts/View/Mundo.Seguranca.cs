@@ -19,7 +19,7 @@ namespace TA
         const float EscalaSeg = 0.5f, PassoX = -0.22f, BeltX = 0.2f, EscalaCabine = EscalaSeg * 0.85f;
         /// <summary>Distâncias da parede de saída: parada diante da mesa, pórtico, cabine, raio-x, parada atrás das máquinas, agente e as pontas da
         /// esteira (centro do rolo: ela passa disso meia largura). Altura e largura da mesa.</summary>
-        const float EntraD = 1.22f, PorticoD = 1.06f, CabineD = 0.6f, RaioXD = 0.66f, SaiD = 0.2f, AgenteD = 0.09f, MesaIniD = 1.08f, MesaFimD = 0.4f, AltMesa = 0.2f, LargMesa = 0.24f;
+        const float EntraD = 1.22f, PorticoD = 1.06f, CabineD = 0.6f, RaioXD = 0.66f, SaiD = 0.2f, AgenteD = 0.13f, MesaIniD = 1.08f, MesaFimD = 0.4f, AltMesa = 0.2f, LargMesa = 0.24f;
         static readonly Color CorLuz = Art.Hex(0x7FD8A0), CorFeixe = new Color(0.35f, 0.95f, 1f, 0.85f);
 
         readonly GameObject[] _linha = new GameObject[4];
