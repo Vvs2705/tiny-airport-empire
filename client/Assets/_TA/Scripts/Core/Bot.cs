@@ -470,6 +470,8 @@ namespace TA.Core
             public int Objetivos; public long Recompensas; public int[] ObjetivoEm;
             /// <summary>Fase C6: diarias e semanais feitas, Cash pago por elas, conquistas e a onda em que cada uma fechou (-1 = nao fechou).</summary>
             public int Diarias, Semanais, Conquistas; public long PagoMissoes; public int[] ConquistaEm;
+            /// <summary>Fase C8: Cash pago nas contas do dia e dias fechados com falta de caixa (pausa).</summary>
+            public long Despesas; public int Apertos;
         }
 
         /// <summary>Joga `ondas` ondas inteiras com o perfil `p` e a semente `seed`, sem render. `reabre` = fecha e reabre o jogo (Save ->
@@ -504,6 +506,8 @@ namespace TA.Core
                         case Ev.ObjetivoConcluido: r.Objetivos++; r.Recompensas += e.C; r.ObjetivoEm[e.A * 10 + e.B] = s.Onda; break;
                         case Ev.MissaoConcluida: if (e.A == 0) r.Diarias++; else r.Semanais++; r.PagoMissoes += e.C; break;
                         case Ev.ConquistaFeita: r.Conquistas++; r.ConquistaEm[e.A] = s.Onda; break;
+                        case Ev.DiaFechado: r.Despesas += e.B; if (e.C > 0) r.Apertos++; break;
+                        case Ev.ContaQuitada: r.Despesas += e.B; break;
                     }
             }
             r.Embarque = r.Voos > 0 ? soma / r.Voos : 0;

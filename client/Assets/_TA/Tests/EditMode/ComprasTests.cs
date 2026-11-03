@@ -18,7 +18,7 @@ namespace TA.Tests
 
         /// <summary>Todo o estado do jogo no save, menos o que a compra pode mudar: voos, passageiros, marcos, campanha, avioes e a renda media.</summary>
         static string SoOJogo(Sim s) =>
-            string.Join("\n", s.Save("t", 1).Split('\n').Where(l => !new[] { "sha256=", "cash=", "gems=", "bst=", "posse=", "tx=" }.Any(l.StartsWith)));
+            string.Join("\n", s.Save("t", 1).Split('\n').Where(l => !new[] { "sha256=", "cash=", "gems=", "bst=", "posse=", "tx=", "atrasada=", "hoje=", "dc." }.Any(l.StartsWith)));
 
         static Sim Jogado(BotProfile p, int ondas, int seed = 3)
         {

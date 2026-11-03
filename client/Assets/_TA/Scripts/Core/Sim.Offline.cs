@@ -33,7 +33,7 @@ namespace TA.Core
             long cash = (long)Math.Min(Math.Floor(RateEma * T.OfflineFator * capped), OfflineMaxCash());
             LastClaimCash = Math.Max(0, cash);
             if (cash <= 0) return 0;
-            Cash += cash;
+            Recebe(cash, Fonte.Cofre);
             Emit(Ev.Offline, (int)Math.Min(int.MaxValue, cash), (int)capped);
             return cash;
         }

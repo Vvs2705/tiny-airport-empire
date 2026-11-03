@@ -89,6 +89,9 @@ namespace TA.Core
         CompraCreditada,    // A = produto, B = Gems, C = Cash                                    -> purchase_succeeded_server_verified
         GemsGastas,         // A = item, B = preco, C = Cash do pacote, s do booster ou 1         -> gems_spent
         GemsGanhas,         // A = aeroporto, B = Gems (cadeia fechada)                           -> gems_earned
+        // Fase C8 (CONTRATO_FASE_C8): despesas
+        DiaFechado,         // A = dia do jogo, B = Cash pago, C = o que faltou (> 0 = pausa)    -> day_closed
+        ContaQuitada,       // A = dia do jogo, B = Cash (a conta atrasada; a pausa acabou)       -> day_bill_paid_late
     }
 
     /// <summary>Funcoes da tripulacao (GDD §5.11). Indice vai no save.</summary>
@@ -371,6 +374,17 @@ namespace TA.Core
         public int PacoteSeg = 600, PacotePiso = 200, PacoteTeto = 10000;
         /// <summary>Booster: 2x renda por BoosterSeg s de jogo (so anda com o jogo aberto).</summary>
         public int BoosterSeg = 1800;
+
+        // ---- Fase C8 (CONTRATO_FASE_C8, hipoteses) ----
+        /// <summary>Cobra a conta no fechamento do dia (false = so o relatorio, o jogo da Fase D1).</summary>
+        public bool RegraDespesas = true;
+        /// <summary>Cash por dia do jogo: salario de cada perfil (ordem de Perfil), de cada funcao da tripulacao e de cada pessoa do patio.</summary>
+        public int[] Salario = { 60, 80, 80, 100, 150, 150 };
+        public int[] SalarioTrip = { 40, 20 };
+        public int SalarioPatio = 30;
+        /// <summary>Cash por dia do jogo de cada estacao ativa (ordem de Estacao) e quanto cada nivel de melhoria dela soma.</summary>
+        public int[] Manutencao = { 20, 20, 15, 15, 15, 15, 30, 20 };
+        public int[] ManutencaoNivel = { 10, 10, 8, 8, 8, 8, 12, 0 };
     }
 
     /// <summary>Historias do TA-3 (GDD §5.9). A v0.1 tem 1. Id = indice (vai no album do save): so cresce no fim.</summary>
