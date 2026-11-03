@@ -21,7 +21,7 @@ namespace TA
     ///   -autoplay N   sem render: o bot joga N ondas (Bom, Lento, Parado; retomada no meio da onda), loga AUTOPLAY OK|FAIL e sai 0/1.
     ///                 Usar com -batchmode -nographics (client/tools/verify.sh full).
     ///   -bot          o bot Bom joga na tela.        -speed N   multiplica o dt (0,1..20).
-    ///   -tela nome    jogo | melhorias | mover | cofre | anuncio | pausa | album | config | excluir | equipe | tripulacao | patio | voo | metas | missoes | conquistas | passoN (tutorial, passo N).
+    ///   -tela nome    jogo | melhorias | mover | cofre | anuncio | pausa | album | config | excluir | equipe | tripulacao | patio | voo | metas | missoes | conquistas | fichapax | fichafunc | fichaestacao | fichatrip (Hud.FichaDev) | passoN (tutorial, passo N).
     ///   -textomaior, -reduzmovimento   ligam o ajuste so nesta sessao (o -testsession nao le as preferencias do PC).
     ///   -onda K       comeca na onda K (1 = a 1a).   -passageiros N   estresse: N passageiros por onda (60 = o K3).
     ///   -tutorial     liga o tutorial no -testsession (sem gravar; com -bot o ENTENDI se aperta sozinho).

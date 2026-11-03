@@ -42,8 +42,9 @@ namespace TA
         /// <summary>Gente do patio: pontos de uma volta curta e a pausa em cada um.</summary>
         sealed class Ator { public Boneco B; public Vector2[] Pontos; public float Pausa, Espera; public int I; }
 
-        /// <summary>Tripulante, ou passageiro que desce, de passagem entre o aviao e o terminal: aparece depois de Atraso s e volta para o pool quando chega.</summary>
-        sealed class Andante { public Boneco B; public float Atraso; }
+        /// <summary>Tripulante, ou passageiro que desce, de passagem entre o aviao e o terminal: aparece depois de Atraso s e volta para o pool quando chega.
+        /// Trip = indice em Sim.Tripulacao (-1 = passageiro), para a ficha.</summary>
+        sealed class Andante { public Boneco B; public float Atraso; public int Trip = -1; }
 
         static readonly Color ColetePatio = Art.Hex(0xF2A33A), MacacaoMecanico = Art.Hex(0x2A7A88), ColeteSinal = Art.Hex(0xE8D24A);
         /// <summary>Onde a pessoa de patio fica em cada servico: estande G, depois R (desembarque, limpeza, combustivel, bagagem).</summary>
@@ -535,7 +536,70 @@ namespace TA
         void Caminha(Tripulante t, int aviao, bool desce, float atraso)
         {
             string ator = t.Funcao == Funcao.Piloto ? "piloto" : t.Indice % 2 == 0 ? "comissaria" : "comissario";
-            Trilha(NovoAndante(ator, Color.white, atraso), SalaTrip, aviao, desce);
+            Boneco b = NovoAndante(ator, Color.white, atraso);
+            _andantes[_andantes.Count - 1].Trip = t.Id;
+            Trilha(b, SalaTrip, aviao, desce);
+        }
+
+        // ------------------------------------------------------------------ toque e ficha (Hud.Ficha.cs)
+
+        /// <summary>Pessoa na tela (px) a partir do pe no mundo: o meio do corpo, com o alvo minimo de toque.</summary>
+        Rect PessoaTela(Vector3 pe)
+        {
+            Vector2 c = Tela(pe + Vector3.up * (0.5f * Gente));
+            float r = Mathf.Max(Dp.Px(Dp.AlvoMinimoDp) * 0.5f, Vector2.Distance(Tela(pe), Tela(pe + Vector3.up * 0.55f)));
+            return new Rect(c.x - r, c.y - r, 2f * r, 2f * r);
+        }
+
+        /// <summary>Toque sem arrasto. Funcionario (quem >= 0) = a ficha dele; aviao = o voo; sala com a mao acesa = atendimento manual; senao a
+        /// ficha do passageiro ou tripulante sob o dedo (o mais perto do meio do corpo) ou a da sala; no vazio, fecha a ficha. No tutorial,
+        /// o de antes: o veu tapa a ficha, entao o toque atende ou abre o Mover.</summary>
+        void Toca(Vector2 sp, int quem)
+        {
+            bool tour = _h.Tutorial;
+            if (quem >= 0) { if (tour) _h.AbreMover(quem); else _h.Seleciona(Sel.Func, quem); return; }
+            int av = tour ? -1 : AviaoEm(sp);
+            if (av >= 0) { _h.AbreVoo(av); return; }
+            int z = SalaEm(Chao(sp));
+            if (z >= 0 && (tour || S.PodeTocar((Estacao)z))) { _g.Tap((Estacao)z); return; }
+            if (tour) return;
+            Sel tipo = z >= 0 ? Sel.Estacao : Sel.Nada;
+            int id = z;
+            float melhor = float.MaxValue;
+            void Perto(Boneco b, Sel t, int i)
+            {
+                if (!b.T.gameObject.activeSelf || !b.Corpo.enabled) return;
+                Rect r = PessoaTela(b.T.position);
+                float d = Vector2.Distance(r.center, sp);
+                if (r.Contains(sp) && d < melhor) { melhor = d; tipo = t; id = i; }
+            }
+            foreach (KeyValuePair<int, Boneco> kv in _pax) Perto(kv.Value, Sel.Pax, kv.Key);
+            foreach (Andante a in _andantes) if (a.Trip >= 0) Perto(a.B, Sel.Trip, a.Trip);
+            _h.Seleciona(tipo, id);
+        }
+
+        internal RectTransform Rotulos => _rotulos;
+        /// <summary>O passageiro ainda esta na tela; depois de sair do nucleo, embarcou = indo ao aviao (senao, perdeu o voo).</summary>
+        internal bool PaxNaTela(int id, out bool embarcou) { embarcou = _embarcou.Contains(id); return _pax.ContainsKey(id); }
+        internal bool Atende(int k) => _func[k].Atende;
+
+        /// <summary>A linha do topo da ficha em cima de quem esta selecionado (ou da sala); false se nao esta na faixa do mundo.</summary>
+        internal bool PoeTopo(RectTransform rt, Sel tipo, int id)
+        {
+            Vector3 p;
+            if (tipo == Sel.Estacao) p = V3(Centro(id), 2f);   // acima do selo do estado
+            else
+            {
+                Boneco b = tipo == Sel.Func ? _func[id] : null;
+                if (tipo == Sel.Pax) _pax.TryGetValue(id, out b);
+                else if (tipo == Sel.Trip) foreach (Andante a in _andantes) if (a.Trip == id && a.B.T.gameObject.activeSelf) b = a.B;
+                if (b == null || !b.Corpo.enabled) return false;
+                p = b.T.position + Vector3.up * 0.95f;   // acima do nome e do balao de humor
+            }
+            if (!_regiao.Contains(Tela(p))) return false;
+            Coloca(rt, p);
+            Prende(rt);
+            return true;
         }
     }
 }

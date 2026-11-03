@@ -81,6 +81,7 @@ namespace TA
             BuildTelas(_canvas);
             BuildOperacao(_canvas);
             BuildMetas(_canvas);
+            BuildFicha();   // por cima da faixa da meta
             BuildTour(_canvas);
             if (Ajustes.TextoMaior) AplicaTexto();
         }
@@ -254,6 +255,7 @@ namespace TA
             if (_toastT > 0f && (_toastT -= Time.unscaledDeltaTime) <= 0f) _toastFundo.gameObject.SetActive(false);
             PintaAlerta(s);
             PintaMetas(s);
+            PintaFicha(s);
             PintaTelas();
             PintaTour();
         }
