@@ -39,6 +39,8 @@ namespace TA
         }
 
         public static string Onda(int n) => L("Onda ") + n;
+        /// <summary>O botao de velocidade: 1x, 2x, 3x.</summary>
+        public static string Vezes(int v) => v.ToString(CultureInfo.InvariantCulture) + L("x");
         public static string Contratar(long custo) => custo < 0 ? L("Equipe completa") : L("Contratar\n") + Num(custo);
         public static readonly string Melhorias = L("Melhorias"), Pausa = L("II"), Continuar = L("Continuar"),
             Pausado = L("Pausado"), ReverTutorial = L("Rever tutorial"), ExportarDiario = L("Exportar diário"), Album = L("Álbum"),

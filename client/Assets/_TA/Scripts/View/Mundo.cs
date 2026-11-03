@@ -237,10 +237,14 @@ namespace TA
             SincronizaPax(s, dt);
             Funcionarios(s, dt);
             Salas3D(s);
-            Patio(s, dt);
-            AndaPatio(dt);
+            int n = Mathf.Max(1, Mathf.CeilToInt(dt / PatioDtMax - 1e-3f));   // a 3x num aparelho a 30 qps, 3 pedacos de 1/30 s
+            for (int i = 0; i < n; i++) { Patio(s, dt / n); AndaPatio(dt / n); }
             ClimaPasso(s, dt);
         }
+
+        /// <summary>Maior pedaco de jogo (s) em que o patio anda de uma vez: o quadro de um aparelho a 30 qps no 1x. Com o quadro inteiro do
+        /// 3x (0,1 s a 30 qps), a vez na pista e a freada nao seguravam: avioes e veiculos se cruzavam (diag_caixas.py).</summary>
+        const float PatioDtMax = 1f / 30f;
 
         /// <summary>Largura da tela em m no enquadramento: mais que isso, o corpo do adulto (0,45 m na folha) fica abaixo de 28 px na foto 540 x 960 (ART_BIBLE §3).</summary>
         const float LarguraLeitura = 8.6f;
