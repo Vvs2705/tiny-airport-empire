@@ -147,12 +147,12 @@ namespace TA
             if (parou && dono.Etapa == 3) { Olha(dono, -Salas[SalaSeg].N); Gesto(dono, dono.PoeMala, Mathf.InverseLerp(1f, 0.82f, f)); }   // e pega de volta
             if (naCabine)
             {
-                Vector3 c = V3(dono.Pos) + _cam.transform.up * (EscalaFunc * (0.08f + 0.8f * Mathf.PingPong(Time.time * 1.5f, 1f))) - _cam.transform.forward * 1.2f * EscalaFunc;
+                Vector3 c = V3(dono.Pos) + _cam.transform.up * (EscalaFunc * (0.08f + 0.8f * Mathf.PingPong(S.Time * 1.5f, 1f))) - _cam.transform.forward * 1.2f * EscalaFunc;
                 _feixe[i].transform.SetPositionAndRotation(c, _cam.transform.rotation);
                 _feixe[i].transform.localScale = new Vector3(0.42f * EscalaFunc, 0.04f * EscalaFunc, 1f);
                 _feixe[i].sortingOrder = Ordem(c) + 9;
             }
-            if (scan && _scanner[i] != null) _scanner[i].position = V3(dono.Pos + new Vector2(0.14f, 0.08f) * EscalaFunc, EscalaFunc * (0.3f + 0.45f * Mathf.PingPong(Time.time * 1.6f, 1f)));
+            if (scan && _scanner[i] != null) _scanner[i].position = V3(dono.Pos + new Vector2(0.14f, 0.08f) * EscalaFunc, EscalaFunc * (0.3f + 0.45f * Mathf.PingPong(S.Time * 1.6f, 1f)));
             if (!ve) return;
             SoMao(dono, p, naBandeja || dono.Despachou);
             Vector3 b = V3(RaiaMala(i, Mathf.Lerp(MesaIniD, MesaFimD, Mathf.InverseLerp(0.22f, 0.8f, f))), AltMesa);
