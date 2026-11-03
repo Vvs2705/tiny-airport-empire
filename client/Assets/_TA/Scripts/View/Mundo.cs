@@ -367,9 +367,9 @@ namespace TA
                 {
                     int nivel = NivelDe(st.Vel);
                     while (nivel > 0 && _mesa[e, i, nivel] == null) nivel--;
-                    for (int n = 0; n < NivelMalha.Length; n++) if (_mesa[e, i, n] != null) _mesa[e, i, n].SetActive(i < st.Postos && n == nivel);
+                    for (int n = 0; n < NivelMalha.Length; n++) if (_mesa[e, i, n] != null) Acende(_mesa[e, i, n], i < st.Postos && n == nivel);
                 }
-                for (int r = 0; r < 4; r++) if (_fita[e, r] != null) _fita[e, r].SetActive(st.Fila.Count > 12 * (r + 1));   // a fita abre conforme a fila cresce: ninguem a atravessa
+                for (int r = 0; r < 4; r++) if (_fita[e, r] != null) Acende(_fita[e, r], st.Fila.Count > 12 * (r + 1));   // a fita abre conforme a fila cresce: ninguem a atravessa
                 int gente = s.Presentes(st.Tipo);
                 for (int i = 0; i < 4; i++)   // posto sem ninguem: um X em cima do balcao
                 {

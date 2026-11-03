@@ -153,7 +153,7 @@ namespace TA
 
         void Cordoes(int fila)
         {
-            for (int i = 0; i < _cordao.Count; i++) _cordao[i].SetActive(fila > _cordaoDe[i]);
+            for (int i = 0; i < _cordao.Count; i++) Acende(_cordao[i], fila > _cordaoDe[i]);
         }
 
         Vector2 Lugar(int k) => _serpente[Mathf.Min(k, _serpente.Count - 1)];

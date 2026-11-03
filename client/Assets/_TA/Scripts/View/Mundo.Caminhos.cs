@@ -96,21 +96,29 @@ namespace TA
         static bool Livre(int e, Vector2 a, Vector2 b, float f)
         {
             foreach (Barreira c in _barreiras[e])
-                if (c.Go.activeInHierarchy && Bate(c, a, b, FolgaDe(c, f)) && !(a == _de && PelaFace(c, a, b))) return false;
+                if (c.Go.activeInHierarchy && Bate(c, a, b, f) && !(a == _de && PelaFace(c, a, b, f))) return false;
             return true;
         }
 
-        /// <summary>Onde a rota começa: quem está colado numa peça sai rente, sem atravessá-la; quem já está dentro dela (o cordão do posto que fechou
-        /// com ela ali) sai pela face mais perto (PelaFace), nunca pelo outro lado.</summary>
+        /// <summary>Onde a rota começa (_de). Quem está colado numa peça, ou dentro dela (o cordão do posto que fechou com ela ali), sai primeiro pela face
+        /// mais perto: nem rente, ao longo dela, nem pelo outro lado.</summary>
         static Vector2 _de;
-        static float FolgaDe(Barreira c, float f) => Bate(c, _de, _de, f) ? 0f : f;
 
-        static bool PelaFace(Barreira c, Vector2 a, Vector2 b)
+        static bool PelaFace(Barreira c, Vector2 a, Vector2 b, float f)
         {
             Vector2 v = new Vector2(c.U.y, -c.U.x), o = a - c.C, d = b - a;
-            float u = Vector2.Dot(o, c.U), w = Vector2.Dot(o, v);
-            if (Mathf.Abs(u) >= c.L || Mathf.Abs(w) >= c.W) return false;
-            return c.L - Mathf.Abs(u) < c.W - Mathf.Abs(w) ? u * Vector2.Dot(d, c.U) > 0f : w * Vector2.Dot(d, v) > 0f;
+            float u = Vector2.Dot(o, c.U), w = Vector2.Dot(o, v), l = c.L + f, m = c.W + f;
+            if (Mathf.Abs(u) >= l || Mathf.Abs(w) >= m) return false;
+            return l - Mathf.Abs(u) < m - Mathf.Abs(w) ? u * Vector2.Dot(d, c.U) > 0f : w * Vector2.Dot(d, v) > 0f;
+        }
+
+        /// <summary>Muda quando uma peça que a rota enxerga liga ou desliga (Acende): a perna de quem já anda é revista (Confere).</summary>
+        static int _versao;
+        static void Acende(GameObject go, bool sim)
+        {
+            if (go.activeSelf == sim) return;
+            go.SetActive(sim);
+            _versao++;
         }
 
         /// <summary>Folga da rede de proteção (Confere): o corpo do adulto menos a tolerância do diag_caixas.py.</summary>
@@ -119,12 +127,15 @@ namespace TA
 
         /// <summary>Rede de proteção, antes de cada perna de quem passa: a perna que bate em parede ou em peça ligada (a rota feita com a peça apagada,
         /// a tela atrás do núcleo, a perna entre salas do Eixos) é refeita porta a porta e pela grade. Uma vez por ponto do caminho, nunca por quadro.
-        /// O último palmo fica de fora: chegar de frente no balcão é encostar nele.</summary>
-        void Confere(Boneco b)
+        /// O último palmo fica de fora: chegar de frente no balcão é encostar nele. O funcionário entra no posto sem conferência: no vão do bar e da bancada
+        /// (OCAS do diag) e rente à parede, atrás das máquinas.</summary>
+        void Confere(Boneco b, bool func = false)
         {
-            if (b.Caminho.Count == 0 || b.Caminho[0] == b.Conferido) return;
+            if (b.Caminho.Count == 0 || (b.Caminho[0] == b.Conferido && b.Versao == _versao)) return;
             Vector2 p = b.Pos, q = b.Caminho[0];
             b.Conferido = q;
+            b.Versao = _versao;
+            if (func && b.Caminho.Count == 1 && q == b.Alvo) return;
             int de = SalaEm(p), para = SalaEm(q);
             float l = Vector2.Distance(p, q);
             if (de < 0 || para < 0 || _barreiras[de] == null || _barreiras[para] == null || l < 0.02f) return;
@@ -185,16 +196,15 @@ namespace TA
             }
             foreach (Barreira c in _barreiras[e])
             {
-                float g = FolgaDe(c, f);
                 if (!c.Go.activeInHierarchy) continue;
-                float raio = Mathf.Sqrt(c.L * c.L + c.W * c.W) + g;
+                float raio = Mathf.Sqrt(c.L * c.L + c.W * c.W) + f;
                 int x0 = Mathf.Max(0, Mathf.FloorToInt((c.C.x - raio - o.x) / Celula)), x1 = Mathf.Min(GradeN - 1, Mathf.CeilToInt((c.C.x + raio - o.x) / Celula));
                 int z0 = Mathf.Max(0, Mathf.FloorToInt((c.C.y - raio - o.y) / Celula)), z1 = Mathf.Min(GradeN - 1, Mathf.CeilToInt((c.C.y + raio - o.y) / Celula));
                 for (int z = z0; z <= z1; z++)
                     for (int x = x0; x <= x1; x++)
                     {
                         Vector2 m = Ponto(e, x + z * GradeN);
-                        if (Bate(c, m, m, g)) _grade[x + z * GradeN] = -1;
+                        if (Bate(c, m, m, f)) _grade[x + z * GradeN] = -1;
                     }
             }
             int ini = MaisPerto(e, p, false);
@@ -209,7 +219,7 @@ namespace TA
             }
             int fim = MaisPerto(e, q, true);
             Vector2 chegou = Ponto(e, fim);
-            bool perto = Vector2.Distance(chegou, q) < Celula * 1.5f;
+            bool perto = Vector2.Distance(chegou, q) < f + Celula * 1.5f;   // q colado numa peça (o balcão, a parede atrás do agente): o último passo entra na folga
             if (!perto && !ultima) return false;
 
             // de trás para a frente, seguindo reto enquanto der: entre os caminhos mais curtos, o de menos curvas

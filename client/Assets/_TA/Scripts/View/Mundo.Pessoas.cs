@@ -34,7 +34,8 @@ namespace TA
             public float Tempo, Vel, VelAtual, Senta, GestoT, RotT, RotDur;   // RotT, RotDur: Mundo.Postos.cs
             public int Cadeira = -1, Vaga = -1, Etapa;   // Mundo.Espera.cs; Etapa: Mundo.Seguranca.cs
             public Color Tinta = Color.white;
-            public Vector2 Pos, Alvo, Conferido;   // Alvo, Conferido: Mundo.Caminhos.cs
+            public Vector2 Pos, Alvo, Conferido;   // Alvo, Conferido, Versao: Mundo.Caminhos.cs
+            public int Versao;
             public readonly List<Vector2> Caminho = new List<Vector2>();
             public int Zona = -1, Estande = -1;   // Estande >= 0: indo ao aviao desse estande ou vindo dele (Mundo.Embarque)
             public bool Saindo, Andou, Cima, Atende, NoBalcao, SoMao, Despachou;   // SoMao, Despachou: Mundo.Malas.cs
@@ -319,6 +320,7 @@ namespace TA
                         b.Alvo = lugar;
                     }
                     else Segue(b, lugar, Mathf.Abs(Salas[(int)f.Em].N.x) > 0.5f);
+                    Confere(b, true);
                     Anda(b, VelFunc, dt);
                     if (b.Caminho.Count == 0)
                     {

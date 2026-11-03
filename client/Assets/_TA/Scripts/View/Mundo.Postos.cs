@@ -32,6 +32,7 @@ namespace TA
         static readonly Color Apagado = new Color(0.58f, 0.6f, 0.66f), CorBancada = Art.Hex(0x24406E), CorTampo = Art.Hex(0xEEF1F5), CorPedra = Art.Hex(0xC9B8A0), CorMonitor = Art.Hex(0x20242C), CorTela = Art.Hex(0x7FD4FF), CorTelaOff = Art.Hex(0x303642), CorPainel = Art.Hex(0x1E4E86), CorVidro = Art.Hex(0xBFE3F2);
 
         readonly Pax[,] _noPosto = new Pax[8, 4];
+        readonly Pax[,] _ultimo = new Pax[8, 4];   // Libera: quem saiu do posto por último (AindaNaFrente)
         readonly GameObject[,] _faixas = new GameObject[2, 4], _fechado = new GameObject[2, 4];
         readonly bool[,] _apagado = new bool[2, 4];
         readonly List<Renderer>[] _telas = new List<Renderer>[4];
@@ -205,6 +206,7 @@ namespace TA
         void Libera(int e, int i)
         {
             if (_pax.TryGetValue(_noPosto[e, i].Id, out Boneco b)) b.RotT = b.RotDur = 0f;
+            _ultimo[e, i] = _noPosto[e, i];
             _noPosto[e, i] = null;
         }
 
@@ -229,13 +231,23 @@ namespace TA
             return Mathf.Max(0f, Andamento(p, e));
         }
 
+        /// <summary>A tela anda atrás do núcleo: quem acabou de ser atendido ainda está diante do posto quando ele fica sem gente. O cordão espera ele sair.</summary>
+        bool AindaNaFrente(int e, int i)
+        {
+            Pax p = _ultimo[e, i];
+            if (p == null || !_pax.TryGetValue(p.Id, out Boneco b)) return false;
+            if ((b.Pos - (e == SalaSeg ? Parada(i, 0) : NoBalcao(e, i))).sqrMagnitude < 0.4f * 0.4f) return true;
+            _ultimo[e, i] = null;
+            return false;
+        }
+
         /// <summary>Salas3D, por posto: o que muda quando ele fica sem gente. `vazio` = comprado e sem funcionário.</summary>
         void EstadoPosto(Sim s, Station st, int e, int i, bool vazio)
         {
             if (e != SalaCheckIn && e != SalaSeg) return;
-            bool apagado = vazio && _noPosto[e, i] == null;
+            bool apagado = vazio && _noPosto[e, i] == null && !AindaNaFrente(e, i);
             _faixas[e, i].SetActive(i < st.Postos && !apagado);
-            _fechado[e, i].SetActive(apagado && i >= s.Alocados(st.Tipo));
+            Acende(_fechado[e, i], apagado && i >= s.Alocados(st.Tipo));
             if (e == SalaCheckIn)
             {
                 _numero[i].gameObject.SetActive(i < st.Postos);
