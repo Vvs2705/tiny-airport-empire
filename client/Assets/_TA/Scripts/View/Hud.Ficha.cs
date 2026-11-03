@@ -39,6 +39,7 @@ namespace TA
         Image _fichaPlaca, _fichaGlifo;
         Text _fichaNome, _fichaLinha, _fichaInfo, _fichaNota, _fichaTopoTexto;
         Text[] _fichaTextos;
+        readonly Vector3[] _cantos = new Vector3[4];
         BotaoPreco _fichaMover;
         Sel _sel;
         int _selId;
@@ -94,7 +95,8 @@ namespace TA
             foreach (Text t in _fichaTextos) t.rectTransform.offsetMax = new Vector2(-dir, t.rectTransform.offsetMax.y);
             _fichaTopoTexto.text = f.Topo;
             _fichaTopo.sizeDelta = new Vector2(_fichaTopoTexto.preferredWidth + 36f, 56f);
-            _fichaTopo.gameObject.SetActive(M.PoeTopo(_fichaTopo, _sel, _selId));
+            _ficha.GetWorldCorners(_cantos);   // canvas overlay: px da tela
+            _fichaTopo.gameObject.SetActive(M.PoeTopo(_fichaTopo, _sel, _selId, _cantos[1].y));
         }
 
         FichaDados DadosDaFicha(Sim s)

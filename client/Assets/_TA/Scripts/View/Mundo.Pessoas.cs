@@ -583,8 +583,8 @@ namespace TA
         internal bool PaxNaTela(int id, out bool embarcou) { embarcou = _embarcou.Contains(id); return _pax.ContainsKey(id); }
         internal bool Atende(int k) => _func[k].Atende;
 
-        /// <summary>A linha do topo da ficha em cima de quem esta selecionado (ou da sala); false se nao esta na faixa do mundo.</summary>
-        internal bool PoeTopo(RectTransform rt, Sel tipo, int id)
+        /// <summary>A linha do topo da ficha em cima de quem esta selecionado (ou da sala); false fora da faixa do mundo ou atras do cartao (abaixo de baixo, px).</summary>
+        internal bool PoeTopo(RectTransform rt, Sel tipo, int id, float baixo)
         {
             Vector3 p;
             if (tipo == Sel.Estacao) p = V3(Centro(id), 2f);   // acima do selo do estado
@@ -596,7 +596,8 @@ namespace TA
                 if (b == null || !b.Corpo.enabled) return false;
                 p = b.T.position + Vector3.up * 0.95f;   // acima do nome e do balao de humor
             }
-            if (!_regiao.Contains(Tela(p))) return false;
+            Vector2 q = Tela(p);
+            if (!_regiao.Contains(q) || q.y < baixo) return false;
             Coloca(rt, p);
             Prende(rt);
             return true;
