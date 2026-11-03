@@ -378,13 +378,14 @@ namespace TA.Core
         // ---- Fase C8 (CONTRATO_FASE_C8, hipoteses) ----
         /// <summary>Cobra a conta no fechamento do dia (false = so o relatorio, o jogo da Fase D1).</summary>
         public bool RegraDespesas = true;
-        /// <summary>Cash por dia do jogo: salario de cada perfil (ordem de Perfil), de cada funcao da tripulacao e de cada pessoa do patio.</summary>
-        public int[] Salario = { 60, 80, 80, 100, 150, 150 };
-        public int[] SalarioTrip = { 40, 20 };
-        public int SalarioPatio = 30;
+        /// <summary>Cash por dia do jogo: salario de cada perfil (ordem de Perfil), de cada funcao da tripulacao e de cada pessoa do patio. A 1a
+        /// tabela, 1,67 x esta, derrubava o portao dos aeroportos para 1,078 (BALANCE.md D-C8c).</summary>
+        public int[] Salario = { 35, 50, 50, 60, 90, 90 };
+        public int[] SalarioTrip = { 24, 12 };
+        public int SalarioPatio = 18;
         /// <summary>Cash por dia do jogo de cada estacao ativa (ordem de Estacao) e quanto cada nivel de melhoria dela soma.</summary>
-        public int[] Manutencao = { 20, 20, 15, 15, 15, 15, 30, 20 };
-        public int[] ManutencaoNivel = { 10, 10, 8, 8, 8, 8, 12, 0 };
+        public int[] Manutencao = { 12, 12, 9, 9, 9, 9, 18, 12 };
+        public int[] ManutencaoNivel = { 6, 6, 5, 5, 5, 5, 7, 0 };
     }
 
     /// <summary>Historias do TA-3 (GDD §5.9). A v0.1 tem 1. Id = indice (vai no album do save): so cresce no fim.</summary>

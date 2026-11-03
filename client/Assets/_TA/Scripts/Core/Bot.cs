@@ -414,23 +414,24 @@ namespace TA.Core
 
         bool Comprar(Sim s)
         {
-            // hire: -2 = o proximo da v0.1 (Hire()), >= 0 = o perfil novo, -1 = upgrade
-            long best = s.CustoContratar(); Estacao be = 0; Melhoria bm = 0; int hire = best >= 0 ? -2 : -1;
-            for (int p = Sim.MaxFuncionarios; p < Sim.MaxEquipe; p++)
+            // hire: -2 = o proximo da v0.1 (Hire()), >= 0 = o perfil novo, -1 = upgrade. Fase C8: com a conta atrasada (Pausado) a tela trava
+            // contratar e melhorar, e o bot so olha rota e viagem
+            long best = s.Pausado ? -1 : s.CustoContratar(); Estacao be = 0; Melhoria bm = 0; int hire = best >= 0 ? -2 : -1;
+            for (int p = Sim.MaxFuncionarios; p < Sim.MaxEquipe && !s.Pausado; p++)
             {
                 long c = s.CustoContratar((Perfil)p);
                 if (c >= 0 && (best < 0 || c < best)) { best = c; hire = p; }
             }
             foreach (Station st in s.Estacoes)
             {
-                if (!Fluxo(st.Tipo) && s.Alocados(st.Tipo) == 0) continue;   // estacao sem ninguem nao rende: nao melhora
+                if (s.Pausado || !Fluxo(st.Tipo) && s.Alocados(st.Tipo) == 0) continue;   // estacao sem ninguem nao rende: nao melhora
                 foreach (Melhoria m in new[] { Melhoria.Velocidade, Melhoria.Capacidade })
                 {
                     long c = s.Custo(st.Tipo, m);
                     if (c >= 0 && (best < 0 || c < best)) { best = c; be = st.Tipo; bm = m; hire = -1; }
                 }
             }
-            if (s.AtrasosPatio > _patioVisto && s.CustoPatio() >= 0 && (best < 0 || s.CustoPatio() <= best))
+            if (!s.Pausado && s.AtrasosPatio > _patioVisto && s.CustoPatio() >= 0 && (best < 0 || s.CustoPatio() <= best))
             {
                 if (!s.HirePatio()) return false;
                 _patioVisto = s.AtrasosPatio;
