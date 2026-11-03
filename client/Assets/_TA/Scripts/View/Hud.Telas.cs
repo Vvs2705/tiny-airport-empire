@@ -193,9 +193,10 @@ namespace TA
             segundos.offsetMin = new Vector2(166f, -118f); segundos.offsetMax = new Vector2(-28f, -94f);
             BotaoDoPe(_anuncio.F.Corpo, Vector2.zero, new Vector2(1f, 0f), () => Fecha(_anuncio)).Secundario(Textos.FecharSemRecompensa);
 
-            _pausa = NovaFolhaModal(canvas, "Pausa", Textos.Pausado, Art.Relogio(), 1120f);
+            _pausa = NovaFolhaModal(canvas, "Pausa", Textos.Pausado, Art.Relogio(), 1300f);
             RectTransform lp = NovoResumo(_pausa, Textos.Embarcados, Art.Pessoas(), Art.Azul, out _pausaResumo);
             Art.Margem((RectTransform)lp.parent, 24f, 186f, 24f, 184f);
+            ItemPausa(lp, "Config", Art.Chave(), Art.EstacaoCor[6], Textos.Configuracoes, Textos.ConfigLegenda, Textos.Abrir, it => { Fecha(_pausa); AbreTela("config"); });
             ItemPausa(lp, "Tutorial", Art.Mao(), Art.EstacaoCor[0], Textos.ReverTutorial, Textos.TutorialLegenda, Textos.Rever, it => { Fecha(_pausa); ReverTour(); });
             _pausaDiario = ItemPausa(lp, "Diario", Art.Bilhete(), Art.EstacaoCor[3], Textos.ExportarDiario, Textos.DiarioLegenda, Textos.Exportar, it => it.Linha.text = _g.ExportarDiario());
             ItemPausa(lp, "Album", Art.Estrela(), Art.EstacaoCor[1], Textos.Album, Textos.AlbumLegenda, Textos.Abrir, it => { Fecha(_pausa); AbreTela("album"); });
@@ -209,6 +210,7 @@ namespace TA
                 _albumItem[h] = NovoItem(lh, "Historia" + h, Art.Estrela(), Art.Vazio, null, 136f, 18f);
                 _albumItem[h].Nome.text = Textos.Historia[h];
             }
+            BuildConfig(canvas);
         }
 
         void BuildMelhorias(RectTransform canvas)
@@ -258,7 +260,7 @@ namespace TA
             m.Rt.SetAsLastSibling();
         }
 
-        /// <summary>Abre uma tela pelo nome (botoes e a flag -tela): melhorias, mover, cofre, anuncio, pausa, album, metas, missoes, conquistas. "jogo" = nenhuma.</summary>
+        /// <summary>Abre uma tela pelo nome (botoes e a flag -tela): melhorias, mover, cofre, anuncio, pausa, album, config, excluir, metas, missoes, conquistas. "jogo" = nenhuma.</summary>
         public void AbreTela(string nome)
         {
             switch (nome)
@@ -267,6 +269,8 @@ namespace TA
                 case "mover": if (S.Staff.Count > 0) AbreMover(0); break;
                 case "pausa": _pausaDiario.Linha.text = Textos.DiarioLegenda; Abre(_pausa); break;
                 case "album": Abre(_album); break;
+                case "config": Abre(_config); break;
+                case "excluir": Abre(_config); Abre(_excluir); break;
                 case "anuncio": _g.VerAnuncio(Anuncio.Receita); break;
                 case "equipe": Abre(_equipe); break;
                 case "tripulacao": Abre(_trip); break;
@@ -391,6 +395,7 @@ namespace TA
                 }
                 _albumResumo.Pinta(s, Textos.DeTotal(entregues, _albumItem.Length));
             }
+            PintaConfig();
             PintaOperacao();
         }
 
@@ -400,9 +405,11 @@ namespace TA
         /// </summary>
         internal string PisoTela()
         {
-            foreach (Modal m in _modais)
+            Modal m = null;   // a de cima: Abre poe a folha por ultimo entre as irmas
+            foreach (Modal x in _modais)
+                if (x.Rt.gameObject.activeSelf && (m == null || x.Rt.GetSiblingIndex() > m.Rt.GetSiblingIndex())) m = x;
+            if (m != null)
             {
-                if (!m.Rt.gameObject.activeSelf) continue;
                 float texto = float.MaxValue, alvo = float.MaxValue;
                 int cortes = 0;
                 string menor = "", cortado = "";
