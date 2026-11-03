@@ -21,7 +21,7 @@ namespace TA
     ///   -autoplay N   sem render: o bot joga N ondas (Bom, Lento, Parado; retomada no meio da onda), loga AUTOPLAY OK|FAIL e sai 0/1.
     ///                 Usar com -batchmode -nographics (client/tools/verify.sh full).
     ///   -bot          o bot Bom joga na tela.        -speed N   multiplica o dt (0,1..20).   -vel V   comeca em V (0 = pausa, 1..3 = 1x..3x).
-    ///   -tela nome    jogo | melhorias | mover | cofre | anuncio | pausa | pausada (sem o menu) | album | config | excluir | equipe | tripulacao | patio | voo | metas | missoes | conquistas | fichapax | fichafunc | fichaestacao | fichatrip (Hud.FichaDev) | passoN (tutorial, passo N).
+    ///   -tela nome    jogo | melhorias | mover | cofre | anuncio | pausa | pausada (sem o menu) | album | config | excluir | equipe | tripulacao | patio | voo | metas | missoes | conquistas | passe | fichapax | fichafunc | fichaestacao | fichatrip (Hud.FichaDev) | passoN (tutorial, passo N).
     ///   -textomaior, -reduzmovimento   ligam o ajuste so nesta sessao (o -testsession nao le as preferencias do PC).
     ///   -onda K       comeca na onda K (1 = a 1a).   -passageiros N   estresse: N passageiros por onda (60 = o K3).
     ///   -tutorial     liga o tutorial no -testsession (sem gravar; com -bot o ENTENDI se aperta sozinho).
@@ -300,6 +300,7 @@ namespace TA
                 case Ev.ObjetivoConcluido: Diario("campaign_objective_completed", e.A, e.B, e.C); _hud.ObjetivoFeito(e.A, e.B, e.C); break;
                 case Ev.MissaoConcluida: Diario(e.A == 0 ? "daily_mission_completed" : "weekly_mission_completed", e.B, e.C); _hud.MissaoFeita(e.A, e.B, e.C); break;
                 case Ev.ConquistaFeita: Diario("achievement_unlocked", e.A); _hud.ConquistaNova(e.A); break;
+                case Ev.PasseNivel: Diario("season_reward_claimed", e.A, e.B, e.C); _hud.PasseNivel(e.A, e.B); break;
             }
         }
 

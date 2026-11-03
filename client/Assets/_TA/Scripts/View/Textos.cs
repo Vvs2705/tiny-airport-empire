@@ -192,6 +192,40 @@ namespace TA
         public static string ConquistaNova(string nome) => L("Conquista: ") + nome + "!";
         static string Plural(int n, string um, string varios) => Num(n) + " " + (n == 1 ? um : varios);
 
+        // ---------- passe de temporada (docs/PASSE.md e CONTRATO_FASE_C7; os numeros sao os do nucleo) ----------
+        public static readonly string Passe = L("Passe"), PasseTitulo = L("Passe de temporada"), NivelRotulo = L("Nível"), DiasRotulo = L("Dias do jogo"),
+            ComoFunciona = L("Como funciona"), Gratis = L("GRÁTIS"), Premium = L("PREMIUM"), Recebido = L("Recebido"), TrilhaCompleta = L("Trilha completa"),
+            PremiumTitulo = L("Trilha premium"), PremiumLiberadaTitulo = L("Trilha premium liberada"),
+            PremiumTrancada = L("Vem com a loja, numa atualização. Por enquanto não tem preço nem compra."),
+            PremiumLiberada = L("Ela já é sua. Os prêmios dela chegam com a loja."),
+            PremiumNaoPrecisa = L("A campanha e a trilha grátis fecham sem ela."), ComALoja = L("Com a loja"), Liberada = L("Liberada"),
+            PasseFechado = L("A próxima temporada chega numa atualização. O que você ganhou continua seu.");
+        /// <summary>As regras visiveis (GDD §6.4): de onde vem o ponto, quando o premio entra, o que expira e quanto dura.</summary>
+        public static string[] RegrasPasse(Tuning t, int dias) => new[]
+        {
+            L("Ponto vem do jogo: voo que partiu ") + t.PasseVoo + L(", diária ") + t.PasseDiaria + L(", semanal ") + t.PasseSemanal
+                + L(", objetivo da campanha ") + t.PasseObjetivo + L(". Ponto não se compra."),
+            L("O prêmio entra na hora em que o nível fecha. Coletar só marca como visto: não há prazo para resgatar, nem depois do fim."),
+            L("Nada expira: Cash, 2× e cosmético ficam com você. A temporada dura ") + dias + L(" dias do jogo e só anda com o jogo aberto."),
+        };
+        public static string CosmeticoNome(string id)
+        {
+            switch (id)
+            {
+                case "terminal_decor_flags_s1": return L("Bandeirolas no saguão");
+                case "aircraft_skin_sunset_s1": return L("Pintura pôr do sol");
+                case "aircraft_skin_gold_s1": return L("Pintura dourada");
+                default: return id;
+            }
+        }
+        public static string PremioNome(Nivel n) => n.Premio == TA.Core.Premio.Cash ? "+" + Num(n.Valor) + L(" Cash")   // Premio aqui e' o texto "Prêmio"
+            : n.Premio == TA.Core.Premio.Tempo ?(n.Valor / 60) + L(" min de 2×") : CosmeticoNome(n.Id);
+        public static string NivelCurto(int n) => L("Nível ") + n;
+        public static string ParaNivel(int n) => L("Para o nível ") + n;
+        public static string FaltamPontos(int n) => (n == 1 ? L("Falta ") : L("Faltam ")) + Plural(n, L("ponto"), L("pontos"));
+        public static string AbreCom(int pontos) => L("Abre com ") + Num(pontos) + L(" pontos");
+        public static string PasseNivelFeito(int n, Nivel premio) => L("Passe, nível ") + n + ": " + PremioNome(premio);
+
         /// <summary>O que a meta pede, em uma frase: a coluna Condição do CAMPANHA.md e do MISSOES.md, montada de Meta, Arg e Alvo.</summary>
         public static string MetaTexto(Objetivo o)
         {
