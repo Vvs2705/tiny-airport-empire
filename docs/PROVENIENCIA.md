@@ -494,6 +494,17 @@ Peças pedidas pela frente `ta-planta` e geradas pelo coordenador. SHA-256 infor
 | mesa_despacho | `mesa_despacho_hd/mesa_despacho_hd.zip` | 10.0 MiB | `402cafb189731cfd519a3a332021b9623741ecf5e8dca5f80dcfda835ae378df` | `929d2bd0e774a27365f27b0f583cd743f541a1ba203870913764e727d65cf61c` |
 | pneus_empilhados | `pneus_empilhados_hd/pneus_empilhados_hd.zip` | 9.8 MiB | `2d525322696d9b7585480be5f3029d6ade88bb555013f97800ce10eb567e0270` | `3261279f234943f1862af9243ed1f131432ead8d356cc9df7966110f8222a65f` |
 
+### 2.8 Conta nova, 2026-11-01: postos da loja, da oficina e do despacho
+
+Peças pedidas pela frente `ta-planta` e geradas pelo coordenador. SHA-256 informados por ele na entrega.
+
+| Peça | Arquivo | Tamanho | SHA-256 do zip | SHA-256 do FBX |
+|---|---|---|---|---|
+| balcao_loja | `balcao_loja_hd/balcao_loja_hd.zip` | 10.3 MiB | `9cfbcf16e5dd68e8bfd98bb2dc276ab32fdfcfaf8cfccf7176875037d0acdbc8` | `5fbd29119cfc7a56ea80902e5b63479b53d758fa3a62f08e92f08e59ae7eb7f2` |
+| bancada_oficina | `bancada_oficina_hd/bancada_oficina_hd.zip` | 9.2 MiB | `adc0867bb97845eb2a1584385eb1367fd92f2a4d2e6b6b147e680b7388f61ae6` | `cec02b3c3a45200d32aed1ce94d8920b9ef491abb37bab925aa1657d6ad4f71c` |
+| mesa_despacho | `mesa_despacho_hd/mesa_despacho_hd.zip` | 10.0 MiB | `402cafb189731cfd519a3a332021b9623741ecf5e8dca5f80dcfda835ae378df` | `929d2bd0e774a27365f27b0f583cd743f541a1ba203870913764e727d65cf61c` |
+| pneus_empilhados | `pneus_empilhados_hd/pneus_empilhados_hd.zip` | 9.8 MiB | `2d525322696d9b7585480be5f3029d6ade88bb555013f97800ce10eb567e0270` | `3261279f234943f1862af9243ed1f131432ead8d356cc9df7966110f8222a65f` |
+
 ## 3. Marca e arte de instalação (imagem, sem modelo 3D)
 
 Geradas no gerador de imagem do Tripo (Nano Banana 2, 1024 px; splash 9:16 em 768 × 1376) e ampliadas para 4K pelo botão "4K" (10 créditos cada, §1). Os originais 4K ficam em `arte/marca/` (fora do git, com backup). As versões do jogo, em `client/Assets/_TA/Art/Marca/`, saem do script `client/tools/marca.py` (determinístico; recorte do fundo azul-marinho por inundação a partir da borda, tolerância 38; conferido sobre xadrez).

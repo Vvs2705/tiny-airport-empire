@@ -51,7 +51,7 @@ namespace TA
             new Mov(SalaComida, "mesas_alimentacao", 3.05f, 0.1f, 1f, 0f),
             new Mov(SalaComida, "bebedouro", 1.15f, 1.52f, 0f, -1f, 0.8f),
             new Mov(SalaComida, "lixeira_terminal", 2.3f, 1.54f, 0f, -1f, 0.6f),
-            new Mov(SalaComida, "carrinho_cafe", 2.9f, 1.42f, 0f, -1f),
+            new Mov(SalaComida, "carrinho_cafe", 3.1f, 1.45f, 0f, -1f, 0.8f),   // no canto, fora da 5a fileira da fila
             new Mov(SalaComida, "vaso_planta", 3.2f, -1.52f, 1f, 0f, 0.7f),
 
             new Mov(SalaOficina, "escada_manutencao", 1.3f, 1.5f, 0f, -1f),

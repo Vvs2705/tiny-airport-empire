@@ -258,7 +258,7 @@ namespace TA
             m.Rt.SetAsLastSibling();
         }
 
-        /// <summary>Abre uma tela pelo nome (botoes e a flag -tela): melhorias, mover, cofre, anuncio, pausa, album. "jogo" = nenhuma.</summary>
+        /// <summary>Abre uma tela pelo nome (botoes e a flag -tela): melhorias, mover, cofre, anuncio, pausa, album, metas, missoes, conquistas. "jogo" = nenhuma.</summary>
         public void AbreTela(string nome)
         {
             switch (nome)
@@ -272,6 +272,7 @@ namespace TA
                 case "tripulacao": Abre(_trip); break;
                 case "patio": Abre(_patio); break;
                 case "voo": AbreVoo(0); break;
+                case "metas": case "missoes": case "conquistas": AbreMetas(nome); break;
             }
         }
 
