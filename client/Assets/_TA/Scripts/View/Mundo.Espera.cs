@@ -131,9 +131,6 @@ namespace TA
         {
             bool critico = st.Estado == Estado.Critico;
             int k = 0;
-            for (int i = 0; i < st.Fila.Count; i++) if (Aberto(s, st.Fila[i])) k++;
-            Cordoes(Mathf.Min(k, Chamados));   // antes das rotas: quem levanta ao abrir o embarque já vê a corda
-            k = 0;
             for (int i = 0; i < st.Fila.Count && k < Chamados; i++)
                 if (Aberto(s, st.Fila[i])) { Liga(st.Fila[i], Portao, Lugar(k), s, false, critico && k < 3, VagaFila + k); k++; }
             int chamados = 0;
@@ -147,13 +144,8 @@ namespace TA
                 else { Liga(p, Portao, Lugar(k), s, false, false, VagaFila + k); k++; }
             }
             for (int c = 0; c < _dono.Count; c++) if (_dono[c] >= 0 && !_sentados.Contains(_dono[c])) _dono[c] = -1;
-            Cordoes(k);
+            for (int i = 0; i < _cordao.Count; i++) _cordao[i].SetActive(k > _cordaoDe[i]);
             for (int i = 0; i < 4; i++) _zona[i].SetActive(i < st.Postos);
-        }
-
-        void Cordoes(int fila)
-        {
-            for (int i = 0; i < _cordao.Count; i++) Acende(_cordao[i], fila > _cordaoDe[i]);
         }
 
         Vector2 Lugar(int k) => _serpente[Mathf.Min(k, _serpente.Count - 1)];
@@ -187,16 +179,15 @@ namespace TA
             }
             b.Caminho.Clear();
             Vector2 p = b.Cadeira >= 0 ? _assentos[b.Cadeira].Pe : b.Pos;
-            AteASala(b.Caminho, ref p, Portao, Portao);
             RotaSala(b.Caminho, ref p, alvo);
         }
 
         /// <summary>De p até alvo dentro do portão: quem está entre as cadeiras sai pelo corredor da fileira e anda pelo corredor de trás da fila.</summary>
         public static void RotaSala(List<Vector2> r, ref Vector2 p, Vector2 alvo)
         {
-            if (DeSaida(p) > DCorredor) Contorna(r, ref p, Em(Portao, DCorredor, Ao(p)), false);
-            if (DeSaida(alvo) > DCorredor) Contorna(r, ref p, Em(Portao, DCorredor, Ao(alvo)), true);
-            Contorna(r, ref p, alvo, true);
+            if (DeSaida(p) > DCorredor) Eixos(r, ref p, Em(Portao, DCorredor, Ao(p)), false);
+            if (DeSaida(alvo) > DCorredor) Eixos(r, ref p, Em(Portao, DCorredor, Ao(alvo)), true);
+            Eixos(r, ref p, alvo, true);
         }
 
         /// <summary>Sai(): quem deixa a sala do meio das cadeiras passa antes pelo corredor.</summary>
@@ -204,7 +195,7 @@ namespace TA
         {
             b.Vaga = -1;
             if (b.Cadeira >= 0) p = _assentos[b.Cadeira].Pe;
-            if (DeSaida(p) > DCorredor) Contorna(b.Caminho, ref p, Em(Portao, DCorredor, Ao(p)), false);
+            if (DeSaida(p) > DCorredor) Eixos(b.Caminho, ref p, Em(Portao, DCorredor, Ao(p)), false);
         }
 
         /// <summary>Senta ao chegar diante do lugar e levanta quando a vaga muda: a pessoa recua até o assento, sem deslizar o pé. true = parada nisso.</summary>

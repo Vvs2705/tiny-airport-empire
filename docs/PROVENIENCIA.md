@@ -483,16 +483,6 @@ Mesma receita do §2.4, peça a peça pela interface. A hora é a do zip e o id 
 | guiche_checkin_n2 | 15:13 | — | `27b1dc24-33a8-4687-9087-0e178452b0d3` (export) | — | — | `guiche_checkin_n2_hd/guiche_checkin_n2_hd.zip` | 8.1 MiB | `f3a29862ccc69c241532dae6a207a3e8bd4adec34188d85063fb235469eef592` | `7fb6607c80a0ac77f262c97594d3712f8f566149131d8cf51fd4aaa14d0f6702` |
 | guiche_checkin_n3 | 15:20 | — | `7c5c3133-2c3e-47cb-bc1c-170fe31d41c7` (export) | — | — | `guiche_checkin_n3_hd/guiche_checkin_n3_hd.zip` | 8.9 MiB | `2df31afd82ad845298e571f04a55f4e6bc7b3f1fe19c8ec358381ae3f56ec651` | `e00fd2d4637fa0002ecc9a203a0d4268e5f22fd83f2a9d583499814cc059bc2a` |
 | painel_guiche | 15:28 | — | `a1e5c2cc-0863-4d41-af8d-f933dae87012` (export) | — | — | `painel_guiche_hd/painel_guiche_hd.zip` | 6.6 MiB | `964cf71e3ac46185105ed78e9d30be4dffee1ccde08de476a2ca150ba7a1bbde` | `0ecd8a4490872b8ac3fb1985a7d19ac33be56482d7b9b88b622e2b51706deb91` |
-### 2.8 Conta nova, 2026-11-01: postos da loja, da oficina e do despacho
-
-Peças pedidas pela frente `ta-planta` e geradas pelo coordenador. SHA-256 informados por ele na entrega.
-
-| Peça | Arquivo | Tamanho | SHA-256 do zip | SHA-256 do FBX |
-|---|---|---|---|---|
-| balcao_loja | `balcao_loja_hd/balcao_loja_hd.zip` | 10.3 MiB | `9cfbcf16e5dd68e8bfd98bb2dc276ab32fdfcfaf8cfccf7176875037d0acdbc8` | `5fbd29119cfc7a56ea80902e5b63479b53d758fa3a62f08e92f08e59ae7eb7f2` |
-| bancada_oficina | `bancada_oficina_hd/bancada_oficina_hd.zip` | 9.2 MiB | `adc0867bb97845eb2a1584385eb1367fd92f2a4d2e6b6b147e680b7388f61ae6` | `cec02b3c3a45200d32aed1ce94d8920b9ef491abb37bab925aa1657d6ad4f71c` |
-| mesa_despacho | `mesa_despacho_hd/mesa_despacho_hd.zip` | 10.0 MiB | `402cafb189731cfd519a3a332021b9623741ecf5e8dca5f80dcfda835ae378df` | `929d2bd0e774a27365f27b0f583cd743f541a1ba203870913764e727d65cf61c` |
-| pneus_empilhados | `pneus_empilhados_hd/pneus_empilhados_hd.zip` | 9.8 MiB | `2d525322696d9b7585480be5f3029d6ade88bb555013f97800ce10eb567e0270` | `3261279f234943f1862af9243ed1f131432ead8d356cc9df7966110f8222a65f` |
 
 ### 2.8 Conta nova, 2026-11-01: postos da loja, da oficina e do despacho
 
