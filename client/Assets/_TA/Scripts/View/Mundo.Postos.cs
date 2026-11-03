@@ -157,7 +157,7 @@ namespace TA
             _cont = Grupo("Fechado" + i, sala);
             _fechado[e, i] = _cont.gameObject;
             if (Peca("cordao_fila", V3(frente), Rumo(n), EscalaGuiche) == null) Bloco("Cordao", PrimitiveType.Cube, V3(frente, 0.2f), Mathf.Abs(n.x) > 0.5f ? new Vector3(0.02f, 0.03f, 0.6f) : new Vector3(0.6f, 0.03f, 0.02f), Fita);
-            Vector2 placa = frente - n * (0.16f * EscalaFunc) + t * (0.22f * EscalaFunc);
+            Vector2 placa = frente - n * ((e == SalaSeg ? 0f : 0.16f) * EscalaFunc) + t * (0.22f * EscalaFunc);   // na segurança, a 1a fileira da fila passa rente
             if (Peca("placa_fora_de_servico", V3(placa), Rumo(-n), 0.5f * EscalaFunc) == null) Bloco("Placa", PrimitiveType.Cube, V3(placa, 0.2f), Vector3.one * 0.2f, Art.Bad);
             _cont = sala;
         }

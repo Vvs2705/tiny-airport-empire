@@ -34,7 +34,7 @@ namespace TA
             public float Tempo, Vel, VelAtual, Senta, GestoT, RotT, RotDur;   // RotT, RotDur: Mundo.Postos.cs
             public int Cadeira = -1, Vaga = -1, Etapa;   // Mundo.Espera.cs; Etapa: Mundo.Seguranca.cs
             public Color Tinta = Color.white;
-            public Vector2 Pos, Alvo;   // Alvo: Mundo.Caminhos.cs
+            public Vector2 Pos, Alvo, Conferido;   // Alvo, Conferido: Mundo.Caminhos.cs
             public readonly List<Vector2> Caminho = new List<Vector2>();
             public int Zona = -1, Estande = -1;   // Estande >= 0: indo ao aviao desse estande ou vindo dele (Mundo.Embarque)
             public bool Saindo, Andou, Cima, Atende, NoBalcao, SoMao, Despachou;   // SoMao, Despachou: Mundo.Malas.cs
@@ -150,7 +150,7 @@ namespace TA
             {
                 Boneco b = kv.Value;
                 if (!_vistos.Contains(kv.Key) && !b.Saindo) Sai(kv.Key, b);
-                if (!Sentando(b, dt)) Anda(b, VelPax, dt);
+                if (!Sentando(b, dt)) { Confere(b); Anda(b, VelPax, dt); }
                 Pinta(b);
                 b.Gesto = -1;
                 if (b.Saindo && b.Caminho.Count == 0) _sair.Add(kv.Key);
@@ -224,7 +224,7 @@ namespace TA
             Vector2 p = b.Pos;
             if (z == Portao) SaiDaFileira(b, ref p);
             if (!_embarcou.Contains(id)) VoltaDaLinha(b, ref p);
-            AteASala(b.Caminho, ref p, z, z);
+            AteASala(b.Caminho, ref p, z, _embarcou.Contains(id) ? Portao : z);   // a tela atrás do núcleo: quem embarcou pode estar ainda na segurança
             if (!_embarcou.Contains(id)) PelaPorta(b.Caminho, ref p, Salas[z].In);   // um passo para fora da porta
             else Embarca(b, ref p, id / 500 % 2);
         }
@@ -398,6 +398,7 @@ namespace TA
         {
             int aqui = SalaEm(p);
             if (aqui >= 0) de = aqui;
+            else if (de == para && p.x < Salas[0].Min.x) de = -1;   // ainda na calçada: entra pela porta da rua
             _portas.Clear();
             if (de < 0) { _portas.Add(Salas[0].In); de = 0; }
             PelasPortas(de, para, _portas);

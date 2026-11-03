@@ -57,7 +57,7 @@ namespace TA
                     Quaternion q = Quaternion.Euler(0f, t.eulerAngles.y, 0f);
                     Vector3 c = t.position + q * b.center, u = q * Vector3.forward;
                     var p = new Barreira { Go = t.gameObject, C = new Vector2(c.x, c.z), U = new Vector2(u.x, u.z), L = b.extents.z, W = b.extents.x };
-                    if (t.name == "cordao_fila") p.L = 0.01f;   // a caixa é a da diagonal da malha, mais larga que o corredor da fila; a corda é um fio
+                    if (t.name == "cordao_fila" && !t.parent.name.StartsWith("Fechado")) p.L = 0.01f;   // a do portão: a caixa é a da diagonal da malha, mais larga que o corredor da fila; a corda é um fio
                     _barreiras[e].Add(p);
                 }
                 foreach (Fundido f in _fundidos)   // bloco fixo nunca anda: vale onde está, mesmo fora da sala (a parede fica de pé com a sala fechada)
@@ -96,14 +96,49 @@ namespace TA
         static bool Livre(int e, Vector2 a, Vector2 b, float f)
         {
             foreach (Barreira c in _barreiras[e])
-                if (c.Go.activeInHierarchy && FolgaDe(c, f) >= 0f && Bate(c, a, b, FolgaDe(c, f))) return false;
+                if (c.Go.activeInHierarchy && Bate(c, a, b, FolgaDe(c, f)) && !(a == _de && PelaFace(c, a, b))) return false;
             return true;
         }
 
-        /// <summary>Onde a rota começa: quem já está dentro de uma peça (o cordão do posto que fechou com ela ali) sai sem barreira; quem está colado
-        /// numa peça sai rente, sem atravessá-la.</summary>
+        /// <summary>Onde a rota começa: quem está colado numa peça sai rente, sem atravessá-la; quem já está dentro dela (o cordão do posto que fechou
+        /// com ela ali) sai pela face mais perto (PelaFace), nunca pelo outro lado.</summary>
         static Vector2 _de;
-        static float FolgaDe(Barreira c, float f) => Bate(c, _de, _de, 0f) ? -1f : Bate(c, _de, _de, f) ? 0f : f;
+        static float FolgaDe(Barreira c, float f) => Bate(c, _de, _de, f) ? 0f : f;
+
+        static bool PelaFace(Barreira c, Vector2 a, Vector2 b)
+        {
+            Vector2 v = new Vector2(c.U.y, -c.U.x), o = a - c.C, d = b - a;
+            float u = Vector2.Dot(o, c.U), w = Vector2.Dot(o, v);
+            if (Mathf.Abs(u) >= c.L || Mathf.Abs(w) >= c.W) return false;
+            return c.L - Mathf.Abs(u) < c.W - Mathf.Abs(w) ? u * Vector2.Dot(d, c.U) > 0f : w * Vector2.Dot(d, v) > 0f;
+        }
+
+        /// <summary>Folga da rede de proteção (Confere): o corpo do adulto menos a tolerância do diag_caixas.py.</summary>
+        const float Raio = 0.08f;
+        static readonly List<Vector2> _conserto = new List<Vector2>();
+
+        /// <summary>Rede de proteção, antes de cada perna de quem passa: a perna que bate em parede ou em peça ligada (a rota feita com a peça apagada,
+        /// a tela atrás do núcleo, a perna entre salas do Eixos) é refeita porta a porta e pela grade. Uma vez por ponto do caminho, nunca por quadro.
+        /// O último palmo fica de fora: chegar de frente no balcão é encostar nele.</summary>
+        void Confere(Boneco b)
+        {
+            if (b.Caminho.Count == 0 || b.Caminho[0] == b.Conferido) return;
+            Vector2 p = b.Pos, q = b.Caminho[0];
+            b.Conferido = q;
+            int de = SalaEm(p), para = SalaEm(q);
+            float l = Vector2.Distance(p, q);
+            if (de < 0 || para < 0 || _barreiras[de] == null || _barreiras[para] == null || l < 0.02f) return;
+            Vector2 fim = q - (q - p) / l * Mathf.Min(0.1f, l * 0.5f);
+            _de = p;
+            if (Livre(de, p, fim, Raio) && (de == para || Livre(para, p, fim, Raio))) return;
+            _conserto.Clear();
+            AteASala(_conserto, ref p, de, para);
+            Contorna(_conserto, ref p, q, Mathf.Abs(Salas[para].N.x) > 0.5f);
+            if (_conserto.Count == 0) return;
+            b.Caminho.RemoveAt(0);
+            b.Caminho.InsertRange(0, _conserto);
+            b.Conferido = b.Caminho[0];
+        }
 
         static bool EmL(int e, Vector2 p, Vector2 q, bool xPorUltimo)
         {
@@ -151,7 +186,7 @@ namespace TA
             foreach (Barreira c in _barreiras[e])
             {
                 float g = FolgaDe(c, f);
-                if (!c.Go.activeInHierarchy || g < 0f) continue;
+                if (!c.Go.activeInHierarchy) continue;
                 float raio = Mathf.Sqrt(c.L * c.L + c.W * c.W) + g;
                 int x0 = Mathf.Max(0, Mathf.FloorToInt((c.C.x - raio - o.x) / Celula)), x1 = Mathf.Min(GradeN - 1, Mathf.CeilToInt((c.C.x + raio - o.x) / Celula));
                 int z0 = Mathf.Max(0, Mathf.FloorToInt((c.C.y - raio - o.y) / Celula)), z1 = Mathf.Min(GradeN - 1, Mathf.CeilToInt((c.C.y + raio - o.y) / Celula));
