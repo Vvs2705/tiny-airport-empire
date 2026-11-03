@@ -1,8 +1,8 @@
 # Estado do projeto: Little Terminal (repositório Tiny Airport Empire)
 
-**Data deste retrato: 2026-11-02.** A `main` está em `dd82ecf` (merge do PR #42, de 2026-11-01), com 44 PRs mesclados e nenhum aberto. Este documento é para quem **nunca viu o projeto**: diz o que o jogo é, como rodar, o que está pronto, o que está sendo feito agora, o que falta e o que está errado. Os detalhes de cada regra ficam nos outros documentos, citados ao longo do texto.
+**Data deste retrato: 2026-11-03.** A `main` está em `49e1597` (merge do PR #48, de 2026-11-03), com 48 PRs mesclados e 1 aberto (o #49, do passe de temporada). Este documento é para quem **nunca viu o projeto**: diz o que o jogo é, como rodar, o que está pronto, o que está sendo feito agora, o que falta e o que está errado. Os detalhes de cada regra ficam nos outros documentos, citados ao longo do texto.
 
-> **Como ler as marcações.** "Na `main`" = mesclado e com o portão verde. "Em andamento" = trabalho que existe só num branch ou numa sessão aberta; **não conta como pronto**. Onde este documento e o código discordam, vale o código, e a divergência está registrada no `GDD.md` §26 (v1.4).
+> **Como ler as marcações.** "Na `main`" = mesclado e com o portão verde. "Em andamento" = trabalho que existe só num branch ou numa sessão aberta; **não conta como pronto**. Onde este documento e o código discordam, vale o código, e a divergência está registrada no `GDD.md` §26 (v1.5).
 
 ## 1. O que é o jogo
 
@@ -14,8 +14,9 @@
 - O dia tem hora, clima com previsão (5 tipos), estações do ano e falhas de avião que sempre terminam em pouso seguro. Sem acidente, morte, fogo ou queda.
 - Monetização: anúncio **recompensado e opcional** (nenhum interstitial) e compras com **Gems** validadas em servidor. Nada aleatório pago (ECA Digital, Lei 15.211/2025). Offline limitado a 2 h, como trava no código.
 - Quem é o dono: V-STACK (Vinicius Souza). Repositório público, **todos os direitos reservados** (`README.md`).
+- **Direção (2026-11-03).** O Vinicius trouxe um GDD de direção (`docs/GDD_DIRECAO_v0.1.md`), um simulador de construção, gestão e operação bem maior que este tycoon de 8 estações fixas, e aprovou misturar os dois. O lançamento ganha **9 frentes de gestão**, nenhuma existente no código ainda: despesas e salários (A), velocidades 1x, 2x e 3x (B), ficha ao tocar (C), contratação com 3 candidatos e demissão (D), transferência pelo vestiário (E), limpeza e banheiro (F), satisfação com motivo (G), esteira de restituição (H) e painel de operações com o relatório do dia (I) (`GDD.md` §4.1). O resto do documento dele (construção livre, contratos com companhias, turnos de 24 h, polícia, K9, imigração e o mais) é **roteiro pós-lançamento** (`GDD.md` §4.4), não escopo. Ficam como estavam: retrato, pessoas em sprite (D-18), ondas com dia e noite e compras opção B. Valem desde já seis regras de direção, entre elas o critério de pronto em 10 itens e o "nenhuma despesa leva a derrota inevitável" (`GDD.md` §0.5).
 
-Onde ler mais: `docs/GDD.md` (o produto inteiro: regras, segurança, publicação, decisões), `docs/CONTRATO_LANCAMENTO.md` (cada item do lançamento × o que está feito, com evidência), `docs/CONTRATO_V01.md` (a v0.1, primeiro corte jogável) e os `docs/CONTRATO_FASE_*.md` (um por fase de conteúdo).
+Onde ler mais: `docs/GDD.md` (o produto inteiro: regras, segurança, publicação, decisões), `docs/GDD_DIRECAO_v0.1.md` (o GDD de direção do dono: só direção, não é o escopo de lançamento), `docs/CONTRATO_LANCAMENTO.md` (cada item do lançamento × o que está feito, com evidência), `docs/CONTRATO_V01.md` (a v0.1, primeiro corte jogável) e os `docs/CONTRATO_FASE_*.md` (um por fase de conteúdo).
 
 ## 2. Como compilar e testar
 
@@ -66,8 +67,8 @@ Link de cada PR: `https://github.com/Vvs2705/tiny-airport-empire/pull/<n>`.
 
 | Área | O que existe | PRs |
 |---|---|---|
-| **Documentos e decisões** | GDD mestre (v1.1 a v1.3), GDD de origem, comparativo com concorrentes (dez jogos jogados no celular), decisões D-01 a D-24 respondidas em 2026-11-01 | [#1](https://github.com/Vvs2705/tiny-airport-empire/pull/1), [#2](https://github.com/Vvs2705/tiny-airport-empire/pull/2), [#3](https://github.com/Vvs2705/tiny-airport-empire/pull/3), [#6](https://github.com/Vvs2705/tiny-airport-empire/pull/6), [#25](https://github.com/Vvs2705/tiny-airport-empire/pull/25), [#38](https://github.com/Vvs2705/tiny-airport-empire/pull/38) |
-| **Esqueleto e portão** | Projeto Unity, `verify.sh`, `checa_repo`, `checa_apk`, CI do núcleo e do balanço, auditoria de ferramentas | [#4](https://github.com/Vvs2705/tiny-airport-empire/pull/4), [#16](https://github.com/Vvs2705/tiny-airport-empire/pull/16) |
+| **Documentos e decisões** | GDD mestre (v1.1 a v1.4), GDD de origem, comparativo com concorrentes (dez jogos jogados no celular), decisões D-01 a D-24 respondidas em 2026-11-01, estado do projeto de 2026-11-02 | [#1](https://github.com/Vvs2705/tiny-airport-empire/pull/1), [#2](https://github.com/Vvs2705/tiny-airport-empire/pull/2), [#3](https://github.com/Vvs2705/tiny-airport-empire/pull/3), [#6](https://github.com/Vvs2705/tiny-airport-empire/pull/6), [#25](https://github.com/Vvs2705/tiny-airport-empire/pull/25), [#38](https://github.com/Vvs2705/tiny-airport-empire/pull/38), [#45](https://github.com/Vvs2705/tiny-airport-empire/pull/45) |
+| **Esqueleto e portão** | Projeto Unity, `verify.sh`, `checa_repo`, `checa_apk`, CI do núcleo e do balanço, auditoria de ferramentas, teto de 90 min por chamada do Unity no `verify.sh` | [#4](https://github.com/Vvs2705/tiny-airport-empire/pull/4), [#16](https://github.com/Vvs2705/tiny-airport-empire/pull/16), [#47](https://github.com/Vvs2705/tiny-airport-empire/pull/47) |
 | **Núcleo da v0.1** | Onda de 2 voos, chegadas, filas, atendimento, equipe móvel, melhorias, cofre offline (2 h), 2 anúncios recompensados simulados, história, save, bot. Com o conteúdo das Fases C a C3 ligado, o bot mede TA-1: Bom 96,1% e Lento 73,0% de embarque (portão: 85% e 60%); TA-2: 1,426× a receita de quem não move a equipe (portão: 1,10×) | [#5](https://github.com/Vvs2705/tiny-airport-empire/pull/5) |
 | **Núcleo, Fase C** | Tripulação, pátio e manutenção (portão do §5.13: 1,151) | [#12](https://github.com/Vvs2705/tiny-airport-empire/pull/12) |
 | **Núcleo, Fase C2** | 8 estações e 6 perfis, por marco | [#18](https://github.com/Vvs2705/tiny-airport-empire/pull/18) |
@@ -78,7 +79,7 @@ Link de cada PR: `https://github.com/Vvs2705/tiny-airport-empire/pull/<n>`.
 | **Núcleo, Fase D1** | Gems no save (schema 8), catálogo de 7 produtos sem preço, 3 sumidouros, crédito idempotente por id de transação | [#43](https://github.com/Vvs2705/tiny-airport-empire/pull/43) |
 | **Mundo 3D e pessoas** | v0.1 jogável em greybox; troca pela arte do Tripo (malha nos corpos rígidos, sprite nas pessoas); tela das Fases C e C2; dia a dia (garagem, postos, segurança) | [#7](https://github.com/Vvs2705/tiny-airport-empire/pull/7), [#21](https://github.com/Vvs2705/tiny-airport-empire/pull/21), [#24](https://github.com/Vvs2705/tiny-airport-empire/pull/24), [#26](https://github.com/Vvs2705/tiny-airport-empire/pull/26) |
 | **Cenário vivo** | Embarque pela ponte (a pessoa some no túnel), sala de espera do portão com cadeiras e fila, escala de adulto de 0,5 m com corredores, física do pátio (469 cruzamentos de peças para 0 em 5 cenários), mala de verdade do balcão ao avião, postos com gente e gestos de atendimento, clima e incidentes no cenário | [#29](https://github.com/Vvs2705/tiny-airport-empire/pull/29), [#31](https://github.com/Vvs2705/tiny-airport-empire/pull/31), [#32](https://github.com/Vvs2705/tiny-airport-empire/pull/32), [#33](https://github.com/Vvs2705/tiny-airport-empire/pull/33), [#37](https://github.com/Vvs2705/tiny-airport-empire/pull/37), [#42](https://github.com/Vvs2705/tiny-airport-empire/pull/42), [#44](https://github.com/Vvs2705/tiny-airport-empire/pull/44) |
-| **HUD, telas e textos** | Fontes e linguagem visual (Lilita One e Nunito, licença OFL), HUD fixo com quadro de partidas de aeroporto, avisos de perigo, telas modais (Melhorias, Mover, Cofre, Voo, Tripulação, Pátio...), revisão dos textos em pt-BR e tutorial de 12 passos; velocidade do relógio (pausa operacional, 1x, 2x e 3x; frente `ta-velocidade`) | [#27](https://github.com/Vvs2705/tiny-airport-empire/pull/27), [#34](https://github.com/Vvs2705/tiny-airport-empire/pull/34), [#35](https://github.com/Vvs2705/tiny-airport-empire/pull/35), [#36](https://github.com/Vvs2705/tiny-airport-empire/pull/36), [#41](https://github.com/Vvs2705/tiny-airport-empire/pull/41) |
+| **HUD, telas e textos** | Fontes e linguagem visual (Lilita One e Nunito, licença OFL), HUD fixo com quadro de partidas de aeroporto, avisos de perigo, telas modais (Melhorias, Mover, Cofre, Voo, Tripulação, Pátio...), revisão dos textos em pt-BR, tutorial de 12 passos, tela de metas (campanha, missões e conquistas, com a faixa da meta da vez no HUD) e tela de configurações, com a política de privacidade em pt-BR e inglês, o suporte e "excluir meus dados"; velocidade do relógio (pausa operacional, 1x, 2x e 3x; frente `ta-velocidade`) | [#27](https://github.com/Vvs2705/tiny-airport-empire/pull/27), [#34](https://github.com/Vvs2705/tiny-airport-empire/pull/34), [#35](https://github.com/Vvs2705/tiny-airport-empire/pull/35), [#36](https://github.com/Vvs2705/tiny-airport-empire/pull/36), [#41](https://github.com/Vvs2705/tiny-airport-empire/pull/41), [#46](https://github.com/Vvs2705/tiny-airport-empire/pull/46), [#48](https://github.com/Vvs2705/tiny-airport-empire/pull/48) |
 | **Arte do Tripo** | Lotes 1 a 11 gerados e exportados, com proveniência: tripulação, passageiros, pátio, terminais em 3 níveis, aeronaves, 3 aeroportos, incidentes, cabine de raio-x, garagem | [#8](https://github.com/Vvs2705/tiny-airport-empire/pull/8), [#9](https://github.com/Vvs2705/tiny-airport-empire/pull/9), [#10](https://github.com/Vvs2705/tiny-airport-empire/pull/10), [#11](https://github.com/Vvs2705/tiny-airport-empire/pull/11), [#13](https://github.com/Vvs2705/tiny-airport-empire/pull/13), [#14](https://github.com/Vvs2705/tiny-airport-empire/pull/14), [#15](https://github.com/Vvs2705/tiny-airport-empire/pull/15), [#17](https://github.com/Vvs2705/tiny-airport-empire/pull/17), [#20](https://github.com/Vvs2705/tiny-airport-empire/pull/20), [#22](https://github.com/Vvs2705/tiny-airport-empire/pull/22) |
 | **Áudio** | 8 sons em 13 arquivos e 3 músicas, sintetizados por script (sem licença); a classe `Audio.cs` existe, **sem nenhuma chamada no jogo** | [#19](https://github.com/Vvs2705/tiny-airport-empire/pull/19) |
 | **Nome e marca** | "Little Terminal", appId, chave de upload (fora do git), 5 companhias renomeadas, aeroportos mantidos | [#39](https://github.com/Vvs2705/tiny-airport-empire/pull/39) |
@@ -87,15 +88,15 @@ Medidas que existem: K3 no **PC** (p10 de 58,7 FPS, média de 59,5, trava de 60,
 
 ## 6. Em andamento (não está na `main`)
 
-Cinco frentes abertas em 2026-11-02. Cada uma termina num PR próprio, pequeno; o coordenador mescla. Estado conferido em 2026-11-02, antes do PR deste documento.
+Estado conferido em 2026-11-03. Cada frente termina num PR próprio, pequeno; o coordenador mescla. Das cinco frentes abertas em 2026-11-02, **duas já entraram**: `ta-metas-tela` (PR #46) e `ta-config` (PR #48). As 9 frentes de gestão da v1.5 (`GDD.md` §4.1) **ainda não começaram**: estão no §8.
 
 | Frente | Branch | O que é | O que falta |
 |---|---|---|---|
 | `ta-planta-fim` | `feat/planta-salas` (enviado) | PR 2 da organização das 8 salas: ladrilho, tapete, paredes de fundo, letreiro, mobília e três postos refeitos na régua de 0,5 m (balcão da loja, bancada da oficina, mesa do despacho) | Rodada final do `verify.sh full`, fotos de antes e depois, abrir o PR. Entra **antes** da `ta-caminhos`. A arte nova que a frente pediu ao Tripo (5 peças) não foi gerada; o PR usa as peças que já existem |
 | `ta-caminhos` | `claude/practical-sanderson-e254c9` (enviado como `wip`) | Pessoa não atravessar parede, móvel nem equipamento. Medido em 5 cenários: **1.862 encontros caíram para 237** em 2026-11-01 (cadeira já em zero) | Zerar o que sobrou, conferir encontrão e viradas, rodar o `full` e abrir o PR. Há correções novas sem medir |
-| `ta-metas-tela` | `claude/metas-tela` (só local; sem PR) | Tela de metas: campanha, missões e 20 conquistas, com faixa da meta da vez e selo de coletar (`Hud.Metas.cs`) | `full`, fotos, PR |
-| `ta-passe` | trabalho no disco, sem commit | Passe de temporada, **trilha gratuita de 30 níveis no núcleo** (`Sim.Passe.cs`; contrato próprio; save com mais uma versão). Só núcleo, sem tela | Medir no bot, contrato, PR. A trilha premium e a tela ficam para depois |
-| `ta-config` | `feat/config-privacidade` (enviado; PR por abrir) | Tela de configurações, política de privacidade (HTML em `docs/privacidade/` e `docs/privacy/`), suporte e "excluir meus dados" (`Hud.Config.cs`) | Abrir o PR; **depois do merge**, o coordenador liga o GitHub Pages (hoje desligado). O texto da política precisa de revisão jurídica do dono |
+| `ta-passe` | `claude/frosty-jepsen-605169` (PR #49, aberto) | Passe de temporada, **trilha gratuita de 30 níveis no núcleo** (`Sim.Passe.cs`, `docs/CONTRATO_FASE_C7.md`, `docs/PASSE.md`; save com mais uma versão). Só núcleo, sem tela | O coordenador mescla: o PR estava com conflito com a `main` (estado `DIRTY` em 2026-11-03). A trilha premium e a tela ficam para depois |
+
+`ta-planta-fim` e `ta-caminhos` seguem sem PR aberto em 2026-11-03; o estado das duas é o de 2026-11-02, acima. Da `ta-config` sobra a **revisão jurídica** do texto da política, que é do dono: o GitHub Pages já está ligado (status `built` em 2026-11-03).
 
 Parada: a geração da peça `painel_ferramentas_parede` no Tripo (o navegador com a conta estava ambíguo; 0 crédito gasto).
 
@@ -116,25 +117,41 @@ Do mais importante para o menos.
 
 ## 8. A fazer, em ordem
 
-Ordem de trabalho combinada em 2026-11-02, depois das cinco frentes acima. Cada item é uma frente com PR próprio.
+Ordem de trabalho de 2026-11-03, depois da mistura com o GDD de direção (`GDD.md` §4.1 e §4.4) e das frentes abertas do §6. Cada item é uma frente com PR próprio, e toda frente de gestão só fecha com o critério de pronto em 10 itens (`GDD.md` §0.5).
 
-1. **`ta-loja`:** Unity IAP em modo de teste, tela da loja e Gems no HUD (usa o núcleo da D1).
-2. **`ta-servidor`:** validação de compra no Cloud Run (projeto próprio, sem chave JSON). Se não passar nos testes do GDD §16.6, o jogo lança só com anúncio recompensado (opção A de D-05).
-3. **`ta-rotas-tela`:** tela de aeroportos e de rotas. Hoje o núcleo tem os 3 aeroportos e as 12 rotas e **não existe tela** para o jogador viajar nem programar.
-4. **`ta-avioes`:** 8 variantes visuais de aeronave por rota ou aeroporto (só visual; as peças do Tripo já existem).
-5. **`ta-historias`:** as 20 micro-histórias de passageiros (hoje 1).
-6. **`ta-audio`:** ligar o áudio em `Game.cs`, `Mundo.cs` e na pausa; o dono ouve antes de valer.
-7. **`ta-passe-tela`:** tela do passe de temporada, depois do núcleo.
-8. **`ta-incidente5`:** o 5º incidente (volta ao portão por aviso técnico); só entra se passar no portão do §5.13.
-9. **`ta-estetica`:** auditoria visual contra os concorrentes; refazer o que estiver abaixo.
-10. **`ta-ingles`:** textos em inglês (D-08: pt-BR e en no lançamento; es e id depois, com revisão humana).
-11. **`ta-telemetria`:** Unity Analytics sem dado pessoal (D-11).
-12. **`ta-lgpd`:** consentimento, Data safety, exclusão de dados ponta a ponta.
-13. **`ta-playtest`:** K2 com 20 pessoas; K3 nos aparelhos dos amigos do dono.
-14. **`ta-loja-assets`:** ícone aplicado no build, screenshots, descrição, criativos gravados do jogo real.
-15. **Fim:** atualizações de ferramentas com a fila vazia, AAB assinado, regressão final, GO/NO-GO (GDD §25) e, por último, o celular de teste.
+**Gestão do aeroporto (frentes A a I do `GDD.md` §4.1; nenhuma existe no código):**
+
+1. **A, despesas e salários,** com fechamento do dia e sem derrota inevitável.
+2. **B, velocidades** 1x, 2x e 3x: no PR da `ta-velocidade` (parcial; falta a validação em build na rodada do Unity da leva).
+3. **C, ficha ao tocar** em pessoa, equipamento e sala.
+4. **H, esteira de restituição** (traz junto o desembarque mínimo de quem chega).
+5. **D, contratação** com 3 candidatos e demissão.
+6. **E, transferência pelo vestiário** (o TA-2 tem de passar de novo com o tempo de troca).
+7. **F, limpeza e banheiro.**
+8. **G, satisfação com motivo.**
+9. **I, painel de operações** com o relatório do dia.
+
+**Depois, a loja e o servidor, e então a lista de antes:**
+
+10. **`ta-loja`:** Unity IAP em modo de teste, tela da loja e Gems no HUD (usa o núcleo da D1).
+11. **`ta-servidor`:** validação de compra no Cloud Run (projeto próprio, sem chave JSON). Se não passar nos testes do GDD §16.6, o jogo lança só com anúncio recompensado (opção A de D-05).
+12. **`ta-rotas-tela`:** tela de aeroportos e de rotas. Hoje o núcleo tem os 3 aeroportos e as 12 rotas e **não existe tela** para o jogador viajar nem programar.
+13. **`ta-avioes`:** 8 variantes visuais de aeronave por rota ou aeroporto (só visual; as peças do Tripo já existem).
+14. **`ta-historias`:** as 20 micro-histórias de passageiros (hoje 1).
+15. **`ta-audio`:** ligar o áudio em `Game.cs`, `Mundo.cs` e na pausa; o dono ouve antes de valer.
+16. **`ta-passe-tela`:** tela do passe de temporada, depois do núcleo (PR #49).
+17. **`ta-incidente5`:** o 5º incidente (volta ao portão por aviso técnico); só entra se passar no portão do §5.13.
+18. **`ta-estetica`:** auditoria visual contra os concorrentes; refazer o que estiver abaixo.
+19. **`ta-ingles`:** textos em inglês (D-08: pt-BR e en no lançamento; es e id depois, com revisão humana).
+20. **`ta-telemetria`:** Unity Analytics sem dado pessoal (D-11).
+21. **`ta-lgpd`:** consentimento, Data safety, exclusão de dados ponta a ponta.
+22. **`ta-playtest`:** K2 com 20 pessoas; K3 nos aparelhos dos amigos do dono.
+23. **`ta-loja-assets`:** ícone aplicado no build, screenshots, descrição, criativos gravados do jogo real.
+24. **Fim:** atualizações de ferramentas com a fila vazia, AAB assinado, regressão final, GO/NO-GO (GDD §25) e, por último, o celular de teste.
 
 Fora do lançamento por decisão do dono (D-04): iOS (exige macOS e conta Apple) e o 5º incidente antes do teste.
+
+**Roteiro pós-lançamento** (`GDD.md` §4.4, aprovado como direção em 2026-11-03; nada daqui conta no contrato): construção livre, início com hangar, contratos com companhias, totens, turnos de 24 h e fadiga, supervisores, qualificações e treinamento, polícia, K9, bombeiros e saúde (só prontidão, sem incêndio, morte ou queda), carga, estacionamento, imigração, alfândega, conexões internacionais e múltiplos terminais.
 
 ## 9. O que depende do dono
 
@@ -151,28 +168,31 @@ Nada disso o time de código consegue resolver sozinho.
 | **Liberar o firewall** e demais janelas de segurança do Windows | Só ele aprova | Quando aparecer |
 | **K2 com 20 pessoas e K3 com amigos** | Medida com gente real; APK enviado por ele | Fim das Fases C e D |
 | **Renovar o plano do Tripo** (se ainda houver arte a gerar) | Vence em 2026-11-29 | Antes de 2026-11-29 |
+| **Aprovar o texto do GDD v1.5** | A mistura foi aprovada em 2026-11-03 ("pode seguir desta forma", D-25), mas ele ainda não leu o texto do GDD v1.5 nem o roteiro do §4.4 | Quando ler |
 | **Autorização final de envio** (D-17) | Publicar é irreversível | No fim |
 
 ## 10. Porcentagem estimada e método
 
-**Aproximadamente 57% do contrato de lançamento** (17,0 de 30 pontos), em 2026-11-02, na `main` em `dd82ecf`.
+**Aproximadamente 50% do contrato de lançamento** (19,5 de 39 pontos), em 2026-11-03: os 49% da `main` em `49e1597` mais a linha B (velocidades) em `parcial`, com a frente `ta-velocidade`.
 
-**Método.** `docs/CONTRATO_LANCAMENTO.md` §1 tem 30 linhas (cada item do §4.1 do GDD, mais o projeto Unity, o AAB, a segurança e a regressão final). Cada linha vale 1 ponto e conta assim: **feito 100%**, **parcial 50%**, **depende 25%** (de conta, decisão ou recurso do dono), **falta 0%**. Trabalho em andamento e não mesclado **não conta**. O K2 com gente fica fora da conta de cada linha e aparece na seção 9.
+**Por que caiu de 57% (2026-11-02).** Não foi regressão: em 2026-11-03 o contrato ganhou **9 linhas**, as frentes de gestão A a I, todas em `falta`. Sobre as 30 linhas de antes, a conta **subiu** de 57% para 63% (19,0 de 30), por três mudanças: a tela de configurações (linha 21, de `falta` para `parcial`, PR #48) e a tela de metas, que fechou as linhas 11, 12 e 13 (de `parcial` para `feito`, PR #46, com `verify.sh full` verde e foto). Em pontos: 17,0 + 0,5 + 3 × 0,5 = 19,0.
+
+**Método (o mesmo de antes).** `docs/CONTRATO_LANCAMENTO.md` §1 tem 39 linhas (cada item do §4.1 do GDD, mais o projeto Unity, o AAB, a segurança, a regressão final e as 9 frentes A a I). Cada linha vale 1 ponto e conta assim: **feito 100%**, **parcial 50%**, **depende 25%** (de conta, decisão ou recurso do dono), **falta 0%**. Trabalho em andamento e não mesclado **não conta** (o PR #49, do passe, está aberto e fica de fora). O K2 com gente fica fora da conta de cada linha e aparece na seção 9.
 
 | Estado | Linhas | Pontos |
 |---|---|---|
-| Feito | 9 | 9,0 |
-| Parcial | 15 | 7,5 |
+| Feito | 12 | 12,0 |
+| Parcial | 14 | 7,0 |
 | Depende | 2 | 0,5 |
-| Falta | 4 | 0,0 |
-| **Total** | **30** | **17,0 → 57%** |
+| Falta | 11 | 0,0 |
+| **Total** | **39** | **19,5 → 50%** |
 
-- **Feito (9):** projeto Unity e portão; equipe móvel; pátio e manutenção; quadro de partidas; fluxo de passageiros; 4 incidentes; sem interstitial; offline de 2 h; tutorial de 12 passos.
-- **Falta (4):** passe de temporada; configurações, política, suporte e exclusão de dados; segurança e privacidade ponta a ponta; regressão final.
+- **Feito (12):** projeto Unity e portão; equipe móvel; pátio e manutenção; quadro de partidas; fluxo de passageiros; 4 incidentes; campanha de 30 objetivos; missões; 20 conquistas; sem interstitial; offline de 2 h; tutorial de 12 passos.
+- **Falta (11):** passe de temporada; segurança e privacidade ponta a ponta; regressão final; e 8 das 9 frentes de gestão da v1.5 (A despesas e salários, C ficha ao tocar, D contratação e demissão, E vestiário, F limpeza e banheiro, G satisfação, H esteira de restituição, I painel de operações).
 - **Depende (2):** anúncios recompensados reais; AAB assinado e enviado.
-- As 15 parciais, uma a uma, estão em `docs/CONTRATO_LANCAMENTO.md` §1, com a evidência de cada PR e o que falta.
+- **Parcial (14):** aeroportos; rotas; aeronaves; estações; perfis; tripulação; dia a dia; histórias; loja; save; configurações, política e suporte; telemetria; arte final; velocidades (B). Uma a uma, estão em `docs/CONTRATO_LANCAMENTO.md` §1, com a evidência de cada PR e o que falta.
 
-**O que o número não mostra.** A porcentagem mede **cobertura do contrato**, não esforço restante nem risco. A maior parte do que falta é tela (aeroportos, rotas, metas, passe, loja), integração (IAP, servidor, anúncios, telemetria) e medida em aparelho, e quase toda a parte que depende do dono está na janela de 2026-11-25 em diante.
+**O que o número não mostra.** A porcentagem mede **cobertura do contrato**, não esforço restante nem risco. A maior parte do que falta é tela (aeroportos, rotas, passe e loja), as 9 frentes de gestão (nenhuma começada, e cada uma só fecha com o critério de pronto em 10 itens, `GDD.md` §0.5), integração (IAP, servidor, anúncios, telemetria) e medida em aparelho, e quase toda a parte que depende do dono está na janela de 2026-11-25 em diante. As frentes A a I valem 9 linhas do mesmo peso das demais, mas variam muito de tamanho: a conta não diz isso.
 
 ## 11. Regras que não mudam
 
@@ -184,7 +204,9 @@ Valem por cima de qualquer tarefa (GDD §0.4 e `CLAUDE.md`):
 - Nenhum dado pessoal no diário nem na telemetria. Criativos gravados do jogo real.
 - Print ou arte de jogo de terceiro **nunca** entra no git. Segredo, chave e senha nunca entram no git nem em chat.
 - Toda mudança entra por PR na `main`, com `verify.sh` verde e, se mexe em número, com antes e depois no `docs/BALANCE.md`.
+- Nenhuma despesa leva a uma derrota inevitável; perder voo custa só a receita dele (`GDD.md` §0.5, regra 6).
+- O que parece operacional tem função ou é decoração; o que for novo segue o critério de pronto em 10 itens; a animação segue o estado; ninguém atravessa nada; a loja vem depois do ciclo principal (`GDD.md` §0.5).
 
 ## 12. Como manter este documento
 
-Quem fecha um PR que muda uma linha do contrato atualiza, no mesmo PR: a linha em `docs/CONTRATO_LANCAMENTO.md`, o estado no §21 do GDD e este documento (seções 5, 6, 7 e 10). Troque a data do topo e o hash da `main`. Para recalcular a porcentagem, conte os estados das 30 linhas do contrato e use a tabela da seção 10.
+Quem fecha um PR que muda uma linha do contrato atualiza, no mesmo PR: a linha em `docs/CONTRATO_LANCAMENTO.md`, o estado no §21 do GDD e este documento (seções 5, 6, 7 e 10). Troque a data do topo e o hash da `main`. Para recalcular a porcentagem, conte os estados das linhas do contrato (39 em 2026-11-03) e use a tabela da seção 10; se a ordem de trabalho mudar, ajuste também a seção 8.
