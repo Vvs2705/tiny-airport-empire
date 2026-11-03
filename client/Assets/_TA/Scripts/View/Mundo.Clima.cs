@@ -199,7 +199,7 @@ namespace TA
             PanePasso(s);
         }
 
-        static float Pulso() => 0.55f + 0.45f * Mathf.PingPong(Time.unscaledTime * 2f, 1f);
+        static float Pulso() => 0.55f + 0.45f * Ajustes.Vai(Time.unscaledTime * 2f);
 
         void CeuPasso(Incidente i, long passo)
         {

@@ -331,11 +331,11 @@ namespace TA
                 float t = _troca[k] > 0f ? 1f - _troca[k] / Troca : 1f;
                 if (_troca[k] > 0f) _troca[k] = Mathf.Max(0f, _troca[k] - Time.deltaTime);
                 b.Tinta = Color.Lerp(Color.white, Art.EstacaoCor[_colete[k]], t);   // flash claro que assenta na cor do setor
-                b.Escala = EscalaFunc * ((Arrastando == k ? 1.25f : 1f) + 0.3f * Mathf.Sin(Mathf.PI * t) * (_troca[k] > 0f ? 1f : 0f));
+                b.Escala = EscalaFunc * ((Arrastando == k ? 1.25f : 1f) + 0.3f * Mathf.Sin(Mathf.PI * t) * (_troca[k] > 0f ? Ajustes.Mov : 0f));
                 Vector2 real = b.Pos;
                 if (_falha[k] > 0f)
                 {
-                    b.Pos += new Vector2(_cam.transform.right.x, _cam.transform.right.z) * Mathf.Sin(Time.unscaledTime * 60f) * 0.12f * _falha[k];
+                    b.Pos += new Vector2(_cam.transform.right.x, _cam.transform.right.z) * Mathf.Sin(Time.unscaledTime * 60f) * 0.12f * _falha[k] * Ajustes.Mov;
                     _falha[k] = Mathf.Max(0f, _falha[k] - Time.unscaledDeltaTime * 2f);
                 }
                 Pinta(b);
