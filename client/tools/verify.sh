@@ -28,12 +28,24 @@ repo() {
   ok "repo: $(echo "$log" | tail -1)"
 }
 
+# Carimbo do código em client/ (commit, diff e arquivos novos): o núcleo que passou no quick, fora da fila,
+# não roda de novo dentro dela, onde seriam ~150 s com o Unity parado.
+carimbo() {
+  local f
+  { git -C "$ROOT" rev-parse HEAD; git -C "$ROOT" diff HEAD -- client
+    git -C "$ROOT" ls-files --others --exclude-standard -- client | sort | while read -r f; do echo "$f"; git -C "$ROOT" hash-object "$f"; done
+  } | git hash-object --stdin
+}
+
 nucleo() {
-  local log rc
-  mkdir -p "$OUT"
+  local log rc c
+  mkdir -p "$OUT"; c=$(carimbo)
+  [ "${1:-}" = cache ] && [ "$(cat "$OUT/nucleo.ok" 2>/dev/null)" = "$c" ] && { ok "núcleo: já passou neste código no quick"; return; }
+  rm -f "$OUT/nucleo.ok"
   log=$(dotnet test "$CLIENT/tools/coretests" -nologo 2>&1); rc=$?
   echo "$log" > "$OUT/coretests.log"
   [ $rc -eq 0 ] || { echo "$log" | grep -E "Failed |error " | head -20; fail "dotnet test do núcleo (ver $OUT/coretests.log)"; }
+  echo "$c" > "$OUT/nucleo.ok"
   ok "núcleo: $(echo "$log" | grep -m1 -oE 'Failed: +[0-9]+, Passed: +[0-9]+, Skipped: +[0-9]+, Total: +[0-9]+' | tr -s ' ')"
 }
 
@@ -92,7 +104,7 @@ quick() {
 }
 
 full() {
-  nucleo
+  nucleo cache
   guard
   rm -f "$OUT/editmode.xml"
   run_unity editmode.log -runTests -testPlatform EditMode -testResults "$OUT/editmode.xml"   # veredito no XML, não no código de saída
@@ -115,7 +127,7 @@ full() {
 }
 
 android() {
-  nucleo
+  nucleo cache
   guard
   run_unity build_android.log -buildTarget Android -quit -executeMethod TA.EditorTools.Setup.BuildAndroidDev; local rc=$? sum log
   sum=$(grep -m1 -oE "BuildSummary\(Android[^)]*\): .*" "$OUT/build_android.log")

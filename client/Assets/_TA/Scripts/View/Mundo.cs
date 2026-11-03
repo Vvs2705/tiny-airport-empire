@@ -27,7 +27,7 @@ namespace TA
     ///    da sala: os rotulos escuros da v0.1 tampavam o mundo (foto v01_telas).
     ///  - Pessoas (Mundo.Pessoas.cs) e patio com os avioes e veiculos (Mundo.Patio.cs).
     ///  - Toque na sala = atendimento manual; arrastar o funcionario (alvo de 48 dp no minimo, limiar em dp separado do toque, boneco
-    ///    acima do dedo, salas de destino acesas) ou tocar nele = "mover para".
+    ///    acima do dedo, salas de destino acesas) ou tocar nele = a ficha, com o "mover para" (Hud.Ficha.cs, Mundo.Toca).
     /// </summary>
     public sealed partial class Mundo
     {
@@ -237,10 +237,14 @@ namespace TA
             SincronizaPax(s, dt);
             Funcionarios(s, dt);
             Salas3D(s);
-            Patio(s, dt);
-            AndaPatio(dt);
+            int n = Mathf.Max(1, Mathf.CeilToInt(dt / PatioDtMax - 1e-3f));   // a 3x num aparelho a 30 qps, 3 pedacos de 1/30 s
+            for (int i = 0; i < n; i++) { Patio(s, dt / n); AndaPatio(dt / n); }
             ClimaPasso(s, dt);
         }
+
+        /// <summary>Maior pedaco de jogo (s) em que o patio anda de uma vez: o quadro de um aparelho a 30 qps no 1x. Com o quadro inteiro do
+        /// 3x (0,1 s a 30 qps), a vez na pista e a freada nao seguravam: avioes e veiculos se cruzavam (diag_caixas.py).</summary>
+        const float PatioDtMax = 1f / 30f;
 
         /// <summary>Largura da tela em m no enquadramento: mais que isso, o corpo do adulto (0,45 m na folha) fica abaixo de 28 px na foto 540 x 960 (ART_BIBLE §3).</summary>
         const float LarguraLeitura = 8.6f;
@@ -468,13 +472,7 @@ namespace TA
         public void Foca(Estacao e) => _alvo += V3(Chao(ZonaTela(e).center) - Chao(_regiao.center));
 
         /// <summary>Retangulo do funcionario na tela (px), com o alvo minimo de toque; vazio se ainda nao foi contratado.</summary>
-        public Rect FuncTela(int k)
-        {
-            if (k >= S.Staff.Count) return Rect.zero;
-            Vector2 c = Tela(V3(_func[k].Pos, 0.5f * EscalaFunc));
-            float r = Mathf.Max(Dp.Px(Dp.AlvoMinimoDp) * 0.5f, Vector2.Distance(Tela(V3(_func[k].Pos)), Tela(V3(_func[k].Pos, 0.55f))));
-            return new Rect(c.x - r, c.y - r, 2f * r, 2f * r);
-        }
+        public Rect FuncTela(int k) => k >= S.Staff.Count ? Rect.zero : PessoaTela(V3(_func[k].Pos));
 
         // ------------------------------------------------------------------ toque, arrasto, pan e zoom
 
@@ -485,7 +483,7 @@ namespace TA
             return Input.touchCount > 0 ? es.IsPointerOverGameObject(Input.GetTouch(0).fingerId) : es.IsPointerOverGameObject();
         }
 
-        /// <summary>Dedo/mouse no mundo. Toque na sala = atendimento manual; no funcionario = "mover para"; arrastar o funcionario = mover;
+        /// <summary>Dedo/mouse no mundo. Toque = Mundo.Toca (atendimento manual ou a ficha); arrastar o funcionario = mover;
         /// arrastar no vazio = pan; pinca ou roda = zoom.</summary>
         void Entrada()
         {
@@ -540,14 +538,7 @@ namespace TA
                 _falha[quem] = 1f;   // falha: volta tremendo e diz o que fazer
                 _h.Toast(Textos.SoltaFora);
             }
-            else if (quem >= 0) _h.AbreMover(quem);
-            else if (!pan && !longe)
-            {
-                int av = _h.Tutorial ? -1 : AviaoEm(sp);
-                if (av >= 0) { _h.AbreVoo(av); return; }
-                int z = SalaEm(Chao(sp));
-                if (z >= 0) _g.Tap((Estacao)z);
-            }
+            else if (quem >= 0 || (!pan && !longe)) Toca(sp, quem);   // Mundo.Pessoas.cs
         }
     }
 }

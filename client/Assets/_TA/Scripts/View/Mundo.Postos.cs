@@ -305,7 +305,7 @@ namespace TA
             if (f < 0f) return;
             if (e == SalaSeg)
             {
-                if (_pax.TryGetValue(p.Id, out Boneco dono) && Vistoria(p) && dono.Etapa == 2 && dono.Caminho.Count == 0) Gesto(b, b.Bastao, Mathf.PingPong(Time.time * 1.6f, 1f));
+                if (_pax.TryGetValue(p.Id, out Boneco dono) && Vistoria(p) && dono.Etapa == 2 && dono.Caminho.Count == 0) Gesto(b, b.Bastao, Mathf.PingPong(S.Time * 1.6f, 1f));
                 else if (f < 0.8f) { Gesto(b, b.TelaRaioX, -1f); Olha(b, Salas[e].T * -Mathf.Sign(SegA[i])); }
                 return;
             }
