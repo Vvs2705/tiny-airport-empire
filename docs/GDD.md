@@ -1539,7 +1539,7 @@ Bloqueia a submissão:
 
 ### Fase C — Conteúdo e progressão
 
-*Estado em 03/11/2026: núcleo inteiro na `main` (PRs #12, #18, #23, #28, #30 e #40); tela do dia a dia, do pátio, do clima, dos avisos e das metas (PRs #24 a #46); arte do Tripo no jogo (PR #21). Faltam: telas de aeroportos e de rotas, 19 das 20 histórias, o passe (núcleo gratuito no PR #49, aberto), 10 das 12 aeronaves no pátio, o áudio ligado, a estação do ano na tela e as 9 frentes de gestão A a I (§4.1), que ainda não começaram.*
+*Estado em 03/11/2026: núcleo inteiro na `main` (PRs #12, #18, #23, #28, #30 e #40); tela do dia a dia, do pátio, do clima, dos avisos e das metas (PRs #24 a #46); arte do Tripo no jogo (PR #21). Telas de aeroportos e de rotas no `ta-rotas-tela`, à espera da rodada da leva. Faltam: 19 das 20 histórias, o passe (núcleo gratuito no PR #49, aberto), 10 das 12 aeronaves no pátio, o áudio ligado, a estação do ano na tela e as 9 frentes de gestão A a I (§4.1), que ainda não começaram.*
 
 - Três aeroportos.
 - Rotas, aeronaves e funcionários.
@@ -1740,9 +1740,9 @@ Estado atualizado em 03/11/2026 sobre a `main` em `49e1597` (48 PRs; o #49 está
 | P-02 | Loop completo de voo | Bloqueador | Teste PlayMode + vídeo/captura | `CONCLUÍDO COM EVIDÊNCIA` (testes do núcleo e `-autoplay`, PRs #5 e #7; fotos e GIFs nos PRs #26, #29, #31, #37 e #42) | — |
 | P-03 | Quadro de partidas e deadlines | Bloqueador | Testes de estado/tempo | `CONCLUÍDO COM EVIDÊNCIA` (TA-1: Bom 96,1% e Lento 73,0%; PRs #5 e #35) | — |
 | P-04 | Equipe móvel | Bloqueador | Teste funcional e de usabilidade | `EM ANDAMENTO` (teste funcional e TA-2 de 1,426 feitos, PRs #5 e #23) | playtest com gente: K2 com 20 pessoas (D-24) |
-| P-05 | Três aeroportos e campanha | Obrigatório | Checklist de conteúdo e testes | `EM ANDAMENTO` (núcleo: PRs #23 e #30; tela de metas: PR #46; falta a tela de aeroportos) | `ta-rotas-tela`; `docs/CAMPANHA.md` já existe |
-| P-06 | Rotas, aeronaves, incidentes e histórias | Obrigatório | Catálogo validado e testes | `EM ANDAMENTO` (rotas e incidentes no núcleo e o aviso na tela: PRs #23, #36 e #44; faltam a tela de rotas, 10 aeronaves no pátio e 19 histórias) | `ta-rotas-tela`, `ta-avioes`, `ta-historias`; D-13 decidida |
-| P-07 | Passe de temporada completo | Obrigatório | Catálogo, progressão e sandbox | `EM ANDAMENTO` (trilha gratuita no núcleo, PR #49, frente `ta-passe`: `CONTRATO_FASE_C7.md` e `docs/PASSE.md`; o produto premium só existe no catálogo, PR #43) | tela (`ta-passe-tela`); trilha premium: Play Console |
+| P-05 | Três aeroportos e campanha | Obrigatório | Checklist de conteúdo e testes | `EM ANDAMENTO` (núcleo: PRs #23 e #30; tela de metas: PR #46; tela de aeroportos no `ta-rotas-tela`, à espera da rodada da leva) | `ta-rotas-tela`; `docs/CAMPANHA.md` já existe |
+| P-06 | Rotas, aeronaves, incidentes e histórias | Obrigatório | Catálogo validado e testes | `EM ANDAMENTO` (rotas e incidentes no núcleo e o aviso na tela: PRs #23, #36 e #44; tela de rotas no `ta-rotas-tela`, à espera da rodada da leva; faltam 10 aeronaves no pátio e 19 histórias) | `ta-rotas-tela`, `ta-avioes`, `ta-historias`; D-13 decidida |
+| P-07 | Passe de temporada completo | Obrigatório | Catálogo, progressão e sandbox | `EM ANDAMENTO` (trilha gratuita no núcleo, PR #49, frente `ta-passe`: `CONTRATO_FASE_C7.md` e `docs/PASSE.md`; o produto premium só existe no catálogo, PR #43; tela feita na frente `ta-passe-tela`, `Hud.Passe.cs`, com a premium trancada e sem preço) | arte dos 3 cosméticos; trilha premium: conteúdo no núcleo e Play Console |
 | P-08 | Compras seguras e restore | Bloqueador | Validação sandbox/server-side | `BLOQUEADO` (núcleo feito, PR #43) | servidor (D-06, `ta-servidor`) e Play Console (D-U-N-S, previsão 2026-11-25) |
 | P-09 | Anúncios recompensados e limites | Bloqueador se monetização ativa | Modo de teste + teste de callback | `BLOQUEADO` (regras no núcleo; D-03 e o appId decididos, PR #39) | criar o app no LevelPlay, na conta da V-STACK, e integrar o SDK |
 | P-10 | Save/migração/offline | Bloqueador | Testes de corrupção, tempo e reload | `CONCLUÍDO COM EVIDÊNCIA` (`SaveTests` e `ExploitTests`: corrupção, relógio, reload e migração do schema 1 ao 9; PRs #5 a #43 e #49). Restaurar compras é do P-08 | — |
