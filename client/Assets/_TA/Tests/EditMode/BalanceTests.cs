@@ -26,6 +26,7 @@ namespace TA.Tests
             public BotProfile P; public double Embarque, EmbarqueP10, Receita, Moves, Taps; public double[] Marco;
             public double SemTrip, Inspecoes, Hangares, Checagens, Trocas, Incidentes, Reacoes, Climas, Falhas, Reparos, Objetivos, Recompensas, Diarias, Semanais, PagoMissoes, Conquistas;
             public double Despesas, Apertos;
+            public double Usos, Negados, Interdicoes, Limpezas, FilaBanheiro, SujeiraMedia;
         }
 
         public static Linha Rodar(BotProfile p, Tuning t = null, int sementes = Sementes, int ondas = Ondas, int threads = Threads)
@@ -47,6 +48,8 @@ namespace TA.Tests
                 l.Objetivos += r.Objetivos * k; l.Recompensas += r.Recompensas * k;
                 l.Diarias += r.Diarias * k; l.Semanais += r.Semanais * k; l.PagoMissoes += r.PagoMissoes * k; l.Conquistas += r.Conquistas * k;
                 l.Despesas += r.Despesas * k; l.Apertos += r.Apertos * k;
+                l.Usos += r.Usos * k; l.Negados += r.Negados * k; l.Interdicoes += r.Interdicoes * k; l.Limpezas += r.Limpezas * k;
+                l.FilaBanheiro = Math.Max(l.FilaBanheiro, r.FilaBanheiro); l.SujeiraMedia += r.SujeiraMedia * k;
                 for (int m = 0; m < 3; m++) if (r.MarcoEm[m] >= 0) { l.Marco[m] += r.MarcoEm[m]; marcos[m]++; }
             }
             for (int m = 0; m < 3; m++) l.Marco[m] = marcos[m] > 0 ? l.Marco[m] / marcos[m] : -1;
@@ -84,7 +87,7 @@ namespace TA.Tests
         /// <summary>O "antes" de cada fase e' o jogo de quando ela entrou: sem a conta do dia (Fase C8) e sem o vestiario (frente E). Os portoes rodam com eles.</summary>
         static Tuning SemC8(Tuning t)
         {
-            t.RegraDespesas = t.RegraVestiario = false;
+            t.RegraDespesas = t.RegraVestiario = t.RegraLimpeza = false;
             return t;
         }
 
@@ -204,7 +207,7 @@ namespace TA.Tests
         public static Tuning SemFaseC4(Tuning t = null)
         {
             t = t ?? new Tuning();
-            t.RegraClima = t.RegraEpocas = t.RegraPicos = t.RegraFalhas = t.RegraCampanha = t.RegraMissoes = t.RegraPasse = t.RegraVestiario = false;
+            t.RegraClima = t.RegraEpocas = t.RegraPicos = t.RegraFalhas = t.RegraCampanha = t.RegraMissoes = t.RegraPasse = t.RegraVestiario = t.RegraLimpeza = false;
             return t;
         }
 
@@ -353,7 +356,7 @@ namespace TA.Tests
         [Test]
         public void Antes_FaseC5()
         {
-            var t = new Tuning { RegraCampanha = false, RegraMissoes = false, RegraPasse = false, RegraDespesas = false, RegraVestiario = false };
+            var t = new Tuning { RegraCampanha = false, RegraMissoes = false, RegraPasse = false, RegraDespesas = false, RegraVestiario = false, RegraLimpeza = false };
             Linha bom = Rodar(BotProfile.Bom, t), lento = Rodar(BotProfile.Lento, t), parado = Rodar(BotProfile.Parado, t);
             Imprime("antes da Fase C5 (a main da Fase C4)", new[] { bom, lento, parado });
             Assert.AreEqual((6279, 3872, 4702), ((int)Math.Round(bom.Receita), (int)Math.Round(lento.Receita), (int)Math.Round(parado.Receita)), "sem pagar, a tabela da fase anterior");
@@ -418,7 +421,7 @@ namespace TA.Tests
         [Test]
         public void Antes_FaseC6()
         {
-            var t = new Tuning { RegraMissoes = false, RegraPasse = false, RegraDespesas = false, RegraVestiario = false };
+            var t = new Tuning { RegraMissoes = false, RegraPasse = false, RegraDespesas = false, RegraVestiario = false, RegraLimpeza = false };
             Linha bom = Rodar(BotProfile.Bom, t), lento = Rodar(BotProfile.Lento, t), parado = Rodar(BotProfile.Parado, t);
             Imprime("antes da Fase C6 (a main da Fase C5)", new[] { bom, lento, parado });
             Assert.AreEqual((6586, 3534, 4660), ((int)Math.Round(bom.Receita), (int)Math.Round(lento.Receita), (int)Math.Round(parado.Receita)), "sem pagar, a tabela da fase anterior");
@@ -519,6 +522,24 @@ namespace TA.Tests
                 Linha l = Rodar(p, null, Sementes, ondas);
                 TestContext.Out.WriteLine(string.Format(ci, "| {0} | {1} | {2:0.0}% | {3:0} | {4:0} | {5:0.0}% | {6:0.00} |", p.Name, ondas, l.Embarque * 100, l.Receita, l.Despesas,
                     100 * l.Despesas / l.Receita, l.Apertos));
+            }
+        }
+
+        /// <summary>Portao da frente F (BALANCE.md §17): o banheiro, a sujeira e a equipe de limpeza nao derrubam nada. As mesmas sementes com e sem a
+        /// regra: o banheiro nunca faz perder voo (embarque) e o salario quase nao pesa (receita); e o que a satisfacao (frente G) vai ler.</summary>
+        [Test]
+        public void Portao_FrenteF_Limpeza()
+        {
+            var ci = CultureInfo.InvariantCulture;
+            TestContext.Out.WriteLine("| bot | ondas | embarque sem / com | receita sem / com | usos | maior fila | negados | interdicoes | limpezas | sujeira media |\n|---|---|---|---|---|---|---|---|---|---|");
+            foreach ((BotProfile p, int ondas) in new[] { (BotProfile.Bom, Ondas), (BotProfile.Lento, Ondas), (BotProfile.Guiado, OndasFaseC) })
+            {
+                Linha com = Rodar(p, null, Sementes, ondas), sem = Rodar(p, new Tuning { RegraLimpeza = false }, Sementes, ondas);
+                TestContext.Out.WriteLine(string.Format(ci, "| {0} | {1} | {2:0.0}% / {3:0.0}% | {4:0} / {5:0} | {6:0.0} | {7:0} | {8:0.00} | {9:0.00} | {10:0.0} | {11:0} |", p.Name, ondas,
+                    sem.Embarque * 100, com.Embarque * 100, sem.Receita, com.Receita, com.Usos, com.FilaBanheiro, com.Negados, com.Interdicoes, com.Limpezas, com.SujeiraMedia));
+                Assert.GreaterOrEqual(com.Embarque, sem.Embarque - 0.005, p.Name + ": o banheiro nao faz perder voo");
+                Assert.GreaterOrEqual(com.Receita, sem.Receita * 0.98, p.Name + ": a limpeza custa pouco");
+                Assert.Greater(com.Usos, 0, p.Name + ": o banheiro e' usado");
             }
         }
 

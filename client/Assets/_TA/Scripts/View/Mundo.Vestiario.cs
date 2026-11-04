@@ -92,11 +92,14 @@ namespace TA
         }
 
         /// <summary>Letreiro em cima da parede norte, como o das salas (Placa), sem selo de estado: o vestiario nao tem fila.</summary>
-        void PlacaVestiario(Vector3 p)
+        void PlacaVestiario(Vector3 p) => Letreiro(p, Textos.Vestiario, Art.EstacaoCor[SalaDespacho]);
+
+        /// <summary>O letreiro do vestiario e do banheiro (Mundo.Limpeza.cs, que troca o texto na interdicao).</summary>
+        TextMesh Letreiro(Vector3 p, string texto, Color cor)
         {
             Quaternion rosto = Quaternion.Euler(20f, 0f, 0f);
-            Bloco("PlacaVestiario", PrimitiveType.Cube, p, new Vector3(1.8f, 0.34f, 0.03f), Art.EstacaoCor[SalaDespacho]).transform.rotation = rosto;
-            var go = new GameObject("PlacaNomeVestiario");
+            Bloco("Placa" + texto, PrimitiveType.Cube, p, new Vector3(1.8f, 0.34f, 0.03f), cor).transform.rotation = rosto;
+            var go = new GameObject("PlacaNome" + texto);
             go.transform.SetParent(_raiz, false);
             go.transform.SetPositionAndRotation(p + rosto * Vector3.back * 0.02f, rosto);
             TextMesh tm = go.AddComponent<TextMesh>();
@@ -107,8 +110,9 @@ namespace TA
             tm.alignment = TextAlignment.Center;
             tm.fontStyle = FontStyle.Bold;
             tm.color = Art.Ink;
-            tm.text = Textos.Vestiario;
+            tm.text = texto;
             go.GetComponent<MeshRenderer>().sharedMaterial = Art.Font().material;
+            return tm;
         }
     }
 }
