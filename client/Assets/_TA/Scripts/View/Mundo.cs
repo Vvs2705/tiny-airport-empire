@@ -235,6 +235,7 @@ namespace TA
             Sim s = S;
             EmbarquePasso(s, dt);
             SincronizaPax(s, dt);
+            ChegadaPasso(s, dt);
             Funcionarios(s, dt);
             Salas3D(s);
             int n = Mathf.Max(1, Mathf.CeilToInt(dt / PatioDtMax - 1e-3f));   // a 3x num aparelho a 30 qps, 3 pedacos de 1/30 s
@@ -296,6 +297,7 @@ namespace TA
             else if (_vista == "malas") { _alvo = V3(Centro(SalaMalas)) + new Vector3(0f, 0f, 1.2f); _tam = 3.8f; }
             else if (_vista == "ponte") { _alvo = new Vector3(10.2f, 0f, 11.6f); _tam = 4.6f; }
             else if (_vista == "escada") { _alvo = new Vector3(21f, 0f, 14f); _tam = 4.2f; }
+            else if (_vista == "esteira") { _alvo = new Vector3(8f, 0f, -2f); _tam = 2.8f; }
             else if (_vista == "chegadas") { _alvo = new Vector3(4.6f, 0f, 10.2f); _tam = 3.6f; }
             else if (_vista == "calcada") { _alvo = new Vector3(-1.45f, 0f, 3.25f); _tam = 4.4f; }
             else if (_vista == "pista") { _alvo = new Vector3(11f, 0f, 26f); _tam = 15f; }

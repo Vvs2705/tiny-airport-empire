@@ -333,6 +333,14 @@ namespace TA.Core
         public float InspecaoSeg = 110f; public int InspecaoTira = 50;
         public float HangarSeg = 180f; public int HangarCusto = 100;
 
+        // ---- Frente H (Direcao §8.3, hipoteses): chegada e restituicao de bagagem (Sim.Chegada.cs). Sem Cash: nao passa pelo portao do §5.13 ----
+        /// <summary>Quem chega por pouso (fracao dos passageiros da onda, com teto), a chance de mala despachada e os s do aviao ate a esteira,
+        /// por estande (G pela ponte; R pela escada, pelo patio e pelo corredor).</summary>
+        public float ChegadaFator = 0.5f, ChegadaMalaChance = 0.7f; public int ChegadaMax = 10;
+        public float[] ChegadaAndar = { 20f, 40f };
+        /// <summary>Esteira de restituicao: lugares de mala na volta, s para andar um lugar (a boca poe no maximo uma mala por lugar) e s para tirar a mala.</summary>
+        public int EsteiraCap = 10; public float EsteiraSeg = 1f, PegarSeg = 1.5f;
+
         // ---- Fase C3 (CONTRATO_FASE_C3, hipoteses) ----
         /// <summary>Portao de design do GDD §5.13 por sistema (false = so visual: o nome muda, os numeros nao).</summary>
         public bool RegraRotas = true, RegraAeroportos = true, RegraIncidentes = true;

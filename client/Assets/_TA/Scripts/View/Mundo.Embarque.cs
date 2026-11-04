@@ -36,20 +36,15 @@ namespace TA
         /// <summary>Chegadas: quem desceu do aviao segue pelo passeio e some no arco de vidro do terminal, com o quad a frente para a fachada nao cortar a cabeca.</summary>
         static readonly No[] Terminal = { new No(4f, 8.2f, 0f, 0f, 1f), new No(4f, 9.9f, 0f, 0f, 1f), new No(4f, 10.5f, 0f, 1f, 1f), new No(4f, 10.9f, 0f, 1.2f, 0f) };
         const float PasseioZ = 8.2f;   // ao longo da parede norte das salas, por tras do pe da rampa
-        static readonly Vector2 Chegadas = new Vector2(4f, 10.9f);
 
         const float PonteGraus = 5f;
         public static readonly Vector3 PonteEm = new Vector3(9.95f, 0f, 11.55f), PonteEscala = new Vector3(1.15f, 1.1f, 0.9f);
         static readonly Color PisoRampa = Art.Hex(0x9AA6BC), Corrimao = Art.Hex(0xF2C14E), Escuro = Art.Hex(0x1E2533), Metal = Art.Hex(0x6E7A90), PisoPasseio = Art.Hex(0xB8B2A6);
-        /// <summary>Passageiros que descem por aviao na tela (o nucleo nao conta quem chega) e o intervalo em s de jogo.</summary>
-        const int Descem = 8;
-        const float DesceCada = 1.1f, TripCada = 0.7f;
+        /// <summary>Intervalo em s de jogo entre os tripulantes que andam juntos. Quem chega de passageiro vem do nucleo (Mundo.Chegada.cs).</summary>
+        const float TripCada = 0.7f;
 
         GameObject _passarela, _portaJato;
         bool _escada;
-        readonly int[] _faltaDescer = new int[2];
-        readonly float[] _proxDescer = new float[2];
-        readonly bool[] _descia = new bool[2];
 
         // ------------------------------------------------------------------ construcao
 
@@ -198,7 +193,7 @@ namespace TA
         {
             foreach (Boneco b in _pax.Values) if (NoCaminho(b, k)) return true;
             foreach (Andante a in _andantes) if (NoCaminho(a.B, k)) return true;
-            return false;
+            return ChegandoNoTrilho(k);
         }
 
         static bool NoCaminho(Boneco b, int k)
@@ -207,25 +202,13 @@ namespace TA
             return b.Caminho[b.Caminho.Count - 1] == Trilho[k][Trilho[k].Length - 1].P || Le(Trilho[k], b.Pos, out _, out _, out _);
         }
 
-        /// <summary>O que muda no quadro: caminhao-escada no lugar (passarela), porta do jato e os passageiros que descem, um a um, a partir do servico de desembarque.</summary>
+        /// <summary>O que muda no quadro: caminhao-escada no lugar (passarela) e porta do jato. Quem desce e o nucleo que diz (Mundo.Chegada.cs, frente H).</summary>
         void EmbarquePasso(Sim s, float dt)
         {
             _escada = false;
             foreach (Veiculo v in _veiculos) if (v.Tipo?.Malha == "escada_embarque" && v.Aviao == 1 && v.Lida == Lida.Servindo) _escada = true;
             _passarela.SetActive(_escada);
             _portaJato.SetActive(_escada);
-            for (int k = 0; k < 2; k++)
-            {
-                bool desce = s.Avioes[k].Fazendo[(int)Servico.Desembarque];
-                if (desce && !_descia[k]) _faltaDescer[k] = Descem;
-                _descia[k] = desce;
-                if (_faltaDescer[k] == 0 || _avioes[k].Fase != Fase.NoPatio || (k == 1 && !_escada)) continue;
-                _proxDescer[k] -= dt;
-                if (_proxDescer[k] > 0f) continue;
-                _proxDescer[k] = DesceCada;
-                _faltaDescer[k]--;
-                Trilha(NovoAndante(PaxAtor[_faltaDescer[k] % PaxAtor.Length], Art.VooCor[k], 0f), Chegadas, k, true);
-            }
         }
     }
 }

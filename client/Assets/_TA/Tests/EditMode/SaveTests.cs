@@ -733,9 +733,50 @@ namespace TA.Tests
             Assert.AreEqual(SemEma(n.Save("0.11.0", U)), SemEma(Sim.Load(V11, sv, 7).Save("0.11.0", U)), "migrar = jogar ate ali com o codigo novo");
         }
 
+        /// <summary>Save real do schema 12 (commit 6703774, a main com a contratacao #61 e o vestiario #63): semente 7, bot Bom, 2 790 s, os 6 perfis.</summary>
+        const string V12 = "sha256=eb7453c431a4a7e1709bf523fa3568f96695d81eb6fb9356896d17592d20a894\nschema=12\ncontent=0.12.0\nat=1800000000\nt=83700\ncash=5964\nseed=7\nonda=15" +
+            "\nemb=1020\nperd=28\nalbum=1\nbst=0\nema=9.395198961373023\nsaved=1800000000\nclaim=0\nclaimcash=0\ndia=0\nest.0=5,2\nfila.0=15501;15502;15503;15504;1" +
+            "5505;15506;15507;15508;15509;15510;15511;15512;15513;15514;15515;15516;15517;15518;15519;15520;15521;15522;15523;15524;15525;15526;15527;15528;15529;1" +
+            "5530;15531;15532;15533;15534\nat.0=15044:2;15045:32;15500:62\nest.1=5,2\nat.1=15042:40;15043:70\nest.2=0,0\nest.3=5,2\nfila.3=15011;15016;15015;15017;" +
+            "15014;15020;15019;15018;15022;15023;15021;15024;15025;15026;15027;15028;15029;15031;15030;15033;15032;15035;15036;15034;15037;15038;15039;15040;15041\n" +
+            "est.4=5,2\nest.5=5,2\nest.6=5,2\nest.7=0,0\nfunc.0=1,0,0,0,1\nfunc.1=1,0,0,1,1\nfunc.2=4,0,0,3,1\nfunc.3=5,1,0,2,1\nfunc.4=6,0,0,4,1\nfunc.5=7,1,0,5,1" +
+            "\nvoo.0=46,13,182,1,0\nvoo.1=35,0,0,0,0\naviao.0=50,82200,1,30,-1,0,0,1,0,0\nsrv.0=0:0,0:0,0:0,0:0\naviao.1=100,83700,0,-1,-1,0,0,1,0,0\nsrv.1=0:0,0:0" +
+            ",0:0,0:0\ntrip.0=0,1,3872,0\ntrip.1=0,1,5400,1\ntrip.2=0,3,1499,-1\ntrip.3=1,1,3842,0\ntrip.4=1,1,5400,1\ntrip.5=1,3,1499,-1\npatio=3\npatioatraso=8\n" +
+            "aero=1,3,-1\nrotas=127\nprog=6,6\nvr.0=6,46,0,0,0,0,1800,0\nvr.1=6,46,0,0,0,0,3300,0\nav.0=6,15\nav.1=6,15\nstt.0=1,31,5.666665818542242\nstt.1=0,-1,2" +
+            "7.900001425296068\nstt.3=1,30,8.099999587982893\nreparo=0\nincw=14\ncamp.0=6,10,0,0,3,0,1,0,1,3,0\ncamp.1=1,0,1,40,40,3,0,1,0,2,0\ncamp.2=0,0,0,0,0,0," +
+            "0,0,0,0,0\nmiss=1,0\nmd.0=14,4,0,1\nmd.1=12,30,0,1\nmd.2=6,300,0,1\nms.0=4,30,1,0\nms.1=2,10,0,0\nms.2=3,20,0,0\nms.3=1,0,5,0\nms.4=0,1000,0,0\ncq=348" +
+            "49,0,0,30,30,27,4,24,70,0,232,252,25,0,2,1,0,0,0,0,6\ngems=0\npasse=0,0,350,3\natrasada=0\nhoje=1,0,7818,1015,0,1904,2349,1200,0,0,0,0,0,0\ndc.0=0,585" +
+            ",4570,445,0,528,1000,790,0,0,195,108,54,228\nhist=3600,4,-1,0,0,10,0,4,0,0,0,6,0,0,0,0;25200,3,-1,0,8,26,3,0,0,0,0,2,3,7,0,0;41460,1,4,0,15,40,0,7,1,0" +
+            ",0,0,0,0,0,0;43200,5,-1,0,-1,0,0,0,0,1,102,12,0,0,0,0;46800,3,-1,0,16,58,16,0,0,0,0,1,3,18,2,0;62400,0,1,0,23,32,0,0,3,1,0,0,0,0,0,0;69900,3,-1,0,25,5" +
+            "4,7,0,0,0,0,1,3,2,3,0;73800,3,-1,0,26,43,2,0,0,0,0,2,3,16,0,0;79260,1,5,0,29,40,0,0,1,0,0,0,0,0,0,0\n";
+
+        /// <summary>Frente H: o schema 12 nao tem quem chega. Abre sem ninguem chegando, com a esteira e o carrinho vazios; o resto volta como
+        /// estava, migrar = jogar ate ali com o codigo novo (a chegada nao mexe no jogo) e o proximo pouso ja traz gente. Com o V10 e o V11, a cadeia
+        /// 10 -> 11 -> 12 -> 13 fica provada em todos os elos.</summary>
+        [Test]
+        public void MigracaoDoSchema12_SaveReal_NinguemChegando()
+        {
+            const long U = 1800000000;
+            Sim m = Sim.Load(V12, null, 7);
+            Assert.IsFalse(m.SaveRefused, "schema 12 migra, nao e' recusado");
+            Assert.AreEqual(6, m.Staff.Count);
+            Assert.AreEqual(0, m.Chegantes.Count, "ninguem chegando");
+            Assert.AreEqual(0, m.Carrinho.Count, "carrinho vazio");
+            Assert.IsTrue(m.Esteira.All(x => x < 0), "esteira vazia");
+            string texto = m.Save("0.13.0", U);
+            StringAssert.Contains("\nschema=" + Sim.Schema + "\n", texto);
+            Assert.AreEqual(texto, Sim.Load(texto, null, 7).Save("0.13.0", U), "ida e volta estavel no schema novo");
+            Assert.AreEqual(SemEma(Jogado(2790f, 7).Save("0.12.0", U)), SemEma(Sim.Load(V12, null, 7).Save("0.12.0", U)), "migrar = jogar ate ali com o codigo novo");
+            var b = new Bot(BotProfile.Bom);
+            bool chegou = false;
+            for (int i = 0; i < (int)(600f * Sim.Hz) && !chegou; i++) { b.Step(m); chegou = m.Chegantes.Count > 0; }
+            Assert.IsTrue(chegou, "o proximo pouso ja traz gente");
+        }
+
         static string SemEma(string save) =>
             string.Join("\n", save.Split('\n').Where(l => !l.StartsWith("ema=") && !l.StartsWith("sha256=") && !l.StartsWith("stt.") && !l.StartsWith("camp.") && !l.StartsWith("miss=") && !l.StartsWith("md.") && !l.StartsWith("ms.") && !l.StartsWith("cq=") && !l.StartsWith("passe=")
-                && !l.StartsWith("atrasada=") && !l.StartsWith("hoje=") && !l.StartsWith("dc.") && !l.StartsWith("hist=")));
+                && !l.StartsWith("atrasada=") && !l.StartsWith("hoje=") && !l.StartsWith("dc.") && !l.StartsWith("hist=")
+                && !l.StartsWith("cheg=") && !l.StartsWith("chav.") && !l.StartsWith("esteira=") && !l.StartsWith("carrinho=")));   // schema 13: o save antigo nao tinha quem chega
 
         [Test]
         public void LixoDaFaseC2_ViraPadraoLimitado()

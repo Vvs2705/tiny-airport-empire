@@ -58,8 +58,11 @@ using System.Collections.Generic;
 //               Total, Perdidos, Atraso, Resposta, Auto, Custo, Motivo com Estacao, Espera e Postos, Aberta, Eficaz) e sim.HoraDe(passo). So observa.
 //   Frente E:   sim.Move passa pelo vestiario (Sim.Vestiario.cs): sim.Fase(f) (Encerrando, IndoVestiario, Trocando, IndoPosto), sim.Veste(f) (o uniforme
 //               muda so no fim da troca), sim.Preparo(f) (0 a 1) e sim.TransferePassos; Funcionario.Andando = passos que faltam. Nada novo no save.
+//   Frente H:   sim.Chegantes (quem chega: Aviao, Estado NoAviao/Andando/Esperando/Pegando, Resto, Vaga, Mala, MalaSolta), sim.Esteira (Id do dono por
+//               lugar, -1 vazio; o lugar j esta na posicao (j + sim.Giro) % EsteiraCap, a boca na 0), sim.EsteiraPassos e sim.Carrinho (a fila da esteira).
+//               Sem Cash e sem intencao: quem chega desce com o desembarque do patio, espera a mala e sai (Sim.Chegada.cs).
 //   Gravar:     texto = sim.Save(versaoDoJogo, nowUnix): payload chave=valor dentro do SaveEnvelope (SHA-256 + schema). Grava filas e o
-//               relogio do quadro: reabrir retoma a onda do ponto gravado. Schema 12; os saves dos schemas 1 a 11 migram no Load.
+//               relogio do quadro: reabrir retoma a onda do ponto gravado. Schema 13; os saves dos schemas 1 a 12 migram no Load.
 //
 // Nomes acima sao estaveis (so crescem). Mudou a API: atualize este cabecalho e o docs/MAPA_CODIGO.md no mesmo PR.
 
@@ -73,9 +76,9 @@ namespace TA.Core
         /// <summary>Teto do dt de um quadro (s): uma travada longa nao vira um salto de minutos no relogio do quadro de partidas.</summary>
         public const float MaxFrame = 0.25f;
         /// <summary>Versao do formato do save (SaveEnvelope). Sobe a cada mudanca de formato; save de schema maior e' recusado; menor migra
-        /// no Load (12 = Fase C9: a experiencia de cada funcionario; 11 = registro de ocorrencias; 10 = Fase C8: despesas e relatorio do dia; 9 = Fase C7: passe de temporada; 8 = Fase D1: Gems e compras; 7 = Fase C6: missoes e conquistas; 6 = Fase C5: campanha; 5 = Fase C4: falhas de aviao e portao atrasado;
+        /// no Load (13 = frente H: chegada e restituicao de bagagem; 12 = Fase C9: a experiencia de cada funcionario; 11 = registro de ocorrencias; 10 = Fase C8: despesas e relatorio do dia; 9 = Fase C7: passe de temporada; 8 = Fase D1: Gems e compras; 7 = Fase C6: missoes e conquistas; 6 = Fase C5: campanha; 5 = Fase C4: falhas de aviao e portao atrasado;
         /// 4 = Fase C3: aeroportos, rotas e incidentes; 3 = Fase C2: 8 estacoes e o perfil de cada funcionario; 2 = Fase C: avioes, tripulacao e patio; o 1 e' a v0.1).</summary>
-        public const int Schema = 12;
+        public const int Schema = 13;
         /// <summary>A equipe da v0.1 (Hire()): Ana, Beto e Caio. MaxEquipe = os 6 perfis, com Dani, Edu e Fatima (Hire(perfil)).</summary>
         public const int MaxFuncionarios = 3, MaxEquipe = 6;
 
@@ -167,6 +170,7 @@ namespace TA.Core
             PassoIncidente();
             Sala();
             Patio();
+            Chegada();
             foreach (Voo v in Voos)
             {
                 if (v.Partiu) continue;

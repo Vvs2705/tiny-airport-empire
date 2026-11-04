@@ -63,7 +63,7 @@ namespace TA
             Escala = L("ESCALA DO VOO"), Reparo = L("Reparo só com Cash e tempo. Nenhum avião se perde."),
             EscalaFechada = L("A escala fecha quando o embarque abre."), EscalaSemVoo = L("O avião ainda não encostou para este voo."),
             AvisoHangar = L("No hangar, este voo não embarca: você perde só o Cash dele."),
-            TripulacaoSala = L("Tripulação na sala");
+            TripulacaoSala = L("Tripulação na sala"), Restituicao = L("RESTITUIÇÃO");
 
         public static string Balcoes(int n, float seg) => n + (n == 1 ? L(" balcão · ") : L(" balcões · ")) + Seg(seg);
         public static string EstadoTexto(Estado e, int voo) => e == Estado.Critico ? L("CRÍTICO: ") + Voo(voo) + L(" em risco")
