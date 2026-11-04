@@ -857,3 +857,38 @@ As 16 travas novas entram no `mutacao.py`, e a do booster da Fase D1 muda de tre
 - **O passe fecha cedo para quem joga tudo.** O Completo termina no dia 18 e passa 10 dias sem barra. Se incomodar, subir os pontos por nível e medir de novo. A trilha premium pode ocupar esse fim.
 - **Cash do passe sem destino.** São 28 300 Cash, quase todo depois do fim do catálogo (perto da onda 20). Só os primeiros níveis compram progresso; o valor que sobra está no 2× e nos 3 cosméticos, que pedem arte.
 - **A barra é entendida?** A tela precisa dizer que ponto não se compra, que nada expira e quantos dias do jogo faltam. Ver se "dia do jogo" confunde quem espera o calendário (D-C7a).
+
+## 13. Registro de ocorrências (2026-11-04, frente `ta-historico`)
+
+Não tem número de balanço: só observa. A prova tem duas partes.
+
+- **No mesmo código:** `Invariante_SoObserva_DesligadoDaOMesmoJogo_NumeroANumero` joga 9 cenários (o padrão, os 4 incidentes, um clima e as 3 falhas de avião), com o Bom e o Parado, 10 ondas cada, com o registro ligado e desligado (`Tuning.RegraHistorico`). Os eventos saem iguais passo a passo, e o save, igual fora da linha `hist=`.
+- **Contra a `main`:** os portões do §5.13, da campanha, das missões e do passe, medidos na `main` de 03/11 (`0b76529`), têm de sair iguais no CI do PR. A base:
+
+| portão | `main` |
+|---|---|
+| §5.13 (Planejador / Automático, 20 ondas) | 1,176: receita 21 447 contra 18 231; só tripulação 1,030, só manutenção 1,176, as duas 1,194 |
+| campanha (Guiado / Bom, 20 ondas) | 1,380: receita 35 568 contra 28 361 |
+| missões (Missionário / Bom, 20 ondas) | 1,438: receita 37 415 contra 28 361 |
+| passe (LentoCompleto) | 200 de 200, dia 20,0, p90 21,8, pior 23,9, 28 300 de Cash, embarque 77,7% |
+
+### Prova de mutação (`MUTACAO_TESTES="FullyQualifiedName~HistoricoTests" python client/tools/mutacao.py historico:`)
+
+As 17 travas novas entram no `mutacao.py`. Resultado em 2026-11-04: **17 de 17 mortos**. A 1ª rodada deu 16: "travou onde ficou a maioria" sobreviveu, porque em todo teste quem perdia o voo estava numa estação só. Entrou `VooPerdido_ExplicaOndeFicouAMaioria` e esse mutante foi repetido.
+
+| trava retirada | testes que caíram |
+|---|---|
+| só observa: não mexe no voo | `Invariante_SoObserva_...` e a migração do schema 9 |
+| só observa: não mexe no avião | os 2 testes da pane |
+| desligado não anota (eventos e portão) | `Invariante_SoObserva_...` |
+| retenção de 3 dias do jogo | `Retencao_TresDiasDoJogo_ODiaQueViraSaiSemEvento` |
+| teto do dia, ao anotar e no save | `TetoDoDia_FicamAsMaisNovas` |
+| passo e perdidos do save limitados | `LixoDoHistorico_ViraPadraoLimitado` |
+| o registro vai no save | `IdaEVolta_ComOcorrencias_TextoEstavel`, `Retomada_ReabrirNoMeio_DaOMesmoRegistro` |
+| o custo do reparo pago | `Pane_ReparoPago_GuardaOCusto` |
+| explica a estação sem ninguém | `VooPerdido_SegurancaSemNinguem_ExplicaSemEquipe` |
+| travou onde ficou a maioria | `VooPerdido_ExplicaOndeFicouAMaioria` |
+| o atraso da decolagem | os testes da rejeição e do pátio lento |
+| a pane fecha quando o avião volta ao normal | a pane sem pagar e o retorno |
+| a falha de avião guarda o desgaste | a pane sem pagar |
+| a rejeição não fecha o incidente do mesmo índice (o `Pico` e a `Rejeicao` valem 2) | `Incidente_EntraNoAviso_FechaComOResultadoDoVoo` |
