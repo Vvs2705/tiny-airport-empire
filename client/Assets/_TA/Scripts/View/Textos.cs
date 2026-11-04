@@ -179,6 +179,28 @@ namespace TA
             Adiantar = L("Adiantar"), Atrasar = L("Atrasar"), Priorizar = L("Priorizar"), Reparar = L("Reparar"),
             AtrasoNao = L("Não dá para atrasar: o clima passa da virada da onda."), MecanicoOcupado = L("O mecânico está ocupado."), PousoSeguro = L("Pouso seguro. Passageiros remarcados.");
 
+        // ---------- registro de ocorrencias (Sim.Historico; a tela vem nas frentes G e I) ----------
+        /// <summary>A explicacao curta da ocorrencia (Ocorrencia.Motivo): por que deu certo ou onde travou. 1 s de jogo = 1 min no quadro.</summary>
+        public static string Explica(Ocorrencia o)
+        {
+            string no = EstacaoNo[(int)o.Estacao];
+            switch (o.Motivo)
+            {
+                case Motivo.Fila: return L("Fila ") + no + ": " + o.Espera + L(" min com ") + Plural(o.Postos, L("posto aberto"), L("postos abertos"));
+                case Motivo.SemEquipe: return L("Ninguém ") + no + L(": só o toque atendia");
+                case Motivo.Equipamento: return L("Equipamento em falha ") + no;
+                case Motivo.Clima: return L("O clima fechou ou segurou a pista");
+                case Motivo.Pista: return L("Pista bloqueada por outro avião");
+                case Motivo.Patio: return L("Pátio atrasado: desembarque, limpeza, combustível ou bagagem");
+                case Motivo.Tripulacao: return L("Faltou tripulação a bordo");
+                case Motivo.Manutencao: return L("Avião parado na inspeção");
+                case Motivo.Pane: return L("Avião em pane no portão");
+                case Motivo.Hangar: return L("Avião mandado ao hangar");
+                case Motivo.Pouso: return L("O avião não pousou a tempo");
+                default: return L("Deu certo: ninguém perdeu o voo");
+            }
+        }
+
         // ---------- metas: campanha, missoes e conquistas (docs/CAMPANHA.md e docs/MISSOES.md; o nome e' o da tabela do nucleo) ----------
         public static readonly string[] AeroportoNome = System.Array.ConvertAll(Tabelas.Aeroportos, a => L(a.Nome));
         public static readonly string Metas = L("Metas"), Campanha = L("Campanha"), Missoes = L("Missões"), Conquistas = L("Conquistas"),

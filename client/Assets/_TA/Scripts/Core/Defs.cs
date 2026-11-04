@@ -380,6 +380,10 @@ namespace TA.Core
         public bool RegraPasse = true;
         public Temporada[] Temporadas = Tabelas.Temporadas;
         public int PassePontosNivel = 100, PasseVoo = 2, PasseDiaria = 25, PasseSemanal = 70, PasseObjetivo = 20;
+
+        // ---- ta-historico ----
+        /// <summary>Anota o registro de ocorrencias (Sim.Historico.cs). So observa: false da o mesmo jogo, numero a numero, sem o registro.</summary>
+        public bool RegraHistorico = true;
     }
 
     /// <summary>Historias do TA-3 (GDD §5.9). A v0.1 tem 1. Id = indice (vai no album do save): so cresce no fim.</summary>

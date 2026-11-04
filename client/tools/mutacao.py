@@ -723,6 +723,108 @@ MUTANTES = [
         "else if (v > 0) _posse.Add(n.Id);",
         "else _posse.Add(n.Id);",
     ),
+    (
+        "historico: so observa (nao mexe no voo)",
+        "Sim.Historico.cs",
+        "int perdidos = v.Total - v.Embarcados;",
+        "int perdidos = v.Total - v.Embarcados; v.Receita = 0;",
+    ),
+    (
+        "historico: so observa (nao mexe no aviao)",
+        "Sim.Historico.cs",
+        "o.Causa = Avioes[a].Desgaste; o.Total",
+        "o.Causa = Avioes[a].Desgaste; Avioes[a].Pane = false; o.Total",
+    ),
+    (
+        "historico: regra desligada nao anota (eventos)",
+        "Sim.Historico.cs",
+        "if (!T.RegraHistorico) return;\n            Ocorrencia o;",
+        "Ocorrencia o;",
+    ),
+    (
+        "historico: regra desligada nao anota (portao)",
+        "Sim.Historico.cs",
+        "if (!T.RegraHistorico) return;\n            int perdidos",
+        "int perdidos",
+    ),
+    (
+        "historico: retencao de 3 dias do jogo",
+        "Sim.Historico.cs",
+        "void Poda() => _hist.RemoveAll(r => r.Dia <= DiaJogo - HistoricoDias);",
+        "void Poda() { }",
+    ),
+    (
+        "historico: teto do dia",
+        "Sim.Historico.cs",
+        "if (doDia >= HistoricoPorDia) _hist.RemoveAt(_hist.FindIndex(r => r.Dia == dia));",
+        "",
+    ),
+    (
+        "historico: teto do dia no save",
+        "Sim.Historico.cs",
+        "if (doDia >= HistoricoPorDia) _hist.RemoveAt(k);",
+        "",
+    ),
+    (
+        "historico: passo do save limitado",
+        "Sim.Historico.cs",
+        "|| n[0] > Steps + 2L * OndaPassos) continue;",
+        ") continue;",
+    ),
+    (
+        "historico: perdidos do save ate o total",
+        "Sim.Historico.cs",
+        "o.Perdidos = (int)Lim(n[6], 0, o.Total);",
+        "o.Perdidos = (int)n[6];",
+    ),
+    (
+        "historico: o registro vai no save",
+        "Sim.Historico.cs",
+        "Poda();\n            if (_hist.Count == 0) return;",
+        "return;",
+    ),
+    (
+        "historico: o custo do reparo pago vai no registro",
+        "Sim.Historico.cs",
+        "case Ev.PaneReparo: Responde(DaFalha(a), Opcao.Reparar, b, false); break;",
+        "case Ev.PaneReparo: break;",
+    ),
+    (
+        "historico: explica a estacao sem ninguem",
+        "Sim.Historico.cs",
+        ": Presentes(e) == 0 ? Motivo.SemEquipe",
+        ": Presentes(e) < 0 ? Motivo.SemEquipe",
+    ),
+    (
+        "historico: travou onde ficou a maioria",
+        "Sim.Historico.cs",
+        "if (n > max) { max = n; o.Estacao = s.Tipo; }",
+        "if (n > 0) { max = n; o.Estacao = s.Tipo; }",
+    ),
+    (
+        "historico: o atraso da decolagem vai no registro",
+        "Sim.Historico.cs",
+        "o.Atraso = atraso;\n                if (o.Tipo",
+        "o.Atraso = 0;\n                if (o.Tipo",
+    ),
+    (
+        "historico: a pane fecha quando o aviao volta ao normal",
+        "Sim.Historico.cs",
+        "case Ev.PaneReparada: if ((o = DaFalha(a)) != null) o.Aberta = false; break;",
+        "case Ev.PaneReparada: break;",
+    ),
+    (
+        "historico: a falha de aviao guarda o desgaste",
+        "Sim.Historico.cs",
+        "o.Causa = Avioes[a].Desgaste; o.Total",
+        "o.Causa = 0; o.Total",
+    ),
+    (
+        "historico: a rejeicao nao fecha o incidente do mesmo indice",
+        "Sim.Historico.cs",
+        "o.Tipo == TipoOcorrencia.FalhaAviao && o.Sub == (int)TipoFalha.Rejeicao) o.Aberta = false;",
+        "o.Sub == (int)TipoFalha.Rejeicao) o.Aberta = false;",
+    ),
 ]
 
 
