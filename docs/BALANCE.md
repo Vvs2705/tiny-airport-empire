@@ -1150,7 +1150,59 @@ As 13 travas novas entram no `mutacao.py`. Resultado em 2026-11-03: **13 de 13 m
 - **O Sênior parece óbvio?** Ver se a pessoa compara os 3 ou vai direto no mais caro, e se usa o Júnior para começar.
 - **Demitir sem custo** (D-C9b). Ver se alguém demite e recontrata para fugir da conta; a conta é do estado na hora do fechamento (D-C8b), então demitir antes e recontratar depois economiza no máximo um salário, pagando a contratação de novo.
 
-## 17. Suprimentos: combustível e refeições (2026-11-04, frente `ta-suprimentos`)
+## 17. Frente F: limpeza e banheiro (2026-11-04, `GDD.md` §4.1, linha F)
+
+Banheiro, sujeira e equipe de limpeza no núcleo (`Sim.Limpeza.cs`, save schema 14) e na tela (`Mundo.Limpeza.cs`). **Antes** = `RegraLimpeza = false`, que dá o jogo de antes número a número: sem banheiro no caminho, sem sujeira, sem equipe de limpeza e sem o salário dela. As tabelas "antes" (`SemC8` e `SemFaseC4` do `BalanceTests`) e as migrações dos saves reais jogam com a regra desligada, como o jogo que as gravou.
+
+| | valor |
+|---|---|
+| passageiro que precisa do banheiro (semente) | 35% |
+| cabines, uso, caminhada do portão à porta (cada perna) | 2, 6 s, 8 s |
+| folga que sobra antes de o embarque abrir, com a volta | 10 s |
+| sujeira por passageiro atendido (check-in, segurança, loja, portão, bagagem, alimentação; banheiro por uso) | 4, 4, 6, 3, 4, 12; 20 (de 1 000) |
+| gatilho da escala automática, limpeza por s | 250, 60 |
+| equipe: no jogo novo, contratações, salário por dia | 1; 60 e 150; 15 |
+
+### D-Fa. O banheiro não pode fazer perder voo
+
+Só vai ao banheiro quem volta antes de o embarque abrir, com 10 s de sobra (`AoPortao`): a viagem acontece enquanto a pessoa esperaria sentada no portão. Quem não tem folga vai direto. Se mesmo assim alguém estiver lá quando o portão fecha (portão adiantado pelo clima, save editado), o voo leva, como numa fila (`FechaOVoo_LevaQuemFicouNoBanheiro`). Com 5 sementes × 4 ondas do Bom e do Lento, nenhum voo fechou com gente no banheiro (`Invariante_NinguemFicaNoBanheiroQuandoOVooFecha`).
+
+### D-Fb. A sujeira ainda não mexe no Cash
+
+A sujeira e a fila do banheiro ficam prontas para a satisfação (frente G) ler (`CONTRATO_LANCAMENTO.md` §5). Hoje o efeito de jogo é o do banheiro: interdita na sujeira máxima, a fila volta ao portão (`Negados`) e só reabre limpo. Com 1 zelador ele quase nunca interdita (0 em 200 sementes), então contratar o 2º e o 3º só limpa mais rápido. O portão do §5.13 dessa escolha (contratar limpeza rende ≥ 1,10) só faz sentido quando a G der peso à sujeira; até lá, a contratação existe no núcleo sem tela.
+
+### O portão da F (`Portao_FrenteF_Limpeza`, 200 sementes, medido no PC com `--filter`)
+
+| bot | ondas | embarque sem / com | receita sem / com | usos do banheiro | maior fila | negados | interdições | limpezas | sujeira média (de 1 000) |
+|---|---|---|---|---|---|---|---|---|---|
+| Bom | 10 | 94,8% / 94,9% | 8 740 / 8 745 | 52,2 | 5 | 0 | 0 | 27,4 | 77 |
+| Lento | 10 | 79,9% / 80,0% | 5 222 / 5 234 | 42,9 | 2 | 0 | 0 | 21,0 | 76 |
+| Guiado | 20 | 91,6% / 91,6% | 35 621 / 35 643 | 61,0 | 6 | 0 | 0 | 74,3 | 106 |
+
+O portão exige embarque com a regra ≥ sem a regra − 0,5 ponto e receita ≥ 98%. O salário (15 por dia) quase não pesa. A receita com a regra sai um pouco maior; a diferença (0,1% a 0,2%) é do tamanho do ruído das decisões do bot, que lê o portão com menos gente enquanto alguns estão no banheiro. Os portões de antes rodam no CI deste PR, com a regra ligada.
+
+### Prova de mutação (`MUTACAO_TESTES="FullyQualifiedName~LimpezaTests|FullyQualifiedName~DespesasTests|FullyQualifiedName~SaveTests|FullyQualifiedName~EquipeTests" python client/tools/mutacao.py limpeza:`)
+
+Resultado em 2026-11-04: **9 de 9 mortos** (o das cabines sobreviveu na 1ª rodada e ganhou o `Cabines_NoTeto_OResto_EsperaNaFilaNaOrdem`).
+
+| trava retirada | testes que caíram |
+|---|---|
+| só vai ao banheiro quem volta antes do embarque | `Invariante_NinguemFicaNoBanheiroQuandoOVooFecha` |
+| as cabines no teto | `Cabines_NoTeto_OResto_EsperaNaFilaNaOrdem` |
+| o banheiro interditado não recebe | `Interdicao_NaSujeiraMaxima_AFilaVolta_OZeladorVaiPrimeiro_EReabreLimpo` |
+| só limpa depois de chegar | 3, entre eles `Escala_VaiAMaisSujaAcimaDoGatilho_SoLimpaDepoisDeChegar_ELiberaNoZero` e `Invariantes_NoBotLento_TresOndas` |
+| a ordem do jogador antes da escala | `Ordem_DoJogador_VemAntesDaEscala_EsperaUmLivre_ERecusaOQueNaoFazSentido` |
+| o salário na folha da equipe | 7, entre eles `Folha_QuemEstaContratado_EAsEstacoesAtivasPeloNivel` |
+| contratar pausa com a conta atrasada | `Contratacao_PrecoFixo_TetoDe3_PausaComAContaAtrasada_FolhaSobe` |
+| o save guarda quem está na cabine | 3, entre eles `Save_NoMeioDoBanheiroEDaLimpeza_IdaEVoltaEstavel_EOMesmoJogo` |
+| o voo que fecha leva quem ficou no banheiro | `FechaOVoo_LevaQuemFicouNoBanheiro` |
+
+### Para medir com gente
+
+- **O banheiro se nota?** Com 2 cabines a fila passa de 5 pessoas só no pico. Ver se a pessoa repara no banheiro e na fila sem a satisfação (G) dizer o motivo.
+- **Mandar limpar.** A ordem existe no núcleo, sem tela ainda. Quando a tela entrar, ver se a pessoa manda limpar a área suja ou deixa a escala automática.
+
+## 18. Suprimentos: combustível e refeições (2026-11-04, frente `ta-suprimentos`)
 
 Ideia do código de outra IA (03/11), refeita no nosso padrão (`Sim.Suprimentos.cs`): nenhum código de lá entrou. Cada turnaround leva cargas de combustível e de refeições. O serviço de pátio que leva o suprimento (combustível; limpeza, que é o caminhão do catering) roda como antes e, quando acaba, tira as cargas do depósito. Sem carga, o caminhão espera no avião até a entrega. Reposição automática: com o depósito no ponto, sai a entrega que enche o tanque, com prazo e custo fixos, e o custo entra na conta do dia. **Antes** = a regra desligada (`RegraSuprimentos = false`: depósito parado, nada pedido, nada cobrado, ninguém espera), que repete a `main` número a número (os `Antes_*` e as migrações rodam com ela). **Depois** = o `Tuning` padrão.
 
@@ -1187,24 +1239,24 @@ O sistema não é uma escolha que o bot mede: a reposição é automática, e o 
 
 | bot | embarque com / sem | receita com / sem | razão | entregas (Cash) | esperas |
 |---|---|---|---|---|---|
-| Bom | 94,8% / 94,8% | 8 740 / 8 740 | 1,000 | 55 | 0,00 |
-| Lento | 79,8% / 79,9% | 5 190 / 5 222 | 0,994 | 55 | 0,00 |
-| Parado | 89,2% / 89,2% | 4 812 / 4 819 | 0,998 | 55 | 0,00 |
+| Bom | 94,8% / 94,9% | 8 739 / 8 745 | 0,999 | 55 | 0,00 |
+| Lento | 79,9% / 80,0% | 5 202 / 5 234 | 0,994 | 55 | 0,00 |
+| Parado | 89,2% / 89,2% | 4 808 / 4 816 | 0,998 | 55 | 0,00 |
 
-Piso: nenhuma espera, embarque no máximo 0,5 ponto abaixo e receita de pelo menos 0,98 da sem a regra. Passa. O Lento perde 0,6% de receita porque a conta maior atrasa uma compra.
+Piso: nenhuma espera, embarque no máximo 0,5 ponto abaixo e receita de pelo menos 0,98 da sem a regra. Passa. Medido na `main` com a esteira (#62) e a limpeza (#67). O Lento perde 0,6% de receita porque a conta maior atrasa uma compra.
 
 ### O peso das entregas (`Medida_Suprimentos`, 40 sementes, tanque de 8 e de 16 nos dois)
 
 | bot | ondas | tanque | receita | entregas (Cash) | entregas ÷ receita | conta paga | esperas |
 |---|---|---|---|---|---|---|---|
-| Bom | 10 | 8 | 8 772 | 55 | 0,63% | 609 | 0 |
-| Bom | 10 | 16 | 8 764 | 22 | 0,25% | 576 | 0 |
-| Guiado | 20 | 8 | 36 202 | 103 | 0,28% | 1 584 | 0 |
-| Guiado | 20 | 16 | 36 139 | 44 | 0,12% | 1 530 | 0 |
-| LentoGuiado | 20 | 8 | 16 484 | 109 | 0,66% | 1 511 | 0 |
-| LentoGuiado | 20 | 16 | 16 515 | 44 | 0,27% | 1 450 | 0 |
-| Guiado | 64 | 8 | 212 537 | 258 | 0,12% | 6 207 | 0 |
-| Guiado | 64 | 16 | 212 083 | 110 | 0,05% | 6 072 | 0 |
+| Bom | 10 | 8 | 8 779 | 55 | 0,63% | 624 | 0 |
+| Bom | 10 | 16 | 8 761 | 22 | 0,25% | 591 | 0 |
+| Guiado | 20 | 8 | 36 134 | 103 | 0,29% | 1 614 | 0 |
+| Guiado | 20 | 16 | 36 102 | 44 | 0,12% | 1 560 | 0 |
+| LentoGuiado | 20 | 8 | 16 650 | 109 | 0,65% | 1 544 | 0 |
+| LentoGuiado | 20 | 16 | 16 598 | 44 | 0,27% | 1 487 | 0 |
+| Guiado | 64 | 8 | 213 720 | 258 | 0,12% | 6 312 | 0 |
+| Guiado | 64 | 16 | 213 658 | 110 | 0,05% | 6 177 | 0 |
 
 As entregas custam de 30 a 45 Cash por dia do jogo com o tanque de 8, e de 14 a 18 com o de 16. Os 2 níveis do tanque nos dois suprimentos custam 240 e se pagam em 10 a 15 dias do jogo: é um ganho pequeno, de propósito (D-Sd). O peso maior da conta continua sendo o salário (§13).
 

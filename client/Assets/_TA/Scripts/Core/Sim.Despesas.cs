@@ -57,7 +57,10 @@ namespace TA.Core
             long n = 0;
             switch (d)
             {
-                case Despesa.Equipe: foreach (Funcionario f in Staff) n += Salario(f.Perfil, f.Experiencia); break;
+                case Despesa.Equipe:   // a equipe do terminal: os perfis e a limpeza (frente F)
+                    foreach (Funcionario f in Staff) n += Salario(f.Perfil, f.Experiencia);
+                    if (T.RegraLimpeza) n += (long)Limpeza.Count * T.SalarioLimpeza;
+                    break;
                 case Despesa.Tripulacao: foreach (Tripulante t in Tripulacao) n += T.SalarioTrip[(int)t.Funcao]; break;
                 case Despesa.Patio: n = (long)EquipePatio * T.SalarioPatio; break;
                 case Despesa.Suprimentos: n = Hoje.Despesas[(int)d]; break;   // as entregas ja pedidas hoje

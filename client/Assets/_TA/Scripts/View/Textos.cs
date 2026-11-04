@@ -63,7 +63,7 @@ namespace TA
             Escala = L("ESCALA DO VOO"), Reparo = L("Reparo só com Cash e tempo. Nenhum avião se perde."),
             EscalaFechada = L("A escala fecha quando o embarque abre."), EscalaSemVoo = L("O avião ainda não encostou para este voo."),
             AvisoHangar = L("No hangar, este voo não embarca: você perde só o Cash dele."),
-            TripulacaoSala = L("Tripulação na sala");
+            TripulacaoSala = L("Tripulação na sala"), Restituicao = L("RESTITUIÇÃO");
 
         public static string Balcoes(int n, float seg) => n + (n == 1 ? L(" balcão · ") : L(" balcões · ")) + Seg(seg);
         public static string EstadoTexto(Estado e, int voo) => e == Estado.Critico ? L("CRÍTICO: ") + Voo(voo) + L(" em risco")
@@ -366,6 +366,9 @@ namespace TA
         /// <summary>Frente E: a transferencia pelo vestiario (Sim.Fase, na ordem de Transferencia) e o preparo com o relogio (Sim.Preparo).</summary>
         public static readonly string[] FaseTransf = { L("No posto"), L("Terminando o atendimento"), L("Indo ao vestiário"), L("Trocando o uniforme"), L("Indo ao posto") };
         public static readonly string Vestiario = L("Vestiário");
+        /// <summary>Frente F: o letreiro do banheiro (interditado = fechado para limpeza) e o que o zelador faz (Sim.Limpeza.cs, na ordem de Faxina).</summary>
+        public static readonly string Banheiro = L("Banheiro"), BanheiroFechado = L("Banheiro · em limpeza");
+        public static readonly string[] Faxina = { L("Livre"), L("Indo limpar"), L("Limpando") };
         public static string Preparo(float frac, float seg) => L("Preparo ") + (int)System.Math.Round(frac * 100f) + L("% · no posto em ") + Tempo(seg);
         public static string NaFila(int n) => n + L(" na fila");
         public static string FuncaoDe(Tripulante t) => t.Funcao == TA.Core.Funcao.Piloto ? L("Piloto") : t.Indice % 2 == 0 ? L("Comissária") : L("Comissário");   // a folha da comissaria vai nos indices pares

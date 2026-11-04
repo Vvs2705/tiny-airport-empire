@@ -73,6 +73,7 @@ namespace TA.Core
         void Encosta(Aviao a, bool doHangar)
         {
             a.NoPatio = true; a.Chega = Steps;
+            if (!doHangar && a.Retorno == 0) Desembarque(a);   // frente H: do hangar vem vazio; no retorno descem os remarcados
             if (a.Retorno > 0) PousoDeRetorno(a);
             for (int s = 0; s < 4; s++) { a.Falta[s] = doHangar ? 0 : ServicoPassos((Servico)s); a.Fazendo[s] = false; }
             for (int i = 0; i < Suprimentos; i++) a.Carga[i] = doHangar || !T.RegraSuprimentos ? 0 : CargaPede;   // do hangar volta abastecido

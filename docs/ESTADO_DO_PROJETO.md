@@ -80,7 +80,7 @@ Link de cada PR: `https://github.com/Vvs2705/tiny-airport-empire/pull/<n>`.
 | **Contratação, Fase C9 (frente D)** | 3 candidatos fixos por vaga (Júnior, Pleno e Sênior, sem sorteio), demissão com confirmação, save schema 12; portão do §5.13 pelo lucro (`docs/BALANCE.md` §16). Tela da Equipe com a folha Vaga | #61 |
 | **Núcleo, Fase C8 (frente A)** | Despesas: salário por perfil, tripulação e pátio, e manutenção por estação e nível, cobrados no fechamento do dia do jogo; falta de caixa pausa contratar e melhorar, sem dívida nem derrota; relatório do dia no save (schema 10). Todos os portões seguem verdes (`docs/BALANCE.md` §13). Sem tela | [#56](https://github.com/Vvs2705/tiny-airport-empire/pull/56) |
 | **Núcleo, registro de ocorrências** | Os 4 incidentes, o clima, as falhas de avião, o voo perdido ou atrasado e a falta de caixa, com causa, resposta (do jogador ou automática), resultado e a chave da explicação; 3 dias do jogo, até 24 por dia, no save (schema 11). Só observa: desligado, dá o mesmo jogo, número a número (`HistoricoTests`). Base das frentes G e I, ainda sem tela | frente `ta-historico` |
-| **Suprimentos (frente `ta-suprimentos`)** | Combustível e refeições com estoque: cada turnaround tira cargas do depósito no fim do serviço de combustível e no da limpeza (o caminhão do catering); sem carga, o caminhão espera no avião e só a decolagem atrasa. Reposição automática no ponto, com prazo e custo fixos na conta do dia (5ª categoria), também com a conta atrasada; aviso antes de faltar, depósito na ficha do despacho, alerta no caminhão que espera e tanque maior no pátio; save schema 15. Com a tabela padrão nenhum bot espera (`BALANCE.md` §17). Falta validar no Unity | PR da frente (linha S) |
+| **Suprimentos (frente `ta-suprimentos`)** | Combustível e refeições com estoque: cada turnaround tira cargas do depósito no fim do serviço de combustível e no da limpeza (o caminhão do catering); sem carga, o caminhão espera no avião e só a decolagem atrasa. Reposição automática no ponto, com prazo e custo fixos na conta do dia (5ª categoria), também com a conta atrasada; aviso antes de faltar, depósito na ficha do despacho, alerta no caminhão que espera e tanque maior no pátio; save schema 15. Com a tabela padrão nenhum bot espera (`BALANCE.md` §18). Falta validar no Unity | PR da frente (linha S) |
 | **Mundo 3D e pessoas** | v0.1 jogável em greybox; troca pela arte do Tripo (malha nos corpos rígidos, sprite nas pessoas); tela das Fases C e C2; dia a dia (garagem, postos, segurança) | [#7](https://github.com/Vvs2705/tiny-airport-empire/pull/7), [#21](https://github.com/Vvs2705/tiny-airport-empire/pull/21), [#24](https://github.com/Vvs2705/tiny-airport-empire/pull/24), [#26](https://github.com/Vvs2705/tiny-airport-empire/pull/26) |
 | **Cenário vivo** | Embarque pela ponte (a pessoa some no túnel), sala de espera do portão com cadeiras e fila, escala de adulto de 0,5 m com corredores, física do pátio (469 cruzamentos de peças para 0 em 5 cenários), mala de verdade do balcão ao avião, postos com gente e gestos de atendimento, clima e incidentes no cenário | [#29](https://github.com/Vvs2705/tiny-airport-empire/pull/29), [#31](https://github.com/Vvs2705/tiny-airport-empire/pull/31), [#32](https://github.com/Vvs2705/tiny-airport-empire/pull/32), [#33](https://github.com/Vvs2705/tiny-airport-empire/pull/33), [#37](https://github.com/Vvs2705/tiny-airport-empire/pull/37), [#42](https://github.com/Vvs2705/tiny-airport-empire/pull/42), [#44](https://github.com/Vvs2705/tiny-airport-empire/pull/44) |
 | **HUD, telas e textos** | Fontes e linguagem visual (Lilita One e Nunito, licença OFL), HUD fixo com quadro de partidas de aeroporto, avisos de perigo, telas modais (Melhorias, Mover, Cofre, Voo, Tripulação, Pátio...), revisão dos textos em pt-BR, tutorial de 12 passos, tela de metas (campanha, missões e conquistas, com a faixa da meta da vez no HUD) e tela de configurações, com a política de privacidade em pt-BR e inglês, o suporte e "excluir meus dados"; velocidade do relógio (pausa operacional, 1x, 2x e 3x; frente `ta-velocidade`) | [#27](https://github.com/Vvs2705/tiny-airport-empire/pull/27), [#34](https://github.com/Vvs2705/tiny-airport-empire/pull/34), [#35](https://github.com/Vvs2705/tiny-airport-empire/pull/35), [#36](https://github.com/Vvs2705/tiny-airport-empire/pull/36), [#41](https://github.com/Vvs2705/tiny-airport-empire/pull/41), [#46](https://github.com/Vvs2705/tiny-airport-empire/pull/46), [#48](https://github.com/Vvs2705/tiny-airport-empire/pull/48) |
@@ -98,6 +98,7 @@ Estado conferido em 2026-11-03. Cada frente termina num PR próprio, pequeno; o 
 |---|---|---|---|
 | `ta-planta-fim` | `feat/planta-salas` (enviado) | PR 2 da organização das 8 salas: ladrilho, tapete, paredes de fundo, letreiro, mobília e três postos refeitos na régua de 0,5 m (balcão da loja, bancada da oficina, mesa do despacho) | Rodada final do `verify.sh full`, fotos de antes e depois, abrir o PR. Entra **antes** da `ta-caminhos`. A arte nova que a frente pediu ao Tripo (5 peças) não foi gerada; o PR usa as peças que já existem |
 | `ta-caminhos` | `claude/practical-sanderson-e254c9` (enviado como `wip`) | Pessoa não atravessar parede, móvel nem equipamento. Medido em 5 cenários: **1.862 encontros caíram para 237** em 2026-11-01 (cadeira já em zero) | Zerar o que sobrou, conferir encontrão e viradas, rodar o `full` e abrir o PR. Há correções novas sem medir |
+| frente H | `claude/beautiful-northcutt-62afbe` | Esteira de restituição: quem chega no núcleo (`Sim.Chegada.cs`, save schema 13, sem Cash) e o saguão de chegada na tela (`Mundo.Chegada.cs`) | A rodada do Unity da leva (`full`, `diag_caixas.py` com chegadas, foto da esteira cheia) e as malhas do Lote 12 |
 | `ta-passe` | `claude/frosty-jepsen-605169` (PR #49, aberto) | Passe de temporada, **trilha gratuita de 30 níveis no núcleo** (`Sim.Passe.cs`, `docs/CONTRATO_FASE_C7.md`, `docs/PASSE.md`; save com mais uma versão). Só núcleo, sem tela | O coordenador mescla: o PR estava com conflito com a `main` (estado `DIRTY` em 2026-11-03). A trilha premium e a tela ficam para depois |
 
 `ta-planta-fim` e `ta-caminhos` seguem sem PR aberto em 2026-11-03; o estado das duas é o de 2026-11-02, acima. Da `ta-config` sobra a **revisão jurídica** do texto da política, que é do dono: o GitHub Pages já está ligado (status `built` em 2026-11-03).
@@ -128,10 +129,10 @@ Ordem de trabalho de 2026-11-03, depois da mistura com o GDD de direção (`GDD.
 1. **A, despesas e salários:** núcleo no PR #56 (parcial); faltam a tela (a conta de hoje e o aviso de falta de caixa) e o painel (I).
 2. **B, velocidades** 1x, 2x e 3x: no PR da `ta-velocidade` (parcial; falta a validação em build na rodada do Unity da leva).
 3. **C, ficha ao tocar** em pessoa, equipamento e sala: parcial (`ta-ficha`: pessoa e sala); faltam o equipamento e as necessidades.
-4. **H, esteira de restituição** (traz junto o desembarque mínimo de quem chega).
+4. **H, esteira de restituição** (traz junto o desembarque mínimo de quem chega): no PR da frente H (parcial; falta a rodada do Unity da leva e as malhas do Lote 12).
 5. **D, contratação** com 3 candidatos e demissão: núcleo e tela no PR #61 (parcial); falta validar no Unity, na rodada da leva.
 6. **E, transferência pelo vestiário**: parcial (`ta-vestiario`: núcleo, tela e as peças do Tripo); falta a validação em build na rodada do Unity da leva.
-7. **F, limpeza e banheiro.**
+7. **F, limpeza e banheiro**: parcial (frente F: núcleo, tela e save schema 14; o banheiro nunca faz perder voo e a sujeira ainda não mexe no Cash); falta a validação em build na rodada do Unity da leva, as malhas da pia, da lavadora e do cone, e a tela de contratar e mandar limpar. A API que a G lê está no `CONTRATO_LANCAMENTO.md` §5.
 8. **G, satisfação com motivo.** O porquê de cada voo perdido ou atrasado já está no registro de ocorrências do núcleo.
 9. **I, painel de operações** com o relatório do dia. A última ocorrência e as do dia saem do mesmo registro.
 
@@ -177,7 +178,7 @@ Nada disso o time de código consegue resolver sozinho.
 
 ## 10. Porcentagem estimada e método
 
-**Aproximadamente 56% do contrato de lançamento** (22,0 de 39 pontos), em 2026-11-04, contados na matriz depois do passe (PR #49, linha 14 em `parcial`), da ficha (C) e das velocidades (B), com a frente A (PR #56) e o vestiário (E) em `parcial`.
+**Aproximadamente 59% do contrato de lançamento** (23,0 de 39 pontos), em 2026-11-04, contados na matriz depois do passe (PR #49, linha 14 em `parcial`), da ficha (C) e das velocidades (B), com a frente A (PR #56), o vestiário (E) e a limpeza e o banheiro (F) em `parcial`.
 
 **Por que caiu de 57% (2026-11-02).** Não foi regressão: em 2026-11-03 o contrato ganhou **9 linhas**, as frentes de gestão A a I, todas em `falta`. Sobre as 30 linhas de antes, a conta **subiu** de 57% para 63% (19,0 de 30), por três mudanças: a tela de configurações (linha 21, de `falta` para `parcial`, PR #48) e a tela de metas, que fechou as linhas 11, 12 e 13 (de `parcial` para `feito`, PR #46, com `verify.sh full` verde e foto). Em pontos: 17,0 + 0,5 + 3 × 0,5 = 19,0.
 
@@ -186,15 +187,15 @@ Nada disso o time de código consegue resolver sozinho.
 | Estado | Linhas | Pontos |
 |---|---|---|
 | Feito | 12 | 12,0 |
-| Parcial | 19 | 9,5 |
+| Parcial | 21 | 10,5 |
 | Depende | 2 | 0,5 |
-| Falta | 6 | 0,0 |
-| **Total** | **39** | **22,0 → 56%** |
+| Falta | 4 | 0,0 |
+| **Total** | **39** | **23,0 → 59%** |
 
 - **Feito (12):** projeto Unity e portão; equipe móvel; pátio e manutenção; quadro de partidas; fluxo de passageiros; 4 incidentes; campanha de 30 objetivos; missões; 20 conquistas; sem interstitial; offline de 2 h; tutorial de 12 passos.
-- **Falta (6):** segurança e privacidade ponta a ponta; regressão final; e 4 das 9 frentes de gestão da v1.5 (F limpeza e banheiro, G satisfação, H esteira de restituição, I painel de operações).
+- **Falta (4):** segurança e privacidade ponta a ponta; regressão final; e 2 das 9 frentes de gestão da v1.5 (G satisfação, I painel de operações).
 - **Depende (2):** anúncios recompensados reais; AAB assinado e enviado.
-- **Parcial (19):** aeroportos; rotas; aeronaves; estações; perfis; tripulação; dia a dia; histórias; passe de temporada; loja; save; configurações, política e suporte; telemetria; arte final; despesas e salários (A); velocidades (B); ficha ao tocar (C); contratação e demissão (D); vestiário (E). Uma a uma, estão em `docs/CONTRATO_LANCAMENTO.md` §1, com a evidência de cada PR e o que falta.
+- **Parcial (21):** aeroportos; rotas; aeronaves; estações; perfis; tripulação; dia a dia; histórias; passe de temporada; loja; save; configurações, política e suporte; telemetria; arte final; despesas e salários (A); velocidades (B); ficha ao tocar (C); contratação e demissão (D); vestiário (E); limpeza e banheiro (F); esteira de restituição (H). Uma a uma, estão em `docs/CONTRATO_LANCAMENTO.md` §1, com a evidência de cada PR e o que falta.
 
 **O que o número não mostra.** A porcentagem mede **cobertura do contrato**, não esforço restante nem risco. A maior parte do que falta é tela (aeroportos, rotas, passe e loja), as 9 frentes de gestão (nenhuma começada, e cada uma só fecha com o critério de pronto em 10 itens, `GDD.md` §0.5), integração (IAP, servidor, anúncios, telemetria) e medida em aparelho, e quase toda a parte que depende do dono está na janela de 2026-11-25 em diante. As frentes A a I valem 9 linhas do mesmo peso das demais, mas variam muito de tamanho: a conta não diz isso.
 

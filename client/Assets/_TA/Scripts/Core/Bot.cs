@@ -505,6 +505,9 @@ namespace TA.Core
             public int Niveis, PasseEm; public long PagoPasse;
             /// <summary>Fase C8: Cash pago nas contas do dia e dias fechados com falta de caixa (pausa).</summary>
             public long Despesas; public int Apertos;
+            /// <summary>Frente F: usos do banheiro, quem achou fechado, interdicoes, limpezas feitas, sujeira media (de 0 a Sim.SujeiraMax, media das 7 areas
+            /// medida a cada s) e a maior fila na porta do banheiro.</summary>
+            public int Usos, Negados, Interdicoes, Limpezas, FilaBanheiro; public double SujeiraMedia;
             /// <summary>ta-suprimentos: vezes que um aviao esperou suprimento e o custo das entregas pedidas.</summary>
             public int Faltas; public long Suprimentos;
         }
@@ -519,7 +522,8 @@ namespace TA.Core
             for (int i = 0; i < 30; i++) r.ObjetivoEm[i] = -1;
             for (int i = 0; i < r.ConquistaEm.Length; i++) r.ConquistaEm[i] = -1;
             double soma = 0;
-            long passos = (long)ondas * s.OndaPassos;
+            long passos = (long)ondas * s.OndaPassos, amostras = 0;
+            int usos = 0, usando = 0;
             while (s.Steps < passos && !(ateFechar && s.CampanhaCompleta))
             {
                 if (reabre && s.Steps % s.OndaPassos == s.OndaPassos / 2) s = Sim.Load(s.Save("autoplay", 1000 + s.Steps), t, seed);
@@ -549,10 +553,22 @@ namespace TA.Core
                             break;
                         case Ev.DiaFechado: r.Despesas += e.B; if (e.C > 0) r.Apertos++; break;
                         case Ev.ContaQuitada: r.Despesas += e.B; break;
+                        case Ev.Limpou: r.Limpezas++; break;
+                        case Ev.BanheiroInterditado: if (e.A == 1) r.Interdicoes++; break;
                         case Ev.SuprimentoFaltou: r.Faltas++; break;
                         case Ev.SuprimentoPedido: r.Suprimentos += e.C; break;
                     }
+                if (s.Steps % Sim.Hz == 0)
+                {
+                    foreach (int x in s.Sujeira) r.SujeiraMedia += x;
+                    amostras += Sim.Areas;
+                }
+                r.FilaBanheiro = Math.Max(r.FilaBanheiro, s.Banheiro.Fila.Count);
+                usos += Math.Max(0, s.Banheiro.Usando.Count - usando);
+                usando = s.Banheiro.Usando.Count;
             }
+            r.SujeiraMedia = amostras > 0 ? r.SujeiraMedia / amostras : 0;
+            r.Usos = usos; r.Negados = (int)Math.Min(int.MaxValue, s.Banheiro.Negados);
             r.Embarque = r.Voos > 0 ? soma / r.Voos : 0;
             r.Moves = bot.Moves; r.Taps = bot.Taps; r.Reacoes = bot.Reacoes; r.Reparos = bot.Reparos;
             return r;

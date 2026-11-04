@@ -43,11 +43,11 @@ namespace TA.Tests
         {
             var s = new Sim(null, 1) { Cash = 1000000 };
             Tuning t = s.T;
-            Assert.AreEqual((0L, 3L * t.SalarioTrip[0] + 3L * t.SalarioTrip[1], (long)t.SalarioPatio, (long)t.Manutencao.Take(4).Sum()),
-                (s.Folha(Despesa.Equipe), s.Folha(Despesa.Tripulacao), s.Folha(Despesa.Patio), s.Folha(Despesa.Manutencao)), "jogo novo: so a tripulacao inicial, 1 de patio e as 4 estacoes da v0.1");
+            Assert.AreEqual(((long)t.LimpezaIniciais * t.SalarioLimpeza, 3L * t.SalarioTrip[0] + 3L * t.SalarioTrip[1], (long)t.SalarioPatio, (long)t.Manutencao.Take(4).Sum()),
+                (s.Folha(Despesa.Equipe), s.Folha(Despesa.Tripulacao), s.Folha(Despesa.Patio), s.Folha(Despesa.Manutencao)), "jogo novo: so a limpeza inicial (frente F), a tripulacao inicial, 1 de patio e as 4 estacoes da v0.1");
             Assert.IsTrue(s.Hire(Perfil.Atendente) && s.HirePatio());
             Assert.IsTrue(s.Buy(Estacao.CheckIn, Melhoria.Velocidade) && s.Buy(Estacao.CheckIn, Melhoria.Velocidade) && s.Buy(Estacao.CheckIn, Melhoria.Capacidade));
-            Assert.AreEqual(((long)t.Salario[0], 2L * t.SalarioPatio, t.Manutencao.Take(4).Sum() + 3L * t.ManutencaoNivel[0]),
+            Assert.AreEqual(((long)t.Salario[0] + t.LimpezaIniciais * t.SalarioLimpeza, 2L * t.SalarioPatio, t.Manutencao.Take(4).Sum() + 3L * t.ManutencaoNivel[0]),
                 (s.Folha(Despesa.Equipe), s.Folha(Despesa.Patio), s.Folha(Despesa.Manutencao)));
             Assert.AreEqual(Enumerable.Range(0, 4).Sum(d => s.Folha((Despesa)d)), s.Folha());
 
