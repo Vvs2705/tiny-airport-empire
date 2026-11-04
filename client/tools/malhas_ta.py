@@ -128,7 +128,16 @@ PECAS = {
     "armarios_vestiario": (1500, 512, 0.6),
     "banco_vestiario": (800, 256, 0.6),
     "arara_uniformes": (1200, 512, 0.4),
+    # Lote 12, frente F: banheiro e limpeza (mesma lista de medidas); sem a malha, Mundo.Limpeza.cs desenha a primitiva no lugar
+    "cabine_banheiro": (1500, 512, -0.55),
+    "pia_banheiro": (1200, 512, 0.6),
+    "carrinho_limpeza": (1200, 512, 0.3),
+    "maquina_piso": (1000, 256, 0.25),
+    "cone_piso_molhado": (400, 256, -0.12),
 }
+
+# pecas que ainda saem do Tripo (Lote 12): sem o FBX, a rodada completa pula com aviso em vez de parar; com ele, entram como as outras
+PENDENTES = {"pia_banheiro", "maquina_piso", "cone_piso_molhado"}
 
 
 # a View pinta na cor do voo (_Color x textura): a textura guarda so o sombreado
@@ -313,6 +322,9 @@ def main():
         with open(jpath) as f:
             registro = json.load(f)
     for nome in nomes:
+        if nome in PENDENTES and not glob.glob(os.path.join(a.src, nome + "_hd", "*.fbx")):
+            print("PENDENTE " + nome + ": sem FBX ainda, fica a primitiva")
+            continue
         ob, info = peca(nome, a.src, a.out)
         registro[nome] = info
         obs.append(ob)

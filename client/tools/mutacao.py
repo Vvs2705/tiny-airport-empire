@@ -1081,6 +1081,61 @@ MUTANTES = [
         "{ o.Aberta = false; o.Auto = true; } break;",
         "{ } break;",
     ),
+    # frente F (Sim.Limpeza.cs): limpeza e banheiro
+    (
+        "limpeza: so vai ao banheiro quem volta antes do embarque",
+        "Sim.Limpeza.cs",
+        "v != null && v.AbrePasso - loc > 2 * BanheiroAndarPassos + UsoPassos + Passos(T.BanheiroFolga)",
+        "v != null",
+    ),
+    (
+        "limpeza: as cabines no teto",
+        "Sim.Limpeza.cs",
+        "while (b.Usando.Count < b.Cabines && b.Fila.Count > 0)",
+        "while (b.Fila.Count > 0)",
+    ),
+    (
+        "limpeza: o banheiro interditado nao recebe",
+        "Sim.Limpeza.cs",
+        "if (b.Interditado)",
+        "if (false)",
+    ),
+    (
+        "limpeza: so limpa depois de chegar",
+        "Sim.Limpeza.cs",
+        "else if (z.Fase == Faxina.Limpando)",
+        "if (z.Fase != Faxina.Livre)",
+    ),
+    (
+        "limpeza: a ordem do jogador antes da escala",
+        "Sim.Limpeza.cs",
+        "while (Ordens.Count > 0)",
+        "while (false)",
+    ),
+    (
+        "limpeza: o salario na folha da equipe",
+        "Sim.Despesas.cs",
+        "if (T.RegraLimpeza) n += (long)Limpeza.Count * T.SalarioLimpeza;",
+        "",
+    ),
+    (
+        "limpeza: contratar pausa com a conta atrasada",
+        "Sim.Limpeza.cs",
+        "if (!PodeComprar(c)) return false;",
+        "if (c < 0 || Cash < c) return false;",
+    ),
+    (
+        "limpeza: o save guarda quem esta na cabine",
+        "Sim.Limpeza.cs",
+        "Lista(\"bh.uso\", Banheiro.Usando, true);",
+        "",
+    ),
+    (
+        "limpeza: o voo que fecha leva quem ficou no banheiro",
+        "Sim.cs",
+        "TiraDoBanheiro(v);",
+        "",
+    ),
 ]
 
 
