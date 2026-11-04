@@ -62,8 +62,9 @@ namespace TA
         enum Lida { Parado, Indo, Servindo, Voltando }
 
         readonly List<Veiculo> _veiculos = new List<Veiculo>();
-        /// <summary>Quem esta na faixa das ruas e da calcada neste quadro (Anda): os veiculos freiam para eles.</summary>
-        readonly List<Vector2> _naFaixa = new List<Vector2>();
+        /// <summary>Quem esta na faixa das ruas e da calcada neste quadro (Anda): os veiculos freiam para eles. Os passageiros andam uma vez por
+        /// quadro e a gente do patio em cada pedaco (Mundo.Atualiza): _paxNaFaixa guarda os do quadro, que valem em todos os pedacos.</summary>
+        readonly List<Vector2> _naFaixa = new List<Vector2>(), _paxNaFaixa = new List<Vector2>();
         Reboque _reboque;
 
         void Veiculos3D()
@@ -266,8 +267,10 @@ namespace TA
         }
 
         /// <summary>Quem vem atras espera (fila natural), com folga para quem esta na frente entrar de re, e quem atravessa a rua tem a vez: conta a
-        /// distancia de freada, para nao encostar. Quem vira na rua oeste, de frente ou entrando de re na faixa, espera tambem a rua leste: o bico abre ate ela. Depois de 20 s parado atras de
-        /// outro veiculo segue ate se soltar: e a saida de um cruzamento travado, que nao deve acontecer (diag_caixas.py acusaria).</summary>
+        /// distancia de freada, para nao encostar. Quem vira na rua oeste, de frente ou entrando de re na faixa, espera tambem a rua leste: o bico abre ate ela.
+        /// Depois de 20 s parado so pela vez no cruzamento, segue: sai do ciclo de esperas entre as 2 ruas (a 3x com -speed 2, catering, escada,
+        /// combustivel e bagagem esperavam um pelo outro na frente da garagem). Com veiculo de fato na frente, so depois de 60 s, o que nao deve
+        /// acontecer: o diag_caixas.py acusaria, e a tela nao congela.</summary>
         bool FrenteLivre(Veiculo v, Trecho t, float dt)
         {
             Vector3 f = t.Re ? -v.T.forward : v.T.forward, c = Centro(v), lado = new Vector3(f.z, 0f, -f.x);
@@ -282,29 +285,35 @@ namespace TA
             float oeste = Cruza(v, t, RuaOeste), leste = Cruza(v, t, RuaLeste);
             if (oeste >= 0f && v.T.position.z > RuaOeste) leste = oeste;
             else if (t.Re && v.S < 0.2f && Mathf.Abs(v.T.position.z - RuaOeste) < 0.6f) leste = v.T.position.x;
+            bool rua = false, corpo = false;
             foreach (Veiculo o in _veiculos)
             {
                 if (o == v) continue;
                 Vector3 d = Centro(o) - c;
                 float frente = Vector3.Dot(d, f);
                 bool quieto = o.Tipo != null && (o.Lida == Lida.Parado || o.Lida == Lida.Servindo);   // na vaga ou na faixa: fora do caminho, mesmo com o bico apontado na curva
-                if (NaRua(o, RuaOeste, oeste) || NaRua(o, RuaLeste, leste) || (!quieto && frente > 0f && frente < (v.Comp + o.Comp) * 0.5f + (t.Re ? 0.5f : Folga(o)) + freada && Mathf.Abs(Vector3.Dot(d, lado)) < 1.1f))
-                {
-                    v.Parado += dt;
-                    return v.Parado >= 20f;
-                }
+                rua |= NaRua(o, RuaOeste, oeste) || NaRua(o, RuaLeste, leste);
+                corpo |= !quieto && frente > 0f && frente < (v.Comp + o.Comp) * 0.5f + (t.Re ? 0.5f : Folga(o)) + freada && Mathf.Abs(Vector3.Dot(d, lado)) < 1.1f;
+            }
+            if (rua || corpo)
+            {
+                v.Parado += dt;
+                return v.Parado >= (corpo ? 60f : 20f);
             }
             v.Parado = 0f;
             return true;
         }
 
         /// <summary>Na curva o nariz vira para quem estava ao lado, fora da reta da frente: confere os pontos do trajeto logo adiante.</summary>
-        static bool NoTrajeto(Veiculo v, Trecho t, Vector2 q, float freada)
+        static bool NoTrajeto(Veiculo v, Trecho t, Vector2 q, float freada) => DoTrajeto(v, t, q, freada) < v.Larg * 0.5f + 0.25f;
+
+        /// <summary>Distancia de `q` ao trajeto do veiculo logo adiante: do pivo ate a frente dele, mais 0,5 m e a freada.</summary>
+        static float DoTrajeto(Veiculo v, Trecho t, Vector2 q, float freada)
         {
-            float eixo = t.Re ? -v.Eixo : v.Eixo, ate = v.S + eixo + v.Comp * 0.5f + 0.5f + freada, raio = v.Larg * 0.5f + 0.25f;
+            float eixo = t.Re ? -v.Eixo : v.Eixo, ate = v.S + eixo + v.Comp * 0.5f + 0.5f + freada, menor = float.MaxValue;
             for (int i = Indice(t, v.S + Mathf.Max(eixo, 0f)); i < t.P.Count && t.L[i] <= ate; i += 3)
-                if ((new Vector2(t.P[i].x, t.P[i].z) - q).sqrMagnitude < raio * raio) return true;
-            return false;
+                menor = Mathf.Min(menor, (new Vector2(t.P[i].x, t.P[i].z) - q).sqrMagnitude);
+            return Mathf.Sqrt(menor);
         }
 
         /// <summary>Distancia atras de `o`: maior se ele vai entrar de re, para nao voltar por cima de quem colou.</summary>
@@ -336,16 +345,25 @@ namespace TA
         /// <summary>A pessoa espera: o proximo passo (pelo caminho, virando na quina) entra na caixa de um veiculo e chega mais perto dele. A folga
         /// do parado e a meia largura da pessoa (0,2 m, a do diag_caixas.py) menos 1 cm: a calcada passa rente ao bico de quem esta na faixa (0,2 m
         /// do catering, 0,25 do onibus) e nao e entrar nele; com 0,25 o mecanico parava na rua oeste diante do onibus e o catering esperava por ele
-        /// ate o jato sair. Quem ja parou por causa de gente nao conta: se os 2 esperassem, ninguem saia dali.</summary>
+        /// ate o jato sair. Quem parou por causa de gente (EsperaGente) cede a vez, mas so depois de parado e sem folga: a pessoa passa rente e nao
+        /// atravessa a carroceria; enquanto ele freia, ela espera (a 3x o mecanico entrava no catering que ainda freava). E ninguem entra no trajeto
+        /// de um veiculo andando, que nao cedeu a vez: espera na beira, a 0,3 m de onde ele a veria (NoTrajeto), e ele passa.</summary>
         bool VeiculoNoPasso(Boneco b)
         {
             Vector2 prox = Adiante(b, 0.4f);
             foreach (Veiculo v in _veiculos)
             {
-                if (v.EsperaGente || (_escada && b.Estande == 1 && v.Tipo?.Encosta == true)) continue;   // sobe nela
+                if (_escada && b.Estande == 1 && v.Tipo?.Encosta == true) continue;   // sobe nela
+                bool anda = v.V > 0.1f;
+                if (anda && !v.EsperaGente && v.Rotas.Count > 0)
+                {
+                    Trecho t = v.Rotas.Peek();
+                    float freada = v.V * v.V / (2f * t.F), ve = v.Larg * 0.5f + 0.25f, agora = DoTrajeto(v, t, b.Pos, freada), depois = DoTrajeto(v, t, prox, freada);
+                    if (agora >= ve && depois < ve + 0.3f && depois < agora - 0.05f) return true;
+                }
                 Vector3 c = Centro(v), f = v.T.forward;
                 Vector2 eixo = new Vector2(f.x, f.z), lado = new Vector2(f.z, -f.x), a = prox - new Vector2(c.x, c.z), n = b.Pos - new Vector2(c.x, c.z);
-                float folga = v.V > 0.1f ? 0.45f : 0.19f, ax = Mathf.Abs(Vector2.Dot(a, eixo)), ay = Mathf.Abs(Vector2.Dot(a, lado));
+                float folga = anda ? 0.45f : v.EsperaGente ? 0f : 0.19f, ax = Mathf.Abs(Vector2.Dot(a, eixo)), ay = Mathf.Abs(Vector2.Dot(a, lado));
                 if (ax < v.Comp * 0.5f + folga && ay < v.Larg * 0.5f + folga && (ax < Mathf.Abs(Vector2.Dot(n, eixo)) || ay < Mathf.Abs(Vector2.Dot(n, lado)))) return true;
             }
             return false;
@@ -380,6 +398,7 @@ namespace TA
                 else if (v.Lida == Lida.Indo) v.Lida = Lida.Servindo;
                 else if (v.Lida == Lida.Voltando) v.Lida = Lida.Parado;
                 v.V = 0f;
+                v.EsperaGente = false;   // estacionado nao esta cedendo a vez: a gente passa com a folga do parado
             }
             else
             {

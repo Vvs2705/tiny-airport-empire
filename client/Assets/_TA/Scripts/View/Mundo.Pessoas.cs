@@ -252,6 +252,7 @@ namespace TA
                 if (l <= passo) { b.Pos = b.Caminho[0]; passo -= l; b.Caminho.RemoveAt(0); }
                 else { b.Pos += d / l * passo; passo = 0f; }
             }
+            if (patio) _naFaixa.Add(b.Pos);   // e onde parou: no quadro longo (3x) o passo chega a 0,3 m
             Movido(b, b.Pos - antes, dt);
         }
 

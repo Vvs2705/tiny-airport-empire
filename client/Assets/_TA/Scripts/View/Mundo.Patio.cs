@@ -56,8 +56,8 @@ namespace TA
         static readonly Dictionary<string, int[]> ModeloDaRota = new Dictionary<string, int[]>
         {
             { "vv_campinas", new[] { 0, 0 } },    // Arara Air: regional, narrow
-            { "vv_ribeirao", new[] { 1, 3 } },    // Capivara Cargo (carga do agro com passageiros): bimotor, cargueiro
-            { "vv_curitiba", new[] { 0, 0 } },    // Arara Air
+            { "vv_ribeirao", new[] { 1, 0 } },    // Arara Air: bimotor (as 2 rotas iniciais deixam o regional e o narrow da primeira tela)
+            { "vv_curitiba", new[] { 0, 3 } },    // Capivara Cargo (carga com passageiros): regional, cargueiro
             { "vv_bh", new[] { 2, 0 } },          // Arara Air: jato regional
             { "ca_salvador", new[] { 1, 0 } },    // Coral Jet
             { "ca_recife", new[] { 0, 0 } },      // Coral Jet
@@ -410,6 +410,7 @@ namespace TA
             ServicosPasso(s);
             for (int i = 0; i < _veiculos.Count; i++) VeiculoPasso(_veiculos[i], dt);
             _naFaixa.Clear();
+            _naFaixa.AddRange(_paxNaFaixa);   // a gente do patio entra de novo no AndaPatio deste pedaco; os passageiros so andam no proximo quadro
             DiagPasso(dt);
         }
 
