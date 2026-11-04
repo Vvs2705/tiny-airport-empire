@@ -233,12 +233,15 @@ namespace TA
             Entrada();
             Posiciona();
             Sim s = S;
+            int antes = _naFaixa.Count;
             EmbarquePasso(s, dt);
             SincronizaPax(s, dt);
             ChegadaPasso(s, dt);
             Funcionarios(s, dt);
             LimpezaPasso(s, dt);   // banheiro, sujeira e equipe de limpeza (Mundo.Limpeza.cs)
             Salas3D(s);
+            _paxNaFaixa.Clear();   // quem andou uma vez neste quadro: os veiculos o veem em todos os pedacos (sem isso, so no 1o, e o onibus avancava de re sobre quem esperava na calcada)
+            for (int i = antes; i < _naFaixa.Count; i++) _paxNaFaixa.Add(_naFaixa[i]);
             int n = Mathf.Max(1, Mathf.CeilToInt(dt / PatioDtMax - 1e-3f));   // a 3x num aparelho a 30 qps, 3 pedacos de 1/30 s
             for (int i = 0; i < n; i++) { Patio(s, dt / n); AndaPatio(dt / n); }
             ClimaPasso(s, dt);

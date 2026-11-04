@@ -20,13 +20,13 @@ namespace TA
         readonly Dictionary<PrimitiveType, Mesh> _primitiva = new Dictionary<PrimitiveType, Mesh>();
         Material _matPiso;
 
-        /// <summary>Movel fixo: sala, malha, a `D` da parede de saida e `A` ao longo dela, virado para N * FN + T * FT.</summary>
+        /// <summary>Movel fixo: sala, malha, a `D` da parede de saida e `A` ao longo dela, virado para N * FN + T * FT; `Alt` = altura do pe (o de parede fica pendurado).</summary>
         public readonly struct Mov
         {
             public readonly int E;
             public readonly string Malha;
-            public readonly float D, A, FN, FT, Escala;
-            public Mov(int e, string malha, float d, float a, float fn, float ft, float escala = 1f) { E = e; Malha = malha; D = d; A = a; FN = fn; FT = ft; Escala = escala; }
+            public readonly float D, A, FN, FT, Escala, Alt;
+            public Mov(int e, string malha, float d, float a, float fn, float ft, float escala = 1f, float alt = 0f) { E = e; Malha = malha; D = d; A = a; FN = fn; FT = ft; Escala = escala; Alt = alt; }
             public Vector2 P => Em(E, D, A);
         }
 
@@ -60,6 +60,7 @@ namespace TA
             new Mov(SalaOficina, "gerador_solo", 2.55f, -0.2f, 0f, -1f),
             new Mov(SalaOficina, "cavalete_manutencao", 3.0f, -0.8f, 1f, 0f),
             new Mov(SalaOficina, "carrinho_limpeza", 2.75f, 1.5f, 0f, -1f),
+            new Mov(SalaOficina, "painel_ferramentas_parede", 1.8f, 1.63f, 0f, -1f, 1f, 0.25f),   // pendurado na parede leste (de 0,25 a 0,55 m, como os paineis das outras salas), sobre a caixa de ferramentas
 
             new Mov(SalaDespacho, "sofa_lounge", 3.12f, 0.85f, 1f, 0f, 0.7f),
             new Mov(SalaDespacho, "mesa_lounge", 3.1f, -0.75f, 1f, 0f),
@@ -169,7 +170,7 @@ namespace TA
         void Mobilia(int e)
         {
             foreach (Mov m in Moveis)
-                if (m.E == e) Peca(m.Malha, V3(m.P), Rumo(Salas[e].N * m.FN + Salas[e].T * m.FT), m.Escala);
+                if (m.E == e) Peca(m.Malha, V3(m.P, m.Alt), Rumo(Salas[e].N * m.FN + Salas[e].T * m.FT), m.Escala);
             if (e == SalaOficina) ZonaOficina(e);
             else if (e == SalaDespacho) { Tapete(e, 2.75f, 2.4f, 1f); Painel(e, 1.75f, 1.3f, Art.Board, Art.BoardInk); }
             else if (e == SalaComida) Painel(e, 2.6f, 0.7f, Art.Board, Art.Paper);
