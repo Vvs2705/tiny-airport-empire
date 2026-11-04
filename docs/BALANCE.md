@@ -897,23 +897,44 @@ O ganho cai quase em linha com o tamanho da conta. Escolhi 60%, a maior conta qu
 
 Com a conta atrasada, o bot continuava escolhendo o item mais barato. Se era uma melhoria pausada, não comprava nada, nem a rota que poderia abrir. Agora, em pausa, ele só olha rota e viagem, que é o que a tela vai deixar comprar. Sem pausa, nada muda: com a conta desligada, a tabela é a da Fase D1, número a número.
 
-### D-C8e. Todo bot fica sem caixa no 1º fechamento
+### D-C8e. Quase todo bot fica sem caixa no 1º fechamento
 
-O bot compra o que couber assim que pode, e no fim do dia 0 o caixa está perto de zero em todas as sementes. A conta fica atrasada por alguns minutos, e só o LentoGuiado repete no dia 1. Uma pessoa que vê "a conta de hoje" pode guardar a reserva. A tela precisa mostrar a conta antes da virada.
+O bot compra o que couber assim que pode, e no fim do dia 0 o caixa está perto de zero em quase todas as sementes (sem o passe, em todas). A conta fica atrasada por alguns minutos, e só o LentoGuiado repete no dia 1. Uma pessoa que vê "a conta de hoje" pode guardar a reserva. A tela precisa mostrar a conta antes da virada.
 
-### O peso da conta (`Medida_FaseC8`, 200 sementes)
+### O peso da conta (`Medida_FaseC8`, 200 sementes, com o passe)
 
 | bot | ondas | embarque | receita | conta paga | conta ÷ receita | dias sem caixa no fechamento |
 |---|---|---|---|---|---|---|
-| Bom | 10 | 94,4% | 6 529 | 504 | 7,7% | 1,00 |
-| Lento | 10 | 79,1% | 4 264 | 469 | 11,0% | 1,00 |
-| Parado | 10 | 88,5% | 4 627 | 460 | 9,9% | 1,00 |
-| Guiado | 20 | 91,5% | 25 387 | 1 468 | 5,8% | 1,00 |
-| LentoGuiado | 20 | 74,1% | 14 370 | 1 362 | 9,5% | 1,91 |
-| Guiado | 64 | 90,9% | 177 330 | 5 904 | 3,3% | 1,00 |
-| LentoGuiado | 64 | 76,7% | 106 401 | 5 775 | 5,4% | 1,91 |
+| Bom | 10 | 95,5% | 8 883 | 561 | 6,3% | 0,92 |
+| Lento | 10 | 79,6% | 5 221 | 496 | 9,5% | 1,00 |
+| Parado | 10 | 89,2% | 4 819 | 474 | 9,8% | 1,00 |
+| Guiado | 20 | 92,0% | 35 536 | 1 499 | 4,2% | 0,89 |
+| LentoGuiado | 20 | 74,4% | 17 501 | 1 431 | 8,2% | 1,82 |
+| Guiado | 64 | 91,1% | 212 798 | 5 968 | 2,8% | 0,89 |
+| LentoGuiado | 64 | 76,7% | 124 377 | 5 861 | 4,7% | 1,82 |
 
-### Os portões, antes e depois (200 sementes)
+Sem o passe, a conta era 7,7% a 11,0% da receita em 10 ondas e 3,3% a 5,4% em 64: o 2× do passe aumenta a receita, e a conta fica igual.
+
+### Os portões com o passe, antes e depois (200 sementes, a `main` com o PR #49)
+
+| portão | antes | depois |
+|---|---|---|
+| TA-1 Bom (10 ondas) | 95,5%, receita 8 913 | 95,5%, receita 8 883 |
+| TA-1 Lento | 80,6%, receita 5 401 | 79,6%, receita 5 221 |
+| TA-1 Parado | 89,2%, receita 4 887 | 89,2%, receita 4 819 |
+| TA-2 (Bom / Parado) | 1,824 | 1,843 |
+| Fase C (Planejador / Automático, 20 ondas) | 1,176 | 1,182 |
+| Fase C2, as 4 estações | 1,366 | 1,343 |
+| Fase C5, campanha (Guiado / Bom, 20 ondas) | 1,380 | 1,395 |
+| Fase C6, missões (Missionário / Bom, 20 ondas) | 1,438 | 1,451 |
+| Fase C7, passe: o LentoCompleto fecha os 30 níveis | **200 de 200**, dia 20,0 (p90 21,8, pior 23,9) | **200 de 200**, dia 19,9 (p90 21,5, pior 23,4) |
+| Fase D1, sem compra fecham os 30 | 200 de 200: Guiado na onda 51,3, LentoGuiado 62,9 (pior 85) | 200 de 200: Guiado 51,2, LentoGuiado 62,4 (pior 81) |
+| Fase D1, a Baleia fecha a campanha em | 0,996 do tempo | 0,998 |
+| Alcance da campanha e das conquistas | — | os 30 e as 20 em 200 de 200; LentoGuiado fecha a campanha na onda 62,4 (p90 69); última conquista na onda 148,7 e 172,6 |
+
+As Fases C3 e C4 e o TA-6 medem com o passe desligado (`SemFaseC4`) e dão a tabela de baixo. Quem nunca olha para as missões fecha o passe em menos sementes com a conta: Bom 79 de 200 (eram 84) e Lento 99 de 200 (eram 111). O passe não promete nada a eles.
+
+### Os portões sem o passe, antes e depois (200 sementes, medidos antes de o PR #49 entrar)
 
 | portão | antes | depois |
 |---|---|---|
@@ -936,9 +957,7 @@ O bot compra o que couber assim que pode, e no fim do dia 0 o caixa está perto 
 | Alcance da campanha (`Alcance_FaseC5`, até 120 ondas) | os 30 em 200 de 200 | os 30 em 200 de 200; Guiado 51,6 (p90 56), LentoGuiado 63,3 (p90 71) |
 | Alcance das conquistas (`Alcance_FaseC6`, até 240 ondas) | as 20 em 200 de 200; última na onda 148,5 e 172,8 | as 20 em 200 de 200; última na onda 148,5 e 172,7 |
 
-**Passa.** Todos os portões seguem verdes. O que mais cai é o dos aeroportos, pelo motivo da D-C8c. A campanha e as missões sobem porque a receita do Bom, que não persegue nada, cai 533 em 20 ondas, e a do Guiado fica igual (+90).
-
-**Com o passe (§12, PR #49):** o LentoCompleto fecha os 30 níveis da trilha gratuita em **200 de 200** sementes, no dia 19,9 em média (p90 21,5, pior 23,4), contra 20,0 (21,8 e 23,9) sem a conta. TA-2 1,843, campanha 1,395 e missões 1,451, contra 1,824, 1,380 e 1,438 do §12. Quem nunca olha para as missões fecha o passe em menos sementes: Bom 79 de 200 (eram 84) e Lento 99 de 200 (eram 111). O passe não promete nada a eles.
+**Passa, com e sem o passe.** Todos os portões seguem verdes. O que mais cai é o dos aeroportos, pelo motivo da D-C8c. A campanha e as missões sobem porque a receita do Bom, que não persegue nada, cai mais que a de quem recebe as recompensas (sem o passe, −533 contra +90 em 20 ondas).
 
 ### Prova de mutação (`MUTACAO_TESTES="FullyQualifiedName~DespesasTests|FullyQualifiedName~SaveTests|FullyQualifiedName~ExploitTests" python client/tools/mutacao.py despesa`)
 
@@ -963,6 +982,6 @@ As 14 travas novas entram no `mutacao.py`. Resultado em 2026-11-03: **14 de 14 m
 
 ### Para medir com gente
 
-- **A conta é pequena.** Pesa 8% a 11% da receita nas 10 primeiras ondas e 3% a 5% em 64 ondas. Não resolve o Cash sem destino (§9 e §10): para isso faltam o mapa que cresce e a construção. Com mais sumidouro, dá para subir a tabela de novo, medindo os aeroportos.
+- **A conta é pequena.** Com o passe, pesa 6% a 10% da receita nas 10 primeiras ondas e 3% a 5% em 64 ondas. Não resolve o Cash sem destino (§9 e §10): para isso faltam o mapa que cresce e a construção. Com mais sumidouro, dá para subir a tabela de novo, medindo os aeroportos.
 - **Contratar sem demanda ainda não dá prejuízo.** O pior salário (90) é menos de 1% da receita de um dia a partir do dia 2. O GDD de direção §12 pede que dê; isso precisa da demissão (frente D), para o jogador poder corrigir.
 - **O 1º fechamento sempre aperta** (D-C8e). Ver se a pessoa entende a pausa e o que fazer: mostrar o valor que falta e a hora do fechamento.
