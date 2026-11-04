@@ -47,7 +47,7 @@ namespace TA
         /// fica onde a taxiway e a ligacao foram medidas.</summary>
         static readonly Modelo[][] Modelos =
         {
-            new[] { new Modelo("aviao_regional"), new Modelo("aviao_bimotor_helice", 0.25f), new Modelo("aviao_jato_regional"), new Modelo("jato_executivo") },
+            new[] { new Modelo("aviao_regional"), new Modelo("aviao_bimotor_helice", 0.25f), new Modelo("aviao_jato_regional", 0.1f), new Modelo("jato_executivo") },
             new[] { new Modelo("aviao_narrow"), new Modelo("aviao_wide", 0f, 0.7f), new Modelo("aviao_wide_quad", 0f, 0.8f), new Modelo("aviao_cargo", 0.25f, 1f) },
         };
 
@@ -438,7 +438,7 @@ namespace TA
                     if (GenteNoTrilho(a.Id)) return;   // o ultimo do trilho entra antes
                     foreach (Veiculo v in _veiculos) if (v.Aviao == a.Id) return;   // quem esta encostado sai antes
                     // nem sai com o outro pousando: da taxiway a pista cabe so o par regional e narrow; asa grande com asa grande se cruzava
-                    if (OutroPerto(a, EstandeX[a.Id]) || PousoNaPista(a, s, 40f)) break;
+                    if (OutroPerto(a, EstandeX[a.Id]) || PousoNaPista(a, s, 40f, true)) break;
                     if (a.Id != 0 || _reboque == Reboque.Pronto)
                     {
                         if (a.Id == 0) _reboque = Reboque.Preso;
@@ -518,12 +518,14 @@ namespace TA
         }
 
         /// <summary>O outro aviao esta pousando, na pista ou chega em ate `antes` s (12: o tempo de quem sai cruzar a pista e decolar; 40: o de
-        /// recuar, taxiar e decolar, sem rolar ao lado de quem pousa).</summary>
-        bool PousoNaPista(Aviao a, Sim s, float antes = 12f)
+        /// recuar, taxiar e decolar, sem rolar ao lado de quem pousa). Com `decolando`, conta tambem o outro que ainda decola: a volta ja esta
+        /// marcada no nucleo, e no trecho curto (-rota, ~30 s) ele pousava de novo com quem saiu atras dele taxiando ao lado.</summary>
+        bool PousoNaPista(Aviao a, Sim s, float antes = 12f, bool decolando = false)
         {
             Aviao o = _avioes[1 - a.Id];
             TA.Core.Aviao c = s.Avioes[o.Id];
-            return o.Fase == Fase.Chegando ? o.T.position.z > TaxiZ + 3f : o.Fase == Fase.Fora && c.Chega >= 0 && (c.Chega - s.Steps) * Sim.Step <= PousoSeg[o.Id] + antes;
+            return o.Fase == Fase.Chegando ? o.T.position.z > TaxiZ + 3f
+                : (o.Fase == Fase.Fora || decolando && o.Fase == Fase.Saindo) && c.Chega >= 0 && (c.Chega - s.Steps) * Sim.Step <= PousoSeg[o.Id] + antes;
         }
 
         /// <summary>Vez no chao: quem pousou espera na pista o outro sair da ligacao, quem vai decolar espera na taxiway a pista ficar livre, e no
