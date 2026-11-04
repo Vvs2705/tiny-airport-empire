@@ -97,7 +97,7 @@ namespace TA
                 if (int.TryParse(Arg("-perigo"), NumberStyles.Integer, Inv, out int perigo)) PoePerigo(t, perigo);
                 Sim = new Sim(t, 1);
                 if (int.TryParse(Arg("-onda"), NumberStyles.Integer, Inv, out int k) && k > 1) Sim.IrParaOnda(k - 1);
-                if (Arg("-bot") != null) _bot = new Bot(BotProfile.Bom);
+                if (Arg("-bot") != null) _bot = new Bot(Arg("-politicas") != null ? BotProfile.BomPoliticas : BotProfile.Bom);   // -politicas: o bot liga as 3 (ta-politicas)
                 status = 0;
             }
             else
@@ -201,6 +201,8 @@ namespace TA
         public void HirePatio() => Sim.HirePatio();
         public void BuyPatio(Servico s, Melhoria m) => Sim.BuyPatio(s, m);
         public void BuyTanque(Suprimento s) => Sim.BuyTanque(s);
+        public void LigaPolitica(Politica p, bool ligada) => Sim.LigaPolitica(p, ligada);
+        public void RegulaPolitica(Politica p, int nivel) => Sim.RegulaPolitica(p, nivel);
         public void Checagem(int aviao) => Sim.Checagem(aviao);
         public void Hangar(int aviao) => Sim.Hangar(aviao);
         public bool Adianta() => Sim.Adianta();
@@ -299,6 +301,8 @@ namespace TA
                 case Ev.SuprimentoChegou: Diario("supply_delivered", e.A, e.B); break;
                 case Ev.SuprimentoFaltou: Diario("supply_shortage", e.A, e.B); break;
                 case Ev.SuprimentoMelhorou: Diario("supply_upgraded", e.A, e.B, e.C); break;
+                case Ev.PoliticaMudou: Diario("policy_changed", e.A, e.B, e.C); break;
+                case Ev.PoliticaAgiu: Diario("policy_action", e.A, e.B, e.C); _hud.Toast(Hud.AvisoPolitica(Sim, e)); break;
                 case Ev.ManutencaoAviso: Diario("maintenance_warning", e.A, e.B); _hud.Toast(Textos.ManutencaoAviso(e.B)); break;
                 case Ev.ManutencaoPendente: Diario("maintenance_due", e.A, e.B); _hud.Toast(Textos.ManutencaoPendente); break;
                 case Ev.ChecagemIniciada: Diario("maintenance_check_started", e.A, e.B, e.C); break;

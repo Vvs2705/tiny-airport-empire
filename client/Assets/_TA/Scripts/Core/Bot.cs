@@ -28,6 +28,9 @@ namespace TA.Core
         /// rende 25% na estacao toda, cerca do dobro de um nivel de velocidade (CONTRATO_FASE_C9 §6, BALANCE §16). Sem ele, contrata sempre o Pleno e
         /// nunca demite.</summary>
         public bool Candidatos;
+        /// <summary>Politicas = as politicas do diretor que liga no X padrao (bit = Politica; 7 = as 3) na 1a decisao (frente ta-politicas, BALANCE §19).
+        /// O resto do bot nao muda.</summary>
+        public int Politicas;
 
         public static readonly BotProfile Bom = new BotProfile { Name = "Bom", Decide = 1f, Move = true, Planeja = true, Equipe = true, Rotas = true, Viaja = true, Incidentes = true, Clima = true, Falhas = true };
         public static readonly BotProfile Lento = new BotProfile { Name = "Lento", Decide = 2.5f, Move = true, Planeja = true, Equipe = true, Rotas = true, Viaja = true, Incidentes = true, Clima = true, Falhas = true };
@@ -53,7 +56,16 @@ namespace TA.Core
         public static readonly BotProfile Baleia = Comprador("Baleia", Enumerable.Repeat("gems_pack_large", 200).ToArray());
         /// <summary>Portao da Fase C9: o Bom e o Lento que comparam os candidatos e trocam pelo Senior.</summary>
         public static readonly BotProfile Contratador = Candidato(Bom, "Contratador"), LentoContratador = Candidato(Lento, "LentoContratador");
+        /// <summary>Portao da ta-politicas: os 3 de sempre com as politicas ligadas.</summary>
+        public static readonly BotProfile BomPoliticas = ComPoliticas(Bom, "BomPoliticas"), LentoPoliticas = ComPoliticas(Lento, "LentoPoliticas"),
+            ParadoPoliticas = ComPoliticas(Parado, "ParadoPoliticas");
         public static readonly BotProfile[] All = { Bom, Lento, Parado };
+
+        public static BotProfile ComPoliticas(BotProfile p, string nome, int quais = 7)
+        {
+            p.Name = nome; p.Politicas = quais;
+            return p;
+        }
 
         static BotProfile Candidato(BotProfile p, string nome)
         {
@@ -100,6 +112,7 @@ namespace TA.Core
             _t += dt;
             if (_t + 1e-4f < P.Decide) return;
             _t = Math.Min(_t - P.Decide, P.Decide);   // le o estado das estacoes como a tela mostra (atualizado a cada 0,5 s)
+            for (int p = 0; p < Sim.Politicas; p++) if ((P.Politicas >> p & 1) != 0) s.LigaPolitica((Politica)p, true);
             bool moveu = P.Move && Mover(s);
             if (!moveu && Tocar(s)) Taps++;
             _rotaFixa = false;
@@ -510,6 +523,8 @@ namespace TA.Core
             public int Usos, Negados, Interdicoes, Limpezas, FilaBanheiro; public double SujeiraMedia;
             /// <summary>ta-suprimentos: vezes que um aviao esperou suprimento e o custo das entregas pedidas.</summary>
             public int Faltas; public long Suprimentos;
+            /// <summary>ta-politicas: acoes de cada Politica (hangar, estoque, reforco).</summary>
+            public int[] Politicas;
         }
 
         /// <summary>Joga `ondas` ondas inteiras com o perfil `p` e a semente `seed`, sem render. `reabre` = fecha e reabre o jogo (Save ->
@@ -518,7 +533,7 @@ namespace TA.Core
         {
             var s = new Sim(t, seed);
             var bot = new Bot(p);
-            var r = new Resultado { MarcoEm = new[] { -1f, -1f, -1f }, ChegouEm = new[] { 0, -1, -1 }, ObjetivoEm = new int[30], ConquistaEm = new int[s.T.Conquistas.Length], PasseEm = -1 };
+            var r = new Resultado { MarcoEm = new[] { -1f, -1f, -1f }, ChegouEm = new[] { 0, -1, -1 }, ObjetivoEm = new int[30], ConquistaEm = new int[s.T.Conquistas.Length], PasseEm = -1, Politicas = new int[Sim.Politicas] };
             for (int i = 0; i < 30; i++) r.ObjetivoEm[i] = -1;
             for (int i = 0; i < r.ConquistaEm.Length; i++) r.ConquistaEm[i] = -1;
             double soma = 0;
@@ -557,6 +572,7 @@ namespace TA.Core
                         case Ev.BanheiroInterditado: if (e.A == 1) r.Interdicoes++; break;
                         case Ev.SuprimentoFaltou: r.Faltas++; break;
                         case Ev.SuprimentoPedido: r.Suprimentos += e.C; break;
+                        case Ev.PoliticaAgiu: r.Politicas[e.A]++; break;
                     }
                 if (s.Steps % Sim.Hz == 0)
                 {

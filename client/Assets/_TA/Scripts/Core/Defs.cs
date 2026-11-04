@@ -111,6 +111,9 @@ namespace TA.Core
         SuprimentoChegou,   // A = Suprimento, B = cargas                                         -> supply_delivered
         SuprimentoFaltou,   // A = aviao, B = Suprimento (o caminhao espera; so a decolagem atrasa) -> supply_shortage
         SuprimentoMelhorou, // A = Suprimento, B = Melhoria, C = nivel novo                       -> supply_upgraded
+        // ta-politicas (Sim.Politicas.cs): regras automaticas de operacao
+        PoliticaMudou,      // A = Politica, B = 1 se ligada, C = indice do X                     -> policy_changed
+        PoliticaAgiu,       // A = Politica, B = aviao / Suprimento / funcionario, C = desgaste / deposito antes / estacao -> policy_action
     }
 
     /// <summary>Funcoes da tripulacao (GDD §5.11). Indice vai no save.</summary>
@@ -467,6 +470,14 @@ namespace TA.Core
         public int[] SupCusto = { 6, 5 };
         /// <summary>A melhoria (tanque maior: menos entregas por dia), preco de cada nivel; a quantidade de niveis e' o tamanho.</summary>
         public int[] SupTanqueCusto = { 40, 80 };
+
+        // ---- ta-politicas (hipoteses; BALANCE.md §19) ----
+        /// <summary>A lista fixa do X de cada Politica (o jogador escolhe pelo indice): desgaste (%) que manda ao hangar, teto da reposicao da politica
+        /// (Cash por dia de jogo) e fila (pessoas) que pede reforco; PoliticaPadrao = o indice do jogo novo.</summary>
+        public int[][] PoliticaX = { new[] { 70, 80, 90 }, new[] { 12, 24, 48 }, new[] { 6, 10, 15 } };
+        public int[] PoliticaPadrao = { 1, 1, 1 };
+        /// <summary>A politica de estoque pede quando o deposito fica abaixo deste % do tanque; o reforco espera ReforcoCada s entre dois movimentos.</summary>
+        public int PoliticaRepoe = 75; public float ReforcoCada = 20f;
     }
 
     /// <summary>Historias do TA-3 (GDD §5.9). A v0.1 tem 1. Id = indice (vai no album do save): so cresce no fim.</summary>

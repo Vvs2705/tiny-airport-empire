@@ -83,9 +83,9 @@ namespace TA.Core
         /// <summary>Teto do dt de um quadro (s): uma travada longa nao vira um salto de minutos no relogio do quadro de partidas.</summary>
         public const float MaxFrame = 0.25f;
         /// <summary>Versao do formato do save (SaveEnvelope). Sobe a cada mudanca de formato; save de schema maior e' recusado; menor migra
-        /// no Load (15 = ta-suprimentos: estoque, entrega a caminho, carga de cada aviao e a 5a despesa; 14 = frente F: limpeza, sujeira e banheiro; 13 = frente H: chegada e restituicao; 12 = Fase C9: a experiencia de cada funcionario; 11 = registro de ocorrencias; 10 = Fase C8: despesas e relatorio do dia; 9 = Fase C7: passe de temporada; 8 = Fase D1: Gems e compras; 7 = Fase C6: missoes e conquistas; 6 = Fase C5: campanha; 5 = Fase C4: falhas de aviao e portao atrasado;
+        /// no Load (18 = ta-politicas: as 3 regras automaticas, o X de cada uma, o gasto da reposicao no dia e o proximo reforco; 15 = ta-suprimentos: estoque, entrega a caminho, carga de cada aviao e a 5a despesa; 14 = frente F: limpeza, sujeira e banheiro; 13 = frente H: chegada e restituicao; 12 = Fase C9: a experiencia de cada funcionario; 11 = registro de ocorrencias; 10 = Fase C8: despesas e relatorio do dia; 9 = Fase C7: passe de temporada; 8 = Fase D1: Gems e compras; 7 = Fase C6: missoes e conquistas; 6 = Fase C5: campanha; 5 = Fase C4: falhas de aviao e portao atrasado;
         /// 4 = Fase C3: aeroportos, rotas e incidentes; 3 = Fase C2: 8 estacoes e o perfil de cada funcionario; 2 = Fase C: avioes, tripulacao e patio; o 1 e' a v0.1).</summary>
-        public const int Schema = 15;
+        public const int Schema = 18;
         /// <summary>A equipe da v0.1 (Hire()): Ana, Beto e Caio. MaxEquipe = os 6 perfis, com Dani, Edu e Fatima (Hire(perfil)).</summary>
         public const int MaxFuncionarios = 3, MaxEquipe = 6;
 
@@ -145,6 +145,7 @@ namespace TA.Core
             Banheiro.Cabines = Math.Max(1, T.BanheiroCabines);
             for (int i = 0; T.RegraLimpeza && i < T.LimpezaIniciais; i++) Limpeza.Add(new Zelador { Id = i });
             for (int i = 0; i < Suprimentos; i++) Estoque[i] = Tanque((Suprimento)i);   // jogo novo e save sem suprimentos: deposito cheio
+            NovasPoliticas();
             for (int f = 0; f < T.TripPorVoo.Length; f++)
                 for (int i = 0; i < T.TripIniciais; i++) Tripulacao.Add(NovoTripulante((Funcao)f));
         }
@@ -180,6 +181,7 @@ namespace TA.Core
             PassoIncidente();
             Sala();
             Patio();
+            PassoPoliticas();
             Chegada();
             foreach (Voo v in Voos)
             {

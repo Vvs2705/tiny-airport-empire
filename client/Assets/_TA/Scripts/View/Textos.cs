@@ -220,9 +220,29 @@ namespace TA
                 case Motivo.Pouso: return L("O avião não pousou a tempo");
                 case Motivo.Caixa: return L("O caixa não cobriu a conta do dia: contratar e melhorar ficam pausados até quitar");
                 case Motivo.Suprimento: return L("Faltou combustível ou refeição: o caminhão esperou a entrega");
+                case Motivo.Politica: return PoliticaFez(o.Sub, o.Causa, (int)o.Estacao);
                 default: return L("Deu certo: ninguém perdeu o voo");
             }
         }
+
+        // ---------- politicas do diretor (ta-politicas: a folha pela tela de Melhorias, o aviso de cada acao e o registro) ----------
+        public static readonly string Politicas = L("Políticas");
+        public static readonly string[] PoliticaNome = { L("Hangar automático"), L("Reposição antecipada"), L("Reforço da fila") };
+        public static readonly string[] PoliticaTrava = { L("Paga o hangar e o voo do avião; nunca deixa o caixa sem a conta do dia"),
+            L("Pede antes do ponto, até o teto do dia, na conta do dia"), L("Um por vez, pelo vestiário; nunca tira de estação apertada") };
+        public static string PoliticasLigadas(int n, int de) => n + L(" de ") + de + L(" ligadas: hangar, estoque e reforço");
+        /// <summary>O X no botao: 80%, 24/dia, 10 na fila.</summary>
+        public static string PoliticaValor(int p, int x) => p == 0 ? x + "%" : p == 1 ? x + L("/dia") : x + L(" na fila");
+        public static string PoliticaRegra(int p, int x) =>
+            p == 0 ? L("Ao hangar com ") + x + L("% de desgaste") : p == 1 ? L("Repõe abaixo de 3/4 do tanque, até ") + x + L(" por dia") : L("Reforça a fila com ") + x + L(" pessoas ou mais");
+        public static string PoliticaGasto(long gasto, int teto) => L("Hoje: ") + gasto + L(" de ") + teto + L(" nas entregas da política");
+        public static string PoliticaHangar(string aviao, int d) => L("Política: ") + aviao + L(" foi ao hangar com ") + d + L("% de desgaste");
+        public static string PoliticaEstoque(int sup, int antes, int tanque) => L("Política: entrega de ") + Suprimento[sup].ToLower(Br) + L(" pedida com ") + antes + "/" + tanque;
+        public static string PoliticaReforco(string nome, int e) => L("Política: ") + nome + L(" foi reforçar a fila ") + EstacaoNo[e];
+        /// <summary>A explicacao do registro (Motivo.Politica): Sub = a politica, Causa = desgaste, deposito ou fila.</summary>
+        public static string PoliticaFez(int p, int causa, int e) =>
+            p == 0 ? L("Política: ao hangar com ") + causa + L("% de desgaste") : p == 1 ? L("Política: entrega pedida com ") + causa + L(" no depósito")
+            : L("Política: reforço ") + EstacaoNo[e] + L(", com ") + causa + L(" na fila");
 
         // ---------- suprimentos: combustivel e refeicoes (ta-suprimentos; a ficha do despacho, o aviso e o cartao do patio) ----------
         public static readonly string[] Suprimento = { L("Combustível"), L("Refeições") };
