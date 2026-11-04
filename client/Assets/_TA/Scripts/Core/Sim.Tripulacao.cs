@@ -118,7 +118,7 @@ namespace TA.Core
         public bool HireTripulante(Funcao f)
         {
             long c = CustoTripulante(f);
-            if (c < 0 || Cash < c) return false;
+            if (!PodeComprar(c)) return false;
             Cash -= c;
             Tripulante t = NovoTripulante(f);
             Tripulacao.Add(t);

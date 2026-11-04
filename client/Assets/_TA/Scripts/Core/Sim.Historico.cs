@@ -5,11 +5,10 @@ using System.Text;
 namespace TA.Core
 {
     /// <summary>O que o registro guarda (frente ta-historico). Indice vai no save: so cresce no fim.</summary>
-    // ponytail: a falta de caixa entra no fim quando a frente A (despesas) chegar a main
-    public enum TipoOcorrencia { Incidente, Clima, FalhaAviao, VooPerdido, VooAtrasado }
+    public enum TipoOcorrencia { Incidente, Clima, FalhaAviao, VooPerdido, VooAtrasado, FaltaCaixa }
 
-    /// <summary>A chave da explicacao curta (Textos.Motivo): por que deu certo ou onde travou. Indice vai no save: so cresce no fim.</summary>
-    public enum Motivo { Nenhum, Fila, SemEquipe, Equipamento, Clima, Pista, Patio, Tripulacao, Manutencao, Pane, Hangar, Pouso }
+    /// <summary>A chave da explicacao curta (Textos.Explica): por que deu certo ou onde travou. Indice vai no save: so cresce no fim.</summary>
+    public enum Motivo { Nenhum, Fila, SemEquipe, Equipamento, Clima, Pista, Patio, Tripulacao, Manutencao, Pane, Hangar, Pouso, Caixa }
 
     /// <summary>Uma ocorrencia do dia de jogo: o que aconteceu, a causa, a resposta e o resultado (GDD de direcao §14).</summary>
     public sealed class Ocorrencia
@@ -23,34 +22,37 @@ namespace TA.Core
         public int Causa;
         /// <summary>Voo atingido (Id; -1 = nenhum), os passageiros dele (no retorno: os remarcados), os que perderam o voo e os s de atraso da decolagem.</summary>
         public int Voo = -1, Total, Perdidos, Atraso;
-        /// <summary>A resposta: Segurar = ninguem fez nada; Auto = o nucleo resolveu sozinho (mecanico na estacao, inspecao obrigatoria). Custo = Cash dela.</summary>
+        /// <summary>A resposta: Segurar = ninguem fez nada; Auto = o nucleo resolveu sozinho (mecanico na estacao, inspecao obrigatoria, o caixa que
+        /// quitou a conta). Custo = Cash dela; na falta de caixa, o que faltou.</summary>
         public Opcao Resposta; public bool Auto; public long Custo;
         /// <summary>A chave da explicacao e os argumentos dela: estacao, s para a fila andar (min no quadro) e postos abertos.</summary>
         public Motivo Motivo; public Estacao Estacao; public int Espera, Postos;
-        /// <summary>Em andamento: o incidente nao terminou, o voo nao fechou ou nao decolou, ou o aviao da falha ainda nao voltou ao normal.</summary>
+        /// <summary>Em andamento: o incidente nao terminou, o voo nao fechou ou nao decolou, o aviao da falha ainda nao voltou ao normal ou a
+        /// conta que faltou ainda pausa contratar e melhorar.</summary>
         public bool Aberta;
-        /// <summary>Deu certo: ninguem perdeu o voo e ele saiu na hora.</summary>
-        public bool Eficaz => Perdidos == 0 && Atraso == 0;
+        /// <summary>Deu certo: ninguem perdeu o voo e ele saiu na hora. A falta de caixa nunca.</summary>
+        public bool Eficaz => Tipo != TipoOcorrencia.FaltaCaixa && Perdidos == 0 && Atraso == 0;
     }
 
     /// <summary>
-    /// Registro de ocorrencias (frente ta-historico, GDD de direcao §14): os 4 incidentes, o clima, as falhas de aviao e o voo perdido ou
-    /// atrasado, com causa, resposta, resultado e a chave da explicacao. So observa: le os eventos (Emit) e o portao que fecha (Fecha), nunca
+    /// Registro de ocorrencias (frente ta-historico, GDD de direcao §14): os 4 incidentes, o clima, as falhas de aviao, o voo perdido ou
+    /// atrasado e a falta de caixa (frente A), com causa, resposta, resultado e a chave da explicacao. O relatorio dos dias da frente A e'
+    /// o sim.Historico; este e' o sim.Ocorrencias. So observa: le os eventos (Emit) e o portao que fecha (Fecha), nunca
     /// muda o jogo (Tuning.RegraHistorico = false da o mesmo jogo, numero a numero). Sem relogio do aparelho: tudo sai do passo fixo. Guarda
-    /// HistoricoDias dias do jogo, ate HistoricoPorDia por dia, no save. A tela vem nas frentes G (satisfacao) e I (painel).
+    /// OcorrenciasDias dias do jogo, ate OcorrenciasPorDia por dia, no save. A tela vem nas frentes G (satisfacao) e I (painel).
     /// </summary>
     public sealed partial class Sim
     {
         /// <summary>O dia do jogo de agora e os 2 anteriores; ate 24 por dia (o mais antigo do dia sai).</summary>
-        public const int HistoricoDias = 3, HistoricoPorDia = 24;
+        public const int OcorrenciasDias = 3, OcorrenciasPorDia = 24;
 
         readonly List<Ocorrencia> _hist = new List<Ocorrencia>();
 
         /// <summary>As ocorrencias guardadas, na ordem em que entraram (a ultima = a ultima ocorrencia do painel).</summary>
-        public IReadOnlyList<Ocorrencia> Historico { get { Poda(); return _hist; } }
+        public IReadOnlyList<Ocorrencia> Ocorrencias { get { Poda(); return _hist; } }
 
         /// <summary>Tira o que passou da retencao (o dia vira sem evento: quem le, grava ou anota poda antes).</summary>
-        void Poda() => _hist.RemoveAll(r => r.Dia <= DiaJogo - HistoricoDias);
+        void Poda() => _hist.RemoveAll(r => r.Dia <= DiaJogo - OcorrenciasDias);
 
         /// <summary>Hora do jogo (0 a 24) no passo `passo` do relogio do quadro.</summary>
         public float HoraDe(long passo) => (T.HoraInicial + 24f * (passo % DiaPassos) / DiaPassos) % 24f;
@@ -78,6 +80,12 @@ namespace TA.Core
                 case Ev.HangarIniciado: if ((o = DaFalha(a)) != null) { Responde(o, Opcao.Hangar, b, false); o.Aberta = false; } break;
                 case Ev.PaneReparada: if ((o = DaFalha(a)) != null) o.Aberta = false; break;
                 case Ev.Decolou: Decolou(a, b, c); break;
+                // frente A: o caixa nao cobriu a conta do dia; fecha quando quita sozinho ou quando o fechamento seguinte perdoa o resto
+                case Ev.DiaFechado:
+                    if ((o = _hist.FindLast(r => r.Aberta && r.Tipo == TipoOcorrencia.FaltaCaixa)) != null) o.Aberta = false;
+                    if (c > 0) { o = Nova(TipoOcorrencia.FaltaCaixa, -1, -1, Steps); o.Custo = c; o.Motivo = Motivo.Caixa; o.Aberta = true; }
+                    break;
+                case Ev.ContaQuitada: if ((o = _hist.FindLast(r => r.Aberta && r.Tipo == TipoOcorrencia.FaltaCaixa)) != null) { o.Aberta = false; o.Auto = true; } break;
             }
         }
 
@@ -204,15 +212,15 @@ namespace TA.Core
             Poda();
             int doDia = 0;
             foreach (Ocorrencia r in _hist) if (r.Dia == dia) doDia++;
-            if (doDia >= HistoricoPorDia) _hist.RemoveAt(_hist.FindIndex(r => r.Dia == dia));
+            if (doDia >= OcorrenciasPorDia) _hist.RemoveAt(_hist.FindIndex(r => r.Dia == dia));
             var o = new Ocorrencia { Tipo = tipo, Sub = sub, Voo = voo, Passo = passo, Dia = dia };
             _hist.Add(o);
             return o;
         }
 
-        // ------------------------------------------------------------------ save (schema 12)
+        // ------------------------------------------------------------------ save (schema 11)
 
-        /// <summary>Schema 12: uma linha, as ocorrencias separadas por ';' e os campos por ','. Sem nenhuma, a chave fica de fora.</summary>
+        /// <summary>Schema 11: uma linha, as ocorrencias separadas por ';' e os campos por ','. Sem nenhuma, a chave fica de fora.</summary>
         void SalvaHistorico(StringBuilder sb)
         {
             Poda();
@@ -228,7 +236,7 @@ namespace TA.Core
             sb.Append('\n');
         }
 
-        /// <summary>Le o schema 12, com tudo limitado: ocorrencia torta ou longe no futuro sai; o teto do dia fica com as mais novas. O schema 9
+        /// <summary>Le o schema 11, com tudo limitado: ocorrencia torta ou longe no futuro sai; o teto do dia fica com as mais novas. O schema 10
         /// nao tem a chave: o registro comeca vazio.</summary>
         void CarregaHistorico(Dictionary<string, string> kv)
         {
@@ -257,7 +265,7 @@ namespace TA.Core
             {
                 int doDia = 0;
                 for (int j = k + 1; j < _hist.Count; j++) if (_hist[j].Dia == _hist[k].Dia) doDia++;
-                if (doDia >= HistoricoPorDia) _hist.RemoveAt(k);
+                if (doDia >= OcorrenciasPorDia) _hist.RemoveAt(k);
             }
         }
 

@@ -91,6 +91,9 @@ namespace TA.Core
         GemsGanhas,         // A = aeroporto, B = Gems (cadeia fechada)                           -> gems_earned
         // Fase C7 (CONTRATO_FASE_C7): passe de temporada, trilha gratuita
         PasseNivel,         // A = temporada, B = nivel (1..30), C = Cash, s de 2x ou 1 cosmetico   -> season_reward_claimed
+        // Fase C8 (CONTRATO_FASE_C8): despesas
+        DiaFechado,         // A = dia do jogo, B = Cash pago, C = o que faltou (> 0 = pausa)    -> day_closed
+        ContaQuitada,       // A = dia do jogo, B = Cash (a conta atrasada; a pausa acabou)       -> day_bill_paid_late
     }
 
     /// <summary>Funcoes da tripulacao (GDD §5.11). Indice vai no save.</summary>
@@ -380,6 +383,17 @@ namespace TA.Core
         public bool RegraPasse = true;
         public Temporada[] Temporadas = Tabelas.Temporadas;
         public int PassePontosNivel = 100, PasseVoo = 2, PasseDiaria = 25, PasseSemanal = 70, PasseObjetivo = 20;
+        // ---- Fase C8 (CONTRATO_FASE_C8, hipoteses) ----
+        /// <summary>Cobra a conta no fechamento do dia (false = so o relatorio, o jogo da Fase D1).</summary>
+        public bool RegraDespesas = true;
+        /// <summary>Cash por dia do jogo: salario de cada perfil (ordem de Perfil), de cada funcao da tripulacao e de cada pessoa do patio. A 1a
+        /// tabela, 1,67 x esta, derrubava o portao dos aeroportos para 1,078 (BALANCE.md D-C8c).</summary>
+        public int[] Salario = { 35, 50, 50, 60, 90, 90 };
+        public int[] SalarioTrip = { 24, 12 };
+        public int SalarioPatio = 18;
+        /// <summary>Cash por dia do jogo de cada estacao ativa (ordem de Estacao) e quanto cada nivel de melhoria dela soma.</summary>
+        public int[] Manutencao = { 12, 12, 9, 9, 9, 9, 18, 12 };
+        public int[] ManutencaoNivel = { 6, 6, 5, 5, 5, 5, 7, 0 };
 
         // ---- ta-historico ----
         /// <summary>Anota o registro de ocorrencias (Sim.Historico.cs). So observa: false da o mesmo jogo, numero a numero, sem o registro.</summary>
