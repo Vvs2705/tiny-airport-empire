@@ -1007,25 +1007,26 @@ Com 200 sementes, os 3,5 s deram **131 de 200** no alcance da campanha e derruba
 
 **Decisão:** ida, troca de 1 s (`Tuning.Troca`) e volta somam os 2,5 s da caminhada da v0.1. O custo novo de mover é o encerramento. Se o playtest pedir uma troca mais longa, o objetivo de voo cheio da campanha precisa mudar antes (decisão do Vinicius).
 
-### Os portões, com o vestiário (200 sementes)
+### Os portões, com o vestiário (200 sementes, a `main` com a despesas, PR #56)
 
-| portão | antes (§12) | com o vestiário |
+| portão | antes (a `main`, §13) | com o vestiário |
 |---|---|---|
-| TA-1 Bom | 95,5% | 94,7% |
-| TA-1 Lento | 80,6% | 80,6% |
-| TA-2 (Bom / Parado) | 1,824 | **1,787** |
-| Fase C (Planejador / Automático) | 1,176 | 1,177 |
-| Fase C2 | verde | verde |
-| Fase C5 (Guiado / Bom, 20 ondas) | 1,380 | 1,424 |
-| Fase C6 (Missionário / Bom, 20 ondas) | 1,438 | 1,469 |
-| Fase D1 (a Baleia fecha a campanha em) | 0,996 | 0,998 do tempo |
-| Fase C7 (LentoCompleto fecha o passe) | 200 de 200, dia 20,0 | 200 de 200, dia 19,9 |
-| Alcance da campanha: Guiado | onda 51,6 (pior 66) | onda 51,4 (pior 66) |
-| Alcance da campanha: LentoGuiado | onda 62,9 (pior 85) | **onda 69,8 (p90 80, pior 106)**, 200 de 200 |
+| TA-1 Bom (10 ondas) | 95,5%, receita 8 883 | 94,8%, receita 8 740 |
+| TA-1 Lento | 79,6%, receita 5 221 | 79,9%, receita 5 222 |
+| TA-1 Parado | 89,2%, receita 4 819 | 89,2%, receita 4 819 |
+| TA-2 (Bom / Parado) | 1,843 | **1,814** |
+| Fase C (Planejador / Automático, 20 ondas) | 1,182 | 1,182 |
+| Fase C2, as 4 estações | 1,343 | 1,340 |
+| Fase C5, campanha (Guiado / Bom, 20 ondas) | 1,395 | 1,411 |
+| Fase C6, missões (Missionário / Bom, 20 ondas) | 1,451 | 1,461 |
+| Fase C7, passe: o LentoCompleto fecha os 30 níveis | 200 de 200, dia 19,9 (pior 23,4) | 200 de 200, dia 19,9 (pior 23,5) |
+| Fase D1 e alcance da campanha, sem compra | 200 de 200: Guiado 51,2, LentoGuiado 62,4 (pior 81) | 200 de 200: Guiado 51,5, **LentoGuiado 69,5 (p90 80, pior 103)**; a Baleia fecha em 0,994 do tempo |
 | Alcance das missões e conquistas | 200 de 200 | 200 de 200 |
-| Fases C3 e C4 e TA-6 | verdes | iguais, número a número: medem com o vestiário desligado (`SemFaseC4`) |
+| Fases C3 e C4 e TA-6 | verdes | iguais: medem com o vestiário desligado (`SemFaseC4`) |
 
-**Ressalva:** o LentoGuiado leva 7 ondas a mais para fechar a campanha, e o pior caso fica a 14 ondas do teto de 120. O encerramento pesa para quem move muito. As migrações dos saves reais dos schemas 2 a 8 jogam com o vestiário desligado, como o jogo que os gravou.
+Antes da despesas entrar, a mesma medida deu TA-2 1,787 (era 1,824) e LentoGuiado na onda 69,8 (pior 106), também com todos os portões verdes.
+
+**Ressalva:** o LentoGuiado leva 7 ondas a mais para fechar a campanha, e o pior caso fica a 17 ondas do teto de 120. O encerramento pesa para quem move muito. As tabelas "antes" (`SemC8` do `BalanceTests`) e as migrações dos saves reais dos schemas 2 a 9 jogam com o vestiário desligado, como o jogo que as gravou.
 
 ### Prova de mutação (`MUTACAO_TESTES="FullyQualifiedName~VestiarioTests|FullyQualifiedName~RegrasTests|FullyQualifiedName~SaveTests" python client/tools/mutacao.py vestiario`)
 
