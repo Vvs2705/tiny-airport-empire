@@ -245,7 +245,7 @@ namespace TA
         public static string Pct(float x) => (x * 100f).ToString("0", Br) + "%";
         public static string Vaga(int f) => L("Vaga ") + (f + 1);
         public static string ParaDestino(string destino) => "» " + destino;
-        public static string ViagemMarcada(int a) => L("Viagem para ") + AeroportoNome[a] + L(" marcada");
+        public static string ViagemMarcada(int a) => L("Viagem marcada: ") + AeroportoNome[a];
         /// <summary>Tipo, distancia (o tempo de cada trecho fora do patio) e frequencia.</summary>
         public static string RotaLinha(Rota r, float trechoSeg) => TipoRotaNome[(int)r.Tipo] + " · " + Tempo(trechoSeg) + L(" de voo · ") + (r.Cada <= 1 ? L("toda onda") : L("a cada ") + r.Cada + L(" ondas"));
         /// <summary>2 linhas: receita por onda (em relacao a rota da v0.1) e risco; depois o que o tipo muda.</summary>
