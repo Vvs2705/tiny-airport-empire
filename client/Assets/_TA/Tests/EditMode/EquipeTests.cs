@@ -213,12 +213,12 @@ namespace TA.Tests
                 Assert.IsTrue(s.Demite(2));
                 Anda(s, 41f);
             }
-            string texto = a.Save("0.11.0", U);
+            string texto = a.Save("0.12.0", U);
             StringAssert.Contains("\nschema=" + Sim.Schema + "\n", texto);
             Sim c = Sim.Load(texto, a.T, 4);
             Assert.AreEqual(a.Staff.Select(f => (f.Id, f.Perfil, f.Experiencia, f.Em)), c.Staff.Select(f => (f.Id, f.Perfil, f.Experiencia, f.Em)));
             Assert.AreEqual((a.Folha(), a.Rende(Estacao.CheckIn), a.Rende(Estacao.Seguranca)), (c.Folha(), c.Rende(Estacao.CheckIn), c.Rende(Estacao.Seguranca)));
-            Assert.AreEqual(texto, c.Save("0.11.0", U), "ida e volta estavel no schema 11");
+            Assert.AreEqual(texto, c.Save("0.12.0", U), "ida e volta estavel no schema 12");
             Anda(b, 300f); Anda(c, 300f);
             Assert.AreEqual((b.Cash, b.TotalEmbarcados, b.Steps, b.Folha()), (c.Cash, c.TotalEmbarcados, c.Steps, c.Folha()), "reabrir no meio da onda da o mesmo jogo");
         }

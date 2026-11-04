@@ -684,10 +684,10 @@ namespace TA.Tests
             Assert.AreEqual(6, m.Staff.Count);
             Assert.IsTrue(m.Staff.All(f => f.Experiencia == Experiencia.Pleno), "todos sao o Pleno");
             Assert.AreEqual((long)m.T.Salario.Sum(), m.Folha(Despesa.Equipe), "a folha e' a de antes");
-            string texto = m.Save("0.11.0", U);
+            string texto = m.Save("0.12.0", U);
             StringAssert.Contains("\nschema=" + Sim.Schema + "\n", texto);
             StringAssert.Contains("\nfunc.0=1,0,0,0,1\n", texto);
-            Assert.AreEqual(texto, Sim.Load(texto, null, 7).Save("0.11.0", U), "ida e volta estavel no schema 11");
+            Assert.AreEqual(texto, Sim.Load(texto, null, 7).Save("0.12.0", U), "ida e volta estavel no schema 12");
             Sim n = Jogado(2790f, 7);
             Assert.AreEqual(SemEma(n.Save("0.10.0", U)), SemEma(Sim.Load(V10, null, 7).Save("0.10.0", U)), "migrar = jogar ate ali com o codigo novo");
         }

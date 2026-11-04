@@ -23,8 +23,10 @@ namespace TA.Core
         public bool Missoes;
         /// <summary>Compra = produtos creditados no 1o passo (o bot faz o papel do servidor). Gasta = gasta as Gems: booster sempre, pacote de Cash com pouco Cash (CONTRATO_FASE_D1 §7).</summary>
         public string[] Compra; public bool Gasta;
-        /// <summary>Candidatos = compara os 3 candidatos: a vaga entra na conta pelo preco do Junior e contrata o melhor que o caixa paga; e troca quem
-        /// rende menos pelo Senior quando ele e' a compra mais barata (CONTRATO_FASE_C9 §6). Sem ele, contrata sempre o Pleno e nunca demite.</summary>
+        /// <summary>Candidatos = compara os 3 candidatos: a vaga entra na conta do mais barato pelo preco do Junior, em qualquer ordem, e contrata o
+        /// melhor que o caixa paga (o Senior direto quando cobre); e troca quem nao e' Senior por ele, pesando a troca pela metade do preco: o Senior
+        /// rende 25% na estacao toda, cerca do dobro de um nivel de velocidade (CONTRATO_FASE_C9 §6, BALANCE §14). Sem ele, contrata sempre o Pleno e
+        /// nunca demite.</summary>
         public bool Candidatos;
 
         public static readonly BotProfile Bom = new BotProfile { Name = "Bom", Decide = 1f, Move = true, Planeja = true, Equipe = true, Rotas = true, Viaja = true, Incidentes = true, Clima = true, Falhas = true };
@@ -437,7 +439,8 @@ namespace TA.Core
             for (int k = 0; k < s.Staff.Count && P.Candidatos && !s.Pausado; k++)
             {
                 long c = s.Staff[k].Experiencia == Experiencia.Senior ? -1 : s.Preco(s.Staff[k].Perfil, Experiencia.Senior);
-                if (c >= 0 && (best < 0 || c < best)) { best = c; hire = -5; troca = k; }
+                long peso = c >= 0 ? c / 2 : -1;   // a troca vale o dobro de uma compra do mesmo preco; so com o caixa para o preco inteiro
+                if (peso >= 0 && (best < 0 || peso < best) && s.Cash >= c) { best = peso; hire = -5; troca = k; }
             }
             foreach (Station st in s.Estacoes)
             {

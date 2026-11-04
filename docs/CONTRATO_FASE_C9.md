@@ -62,15 +62,15 @@ Em % do Pleno (`Tuning.ExpRende`, `ExpContratacao`, `ExpSalario`), sobre `Tuning
 
 ## 5. Save
 
-**Schema 11** (o número foi combinado com o coordenador em 03/11). `func.<i>` ganha o 5º campo, a experiência: `em,de,andando,perfil,experiencia`. O schema 10 não tem o campo: todos viram o Pleno, com a folha de antes. Lixo (fora de 0 a 2) também vira o Pleno. O teto do atendimento gravado passou a ser o do candidato mais lento (`TempoTeto`), porque um Júnior pode ter saído no meio.
+**Schema 12** (combinado com o coordenador em 04/11: o 11 fica para o histórico, PR #60). `func.<i>` ganha o 5º campo, a experiência: `em,de,andando,perfil,experiencia`. Os schemas 10 e 11 não têm o campo: todos viram o Pleno, com a folha de antes. Lixo (fora de 0 a 2) também vira o Pleno. O teto do atendimento gravado passou a ser o do candidato mais lento (`TempoTeto`), porque um Júnior pode ter saído no meio.
 
 Teste com save real gravado pelo código do schema 10 (commit 03c40bd, semente 7, bot Bom, 2 790 s, os 6 perfis contratados): migrar dá o mesmo jogo que jogar até ali com o código novo, número a número. Os saves dos schemas 1 a 9 continuam migrando pelo mesmo caminho.
 
 ## 6. Bot e portão
 
 - **Começo intacto:** os bots de sempre contratam o Pleno e nunca demitem, então todos os portões anteriores repetem a tabela deles (o Pleno é o caminho de antes, e a migração do schema 10 prova).
-- **Bot `Contratador` e `LentoContratador`:** as 6 vagas entram na conta do mais barato pelo preço do Júnior, em qualquer ordem; ao contratar, levam o melhor que o caixa paga; e trocam quem não é Sênior pelo Sênior (demite e contrata) quando essa é a compra mais barata.
-- **Portão do §5.13 (`Portao_FaseC9_Candidatos`):** o lucro (receita − conta paga) do `Contratador` ≥ 1,10 × o do Bom, e o do `LentoContratador` ≥ 1,10 × o do Lento, 200 sementes × 20 ondas. Abaixo disso a experiência fica só visual (`RegraExperiencia = false`). Calibração local com 40 sementes: 1,120 e 1,297. O CI roda as 200 na parte "resto".
+- **Bot `Contratador` e `LentoContratador`:** as 6 vagas entram na conta do mais barato pelo preço do Júnior, em qualquer ordem; ao contratar, levam o melhor que o caixa paga (o Sênior direto quando cobre); e trocam quem não é Sênior pelo Sênior (demite e contrata), com a troca pesando metade do preço na conta do mais barato, porque o Sênior rende 25% na estação toda, cerca do dobro de um nível de velocidade (D-C9d, `BALANCE.md` §14).
+- **Portão do §5.13 (`Portao_FaseC9_Candidatos`):** o lucro (receita − conta paga) do `Contratador` ≥ 1,10 × o do Bom, e o do `LentoContratador` ≥ 1,10 × o do Lento, 200 sementes × 20 ondas. Abaixo disso a experiência fica só visual (`RegraExperiencia = false`). Com 200 sementes: **1,118 e 1,405**. O CI roda as 200 na parte "resto".
 
 ## 7. Tela
 
@@ -90,7 +90,7 @@ Teste com save real gravado pelo código do schema 10 (commit 03c40bd, semente 7
 | 4 | Animação ou retorno visual | parcial: o contratado aparece de uniforme no posto e a demissão mostra o aviso; quem sai some na hora, sem andar até a porta |
 | 5 | Requisitos e custos definidos | feito: §2 |
 | 6 | Integração com as estações e os departamentos | feito: rendimento nas 8 estações, folha da frente A, cobertura do posto, escala e Mover |
-| 7 | Estado salvo e restaurado | feito: schema 11, migração do save real do schema 10 |
+| 7 | Estado salvo e restaurado | feito: schema 12, migração do save real do schema 10 |
 | 8 | Testes das regras principais | feito: `EquipeTests` (11), `SaveTests` (migração e lixo), prova de mutação 13 de 13 |
 | 9 | Nenhum bloqueio de navegação conhecido | a conferir na rodada da leva: Equipe → Vaga → Contratar volta à Equipe; Mover → Demitir → Confirmar fecha a folha |
 | 10 | Validação em build e no Android | na rodada de integração da leva, com o Unity do coordenador; o aparelho fica para o último passo (D-24) |

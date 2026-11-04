@@ -1008,14 +1008,28 @@ Com estes números o Sênior quase sempre é o melhor. O Júnior põe gente no p
 
 ### O portão do §5.13 (`Portao_FaseC9_Candidatos`)
 
-O `Contratador` (e o `LentoContratador`) compara os 3, contrata o melhor que o caixa paga e troca pelo Sênior quando essa é a compra mais barata. O portão compara o lucro dele com o do Bom (e do Lento), que contrata sempre o Pleno, com as mesmas sementes.
+O `Contratador` (e o `LentoContratador`) compara os 3, contrata o melhor que o caixa paga e troca pelo Sênior, pesando a troca pela metade do preço (D-C9d). O portão compara o lucro dele com o do Bom (e do Lento), que contrata sempre o Pleno, com as mesmas sementes, 200 × 20 ondas.
 
 | bot | embarque | receita | conta paga | lucro | lucro do Pleno | ganho |
 |---|---|---|---|---|---|---|
-| Contratador (40 sementes, calibração) | 96,4% | 31 186 | 1 655 | 29 532 | 26 374 | 1,120 |
-| LentoContratador (40 sementes, calibração) | 86,8% | 19 864 | 1 539 | 18 325 | 14 128 | 1,297 |
+| Contratador | 96,4% | 31 345 | 1 652 | 29 694 | 26 566 | **1,118** |
+| LentoContratador | 88,6% | 21 125 | 1 591 | 19 534 | 13 906 | **1,405** |
 
-As 200 sementes rodam no CI, na parte "resto" do `balanco.yml`; o número de lá vai no PR.
+### D-C9d. O bot que mede a escolha troca pelo Sênior com prioridade
+
+A 1ª versão do `Contratador` pesava a troca pelo preço inteiro: deu 1,120 com 40 sementes e **1,099 com 200** no CI (PR #61), um milésimo abaixo do piso. As variantes, todas com 200 sementes (Bom / Lento):
+
+| variante | Bom | Lento |
+|---|---|---|
+| vaga pelo preço do Júnior, troca pelo preço inteiro (a 1ª) | 1,099 | 1,323 |
+| vaga pelo preço do Sênior: espera o caixa e contrata o Sênior | 1,030 | 0,324 |
+| vaga pelo preço do Pleno, troca pelo preço inteiro | 1,094 | 1,282 |
+| vaga pelo preço do Pleno, sem troca | 1,027 | 1,057 |
+| vaga pelo preço do Júnior, sem troca | 0,936 | 0,854 |
+| **vaga pelo preço do Júnior, troca pesando metade do preço (a final)** | **1,118** | **1,405** |
+| vaga pelo preço do Júnior, troca pesando um quarto | 1,121 | 1,398 |
+
+Esperar o Sênior para contratar atrasa demais, e o Lento desaba (44% de embarque). O que rende é pôr gente no posto cedo e trocar pelo Sênior logo. A troca pesa metade porque o Sênior rende 25% na estação toda, cerca do dobro de um nível de velocidade (12%). Nenhum número do jogo mudou: só o bot que mede.
 
 ### Prova de mutação (`MUTACAO_TESTES="FullyQualifiedName~EquipeTests|FullyQualifiedName~SaveTests.Lixo|FullyQualifiedName~SaveTests.MigracaoDoSchema10|FullyQualifiedName~DespesasTests" python client/tools/mutacao.py candidato demitir`)
 
