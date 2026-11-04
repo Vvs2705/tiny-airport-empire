@@ -65,8 +65,11 @@ using System.Collections.Generic;
 //               Interditado, Negados), sim.BanheiroAberto, sim.Limpeza (Zelador: Em, De, Fase Livre/Indo/Limpando, Andando, AndarTotal, Ordem), sim.Ordens,
 //               sim.TemZelador(a), sim.CustoLimpeza(), sim.TetoLimpeza, sim.Metros(a, b), Pax.Banheiro. Intencoes: sim.HireLimpeza(), sim.Limpar(area)
 //               (ordem do jogador). Ev.Limpeza*, Ev.Limpou, Ev.BanheiroInterditado. O salario entra na Folha(Despesa.Equipe).
+//   Frente G:   satisfacao com motivo (Sim.Satisfacao.cs). Passageiro: sim.Nota(p) (0 a 100), sim.Peso(p, fator), sim.Principal(p), sim.PerfilDe(p),
+//               sim.CarinhaDe(nota), Pax.Reclamou. Aeroporto: sim.SatMedia (-1 sem ninguem ainda), sim.SatFator(f), sim.SatTop(n), sim.Reclamacoes(f)
+//               (hoje), sim.SatOnde(f) (a Estacao, a Area ou a vaga do voo ligada ao motivo), sim.SatAmostras. Ev.Reclamou, Ev.Gorjeta (RegraSatBonus).
 //   Gravar:     texto = sim.Save(versaoDoJogo, nowUnix): payload chave=valor dentro do SaveEnvelope (SHA-256 + schema). Grava filas e o
-//               relogio do quadro: reabrir retoma a onda do ponto gravado. Schema 14; os saves dos schemas 1 a 13 migram no Load.
+//               relogio do quadro: reabrir retoma a onda do ponto gravado. Schema 17; os saves dos schemas 1 a 16 migram no Load.
 //
 // Nomes acima sao estaveis (so crescem). Mudou a API: atualize este cabecalho e o docs/MAPA_CODIGO.md no mesmo PR.
 
@@ -80,9 +83,9 @@ namespace TA.Core
         /// <summary>Teto do dt de um quadro (s): uma travada longa nao vira um salto de minutos no relogio do quadro de partidas.</summary>
         public const float MaxFrame = 0.25f;
         /// <summary>Versao do formato do save (SaveEnvelope). Sobe a cada mudanca de formato; save de schema maior e' recusado; menor migra
-        /// no Load (14 = frente F: limpeza, sujeira e banheiro; 13 = frente H: chegada e restituicao; 12 = Fase C9: a experiencia de cada funcionario; 11 = registro de ocorrencias; 10 = Fase C8: despesas e relatorio do dia; 9 = Fase C7: passe de temporada; 8 = Fase D1: Gems e compras; 7 = Fase C6: missoes e conquistas; 6 = Fase C5: campanha; 5 = Fase C4: falhas de aviao e portao atrasado;
+        /// no Load (17 = frente G: satisfacao de quem esta no aeroporto e a media do aeroporto; 15 e 16 = suprimentos e historias; 14 = frente F: limpeza, sujeira e banheiro; 13 = frente H: chegada e restituicao; 12 = Fase C9: a experiencia de cada funcionario; 11 = registro de ocorrencias; 10 = Fase C8: despesas e relatorio do dia; 9 = Fase C7: passe de temporada; 8 = Fase D1: Gems e compras; 7 = Fase C6: missoes e conquistas; 6 = Fase C5: campanha; 5 = Fase C4: falhas de aviao e portao atrasado;
         /// 4 = Fase C3: aeroportos, rotas e incidentes; 3 = Fase C2: 8 estacoes e o perfil de cada funcionario; 2 = Fase C: avioes, tripulacao e patio; o 1 e' a v0.1).</summary>
-        public const int Schema = 14;
+        public const int Schema = 17;
         /// <summary>A equipe da v0.1 (Hire()): Ana, Beto e Caio. MaxEquipe = os 6 perfis, com Dani, Edu e Fatima (Hire(perfil)).</summary>
         public const int MaxFuncionarios = 3, MaxEquipe = 6;
 
@@ -193,6 +196,7 @@ namespace TA.Core
                 if (f.Andando > 0 && --f.Andando == 0) Emit(Ev.Chegou, f.Id, (int)f.Em);
             foreach (Station s in Estacoes) Atende(s, loc);
             PassoLimpeza();
+            PassoSatisfacao(loc);
             foreach (Voo v in Voos) if (!v.Partiu && loc >= v.FechaPasso) Fecha(v);
             Decolagens();
             PassoMetas();
@@ -343,6 +347,7 @@ namespace TA.Core
         void Avanca(Station s, Pax p, int loc)
         {
             Conta(Meta.Atendidos, (int)s.Tipo);
+            Ve(p, Sim.AreaDe(s.Tipo));
             Suja(s.Tipo);
             Voo v = VooDe(p);
             switch (s.Tipo)
@@ -371,6 +376,7 @@ namespace TA.Core
                     v.Embarcados++;
                     v.Receita += tarifa;
                     Emit(Ev.Embarcou, p.Id, (int)Ganha(tarifa, Fonte.Tarifas));
+                    Saiu(p, true, tarifa);
                     TotalEmbarcados++;
                     if (Marco > marco)
                     {
@@ -404,6 +410,7 @@ namespace TA.Core
         {
             FechaAviao(v);
             AnotaVoo(v);
+            PerdeuOVoo(v);
             foreach (Station s in Estacoes)
             {
                 s.Fila.RemoveAll(p => p.Onda == v.Onda && p.Voo == v.Indice);

@@ -30,7 +30,7 @@ namespace TA
         const float AltFicha = 256f, MargemFicha = 172f;
         /// <summary>Largura do texto da ficha (px da referencia), sem e com o Mover a direita: o teste confere que cada linha cabe.</summary>
         public const float LargFicha = RefW - 32f - MargemFicha - 28f, LargFichaMover = RefW - 32f - MargemFicha - 306f;
-        /// <summary>ponytail: regua da tela para "espera longa" (s no aeroporto); a frente G (satisfacao com motivo) leva a de verdade ao nucleo.</summary>
+        /// <summary>Regua do humor da linha do topo (s no aeroporto). A satisfacao de verdade, com motivo, e a do nucleo (frente G, Sim.Satisfacao.cs).</summary>
         public const float EsperaLonga = 60f;
         /// <summary>A nota no cartao branco: o Good e o Warn da paleta nao leem sobre ele.</summary>
         static readonly Color NotaBem = Art.FeitoTinta, NotaAlerta = Art.Hex(0x8A5300), NotaMal = Art.Perigo;
@@ -124,8 +124,10 @@ namespace TA
         }
 
         static Color CorDo(Humor h) => h == Humor.Tranquilo || h == Humor.Contente ? NotaBem : h >= Humor.Irritado ? NotaMal : NotaAlerta;
+        static Color CorDa(Carinha c) => c == Carinha.Contente ? NotaBem : c == Carinha.Brava ? NotaMal : NotaAlerta;
 
-        /// <summary>Passageiro pelo id: no nucleo (fila ou atendimento) ou ainda na tela depois de sair dele (embarcou ou perdeu o voo). Null = sumiu.</summary>
+        /// <summary>Passageiro pelo id: no nucleo (fila ou atendimento) ou ainda na tela depois de sair dele (embarcou ou perdeu o voo). Null = sumiu.
+        /// No nucleo, a ultima linha e a satisfacao (frente G): a carinha, a nota e o motivo principal; o perfil vai no topo.</summary>
         public static FichaDados FichaPax(Sim s, int id, bool naTela, bool embarcou)
         {
             Pax p = null;
@@ -136,6 +138,10 @@ namespace TA
                 foreach (Pax q in x.Fila) if (q.Id == id) { p = q; st = x; }
                 foreach (Pax q in x.Atendendo) if (q.Id == id) { p = q; st = x; atende = true; }
             }
+            bool banheiro = false;   // frente F: indo, na fila, na cabine ou voltando ao portao
+            if (p == null)
+                foreach (System.Collections.Generic.List<Pax> l in new[] { s.Banheiro.Indo, s.Banheiro.Fila, s.Banheiro.Usando, s.Banheiro.Voltando })
+                    foreach (Pax q in l) if (q.Id == id) { p = q; banheiro = true; }
             if (p == null && !naTela) return null;
             int onda = id / 1000, f = id / 500 % 2, vooId = onda * 2 + f;   // Pax.Onda, Pax.Voo e Voo.Id: quem saiu nao esta mais no nucleo
             Voo v = s.Voos[f] != null && s.Voos[f].Onda == onda ? s.Voos[f] : null;
@@ -153,10 +159,16 @@ namespace TA
                 d.Info = embarcou ? Textos.ABordoLogo : Textos.PortaoFechou;
                 return d;
             }
-            int e = (int)st.Tipo;
-            d.Linha = (atende ? Textos.PaxAtendido[e] : st.Tipo == Estacao.Portao && v != null && v.Embarque ? Textos.NaFilaDoEmbarque : Textos.PaxNaFila[e])
+            d.Linha = (banheiro ? Textos.NoBanheiro : atende ? Textos.PaxAtendido[(int)st.Tipo]
+                : st.Tipo == Estacao.Portao && v != null && v.Embarque ? Textos.NaFilaDoEmbarque : Textos.PaxNaFila[(int)st.Tipo])
                 + (p.Historia ? Textos.ComHistoria : "");
             d.Info = Textos.NoAeroporto(espera, v != null && !v.Partiu ? (v.FechaPasso - s.PassoNaOnda) * Sim.Step : 0f, v != null && v.Atrasado);
+            int nota = s.Nota(p);
+            Fator fp = s.Principal(p);
+            Carinha c = s.CarinhaDe(nota);
+            d.Topo = Textos.Voo(vooId) + " · " + Textos.PerfilPaxNome[(int)s.PerfilDe(p)] + " · " + Textos.Humor[(int)h];
+            d.Nota = Textos.SatPax(nota, c, fp, s.Peso(p, fp), p.Reclamou);
+            d.Cor = p.Reclamou ? NotaMal : CorDa(c);
             return d;
         }
 

@@ -352,7 +352,7 @@ namespace TA
         public static readonly string[] FaseTransf = { L("No posto"), L("Terminando o atendimento"), L("Indo ao vestiário"), L("Trocando o uniforme"), L("Indo ao posto") };
         public static readonly string Vestiario = L("Vestiário");
         /// <summary>Frente F: o letreiro do banheiro (interditado = fechado para limpeza) e o que o zelador faz (Sim.Limpeza.cs, na ordem de Faxina).</summary>
-        public static readonly string Banheiro = L("Banheiro"), BanheiroFechado = L("Banheiro · em limpeza");
+        public static readonly string Banheiro = L("Banheiro"), BanheiroFechado = L("Banheiro · em limpeza"), NoBanheiro = L("Indo ao banheiro ou voltando");
         public static readonly string[] Faxina = { L("Livre"), L("Indo limpar"), L("Limpando") };
         public static string Preparo(float frac, float seg) => L("Preparo ") + (int)System.Math.Round(frac * 100f) + L("% · no posto em ") + Tempo(seg);
         public static string NaFila(int n) => n + L(" na fila");
@@ -361,6 +361,27 @@ namespace TA
         public static string Trechos(int n, int limite) => n + "/" + limite + L(" trechos desde o descanso");
         public static string GargaloRisco(int voo) => L("Gargalo: a fila não dá conta do ") + Voo(voo);
         public static string GargaloFolga(int voo) => L("Atenção: folga curta para o ") + Voo(voo);
+
+        // ---------- frente G: satisfacao com motivo (Sim.Satisfacao.cs, Direcao §8.4) ----------
+        /// <summary>Na ordem de TA.Core.Fator: o nome (HUD) e o porque, do lado ruim e do lado bom (ficha). Na ordem de Carinha e de PerfilPax: o nome.</summary>
+        public static readonly string[] FatorNome = { L("Fila"), L("Limpeza"), L("Banheiro"), L("Pontualidade"), L("Conforto") },
+            FatorContra = { L("fila longa"), L("lugar sujo"), L("banheiro com fila ou fechado"), L("embarque atrasado"), L("em pé, sem cadeira") },
+            FatorAFavor = { L("fila rápida"), L("tudo limpo"), L("banheiro sem fila"), L("embarque na hora"), L("sentado na espera") },
+            CarinhaNome = { L("Contente"), L("Neutro"), L("Bravo") },
+            PerfilPaxNome = { L("Executivo"), L("Família"), L("Conexão"), L("Viagem longa") };
+        public static readonly string Satisfacao = L("Satisfação"), Reclamou = L("Reclamou"), SemSatisfacao = L("Ninguém embarcou ainda");
+        public static string SatPeso(double peso)
+        {
+            int p = (int)System.Math.Round(peso, System.MidpointRounding.AwayFromZero);
+            return (p > 0 ? "+" : "") + p.ToString(CultureInfo.InvariantCulture);   // o sinal de menos U+2212 nao existe nas fontes: hifen
+        }
+        /// <summary>Ficha do passageiro: a carinha (ou Reclamou), a nota e o motivo principal com o peso dele.</summary>
+        public static string SatPax(int nota, Carinha c, Fator f, int peso, bool reclamou) =>
+            (reclamou ? Reclamou : CarinhaNome[(int)c]) + " " + nota + " · " + (peso < 0 ? FatorContra : FatorAFavor)[(int)f] + " (" + SatPeso(peso) + ")";
+        /// <summary>Toque num motivo do HUD: o motivo, onde pesa, o peso medio e as reclamacoes do dia.</summary>
+        public static string SatMotivo(Fator f, string onde, double peso, int reclamacoes) =>
+            FatorNome[(int)f] + (onde.Length > 0 ? " · " + onde : "") + ": " + SatPeso(peso)
+            + (reclamacoes > 0 ? " · " + Plural(reclamacoes, L("reclamação hoje"), L("reclamações hoje")) : "");
 
         // ---------- tutorial (GDD_ORIGEM "Onboarding", passos 1-12) ----------
         // Titulo = o que fazer; texto = por que, em uma ou duas frases. Seta: use o guillemet U+00BB; a seta U+2192 nao existe nas fontes. Passos 10 a 12 = evento.

@@ -27,6 +27,7 @@ namespace TA.Tests
             public double SemTrip, Inspecoes, Hangares, Checagens, Trocas, Incidentes, Reacoes, Climas, Falhas, Reparos, Objetivos, Recompensas, Diarias, Semanais, PagoMissoes, Conquistas;
             public double Despesas, Apertos;
             public double Usos, Negados, Interdicoes, Limpezas, FilaBanheiro, SujeiraMedia;
+            public double SatMedia, Reclamacoes, Gorjetas;
         }
 
         public static Linha Rodar(BotProfile p, Tuning t = null, int sementes = Sementes, int ondas = Ondas, int threads = Threads)
@@ -50,6 +51,7 @@ namespace TA.Tests
                 l.Despesas += r.Despesas * k; l.Apertos += r.Apertos * k;
                 l.Usos += r.Usos * k; l.Negados += r.Negados * k; l.Interdicoes += r.Interdicoes * k; l.Limpezas += r.Limpezas * k;
                 l.FilaBanheiro = Math.Max(l.FilaBanheiro, r.FilaBanheiro); l.SujeiraMedia += r.SujeiraMedia * k;
+                l.SatMedia += r.SatMedia * k; l.Reclamacoes += r.Reclamacoes * k; l.Gorjetas += r.Gorjetas * k;
                 for (int m = 0; m < 3; m++) if (r.MarcoEm[m] >= 0) { l.Marco[m] += r.MarcoEm[m]; marcos[m]++; }
             }
             for (int m = 0; m < 3; m++) l.Marco[m] = marcos[m] > 0 ? l.Marco[m] / marcos[m] : -1;
@@ -541,6 +543,33 @@ namespace TA.Tests
                 Assert.GreaterOrEqual(com.Receita, sem.Receita * 0.98, p.Name + ": a limpeza custa pouco");
                 Assert.Greater(com.Usos, 0, p.Name + ": o banheiro e' usado");
             }
+        }
+
+        /// <summary>Portao da frente G (BALANCE.md §18, GDD §5.13): a satisfacao so le e a gorjeta so soma. Com a gorjeta, o bot embarca o mesmo e
+        /// recebe ao menos o mesmo (nao pune); e quem reage aos motivos (Satisfeito: manda limpar onde suja, contrata zelador, acelera a fila da
+        /// espera) contra o mesmo bot sem reagir, os dois com a gorjeta, pelo lucro (receita - conta paga). Abaixo de 1,10 a gorjeta fica desligada
+        /// (RegraSatBonus = false) e a satisfacao e so leitura.</summary>
+        [Test]
+        public void Portao_FrenteG_Satisfacao() => Assert.IsEmpty(MedeSatisfacao(Sementes), "GDD §5.13 e §5.4: a gorjeta nao pune e so liga com ganho >= 1,10");
+
+        public static string MedeSatisfacao(int sementes, int threads = Threads)
+        {
+            var ci = CultureInfo.InvariantCulture;
+            var gorjeta = new Tuning { RegraSatBonus = true };
+            TestContext.Out.WriteLine("| bot | ondas | embarque sem / com gorjeta | receita sem / com | gorjetas | satisfacao media | reclamacoes | lucro reagindo | lucro sem reagir | ganho | gorjeta |\n|---|---|---|---|---|---|---|---|---|---|---|");
+            string falhas = "";
+            foreach ((BotProfile r, BotProfile p) in new[] { (BotProfile.Satisfeito, BotProfile.Bom), (BotProfile.LentoSatisfeito, BotProfile.Lento) })
+            {
+                Linha sem = Rodar(p, null, sementes, OndasFaseC, threads), com = Rodar(p, gorjeta, sementes, OndasFaseC, threads), re = Rodar(r, gorjeta, sementes, OndasFaseC, threads);
+                double g = (re.Receita - re.Despesas) / (com.Receita - com.Despesas);
+                bool regra = Tuning.Padrao.RegraSatBonus;
+                TestContext.Out.WriteLine(string.Format(ci, "| {0} | {1} | {2:0.0}% / {3:0.0}% | {4:0} / {5:0} | {6:0} | {7:0.0} | {8:0.0} | {9:0} | {10:0} | {11:0.000} | {12} |", p.Name, OndasFaseC,
+                    sem.Embarque * 100, com.Embarque * 100, sem.Receita, com.Receita, com.Gorjetas, sem.SatMedia, sem.Reclamacoes, re.Receita - re.Despesas, com.Receita - com.Despesas, g,
+                    regra ? "ligada" : "so leitura"));
+                if (com.Embarque < sem.Embarque - 0.005 || com.Receita < sem.Receita * 0.98) falhas += " " + p.Name + " pune";
+                if (regra && g < 1.10) falhas += " " + r.Name + "=" + g.ToString("0.000", ci);
+            }
+            return falhas;
         }
 
         /// <summary>Portao do GDD §5.13 para os 3 candidatos (CONTRATO_FASE_C9 §6): quem compara e troca pelo Senior contra quem contrata sempre o Pleno

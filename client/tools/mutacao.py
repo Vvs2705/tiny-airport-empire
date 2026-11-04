@@ -1127,7 +1127,7 @@ MUTANTES = [
     (
         "limpeza: o save guarda quem esta na cabine",
         "Sim.Limpeza.cs",
-        "Lista(\"bh.uso\", Banheiro.Usando, true);",
+        'Lista("bh.uso", Banheiro.Usando, true);',
         "",
     ),
     (
@@ -1135,6 +1135,90 @@ MUTANTES = [
         "Sim.cs",
         "TiraDoBanheiro(v);",
         "",
+    ),
+    (
+        "satisfacao: sem a regra nao paga gorjeta",
+        "Sim.Satisfacao.cs",
+        "if (!embarcou || !T.RegraSatBonus || nota < T.SatGorjeta) return;",
+        "if (!embarcou || nota < T.SatGorjeta) return;",
+    ),
+    (
+        "satisfacao: gorjeta so de quem esta contente",
+        "Sim.Satisfacao.cs",
+        "if (!embarcou || !T.RegraSatBonus || nota < T.SatGorjeta) return;",
+        "if (!embarcou || !T.RegraSatBonus) return;",
+    ),
+    (
+        "satisfacao: no portao, espera so com o embarque aberto",
+        "Sim.Satisfacao.cs",
+        "if (!portao || PodeEmbarcar(v)) { p.Espera += SatPasso;",
+        "if (true) { p.Espera += SatPasso;",
+    ),
+    (
+        "satisfacao: as cadeiras no teto",
+        "Sim.Satisfacao.cs",
+        "if (sentados < T.CadeirasPortao)",
+        "if (true)",
+    ),
+    (
+        "satisfacao: atraso so depois da hora de abrir",
+        "Sim.Satisfacao.cs",
+        "if (v != null && loc >= v.AbrePasso)",
+        "if (v != null)",
+    ),
+    (
+        "satisfacao: reclama 1x",
+        "Sim.Satisfacao.cs",
+        "if (p.Reclamou || Nota(p) >= T.SatReclama) return;",
+        "if (Nota(p) >= T.SatReclama) return;",
+    ),
+    (
+        "satisfacao: as reclamacoes sao do dia",
+        "Sim.Satisfacao.cs",
+        "if (DiaJogo != _satDia) { Array.Clear(_reclama, 0, Fatores); _satDia = DiaJogo; }",
+        "",
+    ),
+    (
+        "satisfacao: quem perdeu o voo entra na media",
+        "Sim.Satisfacao.cs",
+        "Saiu(p, false, 0);",
+        "",
+    ),
+    (
+        "satisfacao: perdeu na fila, a espera vai ao teto",
+        "Sim.Satisfacao.cs",
+        "p.Espera = Math.Max(p.Espera, 10 * OndaPassos);",
+        "",
+    ),
+    (
+        "satisfacao: o perfil sai da rota",
+        "Sim.Satisfacao.cs",
+        "(PerfilPax)(int)Efeito(v).Tipo;",
+        "PerfilPax.Executivo;",
+    ),
+    (
+        "satisfacao: a nota de 0 a 100",
+        "Sim.Satisfacao.cs",
+        "return Math.Max(0, Math.Min(100, n));",
+        "return n;",
+    ),
+    (
+        "satisfacao: o save guarda quem esta no aeroporto",
+        "Sim.Satisfacao.cs",
+        'if (ps.Count > 0) sb.Append("satp=")',
+        'if (false) sb.Append("satp=")',
+    ),
+    (
+        "satisfacao: o save limita o lixo",
+        "Sim.Satisfacao.cs",
+        "p.Sujo = Math.Min(SujeiraMax, x[2]);",
+        "p.Sujo = x[2];",
+    ),
+    (
+        "satisfacao: achou o banheiro fechado",
+        "Sim.Limpeza.cs",
+        "{ p.Negado = true; VoltaAoPortao(p); }",
+        "{ VoltaAoPortao(p); }",
     ),
 ]
 

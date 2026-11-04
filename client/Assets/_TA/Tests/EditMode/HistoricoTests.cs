@@ -32,7 +32,8 @@ namespace TA.Tests
             return null;
         }
 
-        static string SemHist(string save) => string.Join("\n", save.Split('\n').Where(l => !l.StartsWith("hist=") && !l.StartsWith("sha256=")));
+        static string SemHist(string save) => string.Join("\n", save.Split('\n').Where(l => !l.StartsWith("hist=") && !l.StartsWith("sha256=")
+            && !l.StartsWith("sat")));   // schema 17: a satisfacao (sat, satm, satp) so le o jogo; o save antigo nao a tinha
 
         static string Hist(string save) => save.Split('\n').Single(l => l.StartsWith("hist="));
 

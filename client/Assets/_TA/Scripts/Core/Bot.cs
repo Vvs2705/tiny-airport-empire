@@ -28,6 +28,9 @@ namespace TA.Core
         /// rende 25% na estacao toda, cerca do dobro de um nivel de velocidade (CONTRATO_FASE_C9 §6, BALANCE §16). Sem ele, contrata sempre o Pleno e
         /// nunca demite.</summary>
         public bool Candidatos;
+        /// <summary>Satisfacao = olha os 3 motivos que mais pesam no aeroporto (frente G): limpeza ou banheiro contra = manda limpar ali e contrata
+        /// zelador; espera contra = velocidade na estacao da espera. Sem ele, a satisfacao nao muda nenhuma decisao do bot.</summary>
+        public bool Satisfacao;
 
         public static readonly BotProfile Bom = new BotProfile { Name = "Bom", Decide = 1f, Move = true, Planeja = true, Equipe = true, Rotas = true, Viaja = true, Incidentes = true, Clima = true, Falhas = true };
         public static readonly BotProfile Lento = new BotProfile { Name = "Lento", Decide = 2.5f, Move = true, Planeja = true, Equipe = true, Rotas = true, Viaja = true, Incidentes = true, Clima = true, Falhas = true };
@@ -53,11 +56,18 @@ namespace TA.Core
         public static readonly BotProfile Baleia = Comprador("Baleia", Enumerable.Repeat("gems_pack_large", 200).ToArray());
         /// <summary>Portao da Fase C9: o Bom e o Lento que comparam os candidatos e trocam pelo Senior.</summary>
         public static readonly BotProfile Contratador = Candidato(Bom, "Contratador"), LentoContratador = Candidato(Lento, "LentoContratador");
+        public static readonly BotProfile Satisfeito = Satisfaz(Bom, "Satisfeito"), LentoSatisfeito = Satisfaz(Lento, "LentoSatisfeito");
         public static readonly BotProfile[] All = { Bom, Lento, Parado };
 
         static BotProfile Candidato(BotProfile p, string nome)
         {
             p.Name = nome; p.Candidatos = true;
+            return p;
+        }
+
+        static BotProfile Satisfaz(BotProfile p, string nome)
+        {
+            p.Name = nome; p.Satisfacao = true;
             return p;
         }
 
@@ -114,6 +124,24 @@ namespace TA.Core
             if (P.Segue) SegueEpoca(s);
             if (P.Falhas) foreach (Aviao a in s.Avioes) if (a.Pane && s.ReparaAviao(a.Id)) Reparos++;
             if (P.Gasta) Gasta(s);
+            if (P.Satisfacao) Satisfaz(s);
+        }
+
+        /// <summary>Frente G: reage aos 3 motivos que mais pesam contra (para no primeiro que ajuda). O zelador novo so com o dobro do preco em caixa.</summary>
+        void Satisfaz(Sim s)
+        {
+            for (int k = 0; k < 3; k++)
+            {
+                Fator f = s.SatTop(k);
+                if (s.SatFator(f) >= 0) return;
+                if (f == Fator.Limpeza || f == Fator.Banheiro)
+                {
+                    s.Limpar((Area)s.SatOnde(f));
+                    long c = s.CustoLimpeza();
+                    if (c >= 0 && s.Cash >= 2 * c && s.HireLimpeza()) Buys++;
+                }
+                else if (f == Fator.Espera && s.Buy((Estacao)s.SatOnde(f), Melhoria.Velocidade)) Buys++;
+            }
         }
 
         bool _rotaFixa;
@@ -508,6 +536,8 @@ namespace TA.Core
             /// <summary>Frente F: usos do banheiro, quem achou fechado, interdicoes, limpezas feitas, sujeira media (de 0 a Sim.SujeiraMax, media das 7 areas
             /// medida a cada s) e a maior fila na porta do banheiro.</summary>
             public int Usos, Negados, Interdicoes, Limpezas, FilaBanheiro; public double SujeiraMedia;
+            /// <summary>Frente G: a media do aeroporto no fim (-1 = ninguem saiu), as reclamacoes e o Cash das gorjetas (ja na Receita).</summary>
+            public double SatMedia; public int Reclamacoes; public long Gorjetas;
         }
 
         /// <summary>Joga `ondas` ondas inteiras com o perfil `p` e a semente `seed`, sem render. `reabre` = fecha e reabre o jogo (Save ->
@@ -553,6 +583,8 @@ namespace TA.Core
                         case Ev.ContaQuitada: r.Despesas += e.B; break;
                         case Ev.Limpou: r.Limpezas++; break;
                         case Ev.BanheiroInterditado: if (e.A == 1) r.Interdicoes++; break;
+                        case Ev.Reclamou: r.Reclamacoes++; break;
+                        case Ev.Gorjeta: r.Receita += e.B; r.Gorjetas += e.B; break;
                     }
                 if (s.Steps % Sim.Hz == 0)
                 {
@@ -564,6 +596,7 @@ namespace TA.Core
                 usando = s.Banheiro.Usando.Count;
             }
             r.SujeiraMedia = amostras > 0 ? r.SujeiraMedia / amostras : 0;
+            r.SatMedia = s.SatMedia;
             r.Usos = usos; r.Negados = (int)Math.Min(int.MaxValue, s.Banheiro.Negados);
             r.Embarque = r.Voos > 0 ? soma / r.Voos : 0;
             r.Moves = bot.Moves; r.Taps = bot.Taps; r.Reacoes = bot.Reacoes; r.Reparos = bot.Reparos;
