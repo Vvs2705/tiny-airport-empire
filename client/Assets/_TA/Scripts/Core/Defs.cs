@@ -99,6 +99,13 @@ namespace TA.Core
         ContaQuitada,       // A = dia do jogo, B = Cash (a conta atrasada; a pausa acabou)       -> day_bill_paid_late
         // Fase C9 (CONTRATO_FASE_C9): contratacao e demissao
         Demitido,           // A = funcionario (o indice que tinha), B = perfil, C = experiencia  -> staff_fired
+        // Frente F (Sim.Limpeza.cs): limpeza e banheiro
+        LimpezaContratada,  // A = zeladores, B = custo                                           -> cleaner_hired
+        LimpezaPedida,      // A = area, B = zelador que foi (-1 = espera um livre)               -> cleaning_ordered
+        LimpezaTarefa,      // A = zelador, B = area, C = 1 se ordem do jogador                   -> cleaning_task
+        LimpezaChegou,      // A = zelador, B = area (comeca a limpar)                            -> cleaning_started
+        Limpou,             // A = zelador, B = area (sujeira 0)                                  -> cleaning_done
+        BanheiroInterditado, // A = 1 fechou (sujeira no teto), 0 reabriu limpo                   -> restroom_closed
     }
 
     /// <summary>Funcoes da tripulacao (GDD §5.11). Indice vai no save.</summary>
@@ -167,8 +174,8 @@ namespace TA.Core
         public int Id;
         /// <summary>Passos que faltam no atendimento atual (0 na fila) e o total dele (o anel de progresso: 1 - Resto/Total).</summary>
         public int Resto, Total;
-        /// <summary>Loja, mala despachada e fome saem da semente (nao se compram).</summary>
-        public bool Loja, Historia, Mala, Fome;
+        /// <summary>Loja, mala despachada, fome e banheiro (frente F) saem da semente (nao se compram).</summary>
+        public bool Loja, Historia, Mala, Fome, Banheiro;
         public int Onda => Id / 1000;
         public int Voo => Id / 500 % 2;
         public int Indice => Id % 500;
@@ -412,6 +419,21 @@ namespace TA.Core
         /// = so o nome muda: os 3 rendem e custam como o Pleno.</summary>
         public bool RegraExperiencia = true;
         public int[] ExpRende = { 80, 100, 125 }, ExpContratacao = { 50, 100, 200 }, ExpSalario = { 70, 100, 150 };
+
+        // ---- Frente F (Sim.Limpeza.cs, hipoteses): limpeza e banheiro ----
+        /// <summary>Banheiro, sujeira e equipe de limpeza (false = o jogo de antes, numero a numero). A sujeira ainda nao mexe no Cash: so o salario.</summary>
+        public bool RegraLimpeza = true;
+        /// <summary>Chance de o passageiro precisar do banheiro, cabines, s de uso, s de caminhada do portao ate a porta (cada perna) e a folga que
+        /// sobra antes de o embarque abrir, com a volta (sem ela, vai direto ao portao).</summary>
+        public float BanheiroChance = 0.35f, BanheiroUso = 6f, BanheiroAndar = 8f, BanheiroFolga = 10f; public int BanheiroCabines = 2;
+        /// <summary>Sujeira (de 0 a Sim.SujeiraMax) por passageiro atendido em cada area (ordem de Area; no banheiro, por uso) e a do banheiro que interdita.</summary>
+        public int[] SujaPorPax = { 4, 4, 6, 3, 4, 12, 20 }; public int SujeiraInterdita = 1000;
+        /// <summary>Area que vira tarefa da escala automatica, quanto o zelador limpa por s, os metros de cada area ate a vizinha no caminho do portao
+        /// (Sim.Metros: check-in, seguranca e loja em fila ate o portao; bagagem pelo check-in; alimentacao e banheiro saem do portao) e a velocidade com o carrinho.</summary>
+        public int LimpezaGatilho = 250, LimpaPorSeg = 60;
+        public float[] LimpezaTrecho = { 4f, 4f, 4f, 0f, 4f, 4f, 10f }; public float LimpezaVel = 1.2f;
+        /// <summary>Equipe no jogo novo, preco de cada contratacao (o teto e' a soma) e o salario por dia do jogo (Folha da Despesa.Equipe).</summary>
+        public int LimpezaIniciais = 1; public int[] LimpezaContratacao = { 60, 150 }; public int SalarioLimpeza = 15;
 
         // ---- ta-historico ----
         /// <summary>Anota o registro de ocorrencias (Sim.Historico.cs). So observa: false da o mesmo jogo, numero a numero, sem o registro.</summary>

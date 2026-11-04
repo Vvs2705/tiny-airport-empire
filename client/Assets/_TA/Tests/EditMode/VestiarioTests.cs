@@ -107,7 +107,7 @@ namespace TA.Tests
             Assert.IsTrue(s.Move(0, Estacao.Loja));
             Assert.AreEqual(P(s.T.Caminhada), s.Staff[0].Andando, "ida, troca e volta somam a caminhada da v0.1");
 
-            Sim v01 = ComAna(new Tuning { RegraVestiario = false });
+            Sim v01 = ComAna(new Tuning { RegraVestiario = false, RegraLimpeza = false });
             Assert.IsTrue(v01.Move(0, Estacao.Seguranca));
             Assert.AreEqual((P(v01.T.Caminhada), Transferencia.IndoPosto), (v01.Staff[0].Andando, v01.Fase(v01.Staff[0])));
         }

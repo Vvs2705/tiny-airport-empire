@@ -382,7 +382,7 @@ namespace TA.Tests
         public void MigracaoDoSchema10_SaveReal_RegistroVazio_EOMesmoJogo()
         {
             const long U = 1800000000;
-            var t = new Tuning { RegraVestiario = false };   // o jogo que o schema 10 gravava: mover sem o vestiario (frente E)
+            var t = new Tuning { RegraVestiario = false, RegraLimpeza = false };   // o jogo que o schema 10 gravava: mover sem o vestiario (frente E)
             Sim m = Sim.Load(V10, t, 7);
             Assert.IsFalse(m.SaveRefused, "schema 10 migra, nao e' recusado");
             Assert.AreEqual((4424L, 83700L), (m.Cash, m.Steps));
