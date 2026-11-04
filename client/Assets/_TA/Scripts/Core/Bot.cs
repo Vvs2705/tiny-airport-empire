@@ -536,6 +536,8 @@ namespace TA.Core
             /// <summary>Frente F: usos do banheiro, quem achou fechado, interdicoes, limpezas feitas, sujeira media (de 0 a Sim.SujeiraMax, media das 7 areas
             /// medida a cada s) e a maior fila na porta do banheiro.</summary>
             public int Usos, Negados, Interdicoes, Limpezas, FilaBanheiro; public double SujeiraMedia;
+            /// <summary>ta-suprimentos: vezes que um aviao esperou suprimento e o custo das entregas pedidas.</summary>
+            public int Faltas; public long Suprimentos;
             /// <summary>Frente G: a media do aeroporto no fim (-1 = ninguem saiu), as reclamacoes e o Cash das gorjetas (ja na Receita).</summary>
             public double SatMedia; public int Reclamacoes; public long Gorjetas;
         }
@@ -583,6 +585,8 @@ namespace TA.Core
                         case Ev.ContaQuitada: r.Despesas += e.B; break;
                         case Ev.Limpou: r.Limpezas++; break;
                         case Ev.BanheiroInterditado: if (e.A == 1) r.Interdicoes++; break;
+                        case Ev.SuprimentoFaltou: r.Faltas++; break;
+                        case Ev.SuprimentoPedido: r.Suprimentos += e.C; break;
                         case Ev.Reclamou: r.Reclamacoes++; break;
                         case Ev.Gorjeta: r.Receita += e.B; r.Gorjetas += e.B; break;
                     }

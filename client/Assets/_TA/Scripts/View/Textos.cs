@@ -219,9 +219,24 @@ namespace TA
                 case Motivo.Hangar: return L("Avião mandado ao hangar");
                 case Motivo.Pouso: return L("O avião não pousou a tempo");
                 case Motivo.Caixa: return L("O caixa não cobriu a conta do dia: contratar e melhorar ficam pausados até quitar");
+                case Motivo.Suprimento: return L("Faltou combustível ou refeição: o caminhão esperou a entrega");
                 default: return L("Deu certo: ninguém perdeu o voo");
             }
         }
+
+        // ---------- suprimentos: combustivel e refeicoes (ta-suprimentos; a ficha do despacho, o aviso e o cartao do patio) ----------
+        public static readonly string[] Suprimento = { L("Combustível"), L("Refeições") };
+        public static readonly string Suprimentos = L("Suprimentos"), SupSoAtrasa = L("Só a decolagem atrasa; tanque maior evita"),
+            SupReposicao = L("Reposição automática: a entrega enche o tanque"), SupCheio = L("Depósito em dia");
+        /// <summary>"Combustível 6/8 · Refeições 5/8": o deposito dos dois na ficha do despacho.</summary>
+        public static string Estoques(int[] estoque, int[] tanque) => Suprimento[0] + " " + estoque[0] + "/" + tanque[0] + " · " + Suprimento[1] + " " + estoque[1] + "/" + tanque[1];
+        public static string EntregaEm(int sup, float seg) => L("Entrega de ") + Suprimento[sup].ToLower(Br) + L(" em ") + SegInt(seg);
+        public static string VaiFaltar(int sup) => Suprimento[sup] + L(" vai faltar");
+        public static string Faltou(int sup) => L("Faltou ") + Suprimento[sup].ToLower(Br);
+        public static string EsperaEntrega(string aviao, float seg) => aviao + L(" espera a entrega: ") + SegInt(seg);
+        public static string PousaAntes(string aviao, float seg) => aviao + L(" pousa antes da entrega, em ") + SegInt(seg);
+        public static string TanqueNome(int sup, int nivel, int max) => L("Tanque de ") + Suprimento[sup].ToLower(Br) + " " + nivel + "/" + max;
+        public static string TanqueDe(string n) => n + L(" cargas · menos entregas por dia");
 
         // ---------- metas: campanha, missoes e conquistas (docs/CAMPANHA.md e docs/MISSOES.md; o nome e' o da tabela do nucleo) ----------
         public static readonly string[] AeroportoNome = System.Array.ConvertAll(Tabelas.Aeroportos, a => L(a.Nome));

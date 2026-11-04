@@ -298,7 +298,7 @@ namespace TA.Tests
             Sim s = Sim.Load(SaveEnvelope.Wrap("t=90\nonda=0\nhist=" + lixo + "\n", "x", 1));
             Assert.AreEqual(new[] { 8L, 9L }, s.Ocorrencias.Select(o => o.Passo).ToArray(), "negativo, longe no futuro, torto e curto saem");
             Ocorrencia a = s.Ocorrencias[0], b = s.Ocorrencias[1];
-            Assert.AreEqual((TipoOcorrencia.FaltaCaixa, 7, 100, 1, 499, 499, 3600, Opcao.Hangar, 0L, Motivo.Caixa, Estacao.Despacho, 3600, 8),
+            Assert.AreEqual((TipoOcorrencia.FaltaCaixa, 7, 100, 1, 499, 499, 3600, Opcao.Hangar, 0L, Motivo.Suprimento, Estacao.Despacho, 3600, 8),
                 (a.Tipo, a.Sub, a.Causa, a.Voo, a.Total, a.Perdidos, a.Atraso, a.Resposta, a.Custo, a.Motivo, a.Estacao, a.Espera, a.Postos));
             Assert.AreEqual((TipoOcorrencia.Incidente, -1, 0, -1, 0, 0, 0, Opcao.Segurar, (long)int.MaxValue, Motivo.Nenhum, Estacao.CheckIn, 0, 0),
                 (b.Tipo, b.Sub, b.Causa, b.Voo, b.Total, b.Perdidos, b.Atraso, b.Resposta, b.Custo, b.Motivo, b.Estacao, b.Espera, b.Postos));
@@ -383,7 +383,7 @@ namespace TA.Tests
         public void MigracaoDoSchema10_SaveReal_RegistroVazio_EOMesmoJogo()
         {
             const long U = 1800000000;
-            var t = new Tuning { RegraVestiario = false, RegraLimpeza = false };   // o jogo que o schema 10 gravava: mover sem o vestiario (frente E)
+            var t = new Tuning { RegraVestiario = false, RegraLimpeza = false, RegraSuprimentos = false };   // o jogo que o schema 10 gravava: sem o vestiario (frente E), a limpeza e os suprimentos
             Sim m = Sim.Load(V10, t, 7);
             Assert.IsFalse(m.SaveRefused, "schema 10 migra, nao e' recusado");
             Assert.AreEqual((4424L, 83700L), (m.Cash, m.Steps));

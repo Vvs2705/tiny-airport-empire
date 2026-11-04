@@ -61,7 +61,7 @@ namespace TA.Tests
         public void Fechamento_CobraNoPrimeiroPassoDoDiaSeguinte_UmaVez()
         {
             var s = new Sim(null, 1) { Cash = 10000 };
-            long[] folha = Enumerable.Range(0, 4).Select(d => s.Folha((Despesa)d)).ToArray();
+            long[] folha = Enumerable.Range(0, 5).Select(d => s.Folha((Despesa)d)).ToArray();
             ViraODia(s);
             Evento e = Fechou(s);
             Assert.AreEqual((0, (int)folha.Sum(), 0), (e.A, e.B, e.C));

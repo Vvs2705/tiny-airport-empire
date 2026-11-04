@@ -54,6 +54,7 @@ namespace TA.Core
             SalvaHistorico(sb);
             SalvaChegada(sb);
             SalvaLimpeza(sb);
+            SalvaSuprimentos(sb);
             SalvaSatisfacao(sb);
             return SaveEnvelope.Wrap(sb.ToString(), content, nowUnix);
         }
@@ -358,6 +359,7 @@ namespace TA.Core
             s.CarregaHistorico(kv);
             s.CarregaChegada(kv);
             s.CarregaLimpeza(kv);
+            s.CarregaSuprimentos(kv);
             s.CarregaSatisfacao(kv);
             return s;
         }
