@@ -162,6 +162,7 @@ namespace TA
             for (int i = 0; i < _conquista.Length; i++) _conquista[i] = NovoCartaoMeta(_abaLista[2], "Conquista" + i, 1, () => { });
 
             BuildFaixaMeta();
+            BuildPasse(canvas);   // o atalho do passe fica ao lado da faixa (Hud.Passe.cs)
         }
 
         /// <summary>A meta da vez, logo acima da barra de baixo: placa, nome, recompensa e barra. Toque abre as Metas.</summary>
@@ -261,6 +262,7 @@ namespace TA
         {
             int coletar = AColetar(s);
             PintaFaixaMeta(s, coletar);
+            PintaPasse(s);
             if (!_metas.Rt.gameObject.activeSelf) return;
             _abaSelo.gameObject.SetActive(coletar > 0);
             _abaSeloN.text = coletar.ToString();

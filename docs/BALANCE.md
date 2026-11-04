@@ -857,3 +857,131 @@ As 16 travas novas entram no `mutacao.py`, e a do booster da Fase D1 muda de tre
 - **O passe fecha cedo para quem joga tudo.** O Completo termina no dia 18 e passa 10 dias sem barra. Se incomodar, subir os pontos por nível e medir de novo. A trilha premium pode ocupar esse fim.
 - **Cash do passe sem destino.** São 28 300 Cash, quase todo depois do fim do catálogo (perto da onda 20). Só os primeiros níveis compram progresso; o valor que sobra está no 2× e nos 3 cosméticos, que pedem arte.
 - **A barra é entendida?** A tela precisa dizer que ponto não se compra, que nada expira e quantos dias do jogo faltam. Ver se "dia do jogo" confunde quem espera o calendário (D-C7a).
+
+## 13. Fase C8: despesas e relatório do dia (2026-11-03, `CONTRATO_FASE_C8.md`)
+
+Salário por perfil, por função da tripulação e por pessoa de pátio, e manutenção por estação ativa e por nível, cobrados no fechamento do dia do jogo (8 ondas). Faltou caixa: o Cash vai a zero e para, contratar e melhorar pausam até o caixa cobrir a conta, e o fechamento seguinte perdoa o resto. **Antes** = a conta desligada (`RegraDespesas = false`), medida no mesmo código: repete a `main` da Fase D1 número a número (`Antes_FaseD1`). **Depois** = o `Tuning` padrão.
+
+### A tabela (Cash por dia do jogo)
+
+| | Atendente | Segurança | Vendedor | Bagageiro | Mecânico | Despachante | Piloto | Comissário | Pátio |
+|---|---|---|---|---|---|---|---|---|---|
+| salário | 35 | 50 | 50 | 60 | 90 | 90 | 24 | 12 | 18 |
+
+| | Check-in | Segurança | Loja | Portão | Bagagem | Alimentação | Oficina | Despacho |
+|---|---|---|---|---|---|---|---|---|
+| manutenção da estação ativa | 12 | 12 | 9 | 9 | 9 | 9 | 18 | 12 |
+| + por nível (velocidade + capacidade) | 6 | 6 | 5 | 5 | 5 | 5 | 7 | 0 |
+
+O jogo novo paga 168 por dia: a tripulação inicial (3 pilotos e 3 comissários), 1 pessoa de pátio e as 4 estações da v0.1. Com as 8 estações, a equipe e o pátio completos e tudo no máximo, a conta chega a cerca de 1 000 por dia.
+
+### D-C8c. A 1ª tabela derrubava o portão dos aeroportos
+
+A 1ª tabela era 1,67 × esta (salário de 60 a 150, manutenção de 15 a 30 mais 8 a 12 por nível). Com ela, todos os portões passaram, menos **aeroportos: 1,078**. Quem viaja e quem fica pagam a mesma conta (2 270 em 20 ondas), mas juntar Cash para a viagem demora mais, e quem viaja chega depois ao aeroporto que paga mais. Variantes medidas (200 sementes × 20 ondas, tudo aberto, partindo de Vale Verde, sem incidente):
+
+| variante | viaja | fica | ganho | chega à Costa Azul | chega a Aurora | conta paga |
+|---|---|---|---|---|---|---|
+| sem conta | 31 365 | 27 256 | 1,151 | onda 13,4 | onda 16,8 | 0 |
+| 1ª tabela | 28 692 | 26 615 | **1,078** | 14,2 | 18,1 | 2 270 |
+| 1ª tabela pela metade | 30 540 | 26 909 | 1,135 | 14,0 | 17,3 | 1 131 |
+| 1ª tabela, só salário | 29 954 | 26 835 | 1,116 | 14,0 | 17,5 | 1 370 |
+| 1ª tabela, só manutenção | 30 830 | 26 945 | 1,144 | 13,9 | 17,1 | 900 |
+| bot respeita a pausa (D-C8d), 1ª tabela | 29 056 | 26 707 | 1,088 | 14,0 | 18,0 | 2 271 |
+| bot respeita a pausa, 75% | 29 251 | 26 790 | 1,092 | 14,0 | 17,8 | 1 709 |
+| **bot respeita a pausa, 60% (escolhida, arredondada)** | **30 165** | **26 890** | **1,122** | 14,0 | 17,5 | 1 367 |
+| bot respeita a pausa, salário pela metade | 29 417 | 26 803 | 1,097 | 14,0 | 17,7 | 1 585 |
+
+O ganho cai quase em linha com o tamanho da conta. Escolhi 60%, a maior conta que deixa o portão com folga parecida com a dos outros (o menor deles é 1,118).
+
+### D-C8d. O bot respeita a pausa
+
+Com a conta atrasada, o bot continuava escolhendo o item mais barato. Se era uma melhoria pausada, não comprava nada, nem a rota que poderia abrir. Agora, em pausa, ele só olha rota e viagem, que é o que a tela vai deixar comprar. Sem pausa, nada muda: com a conta desligada, a tabela é a da Fase D1, número a número.
+
+### D-C8e. Quase todo bot fica sem caixa no 1º fechamento
+
+O bot compra o que couber assim que pode, e no fim do dia 0 o caixa está perto de zero em quase todas as sementes (sem o passe, em todas). A conta fica atrasada por alguns minutos, e só o LentoGuiado repete no dia 1. Uma pessoa que vê "a conta de hoje" pode guardar a reserva. A tela precisa mostrar a conta antes da virada.
+
+### O peso da conta (`Medida_FaseC8`, 200 sementes, com o passe)
+
+| bot | ondas | embarque | receita | conta paga | conta ÷ receita | dias sem caixa no fechamento |
+|---|---|---|---|---|---|---|
+| Bom | 10 | 95,5% | 8 883 | 561 | 6,3% | 0,92 |
+| Lento | 10 | 79,6% | 5 221 | 496 | 9,5% | 1,00 |
+| Parado | 10 | 89,2% | 4 819 | 474 | 9,8% | 1,00 |
+| Guiado | 20 | 92,0% | 35 536 | 1 499 | 4,2% | 0,89 |
+| LentoGuiado | 20 | 74,4% | 17 501 | 1 431 | 8,2% | 1,82 |
+| Guiado | 64 | 91,1% | 212 798 | 5 968 | 2,8% | 0,89 |
+| LentoGuiado | 64 | 76,7% | 124 377 | 5 861 | 4,7% | 1,82 |
+
+Sem o passe, a conta era 7,7% a 11,0% da receita em 10 ondas e 3,3% a 5,4% em 64: o 2× do passe aumenta a receita, e a conta fica igual.
+
+### Os portões com o passe, antes e depois (200 sementes, a `main` com o PR #49)
+
+| portão | antes | depois |
+|---|---|---|
+| TA-1 Bom (10 ondas) | 95,5%, receita 8 913 | 95,5%, receita 8 883 |
+| TA-1 Lento | 80,6%, receita 5 401 | 79,6%, receita 5 221 |
+| TA-1 Parado | 89,2%, receita 4 887 | 89,2%, receita 4 819 |
+| TA-2 (Bom / Parado) | 1,824 | 1,843 |
+| Fase C (Planejador / Automático, 20 ondas) | 1,176 | 1,182 |
+| Fase C2, as 4 estações | 1,366 | 1,343 |
+| Fase C5, campanha (Guiado / Bom, 20 ondas) | 1,380 | 1,395 |
+| Fase C6, missões (Missionário / Bom, 20 ondas) | 1,438 | 1,451 |
+| Fase C7, passe: o LentoCompleto fecha os 30 níveis | **200 de 200**, dia 20,0 (p90 21,8, pior 23,9) | **200 de 200**, dia 19,9 (p90 21,5, pior 23,4) |
+| Fase D1, sem compra fecham os 30 | 200 de 200: Guiado na onda 51,3, LentoGuiado 62,9 (pior 85) | 200 de 200: Guiado 51,2, LentoGuiado 62,4 (pior 81) |
+| Fase D1, a Baleia fecha a campanha em | 0,996 do tempo | 0,998 |
+| Alcance da campanha e das conquistas | — | os 30 e as 20 em 200 de 200; LentoGuiado fecha a campanha na onda 62,4 (p90 69); última conquista na onda 148,7 e 172,6 |
+
+As Fases C3 e C4 e o TA-6 medem com o passe desligado (`SemFaseC4`) e dão a tabela de baixo. Quem nunca olha para as missões fecha o passe em menos sementes com a conta: Bom 79 de 200 (eram 84) e Lento 99 de 200 (eram 111). O passe não promete nada a eles.
+
+### Os portões sem o passe, antes e depois (200 sementes, medidos antes de o PR #49 entrar)
+
+| portão | antes | depois |
+|---|---|---|
+| TA-1 Bom (10 ondas) | 95,0%, receita 6 740 | 94,4%, receita 6 529 |
+| TA-1 Lento | 78,8%, receita 4 219 | 79,1%, receita 4 264 |
+| TA-1 Parado | 88,5%, receita 4 709 | 88,5%, receita 4 627 |
+| TA-2 (Bom / Parado) | 1,431 | **1,411** |
+| Fase C (Planejador / Automático, 20 ondas) | 1,152 | 1,157 |
+| Fase C2, as 4 estações | 1,371 | 1,353 |
+| Fase C3, rotas em Vale Verde, Costa Azul e Aurora | 1,221, 1,124 e 1,273 | 1,213, 1,118 e 1,255 |
+| Fase C3, aeroportos | 1,151 | **1,122** |
+| Fase C3, incidentes na Costa Azul e em Aurora | 1,146 e 1,170 | 1,162 e 1,203 |
+| Fase C4, clima na Costa Azul e em Aurora | 1,161 e 1,147 | 1,166 e 1,140 |
+| Fase C4, falhas em Vale Verde, Costa Azul e Aurora | 1,134, 1,131 e 1,124 | 1,139, 1,139 e 1,135 |
+| Fase C5, campanha (Guiado / Bom, 20 ondas) | 1,114 | 1,142 |
+| Fase C6, missões (Missionário / Bom, 20 ondas) | 1,147 | 1,164 |
+| Fase D1, sem compra fecham os 30 | 200 de 200: Guiado na onda 51,6, LentoGuiado 62,8 (pior 99) | 200 de 200: Guiado 51,6, LentoGuiado 63,3 (pior 99) |
+| Fase D1, a Baleia fecha a campanha em | 0,990 do tempo | 0,991 |
+| TA-6, melhor ÷ segunda rota (Vale Verde, Costa Azul, Aurora) | 1,020, 1,047 e 1,161 | 1,066, 1,055 e 1,161 |
+| Alcance da campanha (`Alcance_FaseC5`, até 120 ondas) | os 30 em 200 de 200 | os 30 em 200 de 200; Guiado 51,6 (p90 56), LentoGuiado 63,3 (p90 71) |
+| Alcance das conquistas (`Alcance_FaseC6`, até 240 ondas) | as 20 em 200 de 200; última na onda 148,5 e 172,8 | as 20 em 200 de 200; última na onda 148,5 e 172,7 |
+
+**Passa, com e sem o passe.** Todos os portões seguem verdes. O que mais cai é o dos aeroportos, pelo motivo da D-C8c. A campanha e as missões sobem porque a receita do Bom, que não persegue nada, cai mais que a de quem recebe as recompensas (sem o passe, −533 contra +90 em 20 ondas).
+
+### Prova de mutação (`MUTACAO_TESTES="FullyQualifiedName~DespesasTests|FullyQualifiedName~SaveTests|FullyQualifiedName~ExploitTests" python client/tools/mutacao.py despesa`)
+
+As 14 travas novas entram no `mutacao.py`. Resultado em 2026-11-03: **14 de 14 mortos**. Das travas anteriores, conferi que os trechos ainda existem no núcleo, sem rodar de novo.
+
+| trava retirada | testes que caíram |
+|---|---|
+| o caixa paga só o que tem | 9, entre eles `FaltaDeCaixa_CashNuncaNegativo_PausaEQuitaSozinho` |
+| a falta não acumula | `Falta_PerdoadaNoFechamentoSeguinte_NuncaViraDivida` e mais 2 |
+| a atrasada só sai inteira | 8, entre eles `FaltaDeCaixa_CashNuncaNegativo_PausaEQuitaSozinho` |
+| a falta pausa contratar e melhorar | `FaltaDeCaixa_CashNuncaNegativo_PausaEQuitaSozinho` |
+| cobra só na virada do dia | 31, entre eles `Fechamento_CobraNoPrimeiroPassoDoDiaSeguinte_UmaVez` |
+| regra desligada não cobra | 6, entre eles `RegraDesligada_SoORelatorio` |
+| só a estação ativa cobra | `Folha_QuemEstaContratado_EAsEstacoesAtivasPeloNivel` |
+| o nível da estação cobra | `Folha_QuemEstaContratado_EAsEstacoesAtivasPeloNivel` |
+| offline não cobra | 4, entre eles `Invariante_C8_Offline_NaoCobraNemViraODia` |
+| o relatório guarda a fonte | `Relatorio_ReceitaPorFonte_BateComOsEventos` e mais 1 |
+| a conta atrasada vai no save | 5, entre eles `Save_ReabrirNoMeioDaOnda_DaOMesmoJogo` |
+| atrasada do save limitada | `LixoDoRelatorio_ViraPadraoLimitado` |
+| dia do save nunca no futuro | `LixoDoRelatorio_ViraPadraoLimitado` |
+| pago do save até a conta | `LixoDoRelatorio_ViraPadraoLimitado` |
+
+### Para medir com gente
+
+- **A conta é pequena.** Com o passe, pesa 6% a 10% da receita nas 10 primeiras ondas e 3% a 5% em 64 ondas. Não resolve o Cash sem destino (§9 e §10): para isso faltam o mapa que cresce e a construção. Com mais sumidouro, dá para subir a tabela de novo, medindo os aeroportos.
+- **Contratar sem demanda ainda não dá prejuízo.** O pior salário (90) é menos de 1% da receita de um dia a partir do dia 2. O GDD de direção §12 pede que dê; isso precisa da demissão (frente D), para o jogador poder corrigir.
+- **O 1º fechamento sempre aperta** (D-C8e). Ver se a pessoa entende a pausa e o que fazer: mostrar o valor que falta e a hora do fechamento.
