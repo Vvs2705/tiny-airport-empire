@@ -202,7 +202,7 @@ namespace TA
                 b.Caminho.Clear();
                 Vector2 q = b.Pos;
                 AteASala(b.Caminho, ref q, e, e);
-                Contorna(b.Caminho, ref q, Em(e, FaixaD, Vector2.Dot(q - sala.Out, sala.T)), normalX);
+                Contorna(b.Caminho, ref q, Em(e, FaixaD, Mathf.Clamp(Vector2.Dot(q - sala.Out, sala.T), 0.2f - Interno * 0.5f, Interno * 0.5f - 0.2f)), normalX);   // quem está na porta: o passo é dentro da sala, não atrás da parede
                 Contorna(b.Caminho, ref q, alvo, normalX);
                 b.Alvo = alvo;
             }
@@ -321,6 +321,7 @@ namespace TA
                         b.Alvo = lugar;
                     }
                     else Segue(b, lugar, Mathf.Abs(Salas[(int)f.Em].N.x) > 0.5f);
+                    if (b.Caminho.Count > 0 && b.Caminho[b.Caminho.Count - 1] != lugar) b.Caminho.Add(lugar);   // a rota parou antes do posto (no vão do bar): o último passo entra nele
                     Confere(b, true);
                     Anda(b, VelFunc, dt);
                     if (b.Caminho.Count == 0)

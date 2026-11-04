@@ -7,7 +7,7 @@ Uso: python client/tools/diag_caixas.py arq.csv [arq2.csv ...]     (sai 1 se hou
 Conta um cruzamento por encontro (2 pecas sobrepostas em amostras seguidas), mais fundo que TOLERANCIA:
   veiculo x peca, veiculo x veiculo, veiculo x aviao, aviao x peca, aviao x aviao e pessoa x veiculo.
 Nas salas: pessoa x parede e pessoa x movel, por sala e por peca, com o corpo do adulto (circulo de CORPO_RAIO) contra as pecas ligadas naquele
-momento (liga#). Nao conta quem esta sentado, contra a cadeira, nem quem esta parado no posto e so encosta: la, so conta com o centro dentro da peca (no vao de um balcao OCAS, nem isso).
+momento (liga#). Nao conta quem esta sentado, contra a cadeira, nem quem esta parado no posto e so encosta: la, so conta com o centro dentro da peca (no vao de um balcao OCAS, o funcionario nunca conta: e o lugar de trabalho dele).
 Cobertura: quantas vezes cada peca saiu do lugar e voltou (ida e volta) e por onde passou; o par so vale se a rota rodou.
 A caixa de um veiculo e a da malha. As de aviao, garagem e rebocador preso sao as tabelas abaixo, medidas nos cortes das malhas.
 """
@@ -23,7 +23,7 @@ PESSOAS = ("pax", "func", "equipe", "ator", "trip", "mec")
 PESSOA_LADO, PESSOA_ALTURA = 0.4, 1.2
 CORPO_RAIO, CORPO_ALTURA = 0.1, 0.5  # adulto de 0,5 m e 0,2 m de ombros (Mundo.Gente)
 CADEIRAS = ("cadeiras_espera", "Cadeira")
-OCAS = ("bar_lounge", "bancada_oficina")  # balcao com prateleira ou painel atras (nivel 3): quem trabalha fica no vao entre os dois, dentro da caixa
+OCAS = ("bar_lounge", "bancada_oficina")  # balcao com prateleira ou painel atras (nivel 3): quem trabalha anda e fica no vao entre os dois, dentro da caixa
 FINAS = ("cordao_fila",)  # a caixa e a da diagonal da malha, mais larga que o corredor da fila: encostar nao conta, so o centro dentro (atravessou)
 # a gente passa por dentro (portico, cabine) ou a peca anda com ela (Mundo.Seguranca, Mundo.Malas): nao e obstaculo
 SEM_CORPO = ("portico_detector", "cabine_scanner_corpo", "bandeja_seguranca", "Bandeja", "scanner_mao", "mala_rodinha", "Mala", "MalaSeg", "Pilha")
@@ -228,7 +228,7 @@ def corpo(conta, salas, pecas, nome, x, z, sentado, posto, t, dt):
     for i, c in pecas.get(e, ()):
         d = dentro(c, x, z)
         p = d if posto or c.nome in FINAS else d + CORPO_RAIO
-        if p <= TOLERANCIA or (sentado and c.nome in CADEIRAS) or (posto and c.nome in OCAS):
+        if p <= TOLERANCIA or (sentado and c.nome in CADEIRAS) or (base == "func" and c.nome in OCAS):
             continue
         classe = "pessoa x parede" if c.nome == "Parede" else "pessoa x movel"
         conta.anota(classe, "sala%d %s" % (e, base), c.nome, (nome, i), t, p, dt)
