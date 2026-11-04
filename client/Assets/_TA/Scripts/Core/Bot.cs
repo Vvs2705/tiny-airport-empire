@@ -508,6 +508,8 @@ namespace TA.Core
             /// <summary>Frente F: usos do banheiro, quem achou fechado, interdicoes, limpezas feitas, sujeira media (de 0 a Sim.SujeiraMax, media das 7 areas
             /// medida a cada s) e a maior fila na porta do banheiro.</summary>
             public int Usos, Negados, Interdicoes, Limpezas, FilaBanheiro; public double SujeiraMedia;
+            /// <summary>ta-suprimentos: vezes que um aviao esperou suprimento e o custo das entregas pedidas.</summary>
+            public int Faltas; public long Suprimentos;
         }
 
         /// <summary>Joga `ondas` ondas inteiras com o perfil `p` e a semente `seed`, sem render. `reabre` = fecha e reabre o jogo (Save ->
@@ -553,6 +555,8 @@ namespace TA.Core
                         case Ev.ContaQuitada: r.Despesas += e.B; break;
                         case Ev.Limpou: r.Limpezas++; break;
                         case Ev.BanheiroInterditado: if (e.A == 1) r.Interdicoes++; break;
+                        case Ev.SuprimentoFaltou: r.Faltas++; break;
+                        case Ev.SuprimentoPedido: r.Suprimentos += e.C; break;
                     }
                 if (s.Steps % Sim.Hz == 0)
                 {

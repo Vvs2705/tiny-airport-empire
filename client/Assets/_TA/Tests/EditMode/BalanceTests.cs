@@ -27,6 +27,8 @@ namespace TA.Tests
             public double SemTrip, Inspecoes, Hangares, Checagens, Trocas, Incidentes, Reacoes, Climas, Falhas, Reparos, Objetivos, Recompensas, Diarias, Semanais, PagoMissoes, Conquistas;
             public double Despesas, Apertos;
             public double Usos, Negados, Interdicoes, Limpezas, FilaBanheiro, SujeiraMedia;
+            /// <summary>ta-suprimentos: esperas por suprimento e custo das entregas (medias por partida).</summary>
+            public double Faltas, Suprimentos;
         }
 
         public static Linha Rodar(BotProfile p, Tuning t = null, int sementes = Sementes, int ondas = Ondas, int threads = Threads)
@@ -50,6 +52,7 @@ namespace TA.Tests
                 l.Despesas += r.Despesas * k; l.Apertos += r.Apertos * k;
                 l.Usos += r.Usos * k; l.Negados += r.Negados * k; l.Interdicoes += r.Interdicoes * k; l.Limpezas += r.Limpezas * k;
                 l.FilaBanheiro = Math.Max(l.FilaBanheiro, r.FilaBanheiro); l.SujeiraMedia += r.SujeiraMedia * k;
+                l.Faltas += r.Faltas * k; l.Suprimentos += r.Suprimentos * k;
                 for (int m = 0; m < 3; m++) if (r.MarcoEm[m] >= 0) { l.Marco[m] += r.MarcoEm[m]; marcos[m]++; }
             }
             for (int m = 0; m < 3; m++) l.Marco[m] = marcos[m] > 0 ? l.Marco[m] / marcos[m] : -1;
@@ -84,10 +87,10 @@ namespace TA.Tests
         /// <summary>As regras da v0.1: tripulacao, patio e manutencao so visuais (o "antes" do BALANCE.md).</summary>
         public static Tuning SemFaseC() => FechaC3(new Tuning { RegraTripulacao = false, RegraPatio = false, RegraManutencao = false });
 
-        /// <summary>O "antes" de cada fase e' o jogo de quando ela entrou: sem a conta do dia (Fase C8) e sem o vestiario (frente E). Os portoes rodam com eles.</summary>
+        /// <summary>O "antes" de cada fase e' o jogo de quando ela entrou: sem a conta do dia (Fase C8), sem o vestiario (frente E) e sem os suprimentos. Os portoes rodam com eles.</summary>
         static Tuning SemC8(Tuning t)
         {
-            t.RegraDespesas = t.RegraVestiario = t.RegraLimpeza = false;
+            t.RegraDespesas = t.RegraVestiario = t.RegraLimpeza = t.RegraSuprimentos = false;
             return t;
         }
 
@@ -207,7 +210,7 @@ namespace TA.Tests
         public static Tuning SemFaseC4(Tuning t = null)
         {
             t = t ?? new Tuning();
-            t.RegraClima = t.RegraEpocas = t.RegraPicos = t.RegraFalhas = t.RegraCampanha = t.RegraMissoes = t.RegraPasse = t.RegraVestiario = t.RegraLimpeza = false;
+            t.RegraClima = t.RegraEpocas = t.RegraPicos = t.RegraFalhas = t.RegraCampanha = t.RegraMissoes = t.RegraPasse = t.RegraVestiario = t.RegraLimpeza = t.RegraSuprimentos = false;
             return t;
         }
 
@@ -356,7 +359,7 @@ namespace TA.Tests
         [Test]
         public void Antes_FaseC5()
         {
-            var t = new Tuning { RegraCampanha = false, RegraMissoes = false, RegraPasse = false, RegraDespesas = false, RegraVestiario = false, RegraLimpeza = false };
+            var t = new Tuning { RegraCampanha = false, RegraMissoes = false, RegraPasse = false, RegraDespesas = false, RegraVestiario = false, RegraLimpeza = false, RegraSuprimentos = false };
             Linha bom = Rodar(BotProfile.Bom, t), lento = Rodar(BotProfile.Lento, t), parado = Rodar(BotProfile.Parado, t);
             Imprime("antes da Fase C5 (a main da Fase C4)", new[] { bom, lento, parado });
             Assert.AreEqual((6279, 3872, 4702), ((int)Math.Round(bom.Receita), (int)Math.Round(lento.Receita), (int)Math.Round(parado.Receita)), "sem pagar, a tabela da fase anterior");
@@ -421,7 +424,7 @@ namespace TA.Tests
         [Test]
         public void Antes_FaseC6()
         {
-            var t = new Tuning { RegraMissoes = false, RegraPasse = false, RegraDespesas = false, RegraVestiario = false, RegraLimpeza = false };
+            var t = new Tuning { RegraMissoes = false, RegraPasse = false, RegraDespesas = false, RegraVestiario = false, RegraLimpeza = false, RegraSuprimentos = false };
             Linha bom = Rodar(BotProfile.Bom, t), lento = Rodar(BotProfile.Lento, t), parado = Rodar(BotProfile.Parado, t);
             Imprime("antes da Fase C6 (a main da Fase C5)", new[] { bom, lento, parado });
             Assert.AreEqual((6586, 3534, 4660), ((int)Math.Round(bom.Receita), (int)Math.Round(lento.Receita), (int)Math.Round(parado.Receita)), "sem pagar, a tabela da fase anterior");
@@ -678,6 +681,40 @@ namespace TA.Tests
                 TestContext.Out.WriteLine(string.Format(ci, "{0}: embarque {1:0.0}% receita {2:0} incidentes {3:0.0} reacoes {4:0.0} chegou Costa {5}/200 onda {6:0.0}, Aurora {7}/200 onda {8:0.0}", p.Name, emb * 100, rec, inc, reac,
                     chegou[1], chegou[1] > 0 ? onda[1] / chegou[1] : -1, chegou[2], chegou[2] > 0 ? onda[2] / chegou[2] : -1));
             }
+        }
+
+        /// <summary>Portao da ta-suprimentos (GDD §0.5, regra 6: nenhuma despesa leva a derrota inevitavel; faltar so atrasa): com a tabela padrao, mesmas
+        /// sementes com e sem a regra, nenhum bot espera suprimento, o embarque nao cai e a conta das entregas leva no maximo 2% da receita.</summary>
+        [Test]
+        public void Portao_Suprimentos_SoAtrasa()
+        {
+            var ci = CultureInfo.InvariantCulture;
+            TestContext.Out.WriteLine("| bot | embarque com / sem | receita com / sem | razao | entregas (Cash) | esperas |\n|---|---|---|---|---|---|");
+            string falhas = "";
+            foreach (BotProfile p in new[] { BotProfile.Bom, BotProfile.Lento, BotProfile.Parado })
+            {
+                Linha com = Rodar(p), sem = Rodar(p, new Tuning { RegraSuprimentos = false });
+                double r = com.Receita / sem.Receita;
+                TestContext.Out.WriteLine(string.Format(ci, "| {0} | {1:0.0}% / {2:0.0}% | {3:0} / {4:0} | {5:0.000} | {6:0} | {7:0.00} |", p.Name, com.Embarque * 100, sem.Embarque * 100,
+                    com.Receita, sem.Receita, r, com.Suprimentos, com.Faltas));
+                if (com.Faltas > 0 || com.Embarque < sem.Embarque - 0.005 || r < 0.98) falhas += " " + p.Name + "=" + r.ToString("0.000", ci);
+            }
+            Assert.IsEmpty(falhas, "suprimento nao pode tirar embarque nem pesar mais de 2% da receita");
+        }
+
+        /// <summary>Quanto as entregas pesam ao longo da partida e o que o tanque maior (os 2 niveis, nos dois suprimentos) economiza (BALANCE.md §18).</summary>
+        [Test]
+        public void Medida_Suprimentos()
+        {
+            var ci = CultureInfo.InvariantCulture;
+            TestContext.Out.WriteLine("| bot | ondas | tanque | receita | entregas (Cash) | entregas / receita | conta paga | esperas |\n|---|---|---|---|---|---|---|---|");
+            foreach ((BotProfile p, int ondas) in new[] { (BotProfile.Bom, Ondas), (BotProfile.Guiado, OndasFaseC), (BotProfile.LentoGuiado, OndasFaseC), (BotProfile.Guiado, 64) })
+                foreach (int tanque in new[] { 8, 16 })
+                {
+                    Linha l = Rodar(p, new Tuning { SupTanque = new[] { tanque, tanque } }, 40, ondas);
+                    TestContext.Out.WriteLine(string.Format(ci, "| {0} | {1} | {2} | {3:0} | {4:0} | {5:0.00}% | {6:0} | {7:0.00} |", p.Name, ondas, tanque, l.Receita, l.Suprimentos,
+                        100 * l.Suprimentos / l.Receita, l.Despesas, l.Faltas));
+                }
         }
 
         /// <summary>Varredura do BALANCE.md (Fase C): cada sistema sozinho, 100 sementes x 20 ondas, ganho de planejar por variante.</summary>
