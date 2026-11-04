@@ -77,7 +77,7 @@ Link de cada PR: `https://github.com/Vvs2705/tiny-airport-empire/pull/<n>`.
 | **Núcleo, Fase C5** | Campanha: 30 objetivos, 10 por aeroporto; fecham em 200 de 200 sementes | [#30](https://github.com/Vvs2705/tiny-airport-empire/pull/30) |
 | **Núcleo, Fase C6** | Missões (3 diárias e 5 semanais, de 63 linhas) e 20 conquistas | [#40](https://github.com/Vvs2705/tiny-airport-empire/pull/40) |
 | **Núcleo, Fase D1** | Gems no save (schema 8), catálogo de 7 produtos sem preço, 3 sumidouros, crédito idempotente por id de transação | [#43](https://github.com/Vvs2705/tiny-airport-empire/pull/43) |
-| **Contratação, Fase C9 (frente D)** | 3 candidatos fixos por vaga (Júnior, Pleno e Sênior, sem sorteio), demissão com confirmação, save schema 11; portão do §5.13 pelo lucro (`docs/BALANCE.md` §14). Tela da Equipe com a folha Vaga | #PR |
+| **Contratação, Fase C9 (frente D)** | 3 candidatos fixos por vaga (Júnior, Pleno e Sênior, sem sorteio), demissão com confirmação, save schema 11; portão do §5.13 pelo lucro (`docs/BALANCE.md` §14). Tela da Equipe com a folha Vaga | #61 |
 | **Núcleo, Fase C8 (frente A)** | Despesas: salário por perfil, tripulação e pátio, e manutenção por estação e nível, cobrados no fechamento do dia do jogo; falta de caixa pausa contratar e melhorar, sem dívida nem derrota; relatório do dia no save (schema 10). Todos os portões seguem verdes (`docs/BALANCE.md` §13). Sem tela | [#56](https://github.com/Vvs2705/tiny-airport-empire/pull/56) |
 | **Mundo 3D e pessoas** | v0.1 jogável em greybox; troca pela arte do Tripo (malha nos corpos rígidos, sprite nas pessoas); tela das Fases C e C2; dia a dia (garagem, postos, segurança) | [#7](https://github.com/Vvs2705/tiny-airport-empire/pull/7), [#21](https://github.com/Vvs2705/tiny-airport-empire/pull/21), [#24](https://github.com/Vvs2705/tiny-airport-empire/pull/24), [#26](https://github.com/Vvs2705/tiny-airport-empire/pull/26) |
 | **Cenário vivo** | Embarque pela ponte (a pessoa some no túnel), sala de espera do portão com cadeiras e fila, escala de adulto de 0,5 m com corredores, física do pátio (469 cruzamentos de peças para 0 em 5 cenários), mala de verdade do balcão ao avião, postos com gente e gestos de atendimento, clima e incidentes no cenário | [#29](https://github.com/Vvs2705/tiny-airport-empire/pull/29), [#31](https://github.com/Vvs2705/tiny-airport-empire/pull/31), [#32](https://github.com/Vvs2705/tiny-airport-empire/pull/32), [#33](https://github.com/Vvs2705/tiny-airport-empire/pull/33), [#37](https://github.com/Vvs2705/tiny-airport-empire/pull/37), [#42](https://github.com/Vvs2705/tiny-airport-empire/pull/42), [#44](https://github.com/Vvs2705/tiny-airport-empire/pull/44) |
@@ -127,7 +127,7 @@ Ordem de trabalho de 2026-11-03, depois da mistura com o GDD de direção (`GDD.
 2. **B, velocidades** 1x, 2x e 3x: no PR da `ta-velocidade` (parcial; falta a validação em build na rodada do Unity da leva).
 3. **C, ficha ao tocar** em pessoa, equipamento e sala: parcial (`ta-ficha`: pessoa e sala); faltam o equipamento e as necessidades.
 4. **H, esteira de restituição** (traz junto o desembarque mínimo de quem chega).
-5. **D, contratação** com 3 candidatos e demissão: núcleo e tela no PR #PR (parcial); falta validar no Unity, na rodada da leva.
+5. **D, contratação** com 3 candidatos e demissão: núcleo e tela no PR #61 (parcial); falta validar no Unity, na rodada da leva.
 6. **E, transferência pelo vestiário** (o TA-2 tem de passar de novo com o tempo de troca).
 7. **F, limpeza e banheiro.**
 8. **G, satisfação com motivo.**
@@ -175,7 +175,7 @@ Nada disso o time de código consegue resolver sozinho.
 
 ## 10. Porcentagem estimada e método
 
-**Aproximadamente 55% do contrato de lançamento** (21,5 de 39 pontos), em 2026-11-03, contados na matriz depois do passe (PR #49, linha 14 em `parcial`), da ficha (C) e das velocidades (B), com as frentes A (PR #56) e D (PR #PR) em `parcial`.
+**Aproximadamente 55% do contrato de lançamento** (21,5 de 39 pontos), em 2026-11-03, contados na matriz depois do passe (PR #49, linha 14 em `parcial`), da ficha (C) e das velocidades (B), com as frentes A (PR #56) e D (PR #61) em `parcial`.
 
 **Por que caiu de 57% (2026-11-02).** Não foi regressão: em 2026-11-03 o contrato ganhou **9 linhas**, as frentes de gestão A a I, todas em `falta`. Sobre as 30 linhas de antes, a conta **subiu** de 57% para 63% (19,0 de 30), por três mudanças: a tela de configurações (linha 21, de `falta` para `parcial`, PR #48) e a tela de metas, que fechou as linhas 11, 12 e 13 (de `parcial` para `feito`, PR #46, com `verify.sh full` verde e foto). Em pontos: 17,0 + 0,5 + 3 × 0,5 = 19,0.
 
