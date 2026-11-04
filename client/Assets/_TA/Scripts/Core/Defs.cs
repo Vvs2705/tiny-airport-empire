@@ -11,6 +11,9 @@ namespace TA.Core
     /// <summary>Os 6 perfis do GDD §5.5, um por pessoa, na ordem de contratacao (Ana, Beto, Caio, Dani, Edu, Fatima). Indice vai no save.</summary>
     public enum Perfil { Atendente, Seguranca, Vendedor, Bagageiro, Mecanico, Despachante }
 
+    /// <summary>Os 3 candidatos de cada perfil (CONTRATO_FASE_C9 §2): fixos e nomeados, nada sorteado (TA-5). O Pleno e' a pessoa da v0.1. Indice vai no save.</summary>
+    public enum Experiencia { Junior, Pleno, Senior }
+
     /// <summary>Upgrades por estacao (CONTRATO_V01 §4).</summary>
     public enum Melhoria { Velocidade, Capacidade }
 
@@ -91,6 +94,23 @@ namespace TA.Core
         GemsGanhas,         // A = aeroporto, B = Gems (cadeia fechada)                           -> gems_earned
         // Fase C7 (CONTRATO_FASE_C7): passe de temporada, trilha gratuita
         PasseNivel,         // A = temporada, B = nivel (1..30), C = Cash, s de 2x ou 1 cosmetico   -> season_reward_claimed
+        // Fase C8 (CONTRATO_FASE_C8): despesas
+        DiaFechado,         // A = dia do jogo, B = Cash pago, C = o que faltou (> 0 = pausa)    -> day_closed
+        ContaQuitada,       // A = dia do jogo, B = Cash (a conta atrasada; a pausa acabou)       -> day_bill_paid_late
+        // Fase C9 (CONTRATO_FASE_C9): contratacao e demissao
+        Demitido,           // A = funcionario (o indice que tinha), B = perfil, C = experiencia  -> staff_fired
+        // Frente F (Sim.Limpeza.cs): limpeza e banheiro
+        LimpezaContratada,  // A = zeladores, B = custo                                           -> cleaner_hired
+        LimpezaPedida,      // A = area, B = zelador que foi (-1 = espera um livre)               -> cleaning_ordered
+        LimpezaTarefa,      // A = zelador, B = area, C = 1 se ordem do jogador                   -> cleaning_task
+        LimpezaChegou,      // A = zelador, B = area (comeca a limpar)                            -> cleaning_started
+        Limpou,             // A = zelador, B = area (sujeira 0)                                  -> cleaning_done
+        BanheiroInterditado, // A = 1 fechou (sujeira no teto), 0 reabriu limpo                   -> restroom_closed
+        // ta-suprimentos: combustivel e refeicoes com estoque
+        SuprimentoPedido,   // A = Suprimento, B = cargas, C = custo (entra na conta do dia)      -> supply_ordered
+        SuprimentoChegou,   // A = Suprimento, B = cargas                                         -> supply_delivered
+        SuprimentoFaltou,   // A = aviao, B = Suprimento (o caminhao espera; so a decolagem atrasa) -> supply_shortage
+        SuprimentoMelhorou, // A = Suprimento, B = Melhoria, C = nivel novo                       -> supply_upgraded
     }
 
     /// <summary>Funcoes da tripulacao (GDD §5.11). Indice vai no save.</summary>
@@ -143,8 +163,12 @@ namespace TA.Core
         /// <summary>Fase C4: em pane (parado ate o reparo), voo que ja falhou (sem novo sorteio), passo a partir do qual decola depois de rejeitar
         /// e passo em que pede para voltar (0 = nao esta voltando).</summary>
         public bool Pane; public int Falhou = -1; public long SaiEm, Retorno;
+        /// <summary>ta-suprimentos, por Suprimento: 0 = nada a carregar, Sim.CargaPede = o servico dele ainda corre e tira do deposito no fim,
+        /// Sim.CargaEspera = o servico acabou e o deposito nao tinha (o caminhao espera a entrega no aviao).</summary>
+        public readonly int[] Carga = new int[2];
         public bool Pendente => Desgaste >= 100;
-        public bool PatioPronto { get { foreach (int f in Falta) if (f > 0) return false; return true; } }
+        /// <summary>Servicos feitos e suprimentos a bordo: a decolagem pede isto. O embarque so pede o desembarque e a limpeza (Sim.Pronto).</summary>
+        public bool PatioPronto { get { foreach (int f in Falta) if (f > 0) return false; return Carga[0] == 0 && Carga[1] == 0; } }
     }
 
     public struct Evento
@@ -159,8 +183,8 @@ namespace TA.Core
         public int Id;
         /// <summary>Passos que faltam no atendimento atual (0 na fila) e o total dele (o anel de progresso: 1 - Resto/Total).</summary>
         public int Resto, Total;
-        /// <summary>Loja, mala despachada e fome saem da semente (nao se compram).</summary>
-        public bool Loja, Historia, Mala, Fome;
+        /// <summary>Loja, mala despachada, fome e banheiro (frente F) saem da semente (nao se compram).</summary>
+        public bool Loja, Historia, Mala, Fome, Banheiro;
         public int Onda => Id / 1000;
         public int Voo => Id / 500 % 2;
         public int Indice => Id % 500;
@@ -188,9 +212,11 @@ namespace TA.Core
         public int Id;
         /// <summary>Perfil fixo (GDD §5.5): a especialidade rende Tuning.Especialista a partir do marco Tuning.EspecialistaMarco.</summary>
         public Perfil Perfil;
+        /// <summary>Qual dos 3 candidatos do perfil foi contratado (Fase C9): rende, custa e ganha pelo nivel (Tuning.ExpRende e cia.).</summary>
+        public Experiencia Experiencia = Experiencia.Pleno;
         /// <summary>Estacao onde esta ou para onde esta andando.</summary>
         public Estacao Em, De;
-        /// <summary>Passos de caminhada que faltam (0 = presente e atendendo).</summary>
+        /// <summary>Passos da transferencia que faltam (0 = presente e atendendo; a fase sai daqui: Sim.Fase). De = o uniforme que ele veste ate a troca.</summary>
         public int Andando;
 
         /// <summary>Estacoes da especialidade de cada perfil (CONTRATO_FASE_C2 §2).</summary>
@@ -281,6 +307,11 @@ namespace TA.Core
         /// <summary>Funcionarios no jogo novo (decisao da Fase B, BALANCE.md): 0 = comeca no toque manual.</summary>
         public int FuncionariosIniciais = 0;
         public float Caminhada = 2.5f;
+        /// <summary>Frente E (GDD §4.1; Direcao §9.3 e §9.6): mudar de estacao passa pelo vestiario. Quem sai termina o atendimento em curso e, na
+        /// Caminhada, anda ate o vestiario, troca o uniforme em Troca s e anda ate o posto novo (Sim.Vestiario.cs). false = a regra da v0.1 (sai na
+        /// hora, so a Caminhada). A soma e' a da v0.1: qualquer segundo a mais derruba a campanha do LentoGuiado (BALANCE.md §15).</summary>
+        public bool RegraVestiario = true;
+        public float Troca = 1f;
         public int[] Marcos = { 150, 600, 1500 };
         public float AtencaoFolga = 20f;
         /// <summary>s da media movel da renda online (base do cofre offline).</summary>
@@ -317,6 +348,14 @@ namespace TA.Core
         /// <summary>A inspecao obrigatoria segura o aviao o turnaround inteiro (110 s &gt; os 100 s de patio): o voo dele nao embarca.</summary>
         public float InspecaoSeg = 110f; public int InspecaoTira = 50;
         public float HangarSeg = 180f; public int HangarCusto = 100;
+
+        // ---- Frente H (Direcao §8.3, hipoteses): chegada e restituicao de bagagem (Sim.Chegada.cs). Sem Cash: nao passa pelo portao do §5.13 ----
+        /// <summary>Quem chega por pouso (fracao dos passageiros da onda, com teto), a chance de mala despachada e os s do aviao ate a esteira,
+        /// por estande (G pela ponte; R pela escada, pelo patio e pelo corredor).</summary>
+        public float ChegadaFator = 0.5f, ChegadaMalaChance = 0.7f; public int ChegadaMax = 10;
+        public float[] ChegadaAndar = { 20f, 40f };
+        /// <summary>Esteira de restituicao: lugares de mala na volta, s para andar um lugar (a boca poe no maximo uma mala por lugar) e s para tirar a mala.</summary>
+        public int EsteiraCap = 10; public float EsteiraSeg = 1f, PegarSeg = 1.5f;
 
         // ---- Fase C3 (CONTRATO_FASE_C3, hipoteses) ----
         /// <summary>Portao de design do GDD §5.13 por sistema (false = so visual: o nome muda, os numeros nao).</summary>
@@ -380,6 +419,54 @@ namespace TA.Core
         public bool RegraPasse = true;
         public Temporada[] Temporadas = Tabelas.Temporadas;
         public int PassePontosNivel = 100, PasseVoo = 2, PasseDiaria = 25, PasseSemanal = 70, PasseObjetivo = 20;
+        // ---- Fase C8 (CONTRATO_FASE_C8, hipoteses) ----
+        /// <summary>Cobra a conta no fechamento do dia (false = so o relatorio, o jogo da Fase D1).</summary>
+        public bool RegraDespesas = true;
+        /// <summary>Cash por dia do jogo: salario de cada perfil (ordem de Perfil), de cada funcao da tripulacao e de cada pessoa do patio. A 1a
+        /// tabela, 1,67 x esta, derrubava o portao dos aeroportos para 1,078 (BALANCE.md D-C8c).</summary>
+        public int[] Salario = { 35, 50, 50, 60, 90, 90 };
+        public int[] SalarioTrip = { 24, 12 };
+        public int SalarioPatio = 18;
+        /// <summary>Cash por dia do jogo de cada estacao ativa (ordem de Estacao) e quanto cada nivel de melhoria dela soma.</summary>
+        public int[] Manutencao = { 12, 12, 9, 9, 9, 9, 18, 12 };
+        public int[] ManutencaoNivel = { 6, 6, 5, 5, 5, 5, 7, 0 };
+        // ---- Fase C9 (CONTRATO_FASE_C9, hipoteses) ----
+        /// <summary>Os 3 candidatos de cada perfil, na ordem de Nivel, em % do Pleno: quanto rendem (tempo / x, venda x e forca x, como o especialista),
+        /// quanto custam para contratar (Contratacao) e por dia (Salario). Inteiros: o preco nao depende de arredondamento de float. RegraExperiencia = false
+        /// = so o nome muda: os 3 rendem e custam como o Pleno.</summary>
+        public bool RegraExperiencia = true;
+        public int[] ExpRende = { 80, 100, 125 }, ExpContratacao = { 50, 100, 200 }, ExpSalario = { 70, 100, 150 };
+
+        // ---- Frente F (Sim.Limpeza.cs, hipoteses): limpeza e banheiro ----
+        /// <summary>Banheiro, sujeira e equipe de limpeza (false = o jogo de antes, numero a numero). A sujeira ainda nao mexe no Cash: so o salario.</summary>
+        public bool RegraLimpeza = true;
+        /// <summary>Chance de o passageiro precisar do banheiro, cabines, s de uso, s de caminhada do portao ate a porta (cada perna) e a folga que
+        /// sobra antes de o embarque abrir, com a volta (sem ela, vai direto ao portao).</summary>
+        public float BanheiroChance = 0.35f, BanheiroUso = 6f, BanheiroAndar = 8f, BanheiroFolga = 10f; public int BanheiroCabines = 2;
+        /// <summary>Sujeira (de 0 a Sim.SujeiraMax) por passageiro atendido em cada area (ordem de Area; no banheiro, por uso) e a do banheiro que interdita.</summary>
+        public int[] SujaPorPax = { 4, 4, 6, 3, 4, 12, 20 }; public int SujeiraInterdita = 1000;
+        /// <summary>Area que vira tarefa da escala automatica, quanto o zelador limpa por s, os metros de cada area ate a vizinha no caminho do portao
+        /// (Sim.Metros: check-in, seguranca e loja em fila ate o portao; bagagem pelo check-in; alimentacao e banheiro saem do portao) e a velocidade com o carrinho.</summary>
+        public int LimpezaGatilho = 250, LimpaPorSeg = 60;
+        public float[] LimpezaTrecho = { 4f, 4f, 4f, 0f, 4f, 4f, 10f }; public float LimpezaVel = 1.2f;
+        /// <summary>Equipe no jogo novo, preco de cada contratacao (o teto e' a soma) e o salario por dia do jogo (Folha da Despesa.Equipe).</summary>
+        public int LimpezaIniciais = 1; public int[] LimpezaContratacao = { 60, 150 }; public int SalarioLimpeza = 15;
+
+        // ---- ta-historico ----
+        /// <summary>Anota o registro de ocorrencias (Sim.Historico.cs). So observa: false da o mesmo jogo, numero a numero, sem o registro.</summary>
+        public bool RegraHistorico = true;
+
+        // ---- ta-suprimentos (hipoteses; BALANCE.md §18) ----
+        /// <summary>Estoque de combustivel e refeicoes (Sim.Suprimentos.cs). false = so visual: o deposito fica cheio, nada se pede, nada se cobra e nada espera.</summary>
+        public bool RegraSuprimentos = true;
+        /// <summary>Por Suprimento (combustivel, refeicoes): cargas que cada aviao leva por turnaround (regional, jato), tanque no nivel 0 e quanto cada nivel
+        /// soma, o ponto do pedido automatico (cargas no deposito) e a entrega, que enche o tanque: prazo (s) e custo fixos (Cash, na conta do dia).</summary>
+        public int[][] SupGasto = { new[] { 1, 2 }, new[] { 1, 2 } };
+        public int[] SupTanque = { 8, 8 }, SupTanqueMais = { 4, 4 }, SupPonto = { 3, 3 };
+        public float[] SupPrazo = { 45f, 35f };
+        public int[] SupCusto = { 6, 5 };
+        /// <summary>A melhoria (tanque maior: menos entregas por dia), preco de cada nivel; a quantidade de niveis e' o tamanho.</summary>
+        public int[] SupTanqueCusto = { 40, 80 };
     }
 
     /// <summary>Historias do TA-3 (GDD §5.9). A v0.1 tem 1. Id = indice (vai no album do save): so cresce no fim.</summary>

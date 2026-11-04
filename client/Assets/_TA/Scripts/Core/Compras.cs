@@ -88,7 +88,7 @@ namespace TA.Core
             _tx.Add(id);
             if (unico) _posse.Add(p.Id);
             Gems += p.Gems;
-            SomaCash(p.Cash);
+            Recebe(p.Cash, Fonte.Compras);
             Emit(Ev.CompraCreditada, Array.IndexOf(T.Produtos, p), p.Gems, (int)Math.Min(int.MaxValue, p.Cash));
             return Credito.Creditado;
         }
@@ -119,7 +119,7 @@ namespace TA.Core
             ItemGems g = T.ItensGems[item];
             long v = PreviaGasto(item);
             Gems -= g.Preco;
-            if (g.Tipo == TipoItem.PacoteCash) SomaCash(v);   // como o cofre: fora da media movel
+            if (g.Tipo == TipoItem.PacoteCash) Recebe(v, Fonte.Compras);   // como o cofre: fora da media movel
             else if (g.Tipo == TipoItem.Booster) BoostLeft = (int)v * Hz;
             else _posse.Add(g.Id);
             Emit(Ev.GemsGastas, item, g.Preco, (int)Math.Min(int.MaxValue, v));
@@ -132,8 +132,5 @@ namespace TA.Core
             Gems = Math.Min(T.GemsTeto, Gems + T.GemsPorCadeia);
             Emit(Ev.GemsGanhas, aeroporto, T.GemsPorCadeia);
         }
-
-        /// <summary>Soma que nao vira negativo: o Cash do save e' limitado so por baixo (GDD §8.6).</summary>
-        void SomaCash(long v) => Cash = Cash > long.MaxValue - v ? long.MaxValue : Cash + v;
     }
 }

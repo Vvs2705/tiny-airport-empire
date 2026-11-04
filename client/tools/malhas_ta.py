@@ -64,6 +64,9 @@ PECAS = {
     "radar": (1500, 256, -2.4),
     # as 4 salas novas (Fase C2), a sala da tripulacao e o que muda de nivel fora das salas
     "esteira_bagagem": (2500, 512, 1.15),
+    # Lote 12 (frente H): restituicao de bagagem, sem malas na malha (as que giram sao do nucleo); carrinho de mao do passageiro
+    "esteira_restituicao": (3000, 512, 1.6),
+    "carrinho_passageiro": (1200, 256, 0.35),
     "esteira_bagagem_n2": (2500, 512, 1.15),
     "esteira_bagagem_n3": (2500, 512, 1.15),
     "alimentacao": (2500, 512, 1.4),
@@ -130,7 +133,20 @@ PECAS = {
     # a mala solta (balanca, esteira, bandeja, carrinho)
     "mala_rodinha": (500, 256, -0.42),
     "balanca_bagagem": (1000, 256, 0.6),
+    # Lote 12, frente E: o vestiario (medidas de ~/.tiny-airport/arte_lote12_EFH.md, adulto de 0,5 m)
+    "armarios_vestiario": (1500, 512, 0.6),
+    "banco_vestiario": (800, 256, 0.6),
+    "arara_uniformes": (1200, 512, 0.4),
+    # Lote 12, frente F: banheiro e limpeza (mesma lista de medidas); sem a malha, Mundo.Limpeza.cs desenha a primitiva no lugar
+    "cabine_banheiro": (1500, 512, -0.55),
+    "pia_banheiro": (1200, 512, 0.6),
+    "carrinho_limpeza": (1200, 512, 0.3),
+    "maquina_piso": (1000, 256, 0.25),
+    "cone_piso_molhado": (400, 256, -0.12),
 }
+
+# pecas que ainda saem do Tripo (Lote 12): sem o FBX, a rodada completa pula com aviso em vez de parar; com ele, entram como as outras
+PENDENTES = {"pia_banheiro", "maquina_piso", "cone_piso_molhado"}
 
 
 # a View pinta na cor do voo (_Color x textura): a textura guarda so o sombreado
@@ -315,6 +331,9 @@ def main():
         with open(jpath) as f:
             registro = json.load(f)
     for nome in nomes:
+        if nome in PENDENTES and not glob.glob(os.path.join(a.src, nome + "_hd", "*.fbx")):
+            print("PENDENTE " + nome + ": sem FBX ainda, fica a primitiva")
+            continue
         ob, info = peca(nome, a.src, a.out)
         registro[nome] = info
         obs.append(ob)

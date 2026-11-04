@@ -166,14 +166,14 @@ namespace TA
             Funcionario f = s.Staff[k];
             int p = (int)f.Perfil, e = (int)f.Em;
             bool andando = f.Andando > 0, casa = Funcionario.Especialidade(f.Perfil, f.Em), semFila = e >= (int)Estacao.Manutencao;
-            string tarefa = andando ? Textos.ChegaEm(f.Andando * Sim.Step)
+            string tarefa = andando ? Textos.Preparo(s.Preparo(f), f.Andando * Sim.Step)
                 : f.Em == Estacao.Manutencao ? (Checando(s) ? Textos.NaChecagem : Textos.ProntoChecagem)
                 : f.Em == Estacao.Despacho ? Textos.NoBonus
                 : atende ? Textos.AtendendoUm : s.St(f.Em).Fila.Count > 0 ? Textos.ChamandoProximo : Textos.EsperandoPax;
             return new FichaDados
             {
-                Topo = Textos.Funcionario[p] + " · " + (andando ? Textos.ACaminho : atende ? Textos.Atendendo : semFila ? Textos.Trabalhando : Textos.Livre),
-                Nome = Textos.Funcionario[p] + " · " + Textos.Perfil[p],
+                Topo = Textos.Nome(f) + " · " + (andando ? Textos.FaseTransf[(int)s.Fase(f)] : atende ? Textos.Atendendo : semFila ? Textos.Trabalhando : Textos.Livre),
+                Nome = Textos.Nome(f) + " · " + Textos.Contratado(f),
                 Linha = Textos.EmEstacao(e, andando), Info = tarefa,
                 Nota = casa ? Textos.NaEspecialidade : Textos.PerfilInfo(p), Cor = casa ? NotaBem : Art.Fraco,
                 Placa = Art.EstacaoCor[e], Glifo = Art.Pessoa(), Mover = true,
@@ -211,7 +211,7 @@ namespace TA
                 return d;
             }
             bool pax = e != Estacao.Manutencao && e != Estacao.Despacho;
-            d.Linha = e == Estacao.Despacho ? Textos.SemMelhoria
+            d.Linha = e == Estacao.Despacho ? Textos.Estoques(s.Estoque, new[] { s.Tanque(Suprimento.Combustivel), s.Tanque(Suprimento.Refeicoes) })   // o despacho cuida do patio
                 : Textos.MelhoriaNome(Melhoria.Velocidade, st.Vel, s.T.VelNiveis) + " · " + Textos.MelhoriaNome(Melhoria.Capacidade, st.Cap, s.T.CapNiveis);
             d.Info = (pax ? Textos.Balcoes(st.Postos, s.TempoSeg(e)) + " · " + Textos.NaFila(st.Fila.Count) + " · " : "") + Textos.NaEstacao(s.Alocados(e));
             if (pax) d.Topo += " · " + Textos.NaFila(st.Fila.Count);

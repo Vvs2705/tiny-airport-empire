@@ -162,6 +162,7 @@ namespace TA
             for (int k = 0; k < _avioes.Length; k++)
                 foreach (Tipo t in Tipos)
                     if (Precisa(t, k, s)) Chama(t, k, s);
+            SuprimentosPasso(s);
         }
 
         /// <summary>Um por vez para fora das faixas: quem ainda esta entre a faixa e a rua leste, entrando ou saindo, segura a saida.</summary>
@@ -179,7 +180,7 @@ namespace TA
             TA.Core.Aviao c = s.Avioes[k];
             if (t.Faixa[k] < 0f || a.Fase != Fase.NoPatio) return false;
             if (a.QuerPartir || c.Hangar > 0) return t.Servico == 0 && GenteNoTrilho(k);   // ninguem fica na escada: ela nao sai com gente em cima
-            return t.Servico == 0 || c.Falta[t.Servico] > 0;
+            return t.Servico == 0 || c.Falta[t.Servico] > 0 || Carregando(t.Servico, c);   // sem carga no deposito, o caminhao espera a entrega
         }
 
         void Chama(Tipo t, int k, Sim s)

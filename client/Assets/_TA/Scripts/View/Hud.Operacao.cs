@@ -14,7 +14,7 @@ namespace TA
     {
         const int MaxTrip = 6;   // Tripulante.Nomes
 
-        Modal _voo, _trip, _patio, _equipe;
+        Modal _voo, _trip, _patio, _equipe, _vaga;
         int _vooK;
         Resumo _vooResumo, _tripResumo, _patioResumo;
         BarraNivel _vooBarra;
@@ -27,6 +27,7 @@ namespace TA
         readonly Item[] _patioAviao = new Item[2];
         readonly BarraNivel[] _patioDesgaste = new BarraNivel[2];
         readonly Compra[,] _patioCompra = new Compra[4, 2];
+        readonly Compra[] _tanque = new Compra[Sim.Suprimentos];
         readonly Text[] _equipeNome = new Text[Sim.MaxEquipe], _equipeCargo = new Text[Sim.MaxEquipe], _equipeInfo = new Text[Sim.MaxEquipe];
         readonly Image[] _equipePlaca = new Image[Sim.MaxEquipe];
         readonly BotaoPreco[] _equipeBtn = new BotaoPreco[Sim.MaxEquipe];
@@ -64,6 +65,7 @@ namespace TA
                 _equipeBtn[p] = Art.NovoBotaoPreco(c, Vector2.zero, Vector2.zero, () => EquipeAcao(pp2));
                 Art.Fixa((RectTransform)_equipeBtn[p].B.transform, new Vector2(1f, 0.5f), new Vector2(-24f, 0f), new Vector2(246f, 146f));
             }
+            BuildVaga(canvas);
         }
 
         void BuildVoo(RectTransform canvas)
@@ -132,16 +134,108 @@ namespace TA
                 _patioCompra[sv, 0] = NovaCompra(c, 0, Art.Raio(), S.T.PatioVelNiveis, () => _g.BuyPatio(ss, Melhoria.Velocidade));
                 _patioCompra[sv, 1] = NovaCompra(c, 1, Art.Caminhao(), S.T.PatioCapNiveis, () => _g.BuyPatio(ss, Melhoria.Capacidade));
             }
+            // ta-suprimentos: o tanque de cada um, na ordem de Suprimento
+            RectTransform sc = NovoCartaoCompra(lista, "Suprimentos", Textos.Suprimentos, Art.Caminhao(), Art.Azul);
+            for (int i = 0; i < Sim.Suprimentos; i++)
+            {
+                var sup = (Suprimento)i;
+                _tanque[i] = NovaCompra(sc, i, Art.IconeServico((int)Sim.ServicoDe(sup)), S.T.SupTanqueCusto.Length, () => _g.BuyTanque(sup));
+            }
         }
 
-        /// <summary>Quem ja veio: "mover para". Quem nao veio: contrata (os 3 da v0.1 pela ordem, com Hire(); Dani, Edu e Fatima pelo perfil).</summary>
+        /// <summary>Quem ja veio: "mover para" (la tambem demite). Vaga aberta: os 3 candidatos (Fase C9), em qualquer ordem.</summary>
         void EquipeAcao(int p)
         {
+            int quem = S.Staff.FindIndex(f => f.Perfil == (Perfil)p);
+            Fecha(_equipe);
+            if (quem >= 0) AbreMover(quem);
+            else { _vagaPerfil = p; Abre(_vaga); }
+        }
+
+        // ------------------------------------------------------------------ Fase C9: os 3 candidatos e a demissao
+
+        Resumo _vagaResumo;
+        readonly Item[] _candidato = new Item[3];
+        int _vagaPerfil;
+        Item _demitir;
+        bool _demitirArmado;   // o 1o toque arma e o Confirmar demite: a confirmacao fica no mesmo cartao
+
+        void BuildVaga(RectTransform canvas)
+        {
+            _vaga = NovaFolhaModal(canvas, "Vaga", "", Art.Pessoas(), 1300f);
+            RectTransform lista = NovoResumo(_vaga, Textos.FolhaEquipe, Art.Moeda(), Art.Azul, out _vagaResumo);
+            for (int x = 0; x < 3; x++)
+            {
+                var xx = (Experiencia)x;
+                _candidato[x] = NovoItem(lista, "Candidato" + x, Art.Pessoa(), Art.Apagado, () =>
+                {
+                    if (!_g.Hire((Perfil)_vagaPerfil, xx)) return;
+                    Fecha(_vaga);
+                    Abre(_equipe);
+                }, 236f);
+            }
+        }
+
+        /// <summary>Os 3 candidatos lado a lado: nome, experiencia, salario por dia, rendimento e onde trabalha melhor, com o preco no botao. Fixos (TA-5).</summary>
+        void PintaVaga(Sim s)
+        {
+            var p = (Perfil)_vagaPerfil;
+            _vaga.Titulo.text = Textos.VagaDe(_vagaPerfil);
+            _vagaResumo.Pinta(s, Textos.Num(s.Folha(Despesa.Equipe)));
+            for (int x = 0; x < 3; x++)
+            {
+                var xx = (Experiencia)x;
+                Item it = _candidato[x];
+                long c = s.CustoContratar(p, xx);
+                it.Placa.color = Art.EstacaoCor[(int)Funcionario.Casa(p)];
+                it.Glifo.sprite = Art.IconePerfil(_vagaPerfil);
+                it.Nome.text = Textos.Nome(p, xx) + " · " + Textos.ExperienciaNome[x];
+                it.Linha.text = Textos.PorDia(s.Salario(p, xx));
+                it.Info.text = Textos.Rende(Mathf.RoundToInt(s.Rendimento(xx) * 100f)) + " · " + Textos.PerfilInfo(_vagaPerfil);
+                if (c < 0) it.Btn.Maximo(Textos.Contratados);   // a vaga fechou (contratou por outro caminho)
+                else if (s.Pausado) it.Btn.Travado(Textos.ContaAtrasada, Textos.Num(s.Atrasada));
+                else it.Btn.Preco(Textos.ContratarCurto, c, s.Cash);
+            }
+        }
+
+        Item NovoDemitir(RectTransform lista) => NovoItem(lista, "Demitir", Art.Pessoa(), Art.Perigo, () =>
+        {
+            if (!_demitirArmado) { _demitirArmado = true; return; }
+            int q = _moverQuem;
+            Fecha(_mover);
+            if (_g.Demite(q)) M.Demitiu(q);   // ja, no mesmo quadro: o boneco de quem fica nao troca de pessoa nem por um quadro
+        }, 236f);
+
+        void PintaDemitir(Sim s)
+        {
+            Funcionario f = s.Staff[_moverQuem];
+            string nome = Textos.Nome(f);
+            long salario = s.Salario(f.Perfil, f.Experiencia);
+            _demitir.Nome.text = Textos.DemitirNome(nome);
+            _demitir.Linha.text = Textos.Contratado(f) + " · " + Textos.PorDia(salario);
+            _demitir.Info.text = _demitirArmado ? Textos.DemitirConfirma(nome) : Textos.DemitirInfo(salario);
+            if (_demitirArmado) _demitir.Btn.Principal(Textos.Confirmar, Art.Perigo); else _demitir.Btn.Secundario(Textos.Demitir);
+        }
+
+        /// <summary>-tela vaga (a 1a vaga aberta) e -tela demitir (o Mover do 1o da equipe, com a confirmacao armada): as fotos da Fase C9.</summary>
+        void TelaEquipeDev(string nome)
+        {
             Sim s = S;
-            int quem = s.Staff.FindIndex(f => f.Perfil == (Perfil)p);
-            if (quem >= 0) { Fecha(_equipe); AbreMover(quem); }
-            else if (p < Sim.MaxFuncionarios) _g.Hire();
-            else _g.Hire((Perfil)p);
+            if (nome == "vaga")
+            {
+                int p = 0;
+                while (p < Sim.MaxEquipe - 1 && s.CustoContratar((Perfil)p) < 0) p++;
+                _vagaPerfil = p;
+                Abre(_vaga);
+            }
+            else if (s.Staff.Count > 0) { AbreMover(0); _demitirArmado = true; }
+        }
+
+        /// <summary>Ev.Demitido: a ficha de quem saiu, ou de quem subiu uma posicao no Staff, fecha; e o aviso.</summary>
+        internal void Demitido(int k, Perfil p, Experiencia x)
+        {
+            if (_sel == Sel.Func && _selId >= k) _sel = Sel.Nada;
+            Toast(Textos.Demitido(Textos.Nome(p, x)));
         }
 
         /// <summary>Toque no voo do quadro, no aviao ou na tela do patio.</summary>
@@ -158,6 +252,7 @@ namespace TA
             if (_trip.Rt.gameObject.activeSelf) PintaTrip(s);
             if (_patio.Rt.gameObject.activeSelf) PintaPatio(s);
             if (_equipe.Rt.gameObject.activeSelf) PintaEquipe(s);
+            if (_vaga.Rt.gameObject.activeSelf) PintaVaga(s);
         }
 
         void PintaVoo(Sim s)
@@ -271,6 +366,14 @@ namespace TA
                 _patioCompra[sv, 1].Pinta(Textos.VeiculosNome(nc, s.T.PatioCapNiveis),
                     Textos.VeiculosDe(cc >= 0 ? Art.DePara(veic.ToString(), (veic + 1).ToString()) : veic.ToString()), nc, cc, s.Cash);
             }
+            for (int i = 0; i < Sim.Suprimentos; i++)
+            {
+                var sup = (Suprimento)i;
+                long ct = s.CustoTanque(sup);
+                int t = s.Tanque(sup);
+                _tanque[i].Pinta(Textos.TanqueNome(i, s.TanqueNivel[i], s.T.SupTanqueCusto.Length),
+                    Textos.TanqueDe(ct >= 0 ? Art.DePara(t.ToString(), (t + s.T.SupTanqueMais[i]).ToString()) : t.ToString()), s.TanqueNivel[i], ct, s.Cash);
+            }
         }
 
         void PintaEquipe(Sim s)
@@ -279,23 +382,21 @@ namespace TA
             _equipeCash.Valor.text = Textos.Num(s.Cash);
             _equipeNivel.Valor.text = Textos.NivelNome(s.Marco + 1);
             _equipeBarra.Pinta(s.Staff.Count, Art.Compra);
-            int proximo = 0;   // Ana, Beto e Cida vem na ordem (Sim.Hire)
-            while (proximo < Sim.MaxFuncionarios && s.Contratado((Perfil)proximo)) proximo++;
             for (int p = 0; p < Sim.MaxEquipe; p++)
             {
                 var perfil = (Perfil)p;
                 int quem = s.Staff.FindIndex(f => f.Perfil == perfil), marco = s.T.PerfilMarco[p];
-                bool veio = quem >= 0, aberto = s.Marco >= marco, naVez = p >= Sim.MaxFuncionarios || p == proximo;
-                _equipeNome[p].text = Textos.Funcionario[p];
+                bool veio = quem >= 0, aberto = s.Marco >= marco;
+                Funcionario f = veio ? s.Staff[quem] : null;
+                _equipeNome[p].text = veio ? Textos.Nome(f) + " · " + Textos.ExperienciaNome[(int)f.Experiencia] : Textos.Perfil[p];
                 _equipeNome[p].color = aberto ? Art.Tinta : Art.Fraco;
-                _equipeCargo[p].text = Textos.Perfil[p];
-                _equipeInfo[p].text = veio ? Textos.EmEstacao((int)s.Staff[quem].Em, s.Staff[quem].Andando > 0)
-                    : aberto ? Textos.PerfilInfo(p) : Textos.FaltamEmbarques(s.T.Marcos[marco - 1] - s.TotalEmbarcados);
+                _equipeCargo[p].text = veio ? Textos.Perfil[p] + " · " + Textos.PorDia(s.Salario(perfil, f.Experiencia)) : Textos.PerfilInfo(p);
+                _equipeInfo[p].text = veio ? Textos.EmEstacao((int)f.Em, f.Andando > 0)
+                    : aberto ? Textos.VagaAberta : Textos.FaltamEmbarques(s.T.Marcos[marco - 1] - s.TotalEmbarcados);
                 _equipePlaca[p].color = aberto ? Art.EstacaoCor[(int)Funcionario.Casa(perfil)] : Art.Vazio;
                 if (veio) _equipeBtn[p].Secundario(Textos.MoverCurto);
                 else if (!aberto) _equipeBtn[p].Travado(Textos.TerminalNome, Textos.NivelNome(marco + 1));
-                else if (!naVez) _equipeBtn[p].Travado(Textos.ContrateAntes, Textos.Funcionario[proximo]);
-                else _equipeBtn[p].Preco(Textos.ContratarCurto, s.CustoContratar(perfil), s.Cash);
+                else _equipeBtn[p].Principal(Textos.VerCandidatos, Art.Compra);
             }
         }
     }

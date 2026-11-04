@@ -37,7 +37,7 @@ namespace TA.Core
                     sb.Append("at.").Append(i).Append('=').Append(string.Join(";", s.Atendendo.ConvertAll(p => p.Id.ToString(Ci) + ":" + p.Resto.ToString(Ci)))).Append('\n');
             }
             foreach (Funcionario f in Staff)
-                sb.Append("func.").Append(f.Id).Append('=').Append((int)f.Em).Append(',').Append((int)f.De).Append(',').Append(f.Andando).Append(',').Append((int)f.Perfil).Append('\n');
+                sb.Append("func.").Append(f.Id).Append('=').Append((int)f.Em).Append(',').Append((int)f.De).Append(',').Append(f.Andando).Append(',').Append((int)f.Perfil).Append(',').Append((int)f.Experiencia).Append('\n');
             foreach (Voo v in Voos)
                 if (v != null)
                     sb.Append("voo.").Append(v.Indice).Append('=').Append(v.Criados).Append(',').Append(v.Embarcados).Append(',').Append(v.Receita)
@@ -50,6 +50,11 @@ namespace TA.Core
             SalvaMissoes(sb);
             SalvaCompras(sb);
             SalvaPasse(sb);
+            SalvaDespesas(sb);
+            SalvaHistorico(sb);
+            SalvaChegada(sb);
+            SalvaLimpeza(sb);
+            SalvaSuprimentos(sb);
             return SaveEnvelope.Wrap(sb.ToString(), content, nowUnix);
         }
 
@@ -332,7 +337,9 @@ namespace TA.Core
                 var p = (Perfil)Math.Max(0, Math.Min(MaxEquipe - 1, f.Length >= 4 ? f[3] : i));
                 if (s.Contratado(p) || f.Length < 4 && i >= MaxFuncionarios) break;   // perfil repetido ou sem perfil acima da v0.1: lixo
                 Estacao em = s.Est(f[0]), de = s.Est(f[1]);
-                s.Staff.Add(new Funcionario { Id = i, Perfil = p, Em = em, De = de, Andando = Math.Max(0, Math.Min((int)Math.Round(s.T.Caminhada * Hz), f[2])) });
+                // schemas 10 e 11 nao tem a experiencia (Fase C9): todos sao o Pleno, a pessoa e o preco de antes; lixo tambem vira o Pleno
+                var nv = f.Length >= 5 && f[4] >= (int)Experiencia.Junior && f[4] <= (int)Experiencia.Senior ? (Experiencia)f[4] : Experiencia.Pleno;
+                s.Staff.Add(new Funcionario { Id = i, Perfil = p, Experiencia = nv, Em = em, De = de, Andando = Math.Max(0, Math.Min(s.AndandoMax(em, de), f[2])) });
             }
             int onda = (int)Get(kv, "onda", -1);
             bool bate = onda >= 0 && onda == (int)(s.Steps / s.OndaPassos);   // onda que nao bate com o relogio: comeca a dele
@@ -347,6 +354,11 @@ namespace TA.Core
             s.CarregaMissoes(kv);
             s.CarregaCompras(kv);
             s.CarregaPasse(kv);
+            s.CarregaDespesas(kv);
+            s.CarregaHistorico(kv);
+            s.CarregaChegada(kv);
+            s.CarregaLimpeza(kv);
+            s.CarregaSuprimentos(kv);
             return s;
         }
 
@@ -386,7 +398,7 @@ namespace TA.Core
                         string[] a = tok.Split(':');
                         Pax p = a.Length == 2 ? Valido(L(a[0], -1), vistos) : null;
                         if (p == null) continue;
-                        p.Resto = (int)Math.Max(1, Math.Min(TempoBase(st.Tipo), L(a[1], 1)));
+                        p.Resto = (int)Math.Max(1, Math.Min(TempoTeto(st.Tipo), L(a[1], 1)));
                         p.Total = Math.Max(p.Resto, TempoPassos(st.Tipo));
                         if (st.Atendendo.Count < st.Postos) st.Atendendo.Add(p); else st.Fila.Add(p);
                     }
@@ -397,6 +409,7 @@ namespace TA.Core
                         if (p != null) st.Fila.Add(p);
                     }
             }
+            CarregaBanheiro(kv, vistos);
         }
 
         /// <summary>Passageiro do save: da onda gravada, de voo que nao partiu, ja chegado e ainda nao visto. Senao null.</summary>

@@ -9,8 +9,8 @@ namespace TA
     /// para a camera, com o uniforme ou a mala numa mascara que o shader tinge pela cor do vertice (SpriteTinta).
     ///  - Passageiros (4 corpos) com a mala na cor do voo; andam pela fila, vao ao balcao, seguem pelas portas e embarcam pela ponte; quem
     ///    perde o voo sai pela porta. Na fila critica, os 3 da frente mostram o balao de irritacao.
-    ///  - Funcionarios (os 6 perfis): andam de sala em sala pelas portas no tempo da Tuning.Caminhada e, ao chegar, o uniforme assenta na
-    ///    cor do setor (0,35 s); atras do balcao, "atende" quando o posto dele tem passageiro.
+    ///  - Funcionarios (os 6 perfis): andam de sala em sala pelas portas; mudar de setor passa pelo vestiario (Mundo.Vestiario.cs), onde o
+    ///    uniforme assenta na cor do setor novo (0,35 s); atras do balcao, "atende" quando o posto dele tem passageiro.
     ///  - Patio (com o uniforme da funcao): a equipe de patio (uma pessoa por sim.EquipePatio) vai ate o servico que comecou; o mecanico sai da
     ///    oficina e vai ao aviao em checagem; a tripulacao escalada anda da sala ate o aviao e volta (GDD §5.11); o despachante sinaliza o estande G.
     ///  - Pool: os bonecos de passageiro voltam para a pilha e trocam de folha ao renascer (nada se cria ou destroi no quadro quente).
@@ -40,6 +40,7 @@ namespace TA
             public int Zona = -1, Estande = -1;   // Estande >= 0: indo ao aviao desse estande ou vindo dele (Mundo.Embarque)
             public bool Saindo, Andou, Cima, Atende, NoBalcao, SoMao, Despachou;   // SoMao, Despachou: Mundo.Malas.cs
             public float Dir = 1f, Escala = Gente;
+            public float Pressa;   // m/s para chegar quando o nucleo chega (0 = o passo de sempre; Mundo.Limpeza.cs)
         }
 
         /// <summary>Gente do patio: pontos de uma volta curta e a pausa em cada um.</summary>
@@ -120,6 +121,7 @@ namespace TA
         void SincronizaPax(Sim s, float dt)
         {
             _vistos.Clear();
+            BanheiroPax(s);   // antes das salas (Mundo.Limpeza.cs): quem volta do banheiro entra na fila do portao pela porta leste
             foreach (Station st in s.Estacoes)
             {
                 int e = (int)st.Tipo;
@@ -152,7 +154,7 @@ namespace TA
             {
                 Boneco b = kv.Value;
                 if (!_vistos.Contains(kv.Key) && !b.Saindo) Sai(kv.Key, b);
-                if (!Sentando(b, dt)) { Confere(b); Anda(b, VelPax, dt); }
+                if (!Sentando(b, dt)) { Confere(b); Anda(b, b.Pressa > 0f ? b.Pressa : VelPax, dt); }
                 Pinta(b);
                 b.Gesto = -1;
                 if (b.Saindo && b.Caminho.Count == 0) _sair.Add(kv.Key);
@@ -172,16 +174,7 @@ namespace TA
         void Liga(Pax p, int e, Vector2 alvo, Sim s, bool noBalcao, bool bravo, int vaga = -1)
         {
             _vistos.Add(p.Id);
-            if (!_pax.TryGetValue(p.Id, out Boneco b))
-            {
-                string ator = CorpoDe(p);
-                if (_livres.Count > 0) { b = _livres.Pop(); Veste(b, ator); } else b = NovoBoneco(ator);
-                b.T.gameObject.SetActive(true);
-                b.Pos = Calcada + new Vector2(-0.4f * (p.Indice % 3), 0.3f * (p.Indice % 4) - 0.45f);
-                b.Zona = -1; b.Estande = -1; b.Saindo = false; b.Caminho.Clear(); b.NoBalcao = false; b.VelAtual = 0f; b.Senta = 0f; b.Cadeira = b.Vaga = -1; b.Etapa = 0; b.RotT = b.RotDur = 0f; b.SoMao = b.Despachou = false;
-                b.Coracao.enabled = p.Historia;
-                _pax[p.Id] = b;
-            }
+            if (!_pax.TryGetValue(p.Id, out Boneco b)) b = PaxNovo(p);
             if (IndoAoBalcao(b, p, e, vaga, noBalcao)) return;
             if (b.SoMao != b.Despachou && e != (int)Estacao.Seguranca) SoMao(b, p, b.Despachou);   // a bandeja devolveu a mala mesmo se o quadro pulou
             Sala sala = Salas[e];
@@ -213,6 +206,21 @@ namespace TA
             Voo v = s.VooDe(p);
             Color mala = Art.VooCor[p.Voo];
             b.Tinta = e == (int)Estacao.Portao && v != null && !v.Embarque && !noBalcao ? Color.Lerp(mala, Art.Hex(0x8A8F99), 0.5f) : mala;   // no portao, apagada ate abrir o embarque
+        }
+
+        /// <summary>Boneco novo (ou do pool) para o passageiro, na calcada da rua.</summary>
+        Boneco PaxNovo(Pax p)
+        {
+            string ator = CorpoDe(p);
+            Boneco b;
+            if (_livres.Count > 0) { b = _livres.Pop(); Veste(b, ator); } else b = NovoBoneco(ator);
+            b.T.gameObject.SetActive(true);
+            b.Pos = Calcada + new Vector2(-0.4f * (p.Indice % 3), 0.3f * (p.Indice % 4) - 0.45f);
+            b.Zona = -1; b.Estande = -1; b.Saindo = false; b.Caminho.Clear(); b.NoBalcao = false; b.VelAtual = 0f; b.Senta = 0f; b.Cadeira = b.Vaga = -1; b.Etapa = 0; b.RotT = b.RotDur = 0f; b.SoMao = b.Despachou = false;
+            b.Pressa = 0f;
+            b.Coracao.enabled = p.Historia;
+            _pax[p.Id] = b;
+            return b;
         }
 
         /// <summary>Saiu do nucleo: embarcou (Ev.Embarcou) = vai ao aviao (Embarca: ponte no estande G, patio e escada no R); senao perdeu o voo =
@@ -293,32 +301,93 @@ namespace TA
 
         // ------------------------------------------------------------------ funcionarios
 
+        /// <summary>O ator (FuncAtor) do boneco em cada posicao do Staff. Nasce na ordem de Perfil; Veste e Demitiu (Fase C9) mantem cada pessoa com o
+        /// boneco do perfil dela, mesmo contratando fora de ordem ou demitindo (BonecoDoPerfil e Demitiu).</summary>
+        readonly int[] _ator = { 0, 1, 2, 3, 4, 5 };
+
+        /// <summary>Quem acaba de entrar na posicao k usa o boneco do perfil dele (cabelo e corpo), que esta livre: um por perfil.</summary>
+        void BonecoDoPerfil(int k, int perfil)
+        {
+            int j = System.Array.IndexOf(_ator, perfil);
+            if (j < 0 || j == k) return;
+            (_func[k], _func[j]) = (_func[j], _func[k]);
+            (_ator[k], _ator[j]) = (_ator[j], _ator[k]);
+        }
+
+        /// <summary>Ev.Demitido (o Hud chama no mesmo quadro): quem vinha depois de k sobe uma posicao no Staff e leva o boneco, o uniforme e o caminho;
+        /// o boneco de k vai para o fim, apagado. Inclui o estado do vestiario (Mundo.Vestiario.cs), que tambem e' por posicao.</summary>
+        internal void Demitiu(int k)
+        {
+            int u = _func.Length - 1;
+            if (k < 0 || k > u) return;
+            Boneco b = _func[k]; UnityEngine.UI.Text n = _nome[k]; int a = _ator[k];
+            for (int i = k; i < u; i++)
+            {
+                _func[i] = _func[i + 1]; _nome[i] = _nome[i + 1]; _ator[i] = _ator[i + 1];
+                _colete[i] = _colete[i + 1]; _troca[i] = _troca[i + 1]; _falha[i] = _falha[i + 1]; _rotaPara[i] = _rotaPara[i + 1];
+                _rotaVest[i] = _rotaVest[i + 1]; _posto[i] = _posto[i + 1];
+            }
+            _func[u] = b; _nome[u] = n; _ator[u] = a; _colete[u] = -1; _troca[u] = _falha[u] = 0f; _rotaVest[u] = false; _posto[u] = 0;
+            b.T.gameObject.SetActive(false); n.enabled = false;
+        }
+
         void Funcionarios(Sim s, float dt)
         {
             for (int k = 0; k < _func.Length; k++)
             {
-                Boneco b = _func[k];
                 bool existe = k < s.Staff.Count;
+                if (existe && _colete[k] < 0) BonecoDoPerfil(k, (int)s.Staff[k].Perfil);
+                Boneco b = _func[k];
                 b.T.gameObject.SetActive(existe);
                 _nome[k].enabled = existe;
-                if (!existe) continue;
+                if (!existe) { _colete[k] = -1; continue; }
                 Funcionario f = s.Staff[k];
-                if (_colete[k] < 0)   // contratado: aparece ja de uniforme, no lugar dele
+                _nome[k].text = Textos.Nome(f);
+                if (_colete[k] < 0)   // contratado: aparece ja de uniforme, no lugar dele (save no meio da transferencia: no armario)
                 {
-                    _colete[k] = (int)f.Em; _rotaPara[k] = f.Em; b.Pos = Lugar(s, f, out _); _troca[k] = Troca;
+                    _colete[k] = (int)s.Veste(f); _rotaPara[k] = f.Em; b.Pos = f.Andando > 0 && f.De != f.Em ? VestLugar(k) : Lugar(s, f, out _); _troca[k] = Troca;
                 }
                 b.Atende = false;
                 b.Gesto = -1;
+                Transferencia fase = s.Fase(f);
                 if (Arrastando == k) { b.Andou = false; b.Alvo = b.Pos; }   // o arrasto posiciona
+                else if (fase == Transferencia.Encerrando)   // termina o atendimento no posto antigo antes de sair (Mundo.Vestiario.cs)
+                {
+                    Anda(b, VelFunc, dt);   // quem ainda chegava ao posto antigo termina o caminho
+                    if (b.Caminho.Count == 0)
+                    {
+                        Olha(b, -Salas[(int)f.De].N);
+                        b.Atende = _noPosto[(int)f.De, _posto[k]] != null;
+                        GestoFunc(b, (int)f.De, _posto[k]);
+                    }
+                }
+                else if (_colete[k] != (int)f.Em)   // uniforme de outro setor: vai ao armario e so troca la dentro, quando o nucleo diz que acabou
+                {
+                    if (!_rotaVest[k])
+                    {
+                        _rotaVest[k] = true; _rotaPara[k] = (Estacao)(-1);
+                        b.Caminho.Clear();
+                        int de = SalaEm(b.Pos);
+                        RotaVestiario(b.Caminho, b.Pos, de < 0 ? (int)f.De : de, k);
+                        b.Alvo = VestLugar(k);   // sem Confere: a perna do corredor fica fora das salas, e a rede a refaria pela alimentacao
+                    }
+                    Anda(b, VelFunc, dt);
+                    if (b.Caminho.Count == 0)
+                    {
+                        Olha(b, Vector2.right);   // de frente para o armario
+                        if (s.Veste(f) == f.Em) { _colete[k] = (int)f.Em; _troca[k] = Troca; }
+                    }
+                }
                 else
                 {
                     Vector2 lugar = Lugar(s, f, out int posto);
                     if (_rotaPara[k] != f.Em)   // anda pelas portas ate o setor novo; a sala distante leva mais que a Tuning.Caminhada do nucleo, sem teletransporte
                     {
-                        _rotaPara[k] = f.Em;
+                        _rotaPara[k] = f.Em; _rotaVest[k] = false;
                         b.Caminho.Clear();
                         int de = SalaEm(b.Pos);
-                        RotaPessoa(b.Caminho, b.Pos, de < 0 ? (int)f.De : de, (int)f.Em, lugar, false);
+                        if (NoVestiario(b.Pos) || NoCorredor(b.Pos)) RotaDoVestiario(b.Caminho, b.Pos, (int)f.Em, lugar);
+                        else RotaPessoa(b.Caminho, b.Pos, de < 0 ? (int)f.De : de, (int)f.Em, lugar, false);
                         b.Alvo = lugar;
                     }
                     else Segue(b, lugar, Mathf.Abs(Salas[(int)f.Em].N.x) > 0.5f);
@@ -329,7 +398,7 @@ namespace TA
                         Olha(b, -Salas[(int)f.Em].N);   // de frente para a fila
                         b.Atende = _noPosto[(int)f.Em, posto] != null;
                         GestoFunc(b, (int)f.Em, posto);
-                        if (_colete[k] != (int)f.Em) { _colete[k] = (int)f.Em; _troca[k] = Troca; }   // chegou: veste o uniforme do setor
+                        _posto[k] = posto;
                     }
                 }
                 float t = _troca[k] > 0f ? 1f - _troca[k] / Troca : 1f;

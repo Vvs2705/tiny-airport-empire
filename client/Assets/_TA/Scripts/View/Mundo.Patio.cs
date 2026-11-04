@@ -625,6 +625,7 @@ namespace TA
                     }
             for (int i = 0; i < _cadeiras.Count; i++) _diag.WriteLine(string.Format(inv, "0,cadeira#{0},{1:0.000},0,{2:0.000},0", i, _cadeiras[i].x, _cadeiras[i].y));
             for (int e = 0; e < Salas.Length; e++) _diag.WriteLine(string.Format(inv, "0,sala#{0},{1:0.000},0,{2:0.000},0,{3:0.000}", e, Salas[e].Min.x, Salas[e].Min.y, Lado));
+            DiagSaguao(inv);
             DiagCaixas(inv);
         }
 
@@ -695,8 +696,10 @@ namespace TA
             foreach (KeyValuePair<int, Boneco> kv in _pax) DiagBoneco(inv, "pax#" + kv.Key, kv.Value);
             for (int k = 0; k < S.Staff.Count; k++) DiagBoneco(inv, "func#" + k, _func[k]);
             for (int i = 0; i < _equipe.Count; i++) DiagBoneco(inv, "equipe#" + i, _equipe[i]);
+            for (int i = 0; i < _zel.Count; i++) if (_zel[i].T.gameObject.activeSelf) DiagBoneco(inv, "limp#" + i, _zel[i]);
             for (int i = 0; i < _patio.Count; i++) DiagBoneco(inv, "ator#" + i, _patio[i].B);
             for (int i = 0; i < _andantes.Count; i++) DiagBoneco(inv, "trip#" + i, _andantes[i].B);
+            DiagChegada(inv);
             DiagBoneco(inv, "mec#0", _mecanico);
             if (_agente != null && _agente.T.gameObject.activeSelf) DiagBoneco(inv, "ator#agente", _agente);
             if (_porteiro != null && _porteiro.T.gameObject.activeSelf) DiagBoneco(inv, "ator#porteiro", _porteiro);

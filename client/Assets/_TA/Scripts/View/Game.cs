@@ -196,11 +196,13 @@ namespace TA
         public bool Move(int f, Estacao e) => Sim.Move(f, e);
         public void Buy(Estacao e, Melhoria m) => Sim.Buy(e, m);
         public void Hire() => Sim.Hire();
-        public void Hire(Perfil p) => Sim.Hire(p);
+        public bool Hire(Perfil p, Experiencia x) => Sim.Hire(p, x);
+        public bool Demite(int f) => Sim.Demite(f);
         public void HireTripulante(Funcao f) => Sim.HireTripulante(f);
         public void Escala(int voo, int tripulante) => Sim.Escala(voo, tripulante);
         public void HirePatio() => Sim.HirePatio();
         public void BuyPatio(Servico s, Melhoria m) => Sim.BuyPatio(s, m);
+        public void BuyTanque(Suprimento s) => Sim.BuyTanque(s);
         public void Checagem(int aviao) => Sim.Checagem(aviao);
         public void Hangar(int aviao) => Sim.Hangar(aviao);
         public bool Adianta() => Sim.Adianta();
@@ -278,6 +280,7 @@ namespace TA
                 case Ev.Melhorou: Diario("station_upgraded", e.A, e.B, e.C); break;
                 case Ev.Movido: Diario("staff_moved", e.A, e.B, e.C); break;
                 case Ev.Contratado: Diario("staff_hired", e.A, e.B, e.C); break;
+                case Ev.Demitido: Diario("staff_fired", e.A, e.B, e.C); _hud.Demitido(e.A, (Perfil)e.B, (Experiencia)e.C); break;
                 case Ev.Historia: Diario("story_delivered", e.A, e.B, e.C); _hud.Toast(Textos.HistoriaEntregue); break;
                 case Ev.Offline: Diario("offline_claim", e.A, e.B); break;
                 case Ev.Recompensa: Diario("reward_granted", e.A, e.B); break;
@@ -294,6 +297,10 @@ namespace TA
                 case Ev.Decolou: Diario("flight_takeoff", e.A, e.B, e.C); break;
                 case Ev.PatioContratado: Diario("ground_staff_hired", e.A, e.B); break;
                 case Ev.PatioMelhorou: Diario("ground_vehicle_upgraded", e.A, e.B, e.C); break;
+                case Ev.SuprimentoPedido: Diario("supply_ordered", e.A, e.B, e.C); break;
+                case Ev.SuprimentoChegou: Diario("supply_delivered", e.A, e.B); break;
+                case Ev.SuprimentoFaltou: Diario("supply_shortage", e.A, e.B); break;
+                case Ev.SuprimentoMelhorou: Diario("supply_upgraded", e.A, e.B, e.C); break;
                 case Ev.ManutencaoAviso: Diario("maintenance_warning", e.A, e.B); _hud.Toast(Textos.ManutencaoAviso(e.B)); break;
                 case Ev.ManutencaoPendente: Diario("maintenance_due", e.A, e.B); _hud.Toast(Textos.ManutencaoPendente); break;
                 case Ev.ChecagemIniciada: Diario("maintenance_check_started", e.A, e.B, e.C); break;

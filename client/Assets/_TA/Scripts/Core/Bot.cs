@@ -23,6 +23,11 @@ namespace TA.Core
         public bool Missoes;
         /// <summary>Compra = produtos creditados no 1o passo (o bot faz o papel do servidor). Gasta = gasta as Gems: booster sempre, pacote de Cash com pouco Cash (CONTRATO_FASE_D1 §7).</summary>
         public string[] Compra; public bool Gasta;
+        /// <summary>Candidatos = compara os 3 candidatos: a vaga entra na conta do mais barato pelo preco do Junior, em qualquer ordem, e contrata o
+        /// melhor que o caixa paga (o Senior direto quando cobre); e troca quem nao e' Senior por ele, pesando a troca pela metade do preco: o Senior
+        /// rende 25% na estacao toda, cerca do dobro de um nivel de velocidade (CONTRATO_FASE_C9 §6, BALANCE §16). Sem ele, contrata sempre o Pleno e
+        /// nunca demite.</summary>
+        public bool Candidatos;
 
         public static readonly BotProfile Bom = new BotProfile { Name = "Bom", Decide = 1f, Move = true, Planeja = true, Equipe = true, Rotas = true, Viaja = true, Incidentes = true, Clima = true, Falhas = true };
         public static readonly BotProfile Lento = new BotProfile { Name = "Lento", Decide = 2.5f, Move = true, Planeja = true, Equipe = true, Rotas = true, Viaja = true, Incidentes = true, Clima = true, Falhas = true };
@@ -46,7 +51,15 @@ namespace TA.Core
         public static readonly BotProfile BoasVindas = Comprador("BoasVindas", "welcome_bundle_01");
         public static readonly BotProfile PacoteGrande = Comprador("PacoteGrande", "gems_pack_large");
         public static readonly BotProfile Baleia = Comprador("Baleia", Enumerable.Repeat("gems_pack_large", 200).ToArray());
+        /// <summary>Portao da Fase C9: o Bom e o Lento que comparam os candidatos e trocam pelo Senior.</summary>
+        public static readonly BotProfile Contratador = Candidato(Bom, "Contratador"), LentoContratador = Candidato(Lento, "LentoContratador");
         public static readonly BotProfile[] All = { Bom, Lento, Parado };
+
+        static BotProfile Candidato(BotProfile p, string nome)
+        {
+            p.Name = nome; p.Candidatos = true;
+            return p;
+        }
 
         static BotProfile Comprador(string nome, params string[] compra)
         {
@@ -414,23 +427,31 @@ namespace TA.Core
 
         bool Comprar(Sim s)
         {
-            // hire: -2 = o proximo da v0.1 (Hire()), >= 0 = o perfil novo, -1 = upgrade
-            long best = s.CustoContratar(); Estacao be = 0; Melhoria bm = 0; int hire = best >= 0 ? -2 : -1;
-            for (int p = Sim.MaxFuncionarios; p < Sim.MaxEquipe; p++)
+            // hire: -2 = o proximo da v0.1 (Hire()), >= 0 = o perfil novo, -1 = upgrade. Fase C8: com a conta atrasada (Pausado) a tela trava
+            // contratar e melhorar, e o bot so olha rota e viagem
+            // Fase C9 (Candidatos): as 6 vagas pelo preco do Junior, em qualquer ordem, e a troca pelo Senior (hire = -5)
+            long best = s.Pausado || P.Candidatos ? -1 : s.CustoContratar(); Estacao be = 0; Melhoria bm = 0; int hire = best >= 0 ? -2 : -1, troca = -1;
+            for (int p = P.Candidatos ? 0 : Sim.MaxFuncionarios; p < Sim.MaxEquipe && !s.Pausado; p++)
             {
-                long c = s.CustoContratar((Perfil)p);
+                long c = P.Candidatos ? s.CustoContratar((Perfil)p, Experiencia.Junior) : s.CustoContratar((Perfil)p);
                 if (c >= 0 && (best < 0 || c < best)) { best = c; hire = p; }
+            }
+            for (int k = 0; k < s.Staff.Count && P.Candidatos && !s.Pausado; k++)
+            {
+                long c = s.Staff[k].Experiencia == Experiencia.Senior ? -1 : s.Preco(s.Staff[k].Perfil, Experiencia.Senior);
+                long peso = c >= 0 ? c / 2 : -1;   // a troca vale o dobro de uma compra do mesmo preco; so com o caixa para o preco inteiro
+                if (peso >= 0 && (best < 0 || peso < best) && s.Cash >= c) { best = peso; hire = -5; troca = k; }
             }
             foreach (Station st in s.Estacoes)
             {
-                if (!Fluxo(st.Tipo) && s.Alocados(st.Tipo) == 0) continue;   // estacao sem ninguem nao rende: nao melhora
+                if (s.Pausado || !Fluxo(st.Tipo) && s.Alocados(st.Tipo) == 0) continue;   // estacao sem ninguem nao rende: nao melhora
                 foreach (Melhoria m in new[] { Melhoria.Velocidade, Melhoria.Capacidade })
                 {
                     long c = s.Custo(st.Tipo, m);
                     if (c >= 0 && (best < 0 || c < best)) { best = c; be = st.Tipo; bm = m; hire = -1; }
                 }
             }
-            if (s.AtrasosPatio > _patioVisto && s.CustoPatio() >= 0 && (best < 0 || s.CustoPatio() <= best))
+            if (!s.Pausado && s.AtrasosPatio > _patioVisto && s.CustoPatio() >= 0 && (best < 0 || s.CustoPatio() <= best))
             {
                 if (!s.HirePatio()) return false;
                 _patioVisto = s.AtrasosPatio;
@@ -447,7 +468,17 @@ namespace TA.Core
             long v = s.CustoViagem(s.AeroportoAtual + 1);
             if (P.Viaja && !P.Objetivos && _embarque >= ViajaCom && v >= 0 && (best < 0 || v < best)) { best = v; hire = -4; }
             if (best < 0 || s.Cash < best) return false;
+            if (hire == -5) { Perfil tp = s.Staff[troca].Perfil; return s.Demite(troca) && s.Hire(tp, Experiencia.Senior); }
+            if (hire >= 0 && P.Candidatos) return Contrata(s, (Perfil)hire);
             return hire == -2 ? s.Hire() : hire == -3 ? s.AbreRota(rota) : hire == -4 ? s.Viajar(s.AeroportoAtual + 1) : hire >= 0 ? s.Hire((Perfil)hire) : s.Buy(be, bm);
+        }
+
+        /// <summary>Fase C9: o melhor dos 3 candidatos que o caixa paga.</summary>
+        static bool Contrata(Sim s, Perfil p)
+        {
+            for (var x = Experiencia.Senior; x >= Experiencia.Junior; x--)
+                if (s.Cash >= s.CustoContratar(p, x)) return s.Hire(p, x);
+            return false;
         }
 
         /// <summary>So viaja quem esta dando conta: embarque do ultimo voo.</summary>
@@ -472,6 +503,13 @@ namespace TA.Core
             public int Diarias, Semanais, Conquistas; public long PagoMissoes; public int[] ConquistaEm;
             /// <summary>Fase C7: niveis do passe pagos, o Cash deles e a onda em que a trilha gratuita fechou (-1 = nao fechou).</summary>
             public int Niveis, PasseEm; public long PagoPasse;
+            /// <summary>Fase C8: Cash pago nas contas do dia e dias fechados com falta de caixa (pausa).</summary>
+            public long Despesas; public int Apertos;
+            /// <summary>Frente F: usos do banheiro, quem achou fechado, interdicoes, limpezas feitas, sujeira media (de 0 a Sim.SujeiraMax, media das 7 areas
+            /// medida a cada s) e a maior fila na porta do banheiro.</summary>
+            public int Usos, Negados, Interdicoes, Limpezas, FilaBanheiro; public double SujeiraMedia;
+            /// <summary>ta-suprimentos: vezes que um aviao esperou suprimento e o custo das entregas pedidas.</summary>
+            public int Faltas; public long Suprimentos;
         }
 
         /// <summary>Joga `ondas` ondas inteiras com o perfil `p` e a semente `seed`, sem render. `reabre` = fecha e reabre o jogo (Save ->
@@ -484,7 +522,8 @@ namespace TA.Core
             for (int i = 0; i < 30; i++) r.ObjetivoEm[i] = -1;
             for (int i = 0; i < r.ConquistaEm.Length; i++) r.ConquistaEm[i] = -1;
             double soma = 0;
-            long passos = (long)ondas * s.OndaPassos;
+            long passos = (long)ondas * s.OndaPassos, amostras = 0;
+            int usos = 0, usando = 0;
             while (s.Steps < passos && !(ateFechar && s.CampanhaCompleta))
             {
                 if (reabre && s.Steps % s.OndaPassos == s.OndaPassos / 2) s = Sim.Load(s.Save("autoplay", 1000 + s.Steps), t, seed);
@@ -512,8 +551,24 @@ namespace TA.Core
                             if (n.Premio == Premio.Cash) r.PagoPasse += e.C;
                             if (e.B == s.T.Temporadas[e.A].Gratis.Length && r.PasseEm < 0) r.PasseEm = s.Onda;
                             break;
+                        case Ev.DiaFechado: r.Despesas += e.B; if (e.C > 0) r.Apertos++; break;
+                        case Ev.ContaQuitada: r.Despesas += e.B; break;
+                        case Ev.Limpou: r.Limpezas++; break;
+                        case Ev.BanheiroInterditado: if (e.A == 1) r.Interdicoes++; break;
+                        case Ev.SuprimentoFaltou: r.Faltas++; break;
+                        case Ev.SuprimentoPedido: r.Suprimentos += e.C; break;
                     }
+                if (s.Steps % Sim.Hz == 0)
+                {
+                    foreach (int x in s.Sujeira) r.SujeiraMedia += x;
+                    amostras += Sim.Areas;
+                }
+                r.FilaBanheiro = Math.Max(r.FilaBanheiro, s.Banheiro.Fila.Count);
+                usos += Math.Max(0, s.Banheiro.Usando.Count - usando);
+                usando = s.Banheiro.Usando.Count;
             }
+            r.SujeiraMedia = amostras > 0 ? r.SujeiraMedia / amostras : 0;
+            r.Usos = usos; r.Negados = (int)Math.Min(int.MaxValue, s.Banheiro.Negados);
             r.Embarque = r.Voos > 0 ? soma / r.Voos : 0;
             r.Moves = bot.Moves; r.Taps = bot.Taps; r.Reacoes = bot.Reacoes; r.Reparos = bot.Reparos;
             return r;

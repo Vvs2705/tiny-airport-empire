@@ -857,3 +857,438 @@ As 16 travas novas entram no `mutacao.py`, e a do booster da Fase D1 muda de tre
 - **O passe fecha cedo para quem joga tudo.** O Completo termina no dia 18 e passa 10 dias sem barra. Se incomodar, subir os pontos por nível e medir de novo. A trilha premium pode ocupar esse fim.
 - **Cash do passe sem destino.** São 28 300 Cash, quase todo depois do fim do catálogo (perto da onda 20). Só os primeiros níveis compram progresso; o valor que sobra está no 2× e nos 3 cosméticos, que pedem arte.
 - **A barra é entendida?** A tela precisa dizer que ponto não se compra, que nada expira e quantos dias do jogo faltam. Ver se "dia do jogo" confunde quem espera o calendário (D-C7a).
+
+## 13. Fase C8: despesas e relatório do dia (2026-11-03, `CONTRATO_FASE_C8.md`)
+
+Salário por perfil, por função da tripulação e por pessoa de pátio, e manutenção por estação ativa e por nível, cobrados no fechamento do dia do jogo (8 ondas). Faltou caixa: o Cash vai a zero e para, contratar e melhorar pausam até o caixa cobrir a conta, e o fechamento seguinte perdoa o resto. **Antes** = a conta desligada (`RegraDespesas = false`), medida no mesmo código: repete a `main` da Fase D1 número a número (`Antes_FaseD1`). **Depois** = o `Tuning` padrão.
+
+### A tabela (Cash por dia do jogo)
+
+| | Atendente | Segurança | Vendedor | Bagageiro | Mecânico | Despachante | Piloto | Comissário | Pátio |
+|---|---|---|---|---|---|---|---|---|---|
+| salário | 35 | 50 | 50 | 60 | 90 | 90 | 24 | 12 | 18 |
+
+| | Check-in | Segurança | Loja | Portão | Bagagem | Alimentação | Oficina | Despacho |
+|---|---|---|---|---|---|---|---|---|
+| manutenção da estação ativa | 12 | 12 | 9 | 9 | 9 | 9 | 18 | 12 |
+| + por nível (velocidade + capacidade) | 6 | 6 | 5 | 5 | 5 | 5 | 7 | 0 |
+
+O jogo novo paga 168 por dia: a tripulação inicial (3 pilotos e 3 comissários), 1 pessoa de pátio e as 4 estações da v0.1. Com as 8 estações, a equipe e o pátio completos e tudo no máximo, a conta chega a cerca de 1 000 por dia.
+
+### D-C8c. A 1ª tabela derrubava o portão dos aeroportos
+
+A 1ª tabela era 1,67 × esta (salário de 60 a 150, manutenção de 15 a 30 mais 8 a 12 por nível). Com ela, todos os portões passaram, menos **aeroportos: 1,078**. Quem viaja e quem fica pagam a mesma conta (2 270 em 20 ondas), mas juntar Cash para a viagem demora mais, e quem viaja chega depois ao aeroporto que paga mais. Variantes medidas (200 sementes × 20 ondas, tudo aberto, partindo de Vale Verde, sem incidente):
+
+| variante | viaja | fica | ganho | chega à Costa Azul | chega a Aurora | conta paga |
+|---|---|---|---|---|---|---|
+| sem conta | 31 365 | 27 256 | 1,151 | onda 13,4 | onda 16,8 | 0 |
+| 1ª tabela | 28 692 | 26 615 | **1,078** | 14,2 | 18,1 | 2 270 |
+| 1ª tabela pela metade | 30 540 | 26 909 | 1,135 | 14,0 | 17,3 | 1 131 |
+| 1ª tabela, só salário | 29 954 | 26 835 | 1,116 | 14,0 | 17,5 | 1 370 |
+| 1ª tabela, só manutenção | 30 830 | 26 945 | 1,144 | 13,9 | 17,1 | 900 |
+| bot respeita a pausa (D-C8d), 1ª tabela | 29 056 | 26 707 | 1,088 | 14,0 | 18,0 | 2 271 |
+| bot respeita a pausa, 75% | 29 251 | 26 790 | 1,092 | 14,0 | 17,8 | 1 709 |
+| **bot respeita a pausa, 60% (escolhida, arredondada)** | **30 165** | **26 890** | **1,122** | 14,0 | 17,5 | 1 367 |
+| bot respeita a pausa, salário pela metade | 29 417 | 26 803 | 1,097 | 14,0 | 17,7 | 1 585 |
+
+O ganho cai quase em linha com o tamanho da conta. Escolhi 60%, a maior conta que deixa o portão com folga parecida com a dos outros (o menor deles é 1,118).
+
+### D-C8d. O bot respeita a pausa
+
+Com a conta atrasada, o bot continuava escolhendo o item mais barato. Se era uma melhoria pausada, não comprava nada, nem a rota que poderia abrir. Agora, em pausa, ele só olha rota e viagem, que é o que a tela vai deixar comprar. Sem pausa, nada muda: com a conta desligada, a tabela é a da Fase D1, número a número.
+
+### D-C8e. Quase todo bot fica sem caixa no 1º fechamento
+
+O bot compra o que couber assim que pode, e no fim do dia 0 o caixa está perto de zero em quase todas as sementes (sem o passe, em todas). A conta fica atrasada por alguns minutos, e só o LentoGuiado repete no dia 1. Uma pessoa que vê "a conta de hoje" pode guardar a reserva. A tela precisa mostrar a conta antes da virada.
+
+### O peso da conta (`Medida_FaseC8`, 200 sementes, com o passe)
+
+| bot | ondas | embarque | receita | conta paga | conta ÷ receita | dias sem caixa no fechamento |
+|---|---|---|---|---|---|---|
+| Bom | 10 | 95,5% | 8 883 | 561 | 6,3% | 0,92 |
+| Lento | 10 | 79,6% | 5 221 | 496 | 9,5% | 1,00 |
+| Parado | 10 | 89,2% | 4 819 | 474 | 9,8% | 1,00 |
+| Guiado | 20 | 92,0% | 35 536 | 1 499 | 4,2% | 0,89 |
+| LentoGuiado | 20 | 74,4% | 17 501 | 1 431 | 8,2% | 1,82 |
+| Guiado | 64 | 91,1% | 212 798 | 5 968 | 2,8% | 0,89 |
+| LentoGuiado | 64 | 76,7% | 124 377 | 5 861 | 4,7% | 1,82 |
+
+Sem o passe, a conta era 7,7% a 11,0% da receita em 10 ondas e 3,3% a 5,4% em 64: o 2× do passe aumenta a receita, e a conta fica igual.
+
+### Os portões com o passe, antes e depois (200 sementes, a `main` com o PR #49)
+
+| portão | antes | depois |
+|---|---|---|
+| TA-1 Bom (10 ondas) | 95,5%, receita 8 913 | 95,5%, receita 8 883 |
+| TA-1 Lento | 80,6%, receita 5 401 | 79,6%, receita 5 221 |
+| TA-1 Parado | 89,2%, receita 4 887 | 89,2%, receita 4 819 |
+| TA-2 (Bom / Parado) | 1,824 | 1,843 |
+| Fase C (Planejador / Automático, 20 ondas) | 1,176 | 1,182 |
+| Fase C2, as 4 estações | 1,366 | 1,343 |
+| Fase C5, campanha (Guiado / Bom, 20 ondas) | 1,380 | 1,395 |
+| Fase C6, missões (Missionário / Bom, 20 ondas) | 1,438 | 1,451 |
+| Fase C7, passe: o LentoCompleto fecha os 30 níveis | **200 de 200**, dia 20,0 (p90 21,8, pior 23,9) | **200 de 200**, dia 19,9 (p90 21,5, pior 23,4) |
+| Fase D1, sem compra fecham os 30 | 200 de 200: Guiado na onda 51,3, LentoGuiado 62,9 (pior 85) | 200 de 200: Guiado 51,2, LentoGuiado 62,4 (pior 81) |
+| Fase D1, a Baleia fecha a campanha em | 0,996 do tempo | 0,998 |
+| Alcance da campanha e das conquistas | — | os 30 e as 20 em 200 de 200; LentoGuiado fecha a campanha na onda 62,4 (p90 69); última conquista na onda 148,7 e 172,6 |
+
+As Fases C3 e C4 e o TA-6 medem com o passe desligado (`SemFaseC4`) e dão a tabela de baixo. Quem nunca olha para as missões fecha o passe em menos sementes com a conta: Bom 79 de 200 (eram 84) e Lento 99 de 200 (eram 111). O passe não promete nada a eles.
+
+### Os portões sem o passe, antes e depois (200 sementes, medidos antes de o PR #49 entrar)
+
+| portão | antes | depois |
+|---|---|---|
+| TA-1 Bom (10 ondas) | 95,0%, receita 6 740 | 94,4%, receita 6 529 |
+| TA-1 Lento | 78,8%, receita 4 219 | 79,1%, receita 4 264 |
+| TA-1 Parado | 88,5%, receita 4 709 | 88,5%, receita 4 627 |
+| TA-2 (Bom / Parado) | 1,431 | **1,411** |
+| Fase C (Planejador / Automático, 20 ondas) | 1,152 | 1,157 |
+| Fase C2, as 4 estações | 1,371 | 1,353 |
+| Fase C3, rotas em Vale Verde, Costa Azul e Aurora | 1,221, 1,124 e 1,273 | 1,213, 1,118 e 1,255 |
+| Fase C3, aeroportos | 1,151 | **1,122** |
+| Fase C3, incidentes na Costa Azul e em Aurora | 1,146 e 1,170 | 1,162 e 1,203 |
+| Fase C4, clima na Costa Azul e em Aurora | 1,161 e 1,147 | 1,166 e 1,140 |
+| Fase C4, falhas em Vale Verde, Costa Azul e Aurora | 1,134, 1,131 e 1,124 | 1,139, 1,139 e 1,135 |
+| Fase C5, campanha (Guiado / Bom, 20 ondas) | 1,114 | 1,142 |
+| Fase C6, missões (Missionário / Bom, 20 ondas) | 1,147 | 1,164 |
+| Fase D1, sem compra fecham os 30 | 200 de 200: Guiado na onda 51,6, LentoGuiado 62,8 (pior 99) | 200 de 200: Guiado 51,6, LentoGuiado 63,3 (pior 99) |
+| Fase D1, a Baleia fecha a campanha em | 0,990 do tempo | 0,991 |
+| TA-6, melhor ÷ segunda rota (Vale Verde, Costa Azul, Aurora) | 1,020, 1,047 e 1,161 | 1,066, 1,055 e 1,161 |
+| Alcance da campanha (`Alcance_FaseC5`, até 120 ondas) | os 30 em 200 de 200 | os 30 em 200 de 200; Guiado 51,6 (p90 56), LentoGuiado 63,3 (p90 71) |
+| Alcance das conquistas (`Alcance_FaseC6`, até 240 ondas) | as 20 em 200 de 200; última na onda 148,5 e 172,8 | as 20 em 200 de 200; última na onda 148,5 e 172,7 |
+
+**Passa, com e sem o passe.** Todos os portões seguem verdes. O que mais cai é o dos aeroportos, pelo motivo da D-C8c. A campanha e as missões sobem porque a receita do Bom, que não persegue nada, cai mais que a de quem recebe as recompensas (sem o passe, −533 contra +90 em 20 ondas).
+
+### Prova de mutação (`MUTACAO_TESTES="FullyQualifiedName~DespesasTests|FullyQualifiedName~SaveTests|FullyQualifiedName~ExploitTests" python client/tools/mutacao.py despesa`)
+
+As 14 travas novas entram no `mutacao.py`. Resultado em 2026-11-03: **14 de 14 mortos**. Das travas anteriores, conferi que os trechos ainda existem no núcleo, sem rodar de novo.
+
+| trava retirada | testes que caíram |
+|---|---|
+| o caixa paga só o que tem | 9, entre eles `FaltaDeCaixa_CashNuncaNegativo_PausaEQuitaSozinho` |
+| a falta não acumula | `Falta_PerdoadaNoFechamentoSeguinte_NuncaViraDivida` e mais 2 |
+| a atrasada só sai inteira | 8, entre eles `FaltaDeCaixa_CashNuncaNegativo_PausaEQuitaSozinho` |
+| a falta pausa contratar e melhorar | `FaltaDeCaixa_CashNuncaNegativo_PausaEQuitaSozinho` |
+| cobra só na virada do dia | 31, entre eles `Fechamento_CobraNoPrimeiroPassoDoDiaSeguinte_UmaVez` |
+| regra desligada não cobra | 6, entre eles `RegraDesligada_SoORelatorio` |
+| só a estação ativa cobra | `Folha_QuemEstaContratado_EAsEstacoesAtivasPeloNivel` |
+| o nível da estação cobra | `Folha_QuemEstaContratado_EAsEstacoesAtivasPeloNivel` |
+| offline não cobra | 4, entre eles `Invariante_C8_Offline_NaoCobraNemViraODia` |
+| o relatório guarda a fonte | `Relatorio_ReceitaPorFonte_BateComOsEventos` e mais 1 |
+| a conta atrasada vai no save | 5, entre eles `Save_ReabrirNoMeioDaOnda_DaOMesmoJogo` |
+| atrasada do save limitada | `LixoDoRelatorio_ViraPadraoLimitado` |
+| dia do save nunca no futuro | `LixoDoRelatorio_ViraPadraoLimitado` |
+| pago do save até a conta | `LixoDoRelatorio_ViraPadraoLimitado` |
+
+### Para medir com gente
+
+- **A conta é pequena.** Com o passe, pesa 6% a 10% da receita nas 10 primeiras ondas e 3% a 5% em 64 ondas. Não resolve o Cash sem destino (§9 e §10): para isso faltam o mapa que cresce e a construção. Com mais sumidouro, dá para subir a tabela de novo, medindo os aeroportos.
+- **Contratar sem demanda ainda não dá prejuízo.** O pior salário (90) é menos de 1% da receita de um dia a partir do dia 2. O GDD de direção §12 pede que dê; isso precisa da demissão (frente D), para o jogador poder corrigir.
+- **O 1º fechamento sempre aperta** (D-C8e). Ver se a pessoa entende a pausa e o que fazer: mostrar o valor que falta e a hora do fechamento.
+
+## 14. Registro de ocorrências (2026-11-04, frente `ta-historico`)
+
+Não tem número de balanço: só observa. A prova tem duas partes.
+
+- **No mesmo código:** `Invariante_SoObserva_DesligadoDaOMesmoJogo_NumeroANumero` joga 9 cenários (o padrão, os 4 incidentes, um clima e as 3 falhas de avião), com o Bom e o Parado, 10 ondas cada, com o registro ligado e desligado (`Tuning.RegraHistorico`). Os eventos saem iguais passo a passo, e o save, igual fora da linha `hist=`.
+- **Contra a `main`:** os portões do §5.13, da campanha, das missões e do passe têm de sair iguais no CI do PR. Medi a `main` de 03/11 (`0b76529`, antes da frente A) e o registro entrou depois da frente A, então a base é a coluna "depois" do §13 (a `main` com a conta e o passe):
+
+| portão | `main` de 03/11 | `main` com a frente A (§13) |
+|---|---|---|
+| §5.13 (Planejador / Automático, 20 ondas) | 1,176: receita 21 447 contra 18 231; só tripulação 1,030, só manutenção 1,176, as duas 1,194 | 1,182 |
+| campanha (Guiado / Bom, 20 ondas) | 1,380: receita 35 568 contra 28 361 | 1,395 |
+| missões (Missionário / Bom, 20 ondas) | 1,438: receita 37 415 contra 28 361 | 1,451 |
+| passe (LentoCompleto) | 200 de 200, dia 20,0, p90 21,8, pior 23,9, 28 300 de Cash, embarque 77,7% | 200 de 200, dia 19,9, p90 21,5, pior 23,4 |
+
+### Prova de mutação (`MUTACAO_TESTES="FullyQualifiedName~HistoricoTests" python client/tools/mutacao.py historico:`)
+
+As 19 travas novas entram no `mutacao.py`. Resultado em 2026-11-04, depois da junção com a frente A: **19 de 19 mortos**. A 1ª rodada deu 16: "travou onde ficou a maioria" sobreviveu, porque em todo teste quem perdia o voo estava numa estação só. Entrou `VooPerdido_ExplicaOndeFicouAMaioria` e esse mutante foi repetido.
+
+| trava retirada | testes que caíram |
+|---|---|
+| só observa: não mexe no voo | `Invariante_SoObserva_...` e a migração do schema 10 |
+| só observa: não mexe no avião | os 2 testes da pane |
+| desligado não anota (eventos e portão) | `Invariante_SoObserva_...` |
+| retenção de 3 dias do jogo | `Retencao_TresDiasDoJogo_ODiaQueViraSaiSemEvento` |
+| teto do dia, ao anotar e no save | `TetoDoDia_FicamAsMaisNovas` |
+| passo e perdidos do save limitados | `LixoDoHistorico_ViraPadraoLimitado` |
+| o registro vai no save | `IdaEVolta_ComOcorrencias_TextoEstavel`, `Retomada_ReabrirNoMeio_DaOMesmoRegistro` |
+| o custo do reparo pago | `Pane_ReparoPago_GuardaOCusto` |
+| explica a estação sem ninguém | `VooPerdido_SegurancaSemNinguem_ExplicaSemEquipe` |
+| travou onde ficou a maioria | `VooPerdido_ExplicaOndeFicouAMaioria` |
+| o atraso da decolagem | os testes da rejeição e do pátio lento |
+| a pane fecha quando o avião volta ao normal | a pane sem pagar e o retorno |
+| a falha de avião guarda o desgaste | a pane sem pagar |
+| a rejeição não fecha o incidente do mesmo índice (o `Pico` e a `Rejeicao` valem 2) | `Incidente_EntraNoAviso_FechaComOResultadoDoVoo` |
+| a falta de caixa entra no fechamento (frente A) | `FaltaDeCaixa_EntraNoFechamento_FechaQuandoOCaixaQuita` |
+| a falta fecha quando o caixa quita | `FaltaDeCaixa_EntraNoFechamento_FechaQuandoOCaixaQuita` |
+
+## 15. Frente E: transferência pelo vestiário (2026-11-04, `GDD.md` §4.1, linha E)
+
+Mover alguém de estação passa pelo vestiário (`Sim.Vestiario.cs`). A pessoa termina o atendimento em curso (o encerramento, quando os outros presentes não cobrem os atendimentos), anda ao vestiário, troca o uniforme e anda ao posto novo. Em todo esse tempo ela não atende em nenhuma das duas estações. Voltar ao setor do uniforme que ela ainda veste é só a caminhada. Nada novo no save: a fase sai do `Andando`, e o `De` guarda o uniforme até o fim da troca.
+
+### D-Ea. A transferência não pode durar mais que a caminhada da v0.1
+
+O primeiro desenho somava 2,5 s de ida, 3 a 5 s de troca por estação e 2,5 s de volta. O TA-2 passava com folga, mas o LentoGuiado parava no objetivo 18 ("Fortaleza lotada", 3 voos com 90% na rota de Fortaleza) e não fechava a campanha. Medi o tempo total (sem o encerramento), com 40 sementes para o TA-2 e as sementes 1 a 4 para a campanha:
+
+| transferência | TA-2 | TA-1 Lento | LentoGuiado: objetivos em 120 ondas |
+|---|---|---|---|
+| 2,5 s (a v0.1, sem vestiário) | 1,823 | 80,6% | 30, 30, 30, 30 |
+| 2,5 s com o vestiário e o encerramento | 1,800 | 80,8% | 30, 30, 30, 30 |
+| 3,5 s | 1,789 | 80,4% | 30, 30, 30, 30 |
+| 4 s | 1,764 | 79,0% | 27, 29, 23, 30 |
+| 5 s | 1,758 | 79,0% | 18, 18, 18, 18 |
+| 8 s (troca de 3 s) | 1,709 | 76,5% | 18, 18, 11, 11 |
+
+Com 200 sementes, os 3,5 s deram **131 de 200** no alcance da campanha e derrubaram o `Alcance_FaseC5` e o `Portao_FaseD1_Compras`. Quem trava é o voo cheio: um segundo a mais na mudança custa os últimos passageiros do voo, e o bot lento, que move 4 a 5 vezes por onda, não chega aos 90%. Um bot que reage antes, pelo tempo a mais da transferência, não resolveu: com 8 s, 18/18/18/11, e o TA-2 caiu para 1,664. Ficou de fora.
+
+**Decisão:** ida, troca de 1 s (`Tuning.Troca`) e volta somam os 2,5 s da caminhada da v0.1. O custo novo de mover é o encerramento. Se o playtest pedir uma troca mais longa, o objetivo de voo cheio da campanha precisa mudar antes (decisão do Vinicius).
+
+### Os portões, com o vestiário (200 sementes, a `main` com a despesas, PR #56)
+
+| portão | antes (a `main`, §13) | com o vestiário |
+|---|---|---|
+| TA-1 Bom (10 ondas) | 95,5%, receita 8 883 | 94,8%, receita 8 740 |
+| TA-1 Lento | 79,6%, receita 5 221 | 79,9%, receita 5 222 |
+| TA-1 Parado | 89,2%, receita 4 819 | 89,2%, receita 4 819 |
+| TA-2 (Bom / Parado) | 1,843 | **1,814** |
+| Fase C (Planejador / Automático, 20 ondas) | 1,182 | 1,182 |
+| Fase C2, as 4 estações | 1,343 | 1,340 |
+| Fase C5, campanha (Guiado / Bom, 20 ondas) | 1,395 | 1,411 |
+| Fase C6, missões (Missionário / Bom, 20 ondas) | 1,451 | 1,461 |
+| Fase C7, passe: o LentoCompleto fecha os 30 níveis | 200 de 200, dia 19,9 (pior 23,4) | 200 de 200, dia 19,9 (pior 23,5) |
+| Fase D1 e alcance da campanha, sem compra | 200 de 200: Guiado 51,2, LentoGuiado 62,4 (pior 81) | 200 de 200: Guiado 51,5, **LentoGuiado 69,5 (p90 80, pior 103)**; a Baleia fecha em 0,994 do tempo |
+| Alcance das missões e conquistas | 200 de 200 | 200 de 200 |
+| Fases C3 e C4 e TA-6 | verdes | iguais: medem com o vestiário desligado (`SemFaseC4`) |
+
+Antes da despesas entrar, a mesma medida deu TA-2 1,787 (era 1,824) e LentoGuiado na onda 69,8 (pior 106), também com todos os portões verdes.
+
+**Ressalva:** o LentoGuiado leva 7 ondas a mais para fechar a campanha, e o pior caso fica a 17 ondas do teto de 120. O encerramento pesa para quem move muito. As tabelas "antes" (`SemC8` do `BalanceTests`) e as migrações dos saves reais dos schemas 2 a 9 jogam com o vestiário desligado, como o jogo que as gravou.
+
+### Prova de mutação (`MUTACAO_TESTES="FullyQualifiedName~VestiarioTests|FullyQualifiedName~RegrasTests|FullyQualifiedName~SaveTests" python client/tools/mutacao.py vestiario`)
+
+Resultado em 2026-11-04: **6 de 6 mortos**.
+
+| trava retirada | testes que caíram |
+|---|---|
+| voltar ao setor do uniforme não troca | `VoltarAoSetorDoUniforme_SoACaminhada_DepoisDaTroca_VestiarioDeNovo` |
+| quem sai termina o atendimento | `Encerrando_TerminaOAtendimentoNoPostoAntesDeSair` |
+| o outro no posto cobre o atendimento | `ComOutroNoPosto_SaiSemEsperar` |
+| o uniforme só muda no fim da troca | 5, entre eles `Invariantes_NoBotLento_TresOndas` e `MigracaoDaV01_AbreComTudoEOVooDaFilaEmbarca` |
+| a fase sai do `Andando` | 4, entre eles `Transferencia_EncerraVaiTrocaEChega_NaOrdem_UniformeSoNoVestiario` |
+| o save guarda a transferência inteira | `Encerrando_TerminaOAtendimentoNoPostoAntesDeSair` |
+
+## 16. Fase C9: os 3 candidatos e a demissão (2026-11-03, `CONTRATO_FASE_C9.md`)
+
+Cada vaga tem um Júnior, um Pleno e um Sênior fixos. O Pleno é a pessoa e o preço de antes; os outros dois rendem, custam e ganham em % dele (o `CONTRATO_FASE_C9.md` §2 tem a tabela). Os bots de sempre contratam o Pleno e nunca demitem: o jogo deles é o de antes, número a número. A migração do save real do schema 10 prova isso (migrar = jogar até ali com o código novo).
+
+### A sonda: quanto a experiência pesa (40 sementes × 20 ondas, todos os perfis iguais)
+
+| equipe | Bom: lucro | Lento: lucro | Guiado: lucro |
+|---|---|---|---|
+| toda Pleno (o jogo de antes) | 26 374 | 14 128 | 33 208 |
+| toda Sênior (125%, contratação 200%, salário 150%) | 29 754 (1,128) | 17 911 (1,268) | 40 707 (1,226) |
+| toda Júnior (80%, contratação 50%, salário 70%) | 23 050 (0,874) | 8 584 (0,608) | 31 495 (0,948) |
+| Sênior de graça (125%, preço do Pleno) | 32 943 | 19 695 | 35 827 |
+| Júnior de graça (80%, preço do Pleno) | 22 811 | 8 053 | 30 121 |
+
+Lucro = receita − conta paga. **Ao contrário do especialista** (só visual, ganho 1,00, D-C2a), a experiência pesa muito: o especialista só vale na casa dele, e a experiência vale em toda estação onde a pessoa estiver. O salário é pequeno perto do que cada pessoa rende, por isso o Sênior compensa mesmo pagando o dobro.
+
+### D-C9c. A decisão é de caixa, não de tipo
+
+Com estes números o Sênior quase sempre é o melhor. O Júnior põe gente no posto cedo, com pouco Cash, e a demissão serve para trocá-lo por alguém melhor depois. É o que o bot `Contratador` faz. Se o playtest achar o Sênior óbvio demais, o ajuste é no preço (`ExpContratacao`), não na lista.
+
+### O portão do §5.13 (`Portao_FaseC9_Candidatos`)
+
+O `Contratador` (e o `LentoContratador`) compara os 3, contrata o melhor que o caixa paga e troca pelo Sênior, pesando a troca pela metade do preço (D-C9d). O portão compara o lucro dele com o do Bom (e do Lento), que contrata sempre o Pleno, com as mesmas sementes, 200 × 20 ondas.
+
+| bot | embarque | receita | conta paga | lucro | lucro do Pleno | ganho |
+|---|---|---|---|---|---|---|
+| Contratador | 96,2% | 30 957 | 1 652 | 29 305 | 26 213 | **1,118** |
+| LentoContratador | 88,0% | 20 461 | 1 581 | 18 881 | 13 356 | **1,414** |
+
+Com o vestiário da frente E (PR #63), que entrou depois: antes dele, 1,118 e 1,405.
+
+### D-C9d. O bot que mede a escolha troca pelo Sênior com prioridade
+
+A 1ª versão do `Contratador` pesava a troca pelo preço inteiro: deu 1,120 com 40 sementes e **1,099 com 200** no CI (PR #61), um milésimo abaixo do piso. As variantes, todas com 200 sementes (Bom / Lento):
+
+| variante | Bom | Lento |
+|---|---|---|
+| vaga pelo preço do Júnior, troca pelo preço inteiro (a 1ª) | 1,099 | 1,323 |
+| vaga pelo preço do Sênior: espera o caixa e contrata o Sênior | 1,030 | 0,324 |
+| vaga pelo preço do Pleno, troca pelo preço inteiro | 1,094 | 1,282 |
+| vaga pelo preço do Pleno, sem troca | 1,027 | 1,057 |
+| vaga pelo preço do Júnior, sem troca | 0,936 | 0,854 |
+| **vaga pelo preço do Júnior, troca pesando metade do preço (a final)** | **1,118** | **1,405** |
+| vaga pelo preço do Júnior, troca pesando um quarto | 1,121 | 1,398 |
+
+Esperar o Sênior para contratar atrasa demais, e o Lento desaba (44% de embarque). O que rende é pôr gente no posto cedo e trocar pelo Sênior logo. A troca pesa metade porque o Sênior rende 25% na estação toda, cerca do dobro de um nível de velocidade (12%). Nenhum número do jogo mudou: só o bot que mede.
+
+### Prova de mutação (`MUTACAO_TESTES="FullyQualifiedName~EquipeTests|FullyQualifiedName~SaveTests.Lixo|FullyQualifiedName~SaveTests.MigracaoDoSchema10|FullyQualifiedName~DespesasTests" python client/tools/mutacao.py candidato demitir`)
+
+As 13 travas novas entram no `mutacao.py`. Resultado em 2026-11-03: **13 de 13 mortos**.
+
+| trava retirada | testes que caíram |
+|---|---|
+| cada um custa o preço dele | `Hire_Recusa_SemCaixa_NivelInvalido_AntesDoMarco` e mais 1 |
+| salário pela experiência | `Tabela_TresCandidatos_OPlenoEOPrecoDeAntes_NenhumDomina` |
+| a folha é a da experiência | `Hire_CadaNivel_CobraOPrecoDele_EEntraNaFolha` e mais 1 |
+| rende pela experiência | `Rende_PeloNivel_NoTempoNaVendaENaForca` |
+| regra desligada iguala os 3 | `Rende_PeloNivel_NoTempoNaVendaENaForca` |
+| vaga fechada não contrata | `Hire_CadaNivel_CobraOPrecoDele_EEntraNaFolha` e mais 1 |
+| experiência inválida não contrata | `Hire_Recusa_SemCaixa_NivelInvalido_AntesDoMarco` |
+| demitir não devolve Cash | `Invariante_C9_ContratarEDemitirNuncaDaCash` e mais 1 |
+| quem vinha depois sobe | `Demite_AtualizaEscalaFolhaECobertura_EReabreAVaga` e mais 1 |
+| demitir vale com a conta atrasada | `Invariante_C9_ComContaAtrasada_DemitirTiraDaPausa` |
+| a experiência vai no save | `MigracaoDoSchema10_SaveReal_TodosPleno` e mais 1 |
+| lixo no save vira o Pleno | `LixoNoNivel_ViraOPleno` |
+| teto do atendimento é o do mais lento | `Lixo_ViraPadraoLimitado` e mais 1 |
+
+### Para medir com gente
+
+- **O Sênior parece óbvio?** Ver se a pessoa compara os 3 ou vai direto no mais caro, e se usa o Júnior para começar.
+- **Demitir sem custo** (D-C9b). Ver se alguém demite e recontrata para fugir da conta; a conta é do estado na hora do fechamento (D-C8b), então demitir antes e recontratar depois economiza no máximo um salário, pagando a contratação de novo.
+
+## 17. Frente F: limpeza e banheiro (2026-11-04, `GDD.md` §4.1, linha F)
+
+Banheiro, sujeira e equipe de limpeza no núcleo (`Sim.Limpeza.cs`, save schema 14) e na tela (`Mundo.Limpeza.cs`). **Antes** = `RegraLimpeza = false`, que dá o jogo de antes número a número: sem banheiro no caminho, sem sujeira, sem equipe de limpeza e sem o salário dela. As tabelas "antes" (`SemC8` e `SemFaseC4` do `BalanceTests`) e as migrações dos saves reais jogam com a regra desligada, como o jogo que as gravou.
+
+| | valor |
+|---|---|
+| passageiro que precisa do banheiro (semente) | 35% |
+| cabines, uso, caminhada do portão à porta (cada perna) | 2, 6 s, 8 s |
+| folga que sobra antes de o embarque abrir, com a volta | 10 s |
+| sujeira por passageiro atendido (check-in, segurança, loja, portão, bagagem, alimentação; banheiro por uso) | 4, 4, 6, 3, 4, 12; 20 (de 1 000) |
+| gatilho da escala automática, limpeza por s | 250, 60 |
+| equipe: no jogo novo, contratações, salário por dia | 1; 60 e 150; 15 |
+
+### D-Fa. O banheiro não pode fazer perder voo
+
+Só vai ao banheiro quem volta antes de o embarque abrir, com 10 s de sobra (`AoPortao`): a viagem acontece enquanto a pessoa esperaria sentada no portão. Quem não tem folga vai direto. Se mesmo assim alguém estiver lá quando o portão fecha (portão adiantado pelo clima, save editado), o voo leva, como numa fila (`FechaOVoo_LevaQuemFicouNoBanheiro`). Com 5 sementes × 4 ondas do Bom e do Lento, nenhum voo fechou com gente no banheiro (`Invariante_NinguemFicaNoBanheiroQuandoOVooFecha`).
+
+### D-Fb. A sujeira ainda não mexe no Cash
+
+A sujeira e a fila do banheiro ficam prontas para a satisfação (frente G) ler (`CONTRATO_LANCAMENTO.md` §5). Hoje o efeito de jogo é o do banheiro: interdita na sujeira máxima, a fila volta ao portão (`Negados`) e só reabre limpo. Com 1 zelador ele quase nunca interdita (0 em 200 sementes), então contratar o 2º e o 3º só limpa mais rápido. O portão do §5.13 dessa escolha (contratar limpeza rende ≥ 1,10) só faz sentido quando a G der peso à sujeira; até lá, a contratação existe no núcleo sem tela.
+
+### O portão da F (`Portao_FrenteF_Limpeza`, 200 sementes, medido no PC com `--filter`)
+
+| bot | ondas | embarque sem / com | receita sem / com | usos do banheiro | maior fila | negados | interdições | limpezas | sujeira média (de 1 000) |
+|---|---|---|---|---|---|---|---|---|---|
+| Bom | 10 | 94,8% / 94,9% | 8 740 / 8 745 | 52,2 | 5 | 0 | 0 | 27,4 | 77 |
+| Lento | 10 | 79,9% / 80,0% | 5 222 / 5 234 | 42,9 | 2 | 0 | 0 | 21,0 | 76 |
+| Guiado | 20 | 91,6% / 91,6% | 35 621 / 35 643 | 61,0 | 6 | 0 | 0 | 74,3 | 106 |
+
+O portão exige embarque com a regra ≥ sem a regra − 0,5 ponto e receita ≥ 98%. O salário (15 por dia) quase não pesa. A receita com a regra sai um pouco maior; a diferença (0,1% a 0,2%) é do tamanho do ruído das decisões do bot, que lê o portão com menos gente enquanto alguns estão no banheiro. Os portões de antes rodam no CI deste PR, com a regra ligada.
+
+### Prova de mutação (`MUTACAO_TESTES="FullyQualifiedName~LimpezaTests|FullyQualifiedName~DespesasTests|FullyQualifiedName~SaveTests|FullyQualifiedName~EquipeTests" python client/tools/mutacao.py limpeza:`)
+
+Resultado em 2026-11-04: **9 de 9 mortos** (o das cabines sobreviveu na 1ª rodada e ganhou o `Cabines_NoTeto_OResto_EsperaNaFilaNaOrdem`).
+
+| trava retirada | testes que caíram |
+|---|---|
+| só vai ao banheiro quem volta antes do embarque | `Invariante_NinguemFicaNoBanheiroQuandoOVooFecha` |
+| as cabines no teto | `Cabines_NoTeto_OResto_EsperaNaFilaNaOrdem` |
+| o banheiro interditado não recebe | `Interdicao_NaSujeiraMaxima_AFilaVolta_OZeladorVaiPrimeiro_EReabreLimpo` |
+| só limpa depois de chegar | 3, entre eles `Escala_VaiAMaisSujaAcimaDoGatilho_SoLimpaDepoisDeChegar_ELiberaNoZero` e `Invariantes_NoBotLento_TresOndas` |
+| a ordem do jogador antes da escala | `Ordem_DoJogador_VemAntesDaEscala_EsperaUmLivre_ERecusaOQueNaoFazSentido` |
+| o salário na folha da equipe | 7, entre eles `Folha_QuemEstaContratado_EAsEstacoesAtivasPeloNivel` |
+| contratar pausa com a conta atrasada | `Contratacao_PrecoFixo_TetoDe3_PausaComAContaAtrasada_FolhaSobe` |
+| o save guarda quem está na cabine | 3, entre eles `Save_NoMeioDoBanheiroEDaLimpeza_IdaEVoltaEstavel_EOMesmoJogo` |
+| o voo que fecha leva quem ficou no banheiro | `FechaOVoo_LevaQuemFicouNoBanheiro` |
+
+### Para medir com gente
+
+- **O banheiro se nota?** Com 2 cabines a fila passa de 5 pessoas só no pico. Ver se a pessoa repara no banheiro e na fila sem a satisfação (G) dizer o motivo.
+- **Mandar limpar.** A ordem existe no núcleo, sem tela ainda. Quando a tela entrar, ver se a pessoa manda limpar a área suja ou deixa a escala automática.
+
+## 18. Suprimentos: combustível e refeições (2026-11-04, frente `ta-suprimentos`)
+
+Ideia do código de outra IA (03/11), refeita no nosso padrão (`Sim.Suprimentos.cs`): nenhum código de lá entrou. Cada turnaround leva cargas de combustível e de refeições. O serviço de pátio que leva o suprimento (combustível; limpeza, que é o caminhão do catering) roda como antes e, quando acaba, tira as cargas do depósito. Sem carga, o caminhão espera no avião até a entrega. Reposição automática: com o depósito no ponto, sai a entrega que enche o tanque, com prazo e custo fixos, e o custo entra na conta do dia. **Antes** = a regra desligada (`RegraSuprimentos = false`: depósito parado, nada pedido, nada cobrado, ninguém espera), que repete a `main` número a número (os `Antes_*` e as migrações rodam com ela). **Depois** = o `Tuning` padrão.
+
+### A tabela
+
+| | Combustível | Refeições |
+|---|---|---|
+| cargas por turnaround (regional, jato) | 1, 2 | 1, 2 |
+| tanque no nível 0 e quanto cada nível soma | 8, +4 | 8, +4 |
+| ponto do pedido automático (cargas no depósito) | 3 | 3 |
+| prazo da entrega | 45 s | 35 s |
+| custo fixo da entrega (conta do dia) | 6 | 5 |
+| tanque maior, preço dos 2 níveis | 40, 80 | 40, 80 |
+
+A entrega enche o tanque de quando chega, com o que se gastou no caminho e o tanque novo, se ele cresceu nesse meio-tempo.
+
+### D-Sa. O embarque nunca espera suprimento
+
+O depósito é lido no fim do serviço, não no começo. A limpeza termina e o embarque abre na hora; o catering que faltou fica devendo, e só a decolagem espera (`Aviao.PatioPronto`). Se o portão fecha com o caminhão esperando, o voo sai atrasado, sem perder ninguém, e o registro de ocorrências explica com `Motivo.Suprimento`. Teste: `Falta_SoAtrasaADecolagem_OEmbarqueAbreNaHora_EORegistroDizSuprimento`, com o depósito vazio e a entrega aos 150 s: o embarque abre no mesmo passo e leva os mesmos passageiros que o jogo sem a regra.
+
+### D-Sb. O custo vai para a conta do dia, não para o caixa
+
+A entrega não pede Cash na hora: soma na 5ª categoria da conta (`Despesa.Suprimentos`), cobrada no fechamento como o resto (§13). Assim nunca falta suprimento por falta de caixa, e a conta atrasada não segura a entrega (`ContaAtrasada_NaoSeguraAEntrega_SoOTanqueMaior`). O tanque maior é melhoria, e pausa com a conta atrasada, como todas.
+
+### D-Sc. Com a tabela padrão, nunca falta
+
+O ponto (3) cobre o maior gasto de um avião (2), e o prazo (45 s e 35 s) é menor que o intervalo entre o pedido e o consumo seguinte que passaria do ponto. Por isso a reposição automática chega antes, e o aviso fica apagado. A invariante `Invariante_TabelaPadrao_NuncaFalta_DepositoNoLimite` confere a cada passo, com o Bom, o Lento e o Guiado em 6 sementes × 16 ondas: zero esperas, depósito entre 0 e o tanque, entrega a caminho cabendo nele e aviso apagado. A falta, o aviso e o caminhão esperando aparecem quando a entrega atrasa: hoje só nos testes, que forçam o prazo, e, depois, com a reposição manual da `ta-politicas`.
+
+### D-Sd. Sem portão de escolha
+
+O sistema não é uma escolha que o bot mede: a reposição é automática, e o tanque maior só corta frete (com 16 cargas, as entregas custam cerca de 40% do que custam com 8). O portão aqui é a regra 6 do GDD §0.5 (faltar só atrasa e nenhuma despesa leva à derrota): `Portao_Suprimentos_SoAtrasa`, que entra na parte "resto" do CI.
+
+### O portão (`Portao_Suprimentos_SoAtrasa`, 200 sementes × 10 ondas, mesmas sementes com e sem a regra)
+
+| bot | embarque com / sem | receita com / sem | razão | entregas (Cash) | esperas |
+|---|---|---|---|---|---|
+| Bom | 94,8% / 94,9% | 8 739 / 8 745 | 0,999 | 55 | 0,00 |
+| Lento | 79,9% / 80,0% | 5 202 / 5 234 | 0,994 | 55 | 0,00 |
+| Parado | 89,2% / 89,2% | 4 808 / 4 816 | 0,998 | 55 | 0,00 |
+
+Piso: nenhuma espera, embarque no máximo 0,5 ponto abaixo e receita de pelo menos 0,98 da sem a regra. Passa. Medido na `main` com a esteira (#62) e a limpeza (#67). O Lento perde 0,6% de receita porque a conta maior atrasa uma compra.
+
+### O peso das entregas (`Medida_Suprimentos`, 40 sementes, tanque de 8 e de 16 nos dois)
+
+| bot | ondas | tanque | receita | entregas (Cash) | entregas ÷ receita | conta paga | esperas |
+|---|---|---|---|---|---|---|---|
+| Bom | 10 | 8 | 8 779 | 55 | 0,63% | 624 | 0 |
+| Bom | 10 | 16 | 8 761 | 22 | 0,25% | 591 | 0 |
+| Guiado | 20 | 8 | 36 134 | 103 | 0,29% | 1 614 | 0 |
+| Guiado | 20 | 16 | 36 102 | 44 | 0,12% | 1 560 | 0 |
+| LentoGuiado | 20 | 8 | 16 650 | 109 | 0,65% | 1 544 | 0 |
+| LentoGuiado | 20 | 16 | 16 598 | 44 | 0,27% | 1 487 | 0 |
+| Guiado | 64 | 8 | 213 720 | 258 | 0,12% | 6 312 | 0 |
+| Guiado | 64 | 16 | 213 658 | 110 | 0,05% | 6 177 | 0 |
+
+As entregas custam de 30 a 45 Cash por dia do jogo com o tanque de 8, e de 14 a 18 com o de 16. Os 2 níveis do tanque nos dois suprimentos custam 240 e se pagam em 10 a 15 dias do jogo: é um ganho pequeno, de propósito (D-Sd). O peso maior da conta continua sendo o salário (§13).
+
+### Os portões de antes
+
+Os `Antes_*` e as migrações rodam com a regra desligada e repetem a `main`. Os portões do TA-1, TA-2 e das fases C a C9, com a regra ligada, rodam no CI do PR (4 partes); o resultado vai no corpo do PR.
+
+### Prova de mutação (`MUTACAO_TESTES="FullyQualifiedName~SuprimentosTests" python client/tools/mutacao.py suprimento:`)
+
+As 17 travas novas entram no `mutacao.py`. A 1ª rodada deu 14 de 17: o teste não deixava a entrega chegar depois do tanque maior, o aviso só era conferido depois de o jato pousar, e o teste do hangar não olhava o depósito. Os 3 testes agora conferem isso. Resultado em 2026-11-04: **17 de 17 mortos**.
+
+| trava retirada | teste que caiu |
+|---|---|
+| o embarque não espera a carga | `Falta_SoAtrasaADecolagem_OEmbarqueAbreNaHora_EORegistroDizSuprimento` |
+| a decolagem espera a carga | `Falta_SoAtrasaADecolagem_...` |
+| sem carga no depósito, não tira | `Aviso_VemAntesDaFalta_ESomeComAEntrega` e mais 2 |
+| pede no ponto | `Reposicao_NoPonto_EncheOTanque_NoPrazo_EOCustoVaiParaAConta` e mais 1 |
+| a entrega chega no prazo | `Aviso_VemAntesDaFalta_...` e mais 3 |
+| a entrega enche o tanque de agora | `TanqueMaior_DoisNiveis_AProximaEntregaEncheAteONovo` |
+| o pedido é o que falta no tanque | `TanqueMaior_DoisNiveis_...` |
+| a entrega vai para a conta | `Reposicao_NoPonto_...` |
+| a conta atrasada não segura a entrega | `ContaAtrasada_NaoSeguraAEntrega_SoOTanqueMaior` |
+| a conta de hoje mostra a entrega | `Reposicao_NoPonto_...` |
+| o aviso conta quem pousa antes da entrega | `Aviso_VemAntesDaFalta_...` |
+| do hangar volta abastecido | `Hangar_VoltaAbastecido_SemTirarDoDeposito` |
+| o hangar leva a carga devida | `Hangar_VoltaAbastecido_...` |
+| regra desligada não anda | `RegraDesligada_DepositoParado_NadaNaConta_NadaEspera` |
+| o pedido lido cabe no tanque | `Lixo_ViraPadraoLimitado` |
+| a carga vai no save | `Save_NoMeioDaFalta_IdaEVolta_EOMesmoJogo` |
+| o registro diz suprimento | `Falta_SoAtrasaADecolagem_...` |
+
+### Para medir com gente
+
+- **O aviso de suprimento quase nunca acende** com a tabela padrão (D-Sc). Ver se, com a reposição manual da `ta-politicas`, a pessoa entende o aviso e o caminhão esperando, e se o tanque maior parece valer a pena.
+- **A ficha do despacho** é o único lugar que mostra o depósito sem falta. Ver se alguém procura o estoque em outro lugar, como o pátio ou o avião.

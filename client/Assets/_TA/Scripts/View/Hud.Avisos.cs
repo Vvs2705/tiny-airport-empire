@@ -13,8 +13,9 @@ namespace TA
         public string Titulo, Texto;
         /// <summary>Saidas com botao; Segurar e nao fazer nada, sem botao.</summary>
         public Opcao Acao = Opcao.Segurar, Acao2 = Opcao.Segurar;
-        /// <summary>O toque abre este aviao (>= 0) ou leva a camera a esta sala.</summary>
+        /// <summary>O toque abre este aviao (>= 0), a tela do patio (Patio) ou leva a camera a esta sala.</summary>
         public int Aviao = -1;
+        public bool Patio;
         public Estacao Sala;
     }
 
@@ -97,10 +98,10 @@ namespace TA
         {
             AvisoPerigo p = _alertaAgora;
             if (p == null) return;
-            if (p.Aviao >= 0) AbreVoo(p.Aviao); else M.Foca(p.Sala);
+            if (p.Patio) Abre(_patio); else if (p.Aviao >= 0) AbreVoo(p.Aviao); else M.Foca(p.Sala);
         }
 
-        /// <summary>Um aviso por vez: a falha de aviao vem primeiro, porque ja aconteceu; o incidente ainda da tempo.</summary>
+        /// <summary>Um aviso por vez: a falha de aviao vem primeiro, porque ja aconteceu; o incidente ainda da tempo; o suprimento so atrasa.</summary>
         public static AvisoPerigo AvisoDaVez(Sim s)
         {
             foreach (TA.Core.Aviao a in s.Avioes)
@@ -108,7 +109,27 @@ namespace TA
                 AvisoPerigo p = DoAviao(s, a);
                 if (p != null) return p;
             }
-            return s.Inc != null ? DoIncidente(s, s.Inc) : null;
+            return (s.Inc != null ? DoIncidente(s, s.Inc) : null) ?? DoSuprimento(s);
+        }
+
+        /// <summary>ta-suprimentos: o caminhao ja espera a entrega no aviao, ou o deposito nao cobre quem pousa antes dela (o aviso antes de faltar).
+        /// O toque abre o patio, onde fica o tanque maior.</summary>
+        public static AvisoPerigo DoSuprimento(Sim s)
+        {
+            for (int i = 0; i < Sim.Suprimentos; i++)
+            {
+                var sup = (Suprimento)i;
+                int quem = -1;
+                foreach (TA.Core.Aviao a in s.Avioes) if (s.Esperando(a.Id, sup)) { quem = a.Id; break; }
+                bool ja = quem >= 0;
+                if (!ja) quem = s.VaiFaltar(sup);
+                if (quem < 0) continue;
+                float seg = Mathf.Max(0, s.EntregaEm(sup)) * Sim.Step;
+                return new AvisoPerigo { Icone = Art.IconeServico((int)Sim.ServicoDe(sup)), Cor = Art.Warn, Patio = true,
+                    Titulo = ja ? Textos.Faltou(i) : Textos.VaiFaltar(i),
+                    Texto = (ja ? Textos.EsperaEntrega(Textos.AviaoNome[quem], seg) : Textos.PousaAntes(Textos.AviaoNome[quem], seg)) + "\n" + Textos.SupSoAtrasa };
+            }
+            return null;
         }
 
         static int Segundos(long passos) => Mathf.CeilToInt(passos / (float)Sim.Hz);

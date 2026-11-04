@@ -9,10 +9,10 @@ namespace TA.Core
     /// <summary>As estacoes do ano (GDD §5.14), na ordem do ciclo. Nao vai no save: sai do relogio.</summary>
     public enum Epoca { Verao, Outono, Inverno, Primavera }
 
-    /// <summary>As 3 falhas de aviao do GDD §5.14. Indice nao vai no save (o sorteio e' puro).</summary>
+    /// <summary>As 3 falhas de aviao do GDD §5.14. Indice vai no save do registro de ocorrencias (Ocorrencia.Sub): so cresce no fim.</summary>
     public enum TipoFalha { Nenhuma, Pane, Rejeicao, Retorno }
 
-    /// <summary>O que o jogador pode fazer diante de um perigo (GDD §5.8): a tela lista por Sim.Opcoes. Segurar = esperar passar.</summary>
+    /// <summary>O que o jogador pode fazer diante de um perigo (GDD §5.8): a tela lista por Sim.Opcoes. Segurar = esperar passar. Indice vai no save do registro (Ocorrencia.Resposta): so cresce no fim.</summary>
     public enum Opcao { Segurar, Adiantar, Atrasar, Reparar, Priorizar, Reforcar, Hangar }
 
     /// <summary>

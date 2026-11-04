@@ -19,7 +19,7 @@ import sys
 from collections import defaultdict
 
 TOLERANCIA = 0.02  # m: menos que isso e o contorno da malha, nao um cruzamento
-PESSOAS = ("pax", "func", "equipe", "ator", "trip", "mec")
+PESSOAS = ("pax", "func", "equipe", "ator", "trip", "mec", "limp")
 PESSOA_LADO, PESSOA_ALTURA = 0.4, 1.2
 CORPO_RAIO, CORPO_ALTURA = 0.1, 0.5  # adulto de 0,5 m e 0,2 m de ombros (Mundo.Gente)
 CADEIRAS = ("cadeiras_espera", "Cadeira")
