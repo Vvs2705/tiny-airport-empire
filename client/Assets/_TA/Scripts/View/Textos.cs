@@ -211,6 +211,35 @@ namespace TA
         public static string ObjetivoFeito(string nome, long cash) => L("Objetivo feito: ") + nome + Cash(cash);
         public static string MissaoFeita(string nome, long cash) => L("Missão feita: ") + nome + Cash(cash);
         public static string ConquistaNova(string nome) => L("Conquista: ") + nome + "!";
+
+        // ---------- rotas e aeroportos (CONTRATO_FASE_C3 §2 e §3; Hud.Rotas.cs): o numero sai da tabela do nucleo ----------
+        public static readonly string Rotas = L("Rotas"), Ritmo = L("Ritmo"), Estavel = L("Estável"), EmPicos = L("Em picos"), Incidentes = L("Incidentes"),
+            ProximaOnda = L("Voos da próxima onda"), Programar = L("Programar"), Aberta = L("Aberta"), ViajeAntes = L("Viaje antes"),
+            VoceEstaAqui = L("Você está aqui"), ChegaNaProxima = L("Chega na próxima onda"), Viajar = L("Viajar"), Marcada = L("Marcada"), Espere = L("Espere"),
+            VoltarGratis = L("Voltar é grátis"), PagaUmaVez = L("Paga uma vez; voltar é grátis"), ViagemInfo = L("Cash, equipe e níveis vão com você.\nA viagem vale na próxima onda.");
+        public static readonly string[] TipoRotaNome = { L("Curta"), L("Turística"), L("Conexão"), L("Longa") };
+        public static string Fator(float x) => "×" + x.ToString("0.##", Br);
+        public static string Pct(float x) => (x * 100f).ToString("0", Br) + "%";
+        public static string Vaga(int f) => L("Vaga ") + (f + 1);
+        public static string ParaDestino(string destino) => "» " + destino;
+        public static string ViagemMarcada(int a) => L("Viagem para ") + AeroportoNome[a] + L(" marcada");
+        /// <summary>Tipo, distancia (o tempo de cada trecho fora do patio) e frequencia.</summary>
+        public static string RotaLinha(Rota r, float trechoSeg) => TipoRotaNome[(int)r.Tipo] + " · " + Tempo(trechoSeg) + L(" de voo · ") + (r.Cada <= 1 ? L("toda onda") : L("a cada ") + r.Cada + L(" ondas"));
+        /// <summary>2 linhas: receita por onda (em relacao a rota da v0.1) e risco; depois o que o tipo muda.</summary>
+        public static string RotaInfo(Rota r, float riscoChance) => L("Receita ") + Fator(r.Receita) + " · " + (r.Risco == 0 ? L("sem risco") : L("incidente +") + Pct(r.Risco * riscoChance)) + "\n" + RotaNota(r);
+        static string RotaNota(Rota r)
+        {
+            switch (r.Tipo)
+            {
+                case TipoRota.Turistica: return L("Loja e comida ") + Fator(r.Gasto) + L(" · chegada em pico");
+                case TipoRota.Conexao: return L("Sem check-in · pontualidade +") + Pct(r.Bonus);
+                case TipoRota.Longa: return L("O avião fica fora na onda seguinte");
+                default: return L("Passageiros ") + Fator(r.Pax) + L(" · tarifa ") + Fator(r.Tarifa);
+            }
+        }
+        public static string RotaAbertaAviso(string destino) => L("Rota aberta: ") + destino;
+        public static string ViagemAviso(int a) => L("Viagem marcada: ") + AeroportoNome[a] + L(" na próxima onda");
+        public static string ChegadaAviso(int a) => L("Chegada: ") + AeroportoNome[a] + "!";
         static string Plural(int n, string um, string varios) => Num(n) + " " + (n == 1 ? um : varios);
 
         /// <summary>O que a meta pede, em uma frase: a coluna Condição do CAMPANHA.md e do MISSOES.md, montada de Meta, Arg e Alvo.</summary>
