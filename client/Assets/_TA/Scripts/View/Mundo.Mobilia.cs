@@ -79,6 +79,7 @@ namespace TA
         /// <summary>Bloco que nunca muda: entra na malha unica da sua cor, na sala em construcao (Funde), e nao custa um draw call por peca.</summary>
         void Fixo(PrimitiveType tipo, Vector3 centro, Vector3 tam, Color cor)
         {
+            Guarda(tipo, centro, tam, cor);   // Mundo.Caminhos.cs: a malha fundida tem a caixa da sala inteira
             var chave = (_cont, cor);
             if (!_fixos.TryGetValue(chave, out List<CombineInstance> l)) _fixos[chave] = l = new List<CombineInstance>();
             l.Add(new CombineInstance { mesh = Primitiva(tipo), transform = Matrix4x4.TRS(centro, Quaternion.identity, tam) });

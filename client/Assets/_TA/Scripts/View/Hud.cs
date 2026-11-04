@@ -81,6 +81,7 @@ namespace TA
             BuildTelas(_canvas);
             BuildOperacao(_canvas);
             BuildMetas(_canvas);
+            BuildRotas(_canvas);   // o atalho fica ao lado da faixa da meta (Hud.Rotas.cs)
             BuildFicha();   // por cima da faixa da meta
             BuildTour(_canvas);
             if (Ajustes.TextoMaior) AplicaTexto();
@@ -256,6 +257,7 @@ namespace TA
             PintaAlerta(s);
             PintaVelocidade();
             PintaMetas(s);
+            PintaRotas(s);
             PintaFicha(s);
             PintaTelas();
             PintaTour();
