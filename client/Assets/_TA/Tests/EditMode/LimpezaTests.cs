@@ -126,6 +126,17 @@ namespace TA.Tests
             Assert.Greater(usos, 50, "o banheiro e' usado");
         }
 
+        [Test]
+        public void Cabines_NoTeto_OResto_EsperaNaFilaNaOrdem()
+        {
+            Sim s = Parado();
+            for (int i = 0; i < 5; i++) s.Banheiro.Fila.Add(s.NovoPax(Sim.PaxId(0, 1, 400 + i)));
+            s.Tick(Sim.Step);
+            Assert.AreEqual((s.Banheiro.Cabines, 5 - s.Banheiro.Cabines), (s.Banheiro.Usando.Count, s.Banheiro.Fila.Count));
+            Assert.AreEqual(Sim.PaxId(0, 1, 400), s.Banheiro.Usando[0].Id, "o 1o da fila entra primeiro");
+            Assert.AreEqual(Sim.PaxId(0, 1, 400 + s.Banheiro.Cabines), s.Banheiro.Fila[0].Id);
+        }
+
         /// <summary>Com a folga, ninguem fica la quando o voo fecha; se ficar (portao adiantado, save editado), o voo leva: perdeu, como numa fila.</summary>
         [Test]
         public void FechaOVoo_LevaQuemFicouNoBanheiro()
