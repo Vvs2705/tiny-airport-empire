@@ -394,6 +394,10 @@ namespace TA.Core
         /// <summary>Cash por dia do jogo de cada estacao ativa (ordem de Estacao) e quanto cada nivel de melhoria dela soma.</summary>
         public int[] Manutencao = { 12, 12, 9, 9, 9, 9, 18, 12 };
         public int[] ManutencaoNivel = { 6, 6, 5, 5, 5, 5, 7, 0 };
+
+        // ---- ta-historico ----
+        /// <summary>Anota o registro de ocorrencias (Sim.Historico.cs). So observa: false da o mesmo jogo, numero a numero, sem o registro.</summary>
+        public bool RegraHistorico = true;
     }
 
     /// <summary>Historias do TA-3 (GDD §5.9). A v0.1 tem 1. Id = indice (vai no album do save): so cresce no fim.</summary>
