@@ -5,7 +5,7 @@ using System.Collections.Generic;
 // Regras e numeros: docs/CONTRATO_V01.md §3 e §4 e docs/CONTRATO_FASE_C.md (Defs.cs, Tuning). Arquivos: Sim.cs (relogio, onda, filas,
 // equipe), Sim.Estados.cs (estado das estacoes), Sim.Patio.cs (ciclo do aviao, patio e manutencao), Sim.Tripulacao.cs, Sim.Save.cs,
 // Sim.Offline.cs (cofre e dia local), Sim.Metas.cs (campanha), Sim.Missoes.cs (missoes e conquistas), Anuncios.cs (2 rewarded), Compras.cs (Gems e compras),
-// Sim.Passe.cs (passe de temporada), Bot.cs.
+// Sim.Passe.cs (passe de temporada), Sim.Historico.cs (registro de ocorrencias), Bot.cs.
 //
 //   Abrir:      var sim = Sim.Load(texto) ("" ou null = jogo novo; Sim.Load(texto, tuning, semente) para teste). sim.SaveRefused => save
 //               de schema futuro ou corrompido: avise e NUNCA grave por cima (sim.Save devolve null). Depois: sim.Agora(nowUnix, fusoSeg)
@@ -54,8 +54,10 @@ using System.Collections.Generic;
 //   Fase C9:    os 3 candidatos de cada vaga (Experiencia Junior, Pleno, Senior; fixos): sim.CustoContratar(p, x), sim.Salario(p, x),
 //               sim.Rendimento(x) e sim.Hire(p, x); Funcionario.Experiencia. sim.Demite(funcionario) (sem custo; vale com a conta atrasada;
 //               quem vinha depois sobe uma posicao no Staff). Ev.Demitido.
+//   Ocorrencias: sim.Ocorrencias (as dos ultimos Sim.OcorrenciasDias dias do jogo, na ordem em que entraram: Tipo, Sub, Passo, Dia, Causa, Voo,
+//               Total, Perdidos, Atraso, Resposta, Auto, Custo, Motivo com Estacao, Espera e Postos, Aberta, Eficaz) e sim.HoraDe(passo). So observa.
 //   Gravar:     texto = sim.Save(versaoDoJogo, nowUnix): payload chave=valor dentro do SaveEnvelope (SHA-256 + schema). Grava filas e o
-//               relogio do quadro: reabrir retoma a onda do ponto gravado. Schema 12; os saves dos schemas 1 a 10 migram no Load (o 11 e' do historico, #60).
+//               relogio do quadro: reabrir retoma a onda do ponto gravado. Schema 12; os saves dos schemas 1 a 11 migram no Load.
 //
 // Nomes acima sao estaveis (so crescem). Mudou a API: atualize este cabecalho e o docs/MAPA_CODIGO.md no mesmo PR.
 
@@ -69,7 +71,7 @@ namespace TA.Core
         /// <summary>Teto do dt de um quadro (s): uma travada longa nao vira um salto de minutos no relogio do quadro de partidas.</summary>
         public const float MaxFrame = 0.25f;
         /// <summary>Versao do formato do save (SaveEnvelope). Sobe a cada mudanca de formato; save de schema maior e' recusado; menor migra
-        /// no Load (12 = Fase C9: a experiencia de cada funcionario, e o 11 fica para o historico; 10 = Fase C8: despesas e relatorio do dia; 9 = Fase C7: passe de temporada; 8 = Fase D1: Gems e compras; 7 = Fase C6: missoes e conquistas; 6 = Fase C5: campanha; 5 = Fase C4: falhas de aviao e portao atrasado;
+        /// no Load (12 = Fase C9: a experiencia de cada funcionario; 11 = registro de ocorrencias; 10 = Fase C8: despesas e relatorio do dia; 9 = Fase C7: passe de temporada; 8 = Fase D1: Gems e compras; 7 = Fase C6: missoes e conquistas; 6 = Fase C5: campanha; 5 = Fase C4: falhas de aviao e portao atrasado;
         /// 4 = Fase C3: aeroportos, rotas e incidentes; 3 = Fase C2: 8 estacoes e o perfil de cada funcionario; 2 = Fase C: avioes, tripulacao e patio; o 1 e' a v0.1).</summary>
         public const int Schema = 12;
         /// <summary>A equipe da v0.1 (Hire()): Ana, Beto e Caio. MaxEquipe = os 6 perfis, com Dani, Edu e Fatima (Hire(perfil)).</summary>
@@ -384,6 +386,7 @@ namespace TA.Core
         void Fecha(Voo v)
         {
             FechaAviao(v);
+            AnotaVoo(v);
             foreach (Station s in Estacoes)
             {
                 s.Fila.RemoveAll(p => p.Onda == v.Onda && p.Voo == v.Indice);
@@ -543,6 +546,7 @@ namespace TA.Core
         {
             AnotaMeta(t, a, b, c);
             AnotaPasse(t, a, c);
+            AnotaHistorico(t, a, b, c);
             Events.Add(new Evento { Tipo = t, A = a, B = b, C = c });
         }
 

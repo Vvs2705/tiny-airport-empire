@@ -51,6 +51,7 @@ namespace TA.Core
             SalvaCompras(sb);
             SalvaPasse(sb);
             SalvaDespesas(sb);
+            SalvaHistorico(sb);
             return SaveEnvelope.Wrap(sb.ToString(), content, nowUnix);
         }
 
@@ -351,6 +352,7 @@ namespace TA.Core
             s.CarregaCompras(kv);
             s.CarregaPasse(kv);
             s.CarregaDespesas(kv);
+            s.CarregaHistorico(kv);
             return s;
         }
 

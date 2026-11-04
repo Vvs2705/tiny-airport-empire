@@ -25,7 +25,7 @@ namespace TA.Core
         public string[] Compra; public bool Gasta;
         /// <summary>Candidatos = compara os 3 candidatos: a vaga entra na conta do mais barato pelo preco do Junior, em qualquer ordem, e contrata o
         /// melhor que o caixa paga (o Senior direto quando cobre); e troca quem nao e' Senior por ele, pesando a troca pela metade do preco: o Senior
-        /// rende 25% na estacao toda, cerca do dobro de um nivel de velocidade (CONTRATO_FASE_C9 §6, BALANCE §14). Sem ele, contrata sempre o Pleno e
+        /// rende 25% na estacao toda, cerca do dobro de um nivel de velocidade (CONTRATO_FASE_C9 §6, BALANCE §15). Sem ele, contrata sempre o Pleno e
         /// nunca demite.</summary>
         public bool Candidatos;
 

@@ -18,7 +18,7 @@ namespace TA.Core
         long DiaPassos => (long)OndaPassos * T.DiaOndas;
         public int DiaJogo => (int)(Steps / DiaPassos);
         /// <summary>Hora do dia, de 0 a 24: a onda 0 comeca as Tuning.HoraInicial.</summary>
-        public float Hora => (T.HoraInicial + 24f * (Steps % DiaPassos) / DiaPassos) % 24f;
+        public float Hora => HoraDe(Steps);
         public bool Noite => Hora < 6f || Hora >= 18f;
         /// <summary>Estacao do ano. Chama Epoca porque Estacao ja e' o posto de trabalho do terminal.</summary>
         public Epoca Epoca => EpocaDe(Math.Max(0, Onda));

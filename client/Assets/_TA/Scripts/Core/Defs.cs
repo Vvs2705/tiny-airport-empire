@@ -98,7 +98,7 @@ namespace TA.Core
         DiaFechado,         // A = dia do jogo, B = Cash pago, C = o que faltou (> 0 = pausa)    -> day_closed
         ContaQuitada,       // A = dia do jogo, B = Cash (a conta atrasada; a pausa acabou)       -> day_bill_paid_late
         // Fase C9 (CONTRATO_FASE_C9): contratacao e demissao
-        Demitido,           // A = funcionario (o indice que tinha), B = perfil, C = nivel        -> staff_fired
+        Demitido,           // A = funcionario (o indice que tinha), B = perfil, C = experiencia  -> staff_fired
     }
 
     /// <summary>Funcoes da tripulacao (GDD §5.11). Indice vai no save.</summary>
@@ -407,6 +407,10 @@ namespace TA.Core
         /// = so o nome muda: os 3 rendem e custam como o Pleno.</summary>
         public bool RegraExperiencia = true;
         public int[] ExpRende = { 80, 100, 125 }, ExpContratacao = { 50, 100, 200 }, ExpSalario = { 70, 100, 150 };
+
+        // ---- ta-historico ----
+        /// <summary>Anota o registro de ocorrencias (Sim.Historico.cs). So observa: false da o mesmo jogo, numero a numero, sem o registro.</summary>
+        public bool RegraHistorico = true;
     }
 
     /// <summary>Historias do TA-3 (GDD §5.9). A v0.1 tem 1. Id = indice (vai no album do save): so cresce no fim.</summary>

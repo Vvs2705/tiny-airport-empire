@@ -42,7 +42,7 @@ Em % do Pleno (`Tuning.ExpRende`, `ExpContratacao`, `ExpSalario`), sobre `Tuning
 
 **D-C9b. Demitir é de graça.** Uma multa de rescisão faria o jogador no vermelho pagar para sair do vermelho, e a regra 6 do §0.5 manda o contrário. O custo de demitir já existe: a contratação paga não volta, e trocar alguém por um Sênior paga o Sênior inteiro. Contratar e demitir em laço só gasta Cash (invariante 2).
 
-**D-C9c. O Sênior quase sempre compensa; a decisão é de caixa.** A sonda com 40 sementes (`BALANCE.md` §14) mostrou que o rendimento pesa muito mais que o salário: equipe toda Sênior, pagando o dobro e 1,5× por dia, lucra 13% a mais com o Bom e 27% com o Lento; toda Júnior lucra até 39% a menos. O Júnior serve para pôr gente no posto cedo, com pouco caixa; a demissão é a troca por alguém melhor quando sobra. Se o playtest achar o Sênior óbvio demais, o ajuste é no preço (`ExpContratacao`), não na lista.
+**D-C9c. O Sênior quase sempre compensa; a decisão é de caixa.** A sonda com 40 sementes (`BALANCE.md` §15) mostrou que o rendimento pesa muito mais que o salário: equipe toda Sênior, pagando o dobro e 1,5× por dia, lucra 13% a mais com o Bom e 27% com o Lento; toda Júnior lucra até 39% a menos. O Júnior serve para pôr gente no posto cedo, com pouco caixa; a demissão é a troca por alguém melhor quando sobra. Se o playtest achar o Sênior óbvio demais, o ajuste é no preço (`ExpContratacao`), não na lista.
 
 ## 3. Núcleo e API
 
@@ -69,7 +69,7 @@ Teste com save real gravado pelo código do schema 10 (commit 03c40bd, semente 7
 ## 6. Bot e portão
 
 - **Começo intacto:** os bots de sempre contratam o Pleno e nunca demitem, então todos os portões anteriores repetem a tabela deles (o Pleno é o caminho de antes, e a migração do schema 10 prova).
-- **Bot `Contratador` e `LentoContratador`:** as 6 vagas entram na conta do mais barato pelo preço do Júnior, em qualquer ordem; ao contratar, levam o melhor que o caixa paga (o Sênior direto quando cobre); e trocam quem não é Sênior pelo Sênior (demite e contrata), com a troca pesando metade do preço na conta do mais barato, porque o Sênior rende 25% na estação toda, cerca do dobro de um nível de velocidade (D-C9d, `BALANCE.md` §14).
+- **Bot `Contratador` e `LentoContratador`:** as 6 vagas entram na conta do mais barato pelo preço do Júnior, em qualquer ordem; ao contratar, levam o melhor que o caixa paga (o Sênior direto quando cobre); e trocam quem não é Sênior pelo Sênior (demite e contrata), com a troca pesando metade do preço na conta do mais barato, porque o Sênior rende 25% na estação toda, cerca do dobro de um nível de velocidade (D-C9d, `BALANCE.md` §15).
 - **Portão do §5.13 (`Portao_FaseC9_Candidatos`):** o lucro (receita − conta paga) do `Contratador` ≥ 1,10 × o do Bom, e o do `LentoContratador` ≥ 1,10 × o do Lento, 200 sementes × 20 ondas. Abaixo disso a experiência fica só visual (`RegraExperiencia = false`). Com 200 sementes: **1,118 e 1,405**. O CI roda as 200 na parte "resto".
 
 ## 7. Tela

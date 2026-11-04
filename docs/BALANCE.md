@@ -986,7 +986,44 @@ As 14 travas novas entram no `mutacao.py`. Resultado em 2026-11-03: **14 de 14 m
 - **Contratar sem demanda ainda não dá prejuízo.** O pior salário (90) é menos de 1% da receita de um dia a partir do dia 2. O GDD de direção §12 pede que dê; isso precisa da demissão (frente D), para o jogador poder corrigir.
 - **O 1º fechamento sempre aperta** (D-C8e). Ver se a pessoa entende a pausa e o que fazer: mostrar o valor que falta e a hora do fechamento.
 
-## 14. Fase C9: os 3 candidatos e a demissão (2026-11-03, `CONTRATO_FASE_C9.md`)
+## 14. Registro de ocorrências (2026-11-04, frente `ta-historico`)
+
+Não tem número de balanço: só observa. A prova tem duas partes.
+
+- **No mesmo código:** `Invariante_SoObserva_DesligadoDaOMesmoJogo_NumeroANumero` joga 9 cenários (o padrão, os 4 incidentes, um clima e as 3 falhas de avião), com o Bom e o Parado, 10 ondas cada, com o registro ligado e desligado (`Tuning.RegraHistorico`). Os eventos saem iguais passo a passo, e o save, igual fora da linha `hist=`.
+- **Contra a `main`:** os portões do §5.13, da campanha, das missões e do passe têm de sair iguais no CI do PR. Medi a `main` de 03/11 (`0b76529`, antes da frente A) e o registro entrou depois da frente A, então a base é a coluna "depois" do §13 (a `main` com a conta e o passe):
+
+| portão | `main` de 03/11 | `main` com a frente A (§13) |
+|---|---|---|
+| §5.13 (Planejador / Automático, 20 ondas) | 1,176: receita 21 447 contra 18 231; só tripulação 1,030, só manutenção 1,176, as duas 1,194 | 1,182 |
+| campanha (Guiado / Bom, 20 ondas) | 1,380: receita 35 568 contra 28 361 | 1,395 |
+| missões (Missionário / Bom, 20 ondas) | 1,438: receita 37 415 contra 28 361 | 1,451 |
+| passe (LentoCompleto) | 200 de 200, dia 20,0, p90 21,8, pior 23,9, 28 300 de Cash, embarque 77,7% | 200 de 200, dia 19,9, p90 21,5, pior 23,4 |
+
+### Prova de mutação (`MUTACAO_TESTES="FullyQualifiedName~HistoricoTests" python client/tools/mutacao.py historico:`)
+
+As 19 travas novas entram no `mutacao.py`. Resultado em 2026-11-04, depois da junção com a frente A: **19 de 19 mortos**. A 1ª rodada deu 16: "travou onde ficou a maioria" sobreviveu, porque em todo teste quem perdia o voo estava numa estação só. Entrou `VooPerdido_ExplicaOndeFicouAMaioria` e esse mutante foi repetido.
+
+| trava retirada | testes que caíram |
+|---|---|
+| só observa: não mexe no voo | `Invariante_SoObserva_...` e a migração do schema 10 |
+| só observa: não mexe no avião | os 2 testes da pane |
+| desligado não anota (eventos e portão) | `Invariante_SoObserva_...` |
+| retenção de 3 dias do jogo | `Retencao_TresDiasDoJogo_ODiaQueViraSaiSemEvento` |
+| teto do dia, ao anotar e no save | `TetoDoDia_FicamAsMaisNovas` |
+| passo e perdidos do save limitados | `LixoDoHistorico_ViraPadraoLimitado` |
+| o registro vai no save | `IdaEVolta_ComOcorrencias_TextoEstavel`, `Retomada_ReabrirNoMeio_DaOMesmoRegistro` |
+| o custo do reparo pago | `Pane_ReparoPago_GuardaOCusto` |
+| explica a estação sem ninguém | `VooPerdido_SegurancaSemNinguem_ExplicaSemEquipe` |
+| travou onde ficou a maioria | `VooPerdido_ExplicaOndeFicouAMaioria` |
+| o atraso da decolagem | os testes da rejeição e do pátio lento |
+| a pane fecha quando o avião volta ao normal | a pane sem pagar e o retorno |
+| a falha de avião guarda o desgaste | a pane sem pagar |
+| a rejeição não fecha o incidente do mesmo índice (o `Pico` e a `Rejeicao` valem 2) | `Incidente_EntraNoAviso_FechaComOResultadoDoVoo` |
+| a falta de caixa entra no fechamento (frente A) | `FaltaDeCaixa_EntraNoFechamento_FechaQuandoOCaixaQuita` |
+| a falta fecha quando o caixa quita | `FaltaDeCaixa_EntraNoFechamento_FechaQuandoOCaixaQuita` |
+
+## 15. Fase C9: os 3 candidatos e a demissão (2026-11-03, `CONTRATO_FASE_C9.md`)
 
 Cada vaga tem um Júnior, um Pleno e um Sênior fixos. O Pleno é a pessoa e o preço de antes; os outros dois rendem, custam e ganham em % dele (o `CONTRATO_FASE_C9.md` §2 tem a tabela). Os bots de sempre contratam o Pleno e nunca demitem: o jogo deles é o de antes, número a número. A migração do save real do schema 10 prova isso (migrar = jogar até ali com o código novo).
 
