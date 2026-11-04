@@ -40,6 +40,7 @@ namespace TA
             public int Zona = -1, Estande = -1;   // Estande >= 0: indo ao aviao desse estande ou vindo dele (Mundo.Embarque)
             public bool Saindo, Andou, Cima, Atende, NoBalcao, SoMao, Despachou;   // SoMao, Despachou: Mundo.Malas.cs
             public float Dir = 1f, Escala = Gente;
+            public float Pressa;   // m/s para chegar quando o nucleo chega (0 = o passo de sempre; Mundo.Limpeza.cs)
         }
 
         /// <summary>Gente do patio: pontos de uma volta curta e a pausa em cada um.</summary>
@@ -120,6 +121,7 @@ namespace TA
         void SincronizaPax(Sim s, float dt)
         {
             _vistos.Clear();
+            BanheiroPax(s);   // antes das salas (Mundo.Limpeza.cs): quem volta do banheiro entra na fila do portao pela porta leste
             foreach (Station st in s.Estacoes)
             {
                 int e = (int)st.Tipo;
@@ -152,7 +154,7 @@ namespace TA
             {
                 Boneco b = kv.Value;
                 if (!_vistos.Contains(kv.Key) && !b.Saindo) Sai(kv.Key, b);
-                if (!Sentando(b, dt)) { Confere(b); Anda(b, VelPax, dt); }
+                if (!Sentando(b, dt)) { Confere(b); Anda(b, b.Pressa > 0f ? b.Pressa : VelPax, dt); }
                 Pinta(b);
                 b.Gesto = -1;
                 if (b.Saindo && b.Caminho.Count == 0) _sair.Add(kv.Key);
@@ -172,16 +174,7 @@ namespace TA
         void Liga(Pax p, int e, Vector2 alvo, Sim s, bool noBalcao, bool bravo, int vaga = -1)
         {
             _vistos.Add(p.Id);
-            if (!_pax.TryGetValue(p.Id, out Boneco b))
-            {
-                string ator = CorpoDe(p);
-                if (_livres.Count > 0) { b = _livres.Pop(); Veste(b, ator); } else b = NovoBoneco(ator);
-                b.T.gameObject.SetActive(true);
-                b.Pos = Calcada + new Vector2(-0.4f * (p.Indice % 3), 0.3f * (p.Indice % 4) - 0.45f);
-                b.Zona = -1; b.Estande = -1; b.Saindo = false; b.Caminho.Clear(); b.NoBalcao = false; b.VelAtual = 0f; b.Senta = 0f; b.Cadeira = b.Vaga = -1; b.Etapa = 0; b.RotT = b.RotDur = 0f; b.SoMao = b.Despachou = false;
-                b.Coracao.enabled = p.Historia;
-                _pax[p.Id] = b;
-            }
+            if (!_pax.TryGetValue(p.Id, out Boneco b)) b = PaxNovo(p);
             if (IndoAoBalcao(b, p, e, vaga, noBalcao)) return;
             if (b.SoMao != b.Despachou && e != (int)Estacao.Seguranca) SoMao(b, p, b.Despachou);   // a bandeja devolveu a mala mesmo se o quadro pulou
             Sala sala = Salas[e];
@@ -213,6 +206,21 @@ namespace TA
             Voo v = s.VooDe(p);
             Color mala = Art.VooCor[p.Voo];
             b.Tinta = e == (int)Estacao.Portao && v != null && !v.Embarque && !noBalcao ? Color.Lerp(mala, Art.Hex(0x8A8F99), 0.5f) : mala;   // no portao, apagada ate abrir o embarque
+        }
+
+        /// <summary>Boneco novo (ou do pool) para o passageiro, na calcada da rua.</summary>
+        Boneco PaxNovo(Pax p)
+        {
+            string ator = CorpoDe(p);
+            Boneco b;
+            if (_livres.Count > 0) { b = _livres.Pop(); Veste(b, ator); } else b = NovoBoneco(ator);
+            b.T.gameObject.SetActive(true);
+            b.Pos = Calcada + new Vector2(-0.4f * (p.Indice % 3), 0.3f * (p.Indice % 4) - 0.45f);
+            b.Zona = -1; b.Estande = -1; b.Saindo = false; b.Caminho.Clear(); b.NoBalcao = false; b.VelAtual = 0f; b.Senta = 0f; b.Cadeira = b.Vaga = -1; b.Etapa = 0; b.RotT = b.RotDur = 0f; b.SoMao = b.Despachou = false;
+            b.Pressa = 0f;
+            b.Coracao.enabled = p.Historia;
+            _pax[p.Id] = b;
+            return b;
         }
 
         /// <summary>Saiu do nucleo: embarcou (Ev.Embarcou) = vai ao aviao (Embarca: ponte no estande G, patio e escada no R); senao perdeu o voo =

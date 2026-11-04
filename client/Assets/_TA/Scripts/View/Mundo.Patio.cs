@@ -603,6 +603,7 @@ namespace TA
             foreach (KeyValuePair<int, Boneco> kv in _pax) DiagBoneco(inv, "pax#" + kv.Key, kv.Value);
             for (int k = 0; k < S.Staff.Count; k++) DiagBoneco(inv, "func#" + k, _func[k]);
             for (int i = 0; i < _equipe.Count; i++) DiagBoneco(inv, "equipe#" + i, _equipe[i]);
+            for (int i = 0; i < _zel.Count; i++) if (_zel[i].T.gameObject.activeSelf) DiagBoneco(inv, "limp#" + i, _zel[i]);
             for (int i = 0; i < _patio.Count; i++) DiagBoneco(inv, "ator#" + i, _patio[i].B);
             for (int i = 0; i < _andantes.Count; i++) DiagBoneco(inv, "trip#" + i, _andantes[i].B);
             DiagBoneco(inv, "mec#0", _mecanico);
