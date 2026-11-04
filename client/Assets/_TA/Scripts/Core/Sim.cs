@@ -58,6 +58,9 @@ using System.Collections.Generic;
 //               Total, Perdidos, Atraso, Resposta, Auto, Custo, Motivo com Estacao, Espera e Postos, Aberta, Eficaz) e sim.HoraDe(passo). So observa.
 //   Frente E:   sim.Move passa pelo vestiario (Sim.Vestiario.cs): sim.Fase(f) (Encerrando, IndoVestiario, Trocando, IndoPosto), sim.Veste(f) (o uniforme
 //               muda so no fim da troca), sim.Preparo(f) (0 a 1) e sim.TransferePassos; Funcionario.Andando = passos que faltam. Nada novo no save.
+//   Frente H:   sim.Chegantes (quem chega: Aviao, Estado NoAviao/Andando/Esperando/Pegando, Resto, Vaga, Mala, MalaSolta), sim.Esteira (Id do dono por
+//               lugar, -1 vazio; o lugar j esta na posicao (j + sim.Giro) % EsteiraCap, a boca na 0), sim.EsteiraPassos e sim.Carrinho (a fila da esteira).
+//               Sem Cash e sem intencao: quem chega desce com o desembarque do patio, espera a mala e sai (Sim.Chegada.cs).
 //   Frente F:   limpeza e banheiro (Sim.Limpeza.cs). Ler: sim.Sujeira[Area] (0 a Sim.SujeiraMax), sim.Banheiro (Cabines, Indo, Fila, Usando, Voltando,
 //               Interditado, Negados), sim.BanheiroAberto, sim.Limpeza (Zelador: Em, De, Fase Livre/Indo/Limpando, Andando, AndarTotal, Ordem), sim.Ordens,
 //               sim.TemZelador(a), sim.CustoLimpeza(), sim.TetoLimpeza, sim.Metros(a, b), Pax.Banheiro. Intencoes: sim.HireLimpeza(), sim.Limpar(area)
@@ -173,6 +176,7 @@ namespace TA.Core
             PassoIncidente();
             Sala();
             Patio();
+            Chegada();
             foreach (Voo v in Voos)
             {
                 if (v.Partiu) continue;

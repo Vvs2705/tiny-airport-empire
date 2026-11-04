@@ -95,14 +95,6 @@ namespace TA
             for (int i = s; i >= 0; i--) r.Add(AoBanheiro[i]);
         }
 
-        static float Resta(Boneco b)
-        {
-            float l = 0f;
-            Vector2 q = b.Pos;
-            foreach (Vector2 c in b.Caminho) { l += Vector2.Distance(q, c); q = c; }
-            return l;
-        }
-
         /// <summary>Velocidade para chegar quando o nucleo chega (passos que faltam), no teto em que a folha acompanha.</summary>
         static float NoRitmo(Boneco b, int passos) => passos > 0 ? Mathf.Clamp(Resta(b) / (passos * Sim.Step), 0.6f, VelMax) : VelPax;
 
