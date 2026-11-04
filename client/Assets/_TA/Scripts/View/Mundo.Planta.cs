@@ -199,12 +199,12 @@ namespace TA
                 for (int r = 0; r < 5; r++)
                     for (int lado = -1; lado <= 1; lado += 2)
                     {
-                        Vector2 p = Em(e, FilaD + (r + 0.5f) * FilaLinha, lado * PosteA);
+                        Vector2 p = Em(e, FilaDe(e) + (r + 0.5f) * FilaLinha, lado * PosteA);
                         Fixo(PrimitiveType.Cylinder, new Vector3(p.x, 0.12f, p.y), new Vector3(0.03f, 0.12f, 0.03f), Fita);
                     }
                 for (int r = 0; r < 4; r++)
                 {
-                    Vector2 p = Em(e, FilaD + (r + 0.5f) * FilaLinha, (r % 2 == 0 ? -0.16f : 0.16f));   // aberta no lado em que a fila vira para a fileira de trás (Fila)
+                    Vector2 p = Em(e, FilaDe(e) + (r + 0.5f) * FilaLinha, (r % 2 == 0 ? -0.16f : 0.16f));   // aberta no lado em que a fila vira para a fileira de trás (Fila)
                     bool longoX = Mathf.Abs(s.T.x) > 0.5f;
                     _fita[e, r] = Bloco("Fita", PrimitiveType.Cube, new Vector3(p.x, 0.2f, p.y), longoX ? new Vector3(FitaLarg, 0.03f, 0.02f) : new Vector3(0.02f, 0.03f, FitaLarg), Fita).gameObject;
                 }

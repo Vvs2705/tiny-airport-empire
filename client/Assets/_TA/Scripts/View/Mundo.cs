@@ -115,8 +115,11 @@ namespace TA
         {
             int r = Mathf.Min(k / 12, 4), c = k % 12;
             float a = (r % 2 == 0 ? c - 5.5f : 5.5f - c) * FilaPasso;
-            return Em(e, FilaD + r * FilaLinha, a);
+            return Em(e, FilaDe(e) + r * FilaLinha, a);
         }
+
+        /// <summary>1ª fileira da fila. Na segurança ela recua: entre ela e as mesas passa a faixa de quem vai à linha (FaixaSegD), sem roçar em quem espera.</summary>
+        static float FilaDe(int e) => e == SalaSeg ? FilaD + 0.07f : FilaD;
 
         public static int SalaEm(Vector2 p)
         {
@@ -233,10 +236,10 @@ namespace TA
             Entrada();
             Posiciona();
             Sim s = S;
+            Salas3D(s);   // antes da gente: a rota do quadro já vê o balcão, a fita e o cordão que acenderam (no 1º quadro, nada estava aceso)
             EmbarquePasso(s, dt);
             SincronizaPax(s, dt);
             Funcionarios(s, dt);
-            Salas3D(s);
             int n = Mathf.Max(1, Mathf.CeilToInt(dt / PatioDtMax - 1e-3f));   // a 3x num aparelho a 30 qps, 3 pedacos de 1/30 s
             for (int i = 0; i < n; i++) { Patio(s, dt / n); AndaPatio(dt / n); }
             ClimaPasso(s, dt);

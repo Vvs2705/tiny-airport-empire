@@ -152,7 +152,7 @@ namespace TA
             {
                 Boneco b = kv.Value;
                 if (!_vistos.Contains(kv.Key) && !b.Saindo) Sai(kv.Key, b);
-                if (!Sentando(b, dt)) { Confere(b); Anda(b, VelPax, dt); }
+                if (!Sentando(b, dt)) { Confere(b); Anda(b, Passo(kv.Key, b), dt); }
                 Pinta(b);
                 b.Gesto = -1;
                 if (b.Saindo && b.Caminho.Count == 0) _sair.Add(kv.Key);
@@ -189,8 +189,10 @@ namespace TA
             if (b.Zona != e)
             {
                 Vector2 de = b.Pos;
-                if (!FimDaLinha(b, ref de)) b.Caminho.Clear();
-                RotaPessoa(b.Caminho, de, b.Zona, e, alvo, !noBalcao);
+                if (!FimDaLinha(b, ref de)) { b.Caminho.Clear(); Recua(b, ref de); }
+                bool deFrente = noBalcao && e != Portao;   // chega pela faixa e entra de frente: nunca rente aos balcões, por quem espera ou trabalha neles
+                RotaPessoa(b.Caminho, de, b.Zona, e, deFrente ? NaFaixa(e, alvo) : alvo, !noBalcao);
+                if (deFrente) { Vector2 q = b.Caminho.Count > 0 ? b.Caminho[b.Caminho.Count - 1] : de; Contorna(b.Caminho, ref q, alvo, normalX); }
                 b.Alvo = alvo;
                 b.Zona = e;
                 b.Vaga = vaga;
@@ -202,7 +204,7 @@ namespace TA
                 b.Caminho.Clear();
                 Vector2 q = b.Pos;
                 AteASala(b.Caminho, ref q, e, e);
-                Contorna(b.Caminho, ref q, Em(e, FaixaD, Mathf.Clamp(Vector2.Dot(q - sala.Out, sala.T), 0.2f - Interno * 0.5f, Interno * 0.5f - 0.2f)), normalX);   // quem está na porta: o passo é dentro da sala, não atrás da parede
+                Contorna(b.Caminho, ref q, NaFaixa(e, q), normalX);
                 Contorna(b.Caminho, ref q, alvo, normalX);
                 b.Alvo = alvo;
             }
@@ -224,11 +226,49 @@ namespace TA
             b.Caminho.Clear();
             int z = Mathf.Clamp(b.Zona, 0, 5);
             Vector2 p = b.Pos;
+            Recua(b, ref p);
             if (z == Portao) SaiDaFileira(b, ref p);
             if (!_embarcou.Contains(id)) VoltaDaLinha(b, ref p);
             AteASala(b.Caminho, ref p, z, _embarcou.Contains(id) ? Portao : z);   // a tela atrás do núcleo: quem embarcou pode estar ainda na segurança
             if (!_embarcou.Contains(id)) PelaPorta(b.Caminho, ref p, Salas[z].In);   // um passo para fora da porta
             else Embarca(b, ref p, id / 500 % 2);
+        }
+
+        /// <summary>A faixa livre entre a fila e os balcões, diante de `p` (na segurança, entre a fila e as mesas). Quem está na porta: o passo é dentro
+        /// da sala, não atrás da parede.</summary>
+        static Vector2 NaFaixa(int e, Vector2 p) =>
+            Em(e, e == SalaSeg ? FaixaSegD : FaixaD, Mathf.Clamp(Vector2.Dot(p - Salas[e].Out, Salas[e].T), 0.2f - Interno * 0.5f, Interno * 0.5f - 0.2f));
+
+        /// <summary>Na bagagem quem trabalha fica na frente do balcão, ao lado da balança (AoLadoDaBalanca): quem sai do balcão recua até a faixa antes de
+        /// seguir, em vez de passar rente a ele.</summary>
+        static void Recua(Boneco b, ref Vector2 p)
+        {
+            if (b.Zona == SalaMalas && b.NoBalcao) Contorna(b.Caminho, ref p, NaFaixa(SalaMalas, p), false);
+        }
+
+        /// <summary>Distância em que quem vem atrás, no mesmo rumo, acerta o passo com quem vai à frente; mais perto que Colado, espera.</summary>
+        const float Atras = 0.3f, Colado = 0.18f;
+
+        /// <summary>A velocidade do passageiro: VelPax, ou a de quem anda à frente dele no mesmo rumo (o diag_pessoas.py conta o encontrão a menos de 0,08 m).
+        /// Só segue quem anda para o mesmo lado: quem está parado ou cruza não segura ninguém, e ninguém espera por quem vem atrás, então não há
+        /// impasse. Dois no mesmo ponto (o mesmo caminho na mesma hora): espera o de id maior.</summary>
+        float Passo(int id, Boneco b)
+        {
+            float vel = VelPax;
+            if (b.Caminho.Count == 0) return vel;
+            Vector2 h = b.Caminho[0] - b.Pos;
+            if (h.sqrMagnitude < 1e-8f) return vel;
+            h.Normalize();
+            foreach (KeyValuePair<int, Boneco> kv in _pax)
+            {
+                Boneco o = kv.Value;
+                if (o == b || o.Caminho.Count == 0 || o.VelAtual <= 0f) continue;
+                Vector2 d = o.Pos - b.Pos, ho = o.Caminho[0] - o.Pos;
+                float l = d.magnitude;
+                if (l > Atras || Vector2.Dot(ho, h) < 0.7f * ho.magnitude) continue;
+                if (l < 0.01f ? kv.Key < id : Vector2.Dot(d, h) > 0.5f * l) vel = Mathf.Min(vel, l < Colado ? 0f : o.VelAtual);
+            }
+            return vel;
         }
 
         /// <summary>Anda pelo caminho a ate `vel` m/s, com partida e chegada suaves. O atraso sobre o nucleo se recupera acelerando um pouco no
