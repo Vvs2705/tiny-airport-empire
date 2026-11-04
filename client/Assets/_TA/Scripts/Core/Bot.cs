@@ -414,23 +414,24 @@ namespace TA.Core
 
         bool Comprar(Sim s)
         {
-            // hire: -2 = o proximo da v0.1 (Hire()), >= 0 = o perfil novo, -1 = upgrade
-            long best = s.CustoContratar(); Estacao be = 0; Melhoria bm = 0; int hire = best >= 0 ? -2 : -1;
-            for (int p = Sim.MaxFuncionarios; p < Sim.MaxEquipe; p++)
+            // hire: -2 = o proximo da v0.1 (Hire()), >= 0 = o perfil novo, -1 = upgrade. Fase C8: com a conta atrasada (Pausado) a tela trava
+            // contratar e melhorar, e o bot so olha rota e viagem
+            long best = s.Pausado ? -1 : s.CustoContratar(); Estacao be = 0; Melhoria bm = 0; int hire = best >= 0 ? -2 : -1;
+            for (int p = Sim.MaxFuncionarios; p < Sim.MaxEquipe && !s.Pausado; p++)
             {
                 long c = s.CustoContratar((Perfil)p);
                 if (c >= 0 && (best < 0 || c < best)) { best = c; hire = p; }
             }
             foreach (Station st in s.Estacoes)
             {
-                if (!Fluxo(st.Tipo) && s.Alocados(st.Tipo) == 0) continue;   // estacao sem ninguem nao rende: nao melhora
+                if (s.Pausado || !Fluxo(st.Tipo) && s.Alocados(st.Tipo) == 0) continue;   // estacao sem ninguem nao rende: nao melhora
                 foreach (Melhoria m in new[] { Melhoria.Velocidade, Melhoria.Capacidade })
                 {
                     long c = s.Custo(st.Tipo, m);
                     if (c >= 0 && (best < 0 || c < best)) { best = c; be = st.Tipo; bm = m; hire = -1; }
                 }
             }
-            if (s.AtrasosPatio > _patioVisto && s.CustoPatio() >= 0 && (best < 0 || s.CustoPatio() <= best))
+            if (!s.Pausado && s.AtrasosPatio > _patioVisto && s.CustoPatio() >= 0 && (best < 0 || s.CustoPatio() <= best))
             {
                 if (!s.HirePatio()) return false;
                 _patioVisto = s.AtrasosPatio;
@@ -472,6 +473,8 @@ namespace TA.Core
             public int Diarias, Semanais, Conquistas; public long PagoMissoes; public int[] ConquistaEm;
             /// <summary>Fase C7: niveis do passe pagos, o Cash deles e a onda em que a trilha gratuita fechou (-1 = nao fechou).</summary>
             public int Niveis, PasseEm; public long PagoPasse;
+            /// <summary>Fase C8: Cash pago nas contas do dia e dias fechados com falta de caixa (pausa).</summary>
+            public long Despesas; public int Apertos;
         }
 
         /// <summary>Joga `ondas` ondas inteiras com o perfil `p` e a semente `seed`, sem render. `reabre` = fecha e reabre o jogo (Save ->
@@ -512,6 +515,8 @@ namespace TA.Core
                             if (n.Premio == Premio.Cash) r.PagoPasse += e.C;
                             if (e.B == s.T.Temporadas[e.A].Gratis.Length && r.PasseEm < 0) r.PasseEm = s.Onda;
                             break;
+                        case Ev.DiaFechado: r.Despesas += e.B; if (e.C > 0) r.Apertos++; break;
+                        case Ev.ContaQuitada: r.Despesas += e.B; break;
                     }
             }
             r.Embarque = r.Voos > 0 ? soma / r.Voos : 0;

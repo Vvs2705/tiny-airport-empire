@@ -53,7 +53,7 @@ namespace TA.Core
                 var a = (Anuncio)i;
                 if (Oferta(a) != tx) continue;
                 long k = Chave(a), v = Previa(a);
-                if (a == Anuncio.Cofre) _sim.Cash += v;   // como o cofre: fora da media movel
+                if (a == Anuncio.Cofre) _sim.Recebe(v, Fonte.Cofre);   // como o cofre: fora da media movel
                 else _sim.BoostLeft = _sim.T.BoostSegundos * Sim.Hz;
                 Pago[i] = k;
                 if (_sim.Dia > HojeDia) { Array.Clear(Hoje, 0, N); HojeDia = _sim.Dia; }
