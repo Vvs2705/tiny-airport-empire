@@ -112,6 +112,7 @@ Em `client/Assets/_TA/Tests/EditModeView/` (`TA.ViewTests`, só no Unity: o `dot
 | `EmbarqueTests.cs` | rampa e escada sobem sem degrau, a pessoa some na boca do túnel e não volta até a porta, a ponte encosta na fuselagem sem atravessar |
 | `ClimaTests.cs` | o céu só fecha depois do aviso, todo clima da tabela tem como aparecer e cada incidente cai na sala onde acontece |
 | `PlantaTests.cs` | as 8 salas ligadas pelas portas: de qualquer sala a qualquer sala, sem atravessar parede |
+| `VestiarioPlantaTests.cs` | de qualquer sala ao armário do vestiário pelo corredor do portão, sem diagonal e sem passar pela alimentação nem pelo despacho |
 | `FontesTests.cs` | as 2 fontes OFL carregam e cobrem os nomes do jogo, as placas de chão têm material e os estados do `BotaoPreco` |
 | `PostosTests.cs` | a linha da segurança: as paradas, a saída até a porta e o caminho do agente não cruzam mesa, raio-x, pórtico nem cabine de nenhum posto |
 | `FichaTests.cs` | o humor da ficha diz o motivo que o núcleo conhece (voo perdido, fila crítica, voo atrasado, folga curta, espera longa, e esperar o embarque não conta), a ficha fecha com quem saiu do núcleo e da tela, e cada linha cabe no cartão sem descer de 32 px, também com o Mover |
