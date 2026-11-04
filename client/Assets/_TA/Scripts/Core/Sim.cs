@@ -432,7 +432,7 @@ namespace TA.Core
             int encerra = f.Andando == 0 ? Encerra(f.Em) : 0;
             f.De = veste;
             f.Em = destino;
-            f.Andando = destino == veste ? Passos(T.Caminhada) : encerra + TransferePassos;
+            f.Andando = encerra + TransferePassos;   // De == Em (voltou ao setor do uniforme): so a caminhada, sem troca
             Emit(Ev.Movido, f.Id, (int)f.De, (int)destino);
             return true;
         }

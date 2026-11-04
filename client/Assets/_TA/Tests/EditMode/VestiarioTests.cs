@@ -27,8 +27,8 @@ namespace TA.Tests
             Funcionario f = s.Staff[0];
             Assert.AreEqual(0, s.St(Estacao.CheckIn).Atendendo.Count, "sem atendimento: nao ha o que encerrar");
             Assert.IsTrue(s.Move(0, Estacao.Seguranca));
-            int ida = P(s.T.Caminhada * 0.5f), troca = P(s.T.Troca);
-            Assert.AreEqual(2 * ida + troca, f.Andando);
+            int troca = P(s.T.Troca), volta = (P(s.T.Caminhada) - troca) / 2, ida = P(s.T.Caminhada) - troca - volta;
+            Assert.AreEqual(P(s.T.Caminhada), f.Andando, "o tempo da caminhada da v0.1, agora com a troca dentro");
             Assert.AreEqual(f.Andando, s.TransferePassos);
             var fases = new List<Transferencia>();
             var veste = new List<Estacao>();
@@ -41,8 +41,8 @@ namespace TA.Tests
                 chegou += s.Events.Count(e => e.Tipo == Ev.Chegou && e.A == 0);
             }
             Assert.AreEqual(Enumerable.Repeat(Transferencia.IndoVestiario, ida).Concat(Enumerable.Repeat(Transferencia.Trocando, troca))
-                .Concat(Enumerable.Repeat(Transferencia.IndoPosto, ida)).ToList(), fases);
-            Assert.AreEqual(Enumerable.Repeat(Estacao.CheckIn, ida + troca).Concat(Enumerable.Repeat(Estacao.Seguranca, ida)).ToList(), veste,
+                .Concat(Enumerable.Repeat(Transferencia.IndoPosto, volta)).ToList(), fases);
+            Assert.AreEqual(Enumerable.Repeat(Estacao.CheckIn, ida + troca).Concat(Enumerable.Repeat(Estacao.Seguranca, volta)).ToList(), veste,
                 "o uniforme muda no fim da troca, la dentro, nunca no caminho");
             Assert.AreEqual((Transferencia.Nenhuma, Estacao.Seguranca, 1, 1, 1f), (s.Fase(f), s.Veste(f), s.Presentes(Estacao.Seguranca), chegou, s.Preparo(f)));
         }
@@ -59,6 +59,7 @@ namespace TA.Tests
             Assert.IsTrue(s.Move(0, Estacao.Seguranca));
             Assert.AreEqual(resto + s.TransferePassos, f.Andando, "termina a tarefa, depois a transferencia");
             Assert.AreEqual((Transferencia.Encerrando, Estacao.CheckIn, 0f), (s.Fase(f), s.Veste(f), s.Preparo(f)));
+            Assert.AreEqual(f.Andando, Sim.Load(s.Save("t", T0)).Staff[0].Andando, "o save guarda a transferencia inteira, com o encerramento");
             for (int i = 0; i < resto; i++)
             {
                 Assert.AreEqual(Transferencia.Encerrando, s.Fase(f));
@@ -104,7 +105,7 @@ namespace TA.Tests
         {
             Sim s = ComAna();
             Assert.IsTrue(s.Move(0, Estacao.Loja));
-            Assert.AreEqual(2 * P(s.T.Caminhada * 0.5f) + P(s.T.Troca), s.Staff[0].Andando, "ida e volta somam a caminhada da v0.1, mais a troca");
+            Assert.AreEqual(P(s.T.Caminhada), s.Staff[0].Andando, "ida, troca e volta somam a caminhada da v0.1");
 
             Sim v01 = ComAna(new Tuning { RegraVestiario = false });
             Assert.IsTrue(v01.Move(0, Estacao.Seguranca));
@@ -116,8 +117,7 @@ namespace TA.Tests
         {
             Sim s = ComAna();
             Assert.IsTrue(s.Move(0, Estacao.Seguranca));
-            Assert.AreEqual(s.TransferePassos, Sim.Load(s.Save("t", T0)).Staff[0].Andando, "o save guarda a transferencia inteira, acima da caminhada da v0.1");
-            RegrasTests.Run(s, s.T.Caminhada * 0.5f + 0.5f);
+            RegrasTests.Run(s, 1f);
             Funcionario f = s.Staff[0];
             Assert.AreEqual(Transferencia.Trocando, s.Fase(f));
             string a = s.Save("t", T0);

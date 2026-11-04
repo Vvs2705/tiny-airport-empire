@@ -281,9 +281,9 @@ namespace TA.Core
         /// <summary>Funcionarios no jogo novo (decisao da Fase B, BALANCE.md): 0 = comeca no toque manual.</summary>
         public int FuncionariosIniciais = 0;
         public float Caminhada = 2.5f;
-        /// <summary>Frente E (GDD §4.1; Direcao §9.3 e §9.6): mudar de estacao passa pelo vestiario. Quem sai termina o atendimento em curso, anda
-        /// meia Caminhada ate o vestiario, troca o uniforme em Troca s e anda a outra metade ate o posto novo (Sim.Vestiario.cs). false = a regra da
-        /// v0.1 (so a Caminhada). Troca de 1 s: acima de ~1 s o LentoGuiado deixa de fechar a campanha (BALANCE.md §13).</summary>
+        /// <summary>Frente E (GDD §4.1; Direcao §9.3 e §9.6): mudar de estacao passa pelo vestiario. Quem sai termina o atendimento em curso e, na
+        /// Caminhada, anda ate o vestiario, troca o uniforme em Troca s e anda ate o posto novo (Sim.Vestiario.cs). false = a regra da v0.1 (sai na
+        /// hora, so a Caminhada). A soma e' a da v0.1: qualquer segundo a mais derruba a campanha do LentoGuiado (BALANCE.md §13).</summary>
         public bool RegraVestiario = true;
         public float Troca = 1f;
         public int[] Marcos = { 150, 600, 1500 };

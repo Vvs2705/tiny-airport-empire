@@ -126,7 +126,7 @@ Ordem de trabalho de 2026-11-03, depois da mistura com o GDD de direção (`GDD.
 3. **C, ficha ao tocar** em pessoa, equipamento e sala: parcial (`ta-ficha`: pessoa e sala); faltam o equipamento e as necessidades.
 4. **H, esteira de restituição** (traz junto o desembarque mínimo de quem chega).
 5. **D, contratação** com 3 candidatos e demissão.
-6. **E, transferência pelo vestiário** (o TA-2 tem de passar de novo com o tempo de troca).
+6. **E, transferência pelo vestiário**: parcial (`ta-vestiario`: núcleo, tela e as peças do Tripo); falta a validação em build na rodada do Unity da leva.
 7. **F, limpeza e banheiro.**
 8. **G, satisfação com motivo.**
 9. **I, painel de operações** com o relatório do dia.
@@ -173,7 +173,7 @@ Nada disso o time de código consegue resolver sozinho.
 
 ## 10. Porcentagem estimada e método
 
-**Aproximadamente 50% do contrato de lançamento** (19,5 de 39 pontos), em 2026-11-03: os 49% da `main` em `49e1597` mais a linha B (velocidades) em `parcial`, com a frente `ta-velocidade`.
+**Aproximadamente 53% do contrato de lançamento** (20,5 de 39 pontos), em 2026-11-04: os 50% de 2026-11-03 mais a ficha ao tocar (C) e o vestiário (E) em `parcial`.
 
 **Por que caiu de 57% (2026-11-02).** Não foi regressão: em 2026-11-03 o contrato ganhou **9 linhas**, as frentes de gestão A a I, todas em `falta`. Sobre as 30 linhas de antes, a conta **subiu** de 57% para 63% (19,0 de 30), por três mudanças: a tela de configurações (linha 21, de `falta` para `parcial`, PR #48) e a tela de metas, que fechou as linhas 11, 12 e 13 (de `parcial` para `feito`, PR #46, com `verify.sh full` verde e foto). Em pontos: 17,0 + 0,5 + 3 × 0,5 = 19,0.
 
@@ -182,15 +182,15 @@ Nada disso o time de código consegue resolver sozinho.
 | Estado | Linhas | Pontos |
 |---|---|---|
 | Feito | 12 | 12,0 |
-| Parcial | 14 | 7,0 |
+| Parcial | 16 | 8,0 |
 | Depende | 2 | 0,5 |
-| Falta | 11 | 0,0 |
-| **Total** | **39** | **19,5 → 50%** |
+| Falta | 9 | 0,0 |
+| **Total** | **39** | **20,5 → 53%** |
 
 - **Feito (12):** projeto Unity e portão; equipe móvel; pátio e manutenção; quadro de partidas; fluxo de passageiros; 4 incidentes; campanha de 30 objetivos; missões; 20 conquistas; sem interstitial; offline de 2 h; tutorial de 12 passos.
-- **Falta (10):** passe de temporada; segurança e privacidade ponta a ponta; regressão final; e 7 das 9 frentes de gestão da v1.5 (A despesas e salários, D contratação e demissão, E vestiário, F limpeza e banheiro, G satisfação, H esteira de restituição, I painel de operações).
+- **Falta (9):** passe de temporada; segurança e privacidade ponta a ponta; regressão final; e 6 das 9 frentes de gestão da v1.5 (A despesas e salários, D contratação e demissão, F limpeza e banheiro, G satisfação, H esteira de restituição, I painel de operações).
 - **Depende (2):** anúncios recompensados reais; AAB assinado e enviado.
-- **Parcial (15):** aeroportos; rotas; aeronaves; estações; perfis; tripulação; dia a dia; histórias; loja; save; configurações, política e suporte; telemetria; arte final; velocidades (B); ficha ao tocar (C). Uma a uma, estão em `docs/CONTRATO_LANCAMENTO.md` §1, com a evidência de cada PR e o que falta.
+- **Parcial (16):** aeroportos; rotas; aeronaves; estações; perfis; tripulação; dia a dia; histórias; loja; save; configurações, política e suporte; telemetria; arte final; velocidades (B); ficha ao tocar (C); vestiário (E). Uma a uma, estão em `docs/CONTRATO_LANCAMENTO.md` §1, com a evidência de cada PR e o que falta.
 
 **O que o número não mostra.** A porcentagem mede **cobertura do contrato**, não esforço restante nem risco. A maior parte do que falta é tela (aeroportos, rotas, passe e loja), as 9 frentes de gestão (nenhuma começada, e cada uma só fecha com o critério de pronto em 10 itens, `GDD.md` §0.5), integração (IAP, servidor, anúncios, telemetria) e medida em aparelho, e quase toda a parte que depende do dono está na janela de 2026-11-25 em diante. As frentes A a I valem 9 linhas do mesmo peso das demais, mas variam muito de tamanho: a conta não diz isso.
 
