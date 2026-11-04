@@ -123,8 +123,9 @@ namespace TA
                 Peca("arvore", V3(v), v.x * 37f);
             foreach (Vector2 v in new[] { new Vector2(8.2f, 12.9f), new Vector2(46f, 7.2f) }) Peca("poste", V3(v), 45f, 0.75f);
             foreach (Vector2 v in new[] { new Vector2(7.3f, 15.6f) }) Peca("cone", V3(v), 0f, 0.7f);
-            Peca("conteiner_bagagem", new Vector3(7f, 0f, 16.6f), 0f);
-            Peca("conteiner_bagagem", new Vector3(8.3f, 0f, 16.6f), 0f);
+            // fora da asa baixa dos jatos da vaga G (3,74 m do eixo em x = 11,4, a 0,9 m do chao), que desce da taxiway por cima daqui
+            Peca("conteiner_bagagem", new Vector3(5.6f, 0f, 16.6f), 0f);
+            Peca("conteiner_bagagem", new Vector3(6.9f, 0f, 16.6f), 0f);
             Peca("biruta", new Vector3(30f, 0f, 19.2f), 0f);
             Peca("radar", new Vector3(29.2f, 0f, 4.4f), 0f);
             Patio3D();

@@ -266,7 +266,7 @@ namespace TA
             return t;
         }
 
-        /// <summary>Quem vem atras espera (fila natural), com folga para quem esta na frente entrar de re, e quem atravessa a rua tem a vez: conta a
+        /// <summary>Gente no trajeto ate a freada para o veiculo (DoTrajeto). Quem vem atras espera (fila natural), com folga para quem esta na frente entrar de re, e quem atravessa a rua tem a vez: conta a
         /// distancia de freada, para nao encostar. Quem vira na rua oeste, de frente ou entrando de re na faixa, espera tambem a rua leste: o bico abre ate ela.
         /// Depois de 20 s parado so pela vez no cruzamento, segue: sai do ciclo de esperas entre as 2 ruas (a 3x com -speed 2, catering, escada,
         /// combustivel e bagagem esperavam um pelo outro na frente da garagem). Com veiculo de fato na frente, so depois de 60 s, o que nao deve
@@ -276,11 +276,7 @@ namespace TA
             Vector3 f = t.Re ? -v.T.forward : v.T.forward, c = Centro(v), lado = new Vector3(f.z, 0f, -f.x);
             float freada = v.V * v.V / (2f * t.F);
             foreach (Vector2 q in _naFaixa)
-            {
-                Vector3 d = V(q.x, q.y) - c;
-                float frente = Vector3.Dot(d, f);
-                if ((frente > 0f && frente < v.Comp * 0.5f + 0.5f + freada && Mathf.Abs(Vector3.Dot(d, lado)) < v.Larg * 0.5f + 0.25f) || NoTrajeto(v, t, q, freada)) { v.EsperaGente = true; return false; }
-            }
+                if (DoTrajeto(v, t, q, 0.5f + freada) < Rente) { v.EsperaGente = true; return false; }
             v.EsperaGente = false;
             float oeste = Cruza(v, t, RuaOeste), leste = Cruza(v, t, RuaLeste);
             if (oeste >= 0f && v.T.position.z > RuaOeste) leste = oeste;
@@ -304,16 +300,27 @@ namespace TA
             return true;
         }
 
-        /// <summary>Na curva o nariz vira para quem estava ao lado, fora da reta da frente: confere os pontos do trajeto logo adiante.</summary>
-        static bool NoTrajeto(Veiculo v, Trecho t, Vector2 q, float freada) => DoTrajeto(v, t, q, freada) < v.Larg * 0.5f + 0.25f;
+        /// <summary>Meia largura da pessoa (0,2 m, a do diag_caixas.py) mais 5 cm: mais perto que isso da carroceria e encostar.</summary>
+        const float Rente = 0.25f;
 
-        /// <summary>Distancia de `q` ao trajeto do veiculo logo adiante: do pivo ate a frente dele, mais 0,5 m e a freada.</summary>
-        static float DoTrajeto(Veiculo v, Trecho t, Vector2 q, float freada)
+        /// <summary>Distancia de `q` a metade da frente da carroceria (no sentido do movimento) nas poses do trajeto, de agora ate `alem` m
+        /// adiante; dentro dela e negativa. Na curva fechada (raio de 1,5 m) a frente passa ate 1,5 m para fora do trilho do pivo: medindo so o
+        /// trilho, o mecanico parava onde a frente do catering ia passar e um esperava o outro (a 3x com -speed 2, mais de 4 min). Depois do fim
+        /// do trecho segue reto, como a caixa da frente que isto substituiu.</summary>
+        static float DoTrajeto(Veiculo v, Trecho t, Vector2 q, float alem)
         {
-            float eixo = t.Re ? -v.Eixo : v.Eixo, ate = v.S + eixo + v.Comp * 0.5f + 0.5f + freada, menor = float.MaxValue;
-            for (int i = Indice(t, v.S + Mathf.Max(eixo, 0f)); i < t.P.Count && t.L[i] <= ate; i += 3)
-                menor = Mathf.Min(menor, (new Vector2(t.P[i].x, t.P[i].z) - q).sqrMagnitude);
-            return Mathf.Sqrt(menor);
+            Vector3 o = v.T.position;
+            float r = alem + v.Comp + v.Eixo, menor = float.MaxValue, fim = t.Total;
+            if ((q - new Vector2(o.x, o.z)).sqrMagnitude > r * r) return menor;   // longe: nenhuma pose chega
+            for (float s = v.S; s <= v.S + alem; s += 0.3f)
+            {
+                float l = Mathf.Min(s, fim);
+                Vector3 m3 = Tangente(t, l), p3 = Ponto(t, l);
+                Vector2 m = new Vector2(m3.x, m3.z).normalized, d = q - new Vector2(p3.x, p3.z) - m * (s - l + (t.Re ? -v.Eixo : v.Eixo));
+                float a = Vector2.Dot(d, m), b = Mathf.Abs(d.x * m.y - d.y * m.x);
+                menor = Mathf.Min(menor, Mathf.Max(Mathf.Max(-a, a - v.Comp * 0.5f), b - v.Larg * 0.5f));
+            }
+            return menor;
         }
 
         /// <summary>Distancia atras de `o`: maior se ele vai entrar de re, para nao voltar por cima de quem colou.</summary>
@@ -347,7 +354,8 @@ namespace TA
         /// do catering, 0,25 do onibus) e nao e entrar nele; com 0,25 o mecanico parava na rua oeste diante do onibus e o catering esperava por ele
         /// ate o jato sair. Quem parou por causa de gente (EsperaGente) cede a vez, mas so depois de parado e sem folga: a pessoa passa rente e nao
         /// atravessa a carroceria; enquanto ele freia, ela espera (a 3x o mecanico entrava no catering que ainda freava). E ninguem entra no trajeto
-        /// de um veiculo andando, que nao cedeu a vez: espera na beira, a 0,3 m de onde ele a veria (NoTrajeto), e ele passa.</summary>
+        /// de um veiculo andando, que nao cedeu a vez: espera na beira, a 0,3 m de onde ele a veria (DoTrajeto), olhando 3 m alem dele (a frente
+        /// que vira na curva chega depois), e ele passa.</summary>
         bool VeiculoNoPasso(Boneco b)
         {
             Vector2 prox = Adiante(b, 0.4f);
@@ -358,8 +366,8 @@ namespace TA
                 if (anda && !v.EsperaGente && v.Rotas.Count > 0)
                 {
                     Trecho t = v.Rotas.Peek();
-                    float freada = v.V * v.V / (2f * t.F), ve = v.Larg * 0.5f + 0.25f, agora = DoTrajeto(v, t, b.Pos, freada), depois = DoTrajeto(v, t, prox, freada);
-                    if (agora >= ve && depois < ve + 0.3f && depois < agora - 0.05f) return true;
+                    float alem = 3.5f + v.V * v.V / (2f * t.F), agora = DoTrajeto(v, t, b.Pos, alem), depois = DoTrajeto(v, t, prox, alem);
+                    if (agora >= Rente && depois < Rente + 0.3f && depois < agora - 0.05f) return true;
                 }
                 Vector3 c = Centro(v), f = v.T.forward;
                 Vector2 eixo = new Vector2(f.x, f.z), lado = new Vector2(f.z, -f.x), a = prox - new Vector2(c.x, c.z), n = b.Pos - new Vector2(c.x, c.z);
