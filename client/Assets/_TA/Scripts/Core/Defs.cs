@@ -200,7 +200,7 @@ namespace TA.Core
         public Experiencia Experiencia = Experiencia.Pleno;
         /// <summary>Estacao onde esta ou para onde esta andando.</summary>
         public Estacao Em, De;
-        /// <summary>Passos de caminhada que faltam (0 = presente e atendendo).</summary>
+        /// <summary>Passos da transferencia que faltam (0 = presente e atendendo; a fase sai daqui: Sim.Fase). De = o uniforme que ele veste ate a troca.</summary>
         public int Andando;
 
         /// <summary>Estacoes da especialidade de cada perfil (CONTRATO_FASE_C2 §2).</summary>
@@ -291,6 +291,11 @@ namespace TA.Core
         /// <summary>Funcionarios no jogo novo (decisao da Fase B, BALANCE.md): 0 = comeca no toque manual.</summary>
         public int FuncionariosIniciais = 0;
         public float Caminhada = 2.5f;
+        /// <summary>Frente E (GDD §4.1; Direcao §9.3 e §9.6): mudar de estacao passa pelo vestiario. Quem sai termina o atendimento em curso e, na
+        /// Caminhada, anda ate o vestiario, troca o uniforme em Troca s e anda ate o posto novo (Sim.Vestiario.cs). false = a regra da v0.1 (sai na
+        /// hora, so a Caminhada). A soma e' a da v0.1: qualquer segundo a mais derruba a campanha do LentoGuiado (BALANCE.md §15).</summary>
+        public bool RegraVestiario = true;
+        public float Troca = 1f;
         public int[] Marcos = { 150, 600, 1500 };
         public float AtencaoFolga = 20f;
         /// <summary>s da media movel da renda online (base do cofre offline).</summary>

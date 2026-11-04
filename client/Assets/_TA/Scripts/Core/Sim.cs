@@ -17,7 +17,7 @@ using System.Collections.Generic;
 //               sim.HirePatio(), sim.BuyPatio(servico, melhoria), sim.Checagem(aviao) e sim.Hangar(aviao) (so Cash e tempo). O resto e' o
 //               padrao do nucleo: escala automatica (1o livre na ordem), servicos do patio, inspecao obrigatoria do aviao pendente.
 //   Ler:        sim.Time, sim.Cash, sim.Voos[0..1] (quadro da onda: horario em passos da onda, sim.PassoNaOnda), sim.Stations[e]
-//               (fila, atendendo, Estado/Folga/VooEmRisco), sim.Staff (Em, Andando), sim.Presentes(e), sim.Custo(e, m),
+//               (fila, atendendo, Estado/Folga/VooEmRisco), sim.Staff (Em, De, Andando), sim.Presentes(e), sim.Custo(e, m),
 //               sim.CustoContratar(), sim.Marco, sim.Tarifa, sim.Album, sim.BoostLeft, sim.Anuncios (Pode/Oferta/Pagar).
 //               Fase C: sim.Avioes[f] (o aviao do voo f: Desgaste, NoPatio, Falta/Fazendo por Servico, Check/Inspecao, Hangar, VooId),
 //               sim.Pronto(aviao) (o embarque pode abrir), sim.Tripulacao (Nome, Funcao, Trechos, Aviao; sim.Livre, sim.DescansoFalta),
@@ -56,6 +56,8 @@ using System.Collections.Generic;
 //               quem vinha depois sobe uma posicao no Staff). Ev.Demitido.
 //   Ocorrencias: sim.Ocorrencias (as dos ultimos Sim.OcorrenciasDias dias do jogo, na ordem em que entraram: Tipo, Sub, Passo, Dia, Causa, Voo,
 //               Total, Perdidos, Atraso, Resposta, Auto, Custo, Motivo com Estacao, Espera e Postos, Aberta, Eficaz) e sim.HoraDe(passo). So observa.
+//   Frente E:   sim.Move passa pelo vestiario (Sim.Vestiario.cs): sim.Fase(f) (Encerrando, IndoVestiario, Trocando, IndoPosto), sim.Veste(f) (o uniforme
+//               muda so no fim da troca), sim.Preparo(f) (0 a 1) e sim.TransferePassos; Funcionario.Andando = passos que faltam. Nada novo no save.
 //   Gravar:     texto = sim.Save(versaoDoJogo, nowUnix): payload chave=valor dentro do SaveEnvelope (SHA-256 + schema). Grava filas e o
 //               relogio do quadro: reabrir retoma a onda do ponto gravado. Schema 12; os saves dos schemas 1 a 11 migram no Load.
 //
@@ -428,16 +430,19 @@ namespace TA.Core
             return false;
         }
 
-        /// <summary>TA-2: manda o funcionario para outra estacao. Ele anda Tuning.Caminhada s e, nesse tempo, nao atende em nenhuma das duas
-        /// (quem ja estava em atendimento termina). Redirecionar no meio do caminho recomeca a caminhada.</summary>
+        /// <summary>TA-2: manda o funcionario para outra estacao, pelo vestiario (Sim.Vestiario.cs): termina o atendimento em curso, anda, troca o
+        /// uniforme e anda ate o posto. Nesse tempo nao atende em nenhuma das duas. Redirecionar no meio recomeca; voltar ao setor do uniforme que
+        /// ele veste e' so a caminhada.</summary>
         public bool Move(int funcionario, Estacao destino)
         {
             if (funcionario < 0 || funcionario >= Staff.Count || (int)destino < 0 || (int)destino >= Estacoes.Length || !Desbloqueada(destino)) return false;
             Funcionario f = Staff[funcionario];
             if (f.Em == destino) return false;
-            f.De = f.Em;
+            Estacao veste = Veste(f);
+            int encerra = f.Andando == 0 ? Encerra(f.Em) : 0;
+            f.De = veste;
             f.Em = destino;
-            f.Andando = Math.Max(1, (int)Math.Round(T.Caminhada * Hz));
+            f.Andando = encerra + TransferePassos;   // De == Em (voltou ao setor do uniforme): so a caminhada, sem troca
             Emit(Ev.Movido, f.Id, (int)f.De, (int)destino);
             return true;
         }

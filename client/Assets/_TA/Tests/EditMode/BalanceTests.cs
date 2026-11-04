@@ -81,10 +81,10 @@ namespace TA.Tests
         /// <summary>As regras da v0.1: tripulacao, patio e manutencao so visuais (o "antes" do BALANCE.md).</summary>
         public static Tuning SemFaseC() => FechaC3(new Tuning { RegraTripulacao = false, RegraPatio = false, RegraManutencao = false });
 
-        /// <summary>O "antes" de cada fase e' o jogo de quando ela entrou: sem a conta do dia (Fase C8). Os portoes rodam com ela.</summary>
+        /// <summary>O "antes" de cada fase e' o jogo de quando ela entrou: sem a conta do dia (Fase C8) e sem o vestiario (frente E). Os portoes rodam com eles.</summary>
         static Tuning SemC8(Tuning t)
         {
-            t.RegraDespesas = false;
+            t.RegraDespesas = t.RegraVestiario = false;
             return t;
         }
 
@@ -204,7 +204,7 @@ namespace TA.Tests
         public static Tuning SemFaseC4(Tuning t = null)
         {
             t = t ?? new Tuning();
-            t.RegraClima = t.RegraEpocas = t.RegraPicos = t.RegraFalhas = t.RegraCampanha = t.RegraMissoes = t.RegraPasse = false;
+            t.RegraClima = t.RegraEpocas = t.RegraPicos = t.RegraFalhas = t.RegraCampanha = t.RegraMissoes = t.RegraPasse = t.RegraVestiario = false;
             return t;
         }
 
@@ -353,7 +353,7 @@ namespace TA.Tests
         [Test]
         public void Antes_FaseC5()
         {
-            var t = new Tuning { RegraCampanha = false, RegraMissoes = false, RegraPasse = false, RegraDespesas = false };
+            var t = new Tuning { RegraCampanha = false, RegraMissoes = false, RegraPasse = false, RegraDespesas = false, RegraVestiario = false };
             Linha bom = Rodar(BotProfile.Bom, t), lento = Rodar(BotProfile.Lento, t), parado = Rodar(BotProfile.Parado, t);
             Imprime("antes da Fase C5 (a main da Fase C4)", new[] { bom, lento, parado });
             Assert.AreEqual((6279, 3872, 4702), ((int)Math.Round(bom.Receita), (int)Math.Round(lento.Receita), (int)Math.Round(parado.Receita)), "sem pagar, a tabela da fase anterior");
@@ -418,7 +418,7 @@ namespace TA.Tests
         [Test]
         public void Antes_FaseC6()
         {
-            var t = new Tuning { RegraMissoes = false, RegraPasse = false, RegraDespesas = false };
+            var t = new Tuning { RegraMissoes = false, RegraPasse = false, RegraDespesas = false, RegraVestiario = false };
             Linha bom = Rodar(BotProfile.Bom, t), lento = Rodar(BotProfile.Lento, t), parado = Rodar(BotProfile.Parado, t);
             Imprime("antes da Fase C6 (a main da Fase C5)", new[] { bom, lento, parado });
             Assert.AreEqual((6586, 3534, 4660), ((int)Math.Round(bom.Receita), (int)Math.Round(lento.Receita), (int)Math.Round(parado.Receita)), "sem pagar, a tabela da fase anterior");

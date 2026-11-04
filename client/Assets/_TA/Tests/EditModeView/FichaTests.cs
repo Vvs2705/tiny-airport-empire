@@ -77,8 +77,9 @@ namespace TA.Tests
                 Assert.LessOrEqual(Largura(nome, Textos.Funcionario[p] + " · " + Textos.Perfil[p]), Hud.LargFichaMover, Textos.Perfil[p]);
                 Assert.LessOrEqual(Largura(corpo, Textos.PerfilInfo(p)), Hud.LargFichaMover, Textos.PerfilInfo(p));
             }
-            foreach (string l in new[] { Textos.AtendendoUm, Textos.ChamandoProximo, Textos.EsperandoPax, Textos.NaChecagem, Textos.ProntoChecagem, Textos.NoBonus, Textos.ChegaEm(599f) })
+            foreach (string l in new[] { Textos.AtendendoUm, Textos.ChamandoProximo, Textos.EsperandoPax, Textos.NaChecagem, Textos.ProntoChecagem, Textos.NoBonus, Textos.Preparo(1f, 599f) })
                 Assert.LessOrEqual(Largura(corpo, l), Hud.LargFichaMover, l);
+            foreach (string fase in Textos.FaseTransf) Assert.LessOrEqual(Largura(corpo, Textos.Funcionario[5] + " · " + fase), Hud.LargFichaMover, fase);
             for (int e = 0; e < Textos.Estacao.Length; e++)
                 foreach (bool andando in new[] { false, true }) Assert.LessOrEqual(Largura(corpo, Textos.EmEstacao(e, andando)), Hud.LargFichaMover, Textos.EmEstacao(e, andando));
         }

@@ -341,14 +341,17 @@ namespace TA
             ABordoLogo = L("A bordo em instantes"), PortaoFechou = L("O portão fechou antes do embarque"), ComHistoria = L(" · com história"),
             AtendendoUm = L("Atendendo um passageiro"), ChamandoProximo = L("Chamando o próximo da fila"), EsperandoPax = L("Esperando passageiro"),
             NaChecagem = L("Ajudando na checagem do avião"), ProntoChecagem = L("Pronto para a próxima checagem"), NoBonus = L("Garantindo o bônus de pontualidade"),
-            NaEspecialidade = L("Está na especialidade"), ACaminho = L("A caminho"), Atendendo = L("Atendendo"), Trabalhando = L("Trabalhando"), Livre = L("Livre"),
+            NaEspecialidade = L("Está na especialidade"), Atendendo = L("Atendendo"), Trabalhando = L("Trabalhando"), Livre = L("Livre"),
             VoltaSala = L("Voltando para a sala da tripulação"), EscalaNaTela = L("A escala fica na tela Tripulação"),
             GargaloFalha = L("Gargalo: em falha, atende mais devagar"), GargaloToque = L("Sem equipe: só anda com o seu toque"), GargaloFechada = L("Fechada: ninguém da equipe aqui"),
             EquipeVindo = L("A equipe está a caminho"), SemGargalo = L("Fluindo: sem gargalo"), Trancada = L("Abre quando o terminal crescer");
         public static string HumorLinha(int h) => Humor[h] + ": " + HumorPorque[h];
         public static string NoAeroporto(float seg, float fecha, bool atrasado) => L("No aeroporto há ") + Tempo(seg)
             + (fecha <= 0f ? "" : (atrasado ? L(" · portão atrasado: fecha em ") : L(" · portão fecha em ")) + Tempo(fecha));
-        public static string ChegaEm(float seg) => L("Chega em ") + Tempo(seg);
+        /// <summary>Frente E: a transferencia pelo vestiario (Sim.Fase, na ordem de Transferencia) e o preparo com o relogio (Sim.Preparo).</summary>
+        public static readonly string[] FaseTransf = { L("No posto"), L("Terminando o atendimento"), L("Indo ao vestiário"), L("Trocando o uniforme"), L("Indo ao posto") };
+        public static readonly string Vestiario = L("Vestiário");
+        public static string Preparo(float frac, float seg) => L("Preparo ") + (int)System.Math.Round(frac * 100f) + L("% · no posto em ") + Tempo(seg);
         public static string NaFila(int n) => n + L(" na fila");
         public static string FuncaoDe(Tripulante t) => t.Funcao == TA.Core.Funcao.Piloto ? L("Piloto") : t.Indice % 2 == 0 ? L("Comissária") : L("Comissário");   // a folha da comissaria vai nos indices pares
         public static string IndoPara(int voo) => voo >= 0 ? L("Indo para o ") + Voo(voo) : IndoAoAviao;

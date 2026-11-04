@@ -884,6 +884,42 @@ MUTANTES = [
         "Math.Min(TempoBase(st.Tipo), L(a[1], 1))",
     ),
     (
+        "vestiario: voltar ao setor do uniforme nao troca",
+        "Sim.cs",
+        "f.De = veste;",
+        "f.De = f.Em;",
+    ),
+    (
+        "vestiario: quem sai termina o atendimento",
+        "Sim.Vestiario.cs",
+        "if (!T.RegraVestiario || s.Atendendo.Count < Presentes(e)) return 0;",
+        "if (true) return 0;",
+    ),
+    (
+        "vestiario: o outro no posto cobre o atendimento",
+        "Sim.Vestiario.cs",
+        "if (!T.RegraVestiario || s.Atendendo.Count < Presentes(e)) return 0;",
+        "if (!T.RegraVestiario || s.Atendendo.Count == 0) return 0;",
+    ),
+    (
+        "vestiario: o uniforme so muda no fim da troca",
+        "Sim.Vestiario.cs",
+        "return t == Transferencia.Nenhuma || t == Transferencia.IndoPosto ? f.Em : f.De;",
+        "return f.Em;",
+    ),
+    (
+        "vestiario: a fase sai do Andando",
+        "Sim.Vestiario.cs",
+        "return f.Andando <= Volta + TrocaPassos ? Transferencia.Trocando : f.Andando <= TransferePassos ? Transferencia.IndoVestiario : Transferencia.Encerrando;",
+        "return Transferencia.Trocando;",
+    ),
+    (
+        "vestiario: o save guarda a transferencia inteira",
+        "Sim.Vestiario.cs",
+        "int AndandoMax(Estacao em, Estacao de) => de == em ? TransferePassos : TransferePassos + TempoBase(de);",
+        "int AndandoMax(Estacao em, Estacao de) => TransferePassos;",
+    ),
+    (
         "historico: so observa (nao mexe no voo)",
         "Sim.Historico.cs",
         "int perdidos = v.Total - v.Embarcados;",

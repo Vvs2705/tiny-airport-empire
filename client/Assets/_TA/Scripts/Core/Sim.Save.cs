@@ -336,7 +336,7 @@ namespace TA.Core
                 Estacao em = s.Est(f[0]), de = s.Est(f[1]);
                 // schemas 10 e 11 nao tem a experiencia (Fase C9): todos sao o Pleno, a pessoa e o preco de antes; lixo tambem vira o Pleno
                 var nv = f.Length >= 5 && f[4] >= (int)Experiencia.Junior && f[4] <= (int)Experiencia.Senior ? (Experiencia)f[4] : Experiencia.Pleno;
-                s.Staff.Add(new Funcionario { Id = i, Perfil = p, Experiencia = nv, Em = em, De = de, Andando = Math.Max(0, Math.Min((int)Math.Round(s.T.Caminhada * Hz), f[2])) });
+                s.Staff.Add(new Funcionario { Id = i, Perfil = p, Experiencia = nv, Em = em, De = de, Andando = Math.Max(0, Math.Min(s.AndandoMax(em, de), f[2])) });
             }
             int onda = (int)Get(kv, "onda", -1);
             bool bate = onda >= 0 && onda == (int)(s.Steps / s.OndaPassos);   // onda que nao bate com o relogio: comeca a dele

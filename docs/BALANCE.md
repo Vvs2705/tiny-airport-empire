@@ -1023,7 +1023,62 @@ As 19 travas novas entram no `mutacao.py`. Resultado em 2026-11-04, depois da ju
 | a falta de caixa entra no fechamento (frente A) | `FaltaDeCaixa_EntraNoFechamento_FechaQuandoOCaixaQuita` |
 | a falta fecha quando o caixa quita | `FaltaDeCaixa_EntraNoFechamento_FechaQuandoOCaixaQuita` |
 
-## 15. Fase C9: os 3 candidatos e a demissão (2026-11-03, `CONTRATO_FASE_C9.md`)
+## 15. Frente E: transferência pelo vestiário (2026-11-04, `GDD.md` §4.1, linha E)
+
+Mover alguém de estação passa pelo vestiário (`Sim.Vestiario.cs`). A pessoa termina o atendimento em curso (o encerramento, quando os outros presentes não cobrem os atendimentos), anda ao vestiário, troca o uniforme e anda ao posto novo. Em todo esse tempo ela não atende em nenhuma das duas estações. Voltar ao setor do uniforme que ela ainda veste é só a caminhada. Nada novo no save: a fase sai do `Andando`, e o `De` guarda o uniforme até o fim da troca.
+
+### D-Ea. A transferência não pode durar mais que a caminhada da v0.1
+
+O primeiro desenho somava 2,5 s de ida, 3 a 5 s de troca por estação e 2,5 s de volta. O TA-2 passava com folga, mas o LentoGuiado parava no objetivo 18 ("Fortaleza lotada", 3 voos com 90% na rota de Fortaleza) e não fechava a campanha. Medi o tempo total (sem o encerramento), com 40 sementes para o TA-2 e as sementes 1 a 4 para a campanha:
+
+| transferência | TA-2 | TA-1 Lento | LentoGuiado: objetivos em 120 ondas |
+|---|---|---|---|
+| 2,5 s (a v0.1, sem vestiário) | 1,823 | 80,6% | 30, 30, 30, 30 |
+| 2,5 s com o vestiário e o encerramento | 1,800 | 80,8% | 30, 30, 30, 30 |
+| 3,5 s | 1,789 | 80,4% | 30, 30, 30, 30 |
+| 4 s | 1,764 | 79,0% | 27, 29, 23, 30 |
+| 5 s | 1,758 | 79,0% | 18, 18, 18, 18 |
+| 8 s (troca de 3 s) | 1,709 | 76,5% | 18, 18, 11, 11 |
+
+Com 200 sementes, os 3,5 s deram **131 de 200** no alcance da campanha e derrubaram o `Alcance_FaseC5` e o `Portao_FaseD1_Compras`. Quem trava é o voo cheio: um segundo a mais na mudança custa os últimos passageiros do voo, e o bot lento, que move 4 a 5 vezes por onda, não chega aos 90%. Um bot que reage antes, pelo tempo a mais da transferência, não resolveu: com 8 s, 18/18/18/11, e o TA-2 caiu para 1,664. Ficou de fora.
+
+**Decisão:** ida, troca de 1 s (`Tuning.Troca`) e volta somam os 2,5 s da caminhada da v0.1. O custo novo de mover é o encerramento. Se o playtest pedir uma troca mais longa, o objetivo de voo cheio da campanha precisa mudar antes (decisão do Vinicius).
+
+### Os portões, com o vestiário (200 sementes, a `main` com a despesas, PR #56)
+
+| portão | antes (a `main`, §13) | com o vestiário |
+|---|---|---|
+| TA-1 Bom (10 ondas) | 95,5%, receita 8 883 | 94,8%, receita 8 740 |
+| TA-1 Lento | 79,6%, receita 5 221 | 79,9%, receita 5 222 |
+| TA-1 Parado | 89,2%, receita 4 819 | 89,2%, receita 4 819 |
+| TA-2 (Bom / Parado) | 1,843 | **1,814** |
+| Fase C (Planejador / Automático, 20 ondas) | 1,182 | 1,182 |
+| Fase C2, as 4 estações | 1,343 | 1,340 |
+| Fase C5, campanha (Guiado / Bom, 20 ondas) | 1,395 | 1,411 |
+| Fase C6, missões (Missionário / Bom, 20 ondas) | 1,451 | 1,461 |
+| Fase C7, passe: o LentoCompleto fecha os 30 níveis | 200 de 200, dia 19,9 (pior 23,4) | 200 de 200, dia 19,9 (pior 23,5) |
+| Fase D1 e alcance da campanha, sem compra | 200 de 200: Guiado 51,2, LentoGuiado 62,4 (pior 81) | 200 de 200: Guiado 51,5, **LentoGuiado 69,5 (p90 80, pior 103)**; a Baleia fecha em 0,994 do tempo |
+| Alcance das missões e conquistas | 200 de 200 | 200 de 200 |
+| Fases C3 e C4 e TA-6 | verdes | iguais: medem com o vestiário desligado (`SemFaseC4`) |
+
+Antes da despesas entrar, a mesma medida deu TA-2 1,787 (era 1,824) e LentoGuiado na onda 69,8 (pior 106), também com todos os portões verdes.
+
+**Ressalva:** o LentoGuiado leva 7 ondas a mais para fechar a campanha, e o pior caso fica a 17 ondas do teto de 120. O encerramento pesa para quem move muito. As tabelas "antes" (`SemC8` do `BalanceTests`) e as migrações dos saves reais dos schemas 2 a 9 jogam com o vestiário desligado, como o jogo que as gravou.
+
+### Prova de mutação (`MUTACAO_TESTES="FullyQualifiedName~VestiarioTests|FullyQualifiedName~RegrasTests|FullyQualifiedName~SaveTests" python client/tools/mutacao.py vestiario`)
+
+Resultado em 2026-11-04: **6 de 6 mortos**.
+
+| trava retirada | testes que caíram |
+|---|---|
+| voltar ao setor do uniforme não troca | `VoltarAoSetorDoUniforme_SoACaminhada_DepoisDaTroca_VestiarioDeNovo` |
+| quem sai termina o atendimento | `Encerrando_TerminaOAtendimentoNoPostoAntesDeSair` |
+| o outro no posto cobre o atendimento | `ComOutroNoPosto_SaiSemEsperar` |
+| o uniforme só muda no fim da troca | 5, entre eles `Invariantes_NoBotLento_TresOndas` e `MigracaoDaV01_AbreComTudoEOVooDaFilaEmbarca` |
+| a fase sai do `Andando` | 4, entre eles `Transferencia_EncerraVaiTrocaEChega_NaOrdem_UniformeSoNoVestiario` |
+| o save guarda a transferência inteira | `Encerrando_TerminaOAtendimentoNoPostoAntesDeSair` |
+
+## 16. Fase C9: os 3 candidatos e a demissão (2026-11-03, `CONTRATO_FASE_C9.md`)
 
 Cada vaga tem um Júnior, um Pleno e um Sênior fixos. O Pleno é a pessoa e o preço de antes; os outros dois rendem, custam e ganham em % dele (o `CONTRATO_FASE_C9.md` §2 tem a tabela). Os bots de sempre contratam o Pleno e nunca demitem: o jogo deles é o de antes, número a número. A migração do save real do schema 10 prova isso (migrar = jogar até ali com o código novo).
 
