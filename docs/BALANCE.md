@@ -1104,8 +1104,10 @@ O `Contratador` (e o `LentoContratador`) compara os 3, contrata o melhor que o c
 
 | bot | embarque | receita | conta paga | lucro | lucro do Pleno | ganho |
 |---|---|---|---|---|---|---|
-| Contratador | 96,4% | 31 345 | 1 652 | 29 694 | 26 566 | **1,118** |
-| LentoContratador | 88,6% | 21 125 | 1 591 | 19 534 | 13 906 | **1,405** |
+| Contratador | 96,2% | 30 957 | 1 652 | 29 305 | 26 213 | **1,118** |
+| LentoContratador | 88,0% | 20 461 | 1 581 | 18 881 | 13 356 | **1,414** |
+
+Com o vestiário da frente E (PR #63), que entrou depois: antes dele, 1,118 e 1,405.
 
 ### D-C9d. O bot que mede a escolha troca pelo Sênior com prioridade
 

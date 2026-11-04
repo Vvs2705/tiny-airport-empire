@@ -64,13 +64,13 @@ Em % do Pleno (`Tuning.ExpRende`, `ExpContratacao`, `ExpSalario`), sobre `Tuning
 
 **Schema 12** (combinado com o coordenador em 04/11: o 11 fica para o histórico, PR #60). `func.<i>` ganha o 5º campo, a experiência: `em,de,andando,perfil,experiencia`. Os schemas 10 e 11 não têm o campo: todos viram o Pleno, com a folha de antes. Lixo (fora de 0 a 2) também vira o Pleno. O teto do atendimento gravado passou a ser o do candidato mais lento (`TempoTeto`), porque um Júnior pode ter saído no meio.
 
-A cadeia 10 → 11 → 12 tem teste nos dois elos, cada um com um save real (semente 7, bot Bom, 2 790 s, os 6 perfis contratados): o do schema 10 gravado pelo commit 03c40bd, e o do schema 11 pelo 96a6e40 (a `main` com o registro de ocorrências). Nos dois, todos viram o Pleno, a folha é a de antes e migrar dá o mesmo jogo que jogar até ali com o código novo, número a número; o do 11 traz o registro de volta. Os saves dos schemas 1 a 9 continuam migrando pelo mesmo caminho.
+A cadeia 10 → 11 → 12 tem teste nos dois elos, cada um com um save real (semente 7, bot Bom, 2 790 s, os 6 perfis contratados): o do schema 10 gravado pelo commit 03c40bd, e o do schema 11 pelo 96a6e40 (a `main` com o registro de ocorrências). Nos dois, todos viram o Pleno, a folha é a de antes e migrar dá o mesmo jogo que jogar até ali com o código novo, número a número (sem o vestiário da frente E, como o jogo que esses schemas gravavam); o do 11 traz o registro de volta. Os saves dos schemas 1 a 9 continuam migrando pelo mesmo caminho.
 
 ## 6. Bot e portão
 
 - **Começo intacto:** os bots de sempre contratam o Pleno e nunca demitem, então todos os portões anteriores repetem a tabela deles (o Pleno é o caminho de antes, e a migração do schema 10 prova).
 - **Bot `Contratador` e `LentoContratador`:** as 6 vagas entram na conta do mais barato pelo preço do Júnior, em qualquer ordem; ao contratar, levam o melhor que o caixa paga (o Sênior direto quando cobre); e trocam quem não é Sênior pelo Sênior (demite e contrata), com a troca pesando metade do preço na conta do mais barato, porque o Sênior rende 25% na estação toda, cerca do dobro de um nível de velocidade (D-C9d, `BALANCE.md` §16).
-- **Portão do §5.13 (`Portao_FaseC9_Candidatos`):** o lucro (receita − conta paga) do `Contratador` ≥ 1,10 × o do Bom, e o do `LentoContratador` ≥ 1,10 × o do Lento, 200 sementes × 20 ondas. Abaixo disso a experiência fica só visual (`RegraExperiencia = false`). Com 200 sementes: **1,118 e 1,405**. O CI roda as 200 na parte "resto".
+- **Portão do §5.13 (`Portao_FaseC9_Candidatos`):** o lucro (receita − conta paga) do `Contratador` ≥ 1,10 × o do Bom, e o do `LentoContratador` ≥ 1,10 × o do Lento, 200 sementes × 20 ondas. Abaixo disso a experiência fica só visual (`RegraExperiencia = false`). Com 200 sementes e o vestiário da frente E: **1,118 e 1,414**. O CI roda as 200 na parte "resto".
 
 ## 7. Tela
 

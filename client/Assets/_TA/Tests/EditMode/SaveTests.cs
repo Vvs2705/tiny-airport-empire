@@ -689,8 +689,9 @@ namespace TA.Tests
             StringAssert.Contains("\nschema=" + Sim.Schema + "\n", texto);
             StringAssert.Contains("\nfunc.0=1,0,0,0,1\n", texto);
             Assert.AreEqual(texto, Sim.Load(texto, null, 7).Save("0.12.0", U), "ida e volta estavel no schema 12");
-            Sim n = Jogado(2790f, 7);
-            Assert.AreEqual(SemEma(n.Save("0.10.0", U)), SemEma(Sim.Load(V10, null, 7).Save("0.10.0", U)), "migrar = jogar ate ali com o codigo novo");
+            var sv = new Tuning { RegraVestiario = false };   // o jogo que o schema 10 gravava: mover sem o vestiario (frente E)
+            Sim n = Jogado(2790f, 7, sv);
+            Assert.AreEqual(SemEma(n.Save("0.10.0", U)), SemEma(Sim.Load(V10, sv, 7).Save("0.10.0", U)), "migrar = jogar ate ali com o codigo novo");
         }
 
         /// <summary>Save real do schema 11 (commit 96a6e40, a main com o registro de ocorrencias, #60): semente 7, bot Bom, 2 790 s, os 6 perfis contratados.</summary>
@@ -727,8 +728,9 @@ namespace TA.Tests
             StringAssert.Contains("\nschema=" + Sim.Schema + "\n", texto);
             StringAssert.Contains("\nfunc.0=1,0,0,0,1\n", texto);
             Assert.AreEqual(texto, Sim.Load(texto, null, 7).Save("0.12.0", U), "ida e volta estavel no schema 12");
-            Sim n = Jogado(2790f, 7);
-            Assert.AreEqual(SemEma(n.Save("0.11.0", U)), SemEma(Sim.Load(V11, null, 7).Save("0.11.0", U)), "migrar = jogar ate ali com o codigo novo");
+            var sv = new Tuning { RegraVestiario = false };   // o jogo que o schema 11 gravava: mover sem o vestiario (frente E)
+            Sim n = Jogado(2790f, 7, sv);
+            Assert.AreEqual(SemEma(n.Save("0.11.0", U)), SemEma(Sim.Load(V11, sv, 7).Save("0.11.0", U)), "migrar = jogar ate ali com o codigo novo");
         }
 
         static string SemEma(string save) =>
