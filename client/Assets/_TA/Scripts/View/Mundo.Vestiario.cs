@@ -41,9 +41,9 @@ namespace TA
                     int lado = LadoCorredor(de);
                     var portas = new List<Vector2>();   // ponytail: so na hora da transferencia, nao a cada quadro
                     PelasPortas(de, lado, portas);
-                    foreach (Vector2 porta in portas) { CruzaLinha(r, ref p, porta); PelaPorta(r, ref p, porta); }
+                    foreach (Vector2 porta in portas) { Atravessa(r, ref p, porta); PelaPorta(r, ref p, porta); }   // como o AteASala, sem o _portas: estatica para o teste
                     Vector2 dentro = CorredorPorta + Vector2.right * (lado == Portao ? -0.45f : 0.45f);
-                    if (lado == Portao) RotaSala(r, ref p, dentro); else Eixos(r, ref p, dentro, true);
+                    if (lado == Portao) RotaSala(r, ref p, dentro); else Contorna(r, ref p, dentro, true);
                     r.Add(p = CorredorPorta);
                 }
                 Eixos(r, ref p, VestPorta, false);

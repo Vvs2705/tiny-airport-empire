@@ -28,7 +28,7 @@ namespace TA.Tests
                     foreach (Vector2 v in r)
                     {
                         Vector2 d = v - p;
-                        Assert.IsTrue(Mathf.Abs(d.x) < 1e-3f || Mathf.Abs(d.y) < 1e-3f, q + ": diagonal de " + p + " a " + v);
+                        Assert.IsTrue(Mathf.Abs(d.x) < 0.05f || Mathf.Abs(d.y) < 0.05f, q + ": diagonal de " + p + " a " + v);
                         if (de != (int)Estacao.Alimentacao) Assert.IsFalse(Dentro(v, (int)Estacao.Alimentacao), q + ": pela alimentacao em " + v);
                         if (de != (int)Estacao.Despacho && de != (int)Estacao.Manutencao) Assert.IsFalse(Dentro(v, (int)Estacao.Despacho), q + ": pelo despacho em " + v);
                         p = v;

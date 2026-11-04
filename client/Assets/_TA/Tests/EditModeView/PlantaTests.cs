@@ -58,6 +58,39 @@ namespace TA.Tests
         }
 
         [Test]
+        public void Contorna_DaVoltaNaPecaLigada_SemDiagonal()
+        {
+            var go = new GameObject("peca");
+            try
+            {
+                Mundo.PecaDeTeste(0, go, new Vector2(2f, 2f), 0.05f, 1.2f);   // de x 0,8 a 3,2, no meio do caminho
+                var r = new List<Vector2>();
+                Vector2 de = new Vector2(2f, 1f), q = new Vector2(2f, 3f), p = de;
+                Mundo.Contorna(r, ref p, q, true);
+                Assert.AreEqual(q, p);
+                Assert.LessOrEqual(r.Count, 6, "curvas demais");
+                Vector2 ant = de;
+                foreach (Vector2 c in r)
+                {
+                    Assert.IsTrue(Mathf.Abs(ant.x - c.x) < 0.05f || Mathf.Abs(ant.y - c.y) < 0.05f, "em diagonal de " + ant + " a " + c);
+                    bool cruza = (ant.y - 2f) * (c.y - 2f) < 0f;
+                    Assert.IsFalse(cruza && Mathf.Min(ant.x, c.x) < 3.28f && Mathf.Max(ant.x, c.x) > 0.72f, "atravessou de " + ant + " a " + c);
+                    ant = c;
+                }
+                go.SetActive(false);
+                r.Clear();
+                p = de;
+                Mundo.Contorna(r, ref p, q, true);
+                Assert.AreEqual(1, r.Count, "peca desligada nao barra");
+            }
+            finally
+            {
+                Mundo.PecaDeTeste(0, null, Vector2.zero, 0f, 0f);
+                Object.DestroyImmediate(go);
+            }
+        }
+
+        [Test]
         public void Bagagem_FicaEntreOCheckInEASeguranca()
         {
             var r = new List<Vector2>();
