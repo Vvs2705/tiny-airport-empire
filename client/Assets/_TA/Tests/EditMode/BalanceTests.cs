@@ -90,7 +90,7 @@ namespace TA.Tests
         /// <summary>O "antes" de cada fase e' o jogo de quando ela entrou: sem a conta do dia (Fase C8), sem o vestiario (frente E) e sem os suprimentos. Os portoes rodam com eles.</summary>
         static Tuning SemC8(Tuning t)
         {
-            t.RegraDespesas = t.RegraVestiario = t.RegraLimpeza = t.RegraSuprimentos = false;
+            t.RegraDespesas = t.RegraVestiario = t.RegraLimpeza = t.RegraSuprimentos = t.RegraHistorias = false;
             return t;
         }
 
@@ -210,7 +210,7 @@ namespace TA.Tests
         public static Tuning SemFaseC4(Tuning t = null)
         {
             t = t ?? new Tuning();
-            t.RegraClima = t.RegraEpocas = t.RegraPicos = t.RegraFalhas = t.RegraCampanha = t.RegraMissoes = t.RegraPasse = t.RegraVestiario = t.RegraLimpeza = t.RegraSuprimentos = false;
+            t.RegraClima = t.RegraEpocas = t.RegraPicos = t.RegraFalhas = t.RegraCampanha = t.RegraMissoes = t.RegraPasse = t.RegraVestiario = t.RegraLimpeza = t.RegraSuprimentos = t.RegraHistorias = false;
             return t;
         }
 
@@ -359,7 +359,7 @@ namespace TA.Tests
         [Test]
         public void Antes_FaseC5()
         {
-            var t = new Tuning { RegraCampanha = false, RegraMissoes = false, RegraPasse = false, RegraDespesas = false, RegraVestiario = false, RegraLimpeza = false, RegraSuprimentos = false };
+            var t = new Tuning { RegraCampanha = false, RegraMissoes = false, RegraPasse = false, RegraDespesas = false, RegraVestiario = false, RegraLimpeza = false, RegraSuprimentos = false, RegraHistorias = false };
             Linha bom = Rodar(BotProfile.Bom, t), lento = Rodar(BotProfile.Lento, t), parado = Rodar(BotProfile.Parado, t);
             Imprime("antes da Fase C5 (a main da Fase C4)", new[] { bom, lento, parado });
             Assert.AreEqual((6279, 3872, 4702), ((int)Math.Round(bom.Receita), (int)Math.Round(lento.Receita), (int)Math.Round(parado.Receita)), "sem pagar, a tabela da fase anterior");
@@ -424,7 +424,7 @@ namespace TA.Tests
         [Test]
         public void Antes_FaseC6()
         {
-            var t = new Tuning { RegraMissoes = false, RegraPasse = false, RegraDespesas = false, RegraVestiario = false, RegraLimpeza = false, RegraSuprimentos = false };
+            var t = new Tuning { RegraMissoes = false, RegraPasse = false, RegraDespesas = false, RegraVestiario = false, RegraLimpeza = false, RegraSuprimentos = false, RegraHistorias = false };
             Linha bom = Rodar(BotProfile.Bom, t), lento = Rodar(BotProfile.Lento, t), parado = Rodar(BotProfile.Parado, t);
             Imprime("antes da Fase C6 (a main da Fase C5)", new[] { bom, lento, parado });
             Assert.AreEqual((6586, 3534, 4660), ((int)Math.Round(bom.Receita), (int)Math.Round(lento.Receita), (int)Math.Round(parado.Receita)), "sem pagar, a tabela da fase anterior");
@@ -733,6 +733,50 @@ namespace TA.Tests
                 Mede("trip N=" + v[0] + " M=" + v[1], new Tuning { RegraTripulacao = true, RegraManutencao = false, TrechosAteDescanso = v[0], DescansoSeg = v[1] });
             foreach (int[] v in new[] { new[] { 10, 5, 15, 90 }, new[] { 10, 5, 15, 110 }, new[] { 10, 10, 10, 110 }, new[] { 15, 10, 10, 110 }, new[] { 12, 6, 10, 110 }, new[] { 20, 10, 10, 110 } })
                 Mede("manut W=" + v[0] + " Q=" + v[1] + " C=" + v[2] + " I=" + v[3], new Tuning { RegraTripulacao = false, DesgastePorTrecho = v[0], CheckTira = v[1], CheckCusto = v[2], InspecaoSeg = v[3] });
+        }
+
+        // ------------------------------------------------------------------ ta-historias (TA-3)
+
+        /// <summary>TA-3 (docs/HISTORIAS.md): as 20 historias aparecem e fecham em 200 de 200 sementes com quem joga por elas (o Contador e o
+        /// LentoContador: o Completo e o LentoCompleto que levam o perfil pedido a estacao). Nenhum compra nem assiste anuncio. Onda media, p90 e
+        /// pior de cada uma e do album cheio.</summary>
+        [Test]
+        public void Portao_Historias()
+        {
+            var ci = CultureInfo.InvariantCulture;
+            string falta = "";
+            foreach (BotProfile p in new[] { BotProfile.Contador, BotProfile.LentoContador })
+            {
+                var em = new int[Sementes][];
+                Parallel.For(0, Sementes, new ParallelOptions { MaxDegreeOfParallelism = Threads }, i => em[i] = Album(p, i + 1, OndasAlcance));
+                TestContext.Out.WriteLine(p.Name + "\n| historia | fechou | onda media | p90 | pior |\n|---|---|---|---|---|");
+                for (int h = 0; h < Tabelas.Historias.Length; h++)
+                {
+                    int[] o = em.Select(r => r[h]).Where(x => x >= 0).OrderBy(x => x).ToArray();
+                    TestContext.Out.WriteLine(string.Format(ci, "| {0} | {1}/{2} | {3:0.0} | {4} | {5} |", Tabelas.Historias[h].Id, o.Length, Sementes,
+                        o.Length > 0 ? o.Average() : -1, o.Length > 0 ? o[o.Length * 9 / 10] : -1, o.Length > 0 ? o[o.Length - 1] : -1));
+                    if (o.Length < Sementes) falta += " " + p.Name + ":" + Tabelas.Historias[h].Id + "=" + o.Length;
+                }
+                int[] cheio = em.Where(r => r.All(x => x >= 0)).Select(r => r.Max()).OrderBy(x => x).ToArray();
+                if (cheio.Length > 0)
+                    TestContext.Out.WriteLine(string.Format(ci, "album cheio: {0}/{1}, onda media {2:0.0}, p90 {3}, pior {4}", cheio.Length, Sementes, cheio.Average(), cheio[cheio.Length * 9 / 10], cheio[cheio.Length - 1]));
+            }
+            Assert.IsEmpty(falta, "toda historia aparece e fecha");
+        }
+
+        /// <summary>Onda em que cada historia entrou no album (-1 = nunca), ate o album fechar ou `ondas`.</summary>
+        static int[] Album(BotProfile p, int seed, int ondas)
+        {
+            var s = new Sim(null, seed);
+            var bot = new Bot(p);
+            int[] em = Enumerable.Repeat(-1, s.T.Historias.Length).ToArray();
+            long fim = (long)ondas * s.OndaPassos;
+            while (s.Steps < fim && s.Album != s.TodasHistorias)
+            {
+                bot.Step(s);
+                foreach (Evento e in s.Events) if (e.Tipo == Ev.Historia && em[e.A] < 0) em[e.A] = s.Onda;
+            }
+            return em;
         }
     }
 }

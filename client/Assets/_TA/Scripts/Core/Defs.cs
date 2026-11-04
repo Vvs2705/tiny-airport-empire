@@ -467,11 +467,10 @@ namespace TA.Core
         public int[] SupCusto = { 6, 5 };
         /// <summary>A melhoria (tanque maior: menos entregas por dia), preco de cada nivel; a quantidade de niveis e' o tamanho.</summary>
         public int[] SupTanqueCusto = { 40, 80 };
-    }
 
-    /// <summary>Historias do TA-3 (GDD §5.9). A v0.1 tem 1. Id = indice (vai no album do save): so cresce no fim.</summary>
-    public static class Historias
-    {
-        public static readonly string[] Texto = { "Dona Rosa vai ao casamento da neta" };
+        // ---- ta-historias ----
+        /// <summary>As 20 historias do TA-3 (Sim.Historias.cs). False = a v0.1: so a Dona Rosa, do meio da fila, entregue ao embarcar.</summary>
+        public bool RegraHistorias = true;
+        public Historia[] Historias = Tabelas.Historias;
     }
 }
