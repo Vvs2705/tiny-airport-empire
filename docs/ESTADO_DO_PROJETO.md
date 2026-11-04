@@ -141,7 +141,7 @@ Ordem de trabalho de 2026-11-03, depois da mistura com o GDD de direção (`GDD.
 13. **`ta-avioes`:** 8 variantes visuais de aeronave por rota ou aeroporto (só visual; as peças do Tripo já existem).
 14. **`ta-historias`:** as 20 micro-histórias de passageiros (hoje 1).
 15. **`ta-audio`:** ligar o áudio em `Game.cs`, `Mundo.cs` e na pausa; o dono ouve antes de valer.
-16. **`ta-passe-tela`:** tela do passe de temporada, depois do núcleo (PR #49).
+16. **`ta-passe-tela`:** tela do passe de temporada (`Hud.Passe.cs`), PR aberto em 2026-11-03; faltam a arte dos 3 cosméticos e o conteúdo da trilha premium, que vem com a loja.
 17. **`ta-incidente5`:** o 5º incidente (volta ao portão por aviso técnico); só entra se passar no portão do §5.13.
 18. **`ta-estetica`:** auditoria visual contra os concorrentes; refazer o que estiver abaixo.
 19. **`ta-ingles`:** textos em inglês (D-08: pt-BR e en no lançamento; es e id depois, com revisão humana).

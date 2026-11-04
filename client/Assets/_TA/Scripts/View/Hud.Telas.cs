@@ -261,7 +261,7 @@ namespace TA
             m.Rt.SetAsLastSibling();
         }
 
-        /// <summary>Abre uma tela pelo nome (botoes e a flag -tela): melhorias, mover, cofre, anuncio, pausa, album, config, excluir, metas, missoes, conquistas, rotas (rotas0 a rotas2: a aba do aeroporto). "jogo" = nenhuma.</summary>
+        /// <summary>Abre uma tela pelo nome (botoes e a flag -tela): melhorias, mover, cofre, anuncio, pausa, album, config, excluir, metas, missoes, conquistas, rotas (rotas0 a rotas2: a aba do aeroporto), passe. "jogo" = nenhuma.</summary>
         public void AbreTela(string nome)
         {
             switch (nome)
@@ -279,6 +279,7 @@ namespace TA
                 case "voo": AbreVoo(0); break;
                 case "metas": case "missoes": case "conquistas": AbreMetas(nome); break;
                 case "rotas": case "rotas0": case "rotas1": case "rotas2": AbreRotas(nome); break;
+                case "passe": AbrePasse(); break;
                 case "fichapax": case "fichafunc": case "fichaestacao": case "fichatrip": FichaDev(nome); break;
                 case "vaga": case "demitir": TelaEquipeDev(nome); break;   // Fase C9 (Hud.Operacao.cs)
             }
