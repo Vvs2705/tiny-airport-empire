@@ -187,13 +187,22 @@ namespace TA
                 Fixo(PrimitiveType.Cube, V3(p - Salas[e].T * 0.012f, 0.32f + i * 0.08f), tam(larg - 0.1f, 0.03f), linha);
         }
 
+        /// <summary>Malha do balcão da sala no nível `n` (0..2): loja e alimentação trocam o móvel no nível 3.</summary>
+        static string MalhaDoNivel(int e, int n) => n < 2 ? BalcaoMalha[e] : e == SalaComida ? "bar_lounge" : e == SalaLoja ? "vitrine_loja" : BalcaoMalha[e];
+
+        /// <summary>Onde fica quem atende, em m a partir do pivô do móvel (a frente da malha aponta para a fila; negativo = atrás), medido nas malhas:
+        /// colado atrás do balcão (meia profundidade + o corpo + 3 cm), no vão entre a estante e o balcão do bar e dentro do quiosque da loja. Assim
+        /// ninguém fica atrás da estante nem dentro do telão e da parede (a Cida no café, 04/11).
+        /// ponytail: medido nas malhas do Tripo; sem a arte (clone do repositório) o quiosque vira o bloco da v0.1 e a vendedora fica dentro dele.</summary>
+        static float PostoNaMalha(string m) =>
+            m == "vitrine_loja" ? -0.02f : m == "bar_lounge" ? -0.1f : m == "vitrine_cafe" ? -0.41f : m == "bancada_oficina" ? -0.24f : -0.28f;   // -0,28: balcao_loja e mesa_despacho
+
         /// <summary>Nivel `n` do posto que nao tem uma malha por nivel: o movel e sempre da regua (as malhas loja e alimentacao sao miniaturas de sala, com
         /// moveis menores que o passageiro) e o upgrade acrescenta equipamento e o telao atras do balcao; loja e alimentacao trocam o movel no nivel 3.</summary>
         Transform MesaNivel(int e, int n, Vector2 b)
         {
             if (e != SalaLoja && e != SalaComida && e != SalaOficina && e != SalaDespacho) return null;
-            string malha = n < 2 ? BalcaoMalha[e] : e == SalaComida ? "bar_lounge" : e == SalaLoja ? "vitrine_loja" : BalcaoMalha[e];
-            Transform t = Peca(malha, V3(b), Rumo(-Salas[e].N));
+            Transform t = Peca(MalhaDoNivel(e, n), V3(b), Rumo(-Salas[e].N));
             if (t == null) return null;
             Transform cont = _cont;
             _cont = t;

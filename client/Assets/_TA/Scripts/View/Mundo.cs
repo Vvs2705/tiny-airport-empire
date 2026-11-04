@@ -36,8 +36,8 @@ namespace TA
         /// <summary>Grade das salas, corredor entre elas (metade para cada sala: as paredes ficam recuadas) e o adulto. `Em` mede a partir da parede.</summary>
         public const float Lado = 4f, Corredor = 0.6f, Gente = 0.5f, Interno = Lado - Corredor;
         const float Elev = 45f, VelPax = 1.2f, Troca = 0.35f, EscalaFunc = Gente, PortaLarg = 0.45f;
-        /// <summary>Fileiras de quem atende e de quem e atendido, a partir da parede de saida; a fila em pessoas (1,35 por lugar).</summary>
-        const float AtrasD = 0.16f, BalcaoD = 0.62f, FrenteD = 1.08f, FaixaD = 1.25f, FilaD = 1.42f, FilaPasso = 0.24f, FilaLinha = 0.34f;
+        /// <summary>Fileiras do balcao e de quem e atendido, a partir da parede de saida (quem atende sai do movel: PostoNaMalha); a fila em pessoas (1,35 por lugar).</summary>
+        const float BalcaoD = 0.62f, FrenteD = 1.08f, FaixaD = 1.25f, FilaD = 1.42f, FilaPasso = 0.24f, FilaLinha = 0.34f;
         static readonly float[] Desloc = { -0.6f, 0.6f, -1.3f, 1.3f };   // balcoes ao longo da parede de saida, com o corredor no meio
 
         /// <summary>Sala de cada estacao: canto (x, z), porta de entrada e de saida (no meio da parede) e a direcao da saida (para fora).</summary>
@@ -105,7 +105,9 @@ namespace TA
         static Vector2 Em(int e, float d, float a) => Salas[e].Out - Salas[e].N * (d + Corredor * 0.5f) + Salas[e].T * a;
         static Vector2 Balcao(int e, int i) => Em(e, e == SalaCheckIn ? ChkBalcaoD : BalcaoD, Posto(e, i));
         static Vector2 NoBalcao(int e, int i) => Em(e, e == SalaCheckIn ? ChkFrenteD : e == Portao ? BalcaoD + PassoPodio : FrenteD, Posto(e, i));
-        static Vector2 AtrasBalcao(int e, int i) => e == SalaSeg ? Agente(i) : Em(e, e == SalaCheckIn ? ChkAtrasD : e == Portao ? BalcaoD - PassoPodio : AtrasD, Posto(e, i));
+        /// <summary>Lugar de quem atende no posto `i`: nas salas de móvel único, sai da malha do nível (PostoNaMalha), não da parede.</summary>
+        static Vector2 AtrasBalcao(int e, int i, int nivel = 0) =>
+            e == SalaSeg ? Agente(i) : Em(e, e == SalaCheckIn ? ChkAtrasD : e == Portao ? BalcaoD - PassoPodio : BalcaoD + PostoNaMalha(MalhaDoNivel(e, nivel)), Posto(e, i));
         static Vector2 Centro(int e) => Salas[e].Min + new Vector2(Lado * 0.5f, Lado * 0.5f);
         /// <summary>Rumo (graus de yaw do Unity) da direcao `d` do chao: +z = 0.</summary>
         static float Rumo(Vector2 d) => Mathf.Atan2(d.x, d.y) * Mathf.Rad2Deg;

@@ -395,7 +395,7 @@ namespace TA
             int n = 0;
             foreach (Funcionario o in s.Staff) { if (o == f) break; if (o.Em == f.Em) n++; }
             posto = n % 4;
-            return f.Em == Estacao.Bagagem ? AoLadoDaBalanca(posto) : AtrasBalcao((int)f.Em, posto);
+            return f.Em == Estacao.Bagagem ? AoLadoDaBalanca(posto) : AtrasBalcao((int)f.Em, posto, NivelDe(s.St(f.Em).Vel));
         }
 
         /// <summary>Caminho da pessoa: de p ate q nos eixos do mundo, com a ultima perna em x (ou em z). A folha tem 4 rumos, que sao os eixos: andar

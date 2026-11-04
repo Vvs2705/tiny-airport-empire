@@ -23,7 +23,7 @@ PESSOAS = ("pax", "func", "equipe", "ator", "trip", "mec")
 PESSOA_LADO, PESSOA_ALTURA = 0.4, 1.2
 CORPO_RAIO, CORPO_ALTURA = 0.1, 0.5  # adulto de 0,5 m e 0,2 m de ombros (Mundo.Gente)
 CADEIRAS = ("cadeiras_espera", "Cadeira")
-OCAS = ("bar_lounge", "bancada_oficina")  # balcao com prateleira ou painel atras (nivel 3): quem trabalha anda e fica no vao entre os dois, dentro da caixa
+OCAS = ("bar_lounge", "bancada_oficina", "vitrine_loja")  # balcao com prateleira ou painel atras e o quiosque da loja (nivel 3): quem trabalha fica no vao, dentro da caixa
 FINAS = ("cordao_fila",)  # a caixa e a da diagonal da malha, mais larga que o corredor da fila: encostar nao conta, so o centro dentro (atravessou)
 # a gente passa por dentro (portico, cabine) ou a peca anda com ela (Mundo.Seguranca, Mundo.Malas): nao e obstaculo
 SEM_CORPO = ("portico_detector", "cabine_scanner_corpo", "bandeja_seguranca", "Bandeja", "scanner_mao", "mala_rodinha", "Mala", "MalaSeg", "Pilha")
