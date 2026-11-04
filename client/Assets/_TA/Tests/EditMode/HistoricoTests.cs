@@ -382,12 +382,13 @@ namespace TA.Tests
         public void MigracaoDoSchema10_SaveReal_RegistroVazio_EOMesmoJogo()
         {
             const long U = 1800000000;
-            Sim m = Sim.Load(V10, null, 7);
+            var t = new Tuning { RegraVestiario = false };   // o jogo que o schema 10 gravava: mover sem o vestiario (frente E)
+            Sim m = Sim.Load(V10, t, 7);
             Assert.IsFalse(m.SaveRefused, "schema 10 migra, nao e' recusado");
             Assert.AreEqual((4424L, 83700L), (m.Cash, m.Steps));
             Assert.IsEmpty(m.Ocorrencias);
 
-            Sim n = new Sim(null, 7);
+            Sim n = new Sim(t, 7);
             var bn = new Bot(BotProfile.Bom);
             for (int i = 0; i < 2790 * Sim.Hz; i++) bn.Step(n);
             Assert.IsNotEmpty(n.Ocorrencias, "o codigo novo ja anotou ate ali");
@@ -400,7 +401,7 @@ namespace TA.Tests
             Assert.IsNotEmpty(m.Ocorrencias, "anota dali em diante");
             Assert.AreEqual(SemHist(n.Save("0.10.0", U + 1)), SemHist(m.Save("0.10.0", U + 1)));
             string depois = m.Save("0.10.0", U + 1);
-            Assert.AreEqual(depois, Sim.Load(depois, null, 7).Save("0.10.0", U + 1), "ida e volta estavel no schema 11");
+            Assert.AreEqual(depois, Sim.Load(depois, t, 7).Save("0.10.0", U + 1), "ida e volta estavel no schema 11");
         }
 
         /// <summary>Save real do schema 9 (a main de 03/11, antes da frente A, semente 7, 2 790 s do Bom).</summary>
