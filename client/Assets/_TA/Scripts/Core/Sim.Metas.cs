@@ -68,7 +68,7 @@ namespace TA.Core
                 Objetivo o = ObjetivoAtual(a);
                 if (o == null || Progresso(a) < o.Alvo) continue;
                 int pago = T.RegraCampanha ? o.Recompensa : 0;
-                Cash += pago;
+                Recebe(pago, Fonte.Premios);
                 Emit(Ev.ObjetivoConcluido, a, _feitos[a]++, pago);
                 if (T.RegraCampanha && ObjetivoAtual(a) == null) GanhaGems(a);
             }

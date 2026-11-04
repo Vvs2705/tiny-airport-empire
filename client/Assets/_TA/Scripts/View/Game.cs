@@ -21,7 +21,7 @@ namespace TA
     ///   -autoplay N   sem render: o bot joga N ondas (Bom, Lento, Parado; retomada no meio da onda), loga AUTOPLAY OK|FAIL e sai 0/1.
     ///                 Usar com -batchmode -nographics (client/tools/verify.sh full).
     ///   -bot          o bot Bom joga na tela.        -speed N   multiplica o dt (0,1..20).   -vel V   comeca em V (0 = pausa, 1..3 = 1x..3x).
-    ///   -tela nome    jogo | melhorias | mover | cofre | anuncio | pausa | pausada (sem o menu) | album | config | excluir | equipe | tripulacao | patio | voo | metas | missoes | conquistas | rotas (rotas0..rotas2 = aba do aeroporto) | fichapax | fichafunc | fichaestacao | fichatrip (Hud.FichaDev) | passoN (tutorial, passo N).
+    ///   -tela nome    jogo | melhorias | mover | cofre | anuncio | pausa | pausada (sem o menu) | album | config | excluir | equipe | tripulacao | patio | voo | metas | missoes | conquistas | rotas (rotas0..rotas2 = aba do aeroporto) | passe | fichapax | fichafunc | fichaestacao | fichatrip (Hud.FichaDev) | passoN (tutorial, passo N).
     ///   -textomaior, -reduzmovimento   ligam o ajuste so nesta sessao (o -testsession nao le as preferencias do PC).
     ///   -onda K       comeca na onda K (1 = a 1a).   -passageiros N   estresse: N passageiros por onda (60 = o K3).
     ///   -tutorial     liga o tutorial no -testsession (sem gravar; com -bot o ENTENDI se aperta sozinho).
@@ -308,6 +308,7 @@ namespace TA
                 case Ev.RotaProgramada: Diario("route_scheduled", e.A, e.B); break;
                 case Ev.Viagem: Diario("airport_trip", e.A, e.B); _hud.Toast(Textos.ViagemAviso(e.A)); break;
                 case Ev.AeroportoChegada: Diario("airport_arrived", e.A); _hud.Toast(Textos.ChegadaAviso(e.A)); break;
+                case Ev.PasseNivel: Diario("season_reward_claimed", e.A, e.B, e.C); _hud.PasseNivel(e.A, e.B); break;
             }
         }
 

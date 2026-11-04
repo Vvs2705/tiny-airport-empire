@@ -8,7 +8,7 @@ namespace TA.Core
     /// <summary>
     /// Frente E: transferencia pelo vestiario (GDD §4.1; Direcao §9.3 e §9.6). Nada novo no save: a fase sai do Funcionario.Andando (os passos
     /// que faltam), contada do fim: ultima perna, troca (Tuning.Troca) e ida ao vestiario, que somam a Caminhada da v0.1, e, antes, o resto do
-    /// atendimento em curso. A soma nao cresce: com +1 s, o LentoGuiado fecha a campanha em 131 de 200 sementes (BALANCE.md §13). Funcionario.De guarda o uniforme que ele veste ate o fim da troca; De == Em com Andando > 0 e' so a caminhada (voltou
+    /// atendimento em curso. A soma nao cresce: com +1 s, o LentoGuiado fecha a campanha em 131 de 200 sementes (BALANCE.md §14). Funcionario.De guarda o uniforme que ele veste ate o fim da troca; De == Em com Andando > 0 e' so a caminhada (voltou
     /// ao setor do uniforme). Quem esta em transferencia nao atende (Andando > 0 tira das Presentes).
     /// ponytail: a validacao de qualificacao e treinamento (Direcao §9.3, passos 3 e 4) fica no roteiro (GDD §4.4).
     /// </summary>

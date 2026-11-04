@@ -95,7 +95,7 @@ namespace TA.Core
             {
                 Nivel n = t.Gratis[_pagos++];
                 int v = T.RegraPasse ? n.Valor : 0;
-                if (n.Premio == Premio.Cash) SomaCash(v);
+                if (n.Premio == Premio.Cash) Recebe(v, Fonte.Premios);
                 else if (n.Premio == Premio.Tempo) BoostLeft = (int)Math.Min(BoostTeto, BoostLeft + (long)v * Hz);
                 else if (v > 0) _posse.Add(n.Id);
                 Emit(Ev.PasseNivel, _temp, _pagos, v);

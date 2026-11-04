@@ -74,7 +74,7 @@ namespace TA.Core
                 if (m == null || m.Feita || !m.Cumpriu) continue;
                 m.Feita = true;
                 int pago = T.RegraMissoes ? m.O.Recompensa : 0;
-                Cash += pago;
+                Recebe(pago, Fonte.Premios);
                 Emit(Ev.MissaoConcluida, tipo, m.Indice, pago);
             }
         }

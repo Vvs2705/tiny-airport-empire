@@ -199,7 +199,7 @@ namespace TA.Core
         public bool HirePatio()
         {
             long c = CustoPatio();
-            if (c < 0 || Cash < c) return false;
+            if (!PodeComprar(c)) return false;
             Cash -= c;
             EquipePatio++;
             Emit(Ev.PatioContratado, EquipePatio, (int)c);
@@ -221,7 +221,7 @@ namespace TA.Core
         public bool BuyPatio(Servico s, Melhoria m)
         {
             long c = CustoPatio(s, m);
-            if (c < 0 || Cash < c) return false;
+            if (!PodeComprar(c)) return false;
             Cash -= c;
             if (m == Melhoria.Velocidade) PatioVel[(int)s]++; else PatioCap[(int)s]++;
             Emit(Ev.PatioMelhorou, (int)s, (int)m, NivelPatio(s, m));
