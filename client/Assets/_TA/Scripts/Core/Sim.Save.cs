@@ -52,6 +52,7 @@ namespace TA.Core
             SalvaPasse(sb);
             SalvaDespesas(sb);
             SalvaHistorico(sb);
+            SalvaHistorias(sb);
             return SaveEnvelope.Wrap(sb.ToString(), content, nowUnix);
         }
 
@@ -315,7 +316,9 @@ namespace TA.Core
             s.Cash = Math.Max(0, Get(kv, "cash", 0));   // GDD §6.2: saldo nunca negativo, nem de save editado
             s.TotalEmbarcados = Math.Max(0, Get(kv, "emb", 0));
             s.TotalPerdidos = Math.Max(0, Get(kv, "perd", 0));
-            s.Album = (int)Math.Max(0, Math.Min(int.MaxValue, Get(kv, "album", 0)));
+            s.Album = (int)Math.Max(0, Math.Min(int.MaxValue, Get(kv, "album", 0))) & s.TodasHistorias;
+            int[] hp = Ints(kv, "hp");
+            s.HistoriasSaiu = (hp.Length >= 4 ? hp[3] & s.TodasHistorias : 0) | s.Album;   // antes do schema 16: as que ja foram entregues
             s.BoostLeft = (int)Math.Max(0, Math.Min(s.BoostTeto, Get(kv, "bst", 0)));
             s.RateEma = kv.TryGetValue("ema", out string ema) && double.TryParse(ema, NumberStyles.Float, Ci, out double e) && e > 0 && !double.IsInfinity(e) ? e : 0;
             s.SavedAt = Get(kv, "saved", 0); s.LastClaim = Get(kv, "claim", 0); s.LastClaimCash = Math.Max(0, Get(kv, "claimcash", 0));
@@ -381,6 +384,7 @@ namespace TA.Core
                 v.Embarque = n[3] != 0; v.Partiu = n[4] != 0;
                 if (v.Partiu) v.Criados = v.Total;
             }
+            CarregaHistoria(Ints(kv, "hp"));
             var vistos = new HashSet<int>();
             foreach (Station st in Estacoes)
             {

@@ -416,11 +416,10 @@ namespace TA.Core
         // ---- ta-historico ----
         /// <summary>Anota o registro de ocorrencias (Sim.Historico.cs). So observa: false da o mesmo jogo, numero a numero, sem o registro.</summary>
         public bool RegraHistorico = true;
-    }
 
-    /// <summary>Historias do TA-3 (GDD §5.9). A v0.1 tem 1. Id = indice (vai no album do save): so cresce no fim.</summary>
-    public static class Historias
-    {
-        public static readonly string[] Texto = { "Dona Rosa vai ao casamento da neta" };
+        // ---- ta-historias ----
+        /// <summary>As 20 historias do TA-3 (Sim.Historias.cs). False = a v0.1: so a Dona Rosa, do meio da fila, entregue ao embarcar.</summary>
+        public bool RegraHistorias = true;
+        public Historia[] Historias = Tabelas.Historias;
     }
 }

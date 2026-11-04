@@ -1033,6 +1033,72 @@ MUTANTES = [
         "{ o.Aberta = false; o.Auto = true; } break;",
         "{ } break;",
     ),
+    (
+        "historias: a parada pedida precisa ter sido cumprida",
+        "Sim.Historias.cs",
+        "if (x == null || x.Onde != null && HistoriaPasso != 1) return;",
+        "if (x == null) return;",
+    ),
+    (
+        "historias: o perfil pedido tem de estar na estacao",
+        "Sim.Historias.cs",
+        "if (x.Quem is Perfil q && !Staff.Exists(f => f.Perfil == q && f.Em == e && f.Andando == 0)) return;",
+        "",
+    ),
+    (
+        "historias: todos a bordo so sem perdidos",
+        "Sim.Historias.cs",
+        "if (v.Perdidos == 0) Entrega(HistoriaOnda, HistoriaPax);",
+        "Entrega(HistoriaOnda, HistoriaPax);",
+    ),
+    (
+        "historias: todos a bordo espera o portao",
+        "Sim.Historias.cs",
+        "if (x.Todos) HistoriaPasso = 2; else Entrega(HistoriaOnda, p.Id);",
+        "Entrega(HistoriaOnda, p.Id);",
+    ),
+    (
+        "historias: a parada vai para quem tem o motivo",
+        "Sim.Historias.cs",
+        "x.Onde == Estacao.Loja ? p.Loja :",
+        "x.Onde == Estacao.Loja ? true :",
+    ),
+    (
+        "historias: ineditas primeiro",
+        "Sim.Historias.cs",
+        ": nova != 0 ? nova :",
+        ":",
+    ),
+    (
+        "historias: a Dona Rosa abre o album",
+        "Sim.Historias.cs",
+        "(nova & 1) != 0 ? 1 :",
+        "",
+    ),
+    (
+        "historias: so do aeroporto atual",
+        "Sim.Historias.cs",
+        "x.Aeroporto != AeroportoAtual ||",
+        "",
+    ),
+    (
+        "historias: so do marco alcancado",
+        "Sim.Historias.cs",
+        "|| x.Marco > Marco ||",
+        "||",
+    ),
+    (
+        "historias: o save volta a historia da onda",
+        "Sim.Historias.cs",
+        "HistoriaOnda = hp[0]; HistoriaPax = hp[1];",
+        "SorteiaHistoria(Onda); return;",
+    ),
+    (
+        "historias: as que sairam ficam na tabela",
+        "Sim.Save.cs",
+        "(hp.Length >= 4 ? hp[3] & s.TodasHistorias : 0)",
+        "(hp.Length >= 4 ? hp[3] : 0)",
+    ),
 ]
 
 

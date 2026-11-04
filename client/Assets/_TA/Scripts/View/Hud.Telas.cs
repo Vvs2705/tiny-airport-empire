@@ -202,13 +202,12 @@ namespace TA
             ItemPausa(lp, "Album", Art.Estrela(), Art.EstacaoCor[1], Textos.Album, Textos.AlbumLegenda, Textos.Abrir, it => { Fecha(_pausa); AbreTela("album"); });
             BotaoDoPe(_pausa.F.Corpo, Vector2.zero, new Vector2(1f, 0f), () => { Fecha(_pausa); _g.Pausa(false); }).Principal(Textos.Continuar, Art.Compra);
 
-            _album = NovaFolhaModal(canvas, "Album", Textos.Album, Art.Estrela(), 560f);
+            _album = NovaFolhaModal(canvas, "Album", Textos.Album, Art.Estrela(), 1300f);
             RectTransform lh = NovoResumo(_album, Textos.HistoriasNome, Art.Estrela(), Art.Coin, out _albumResumo);
             _albumItem = new Item[Textos.Historia.Length];
             for (int h = 0; h < _albumItem.Length; h++)
             {
                 _albumItem[h] = NovoItem(lh, "Historia" + h, Art.Estrela(), Art.Vazio, null, 136f, 18f);
-                _albumItem[h].Nome.text = Textos.Historia[h];
             }
             BuildConfig(canvas);
         }
@@ -394,11 +393,14 @@ namespace TA
                 int entregues = 0;
                 for (int h = 0; h < _albumItem.Length; h++)
                 {
-                    bool tem = (s.Album & (1 << h)) != 0;
+                    // TA-3: entregue (estrela), ja vista (coracao e o pedido) ou trancada (cadeado e onde aparece); o titulo so depois de vista
+                    bool tem = (s.Album >> h & 1) != 0, viu = (s.HistoriasSaiu >> h & 1) != 0 || tem;
+                    TA.Core.Historia x = s.T.Historias[h];
                     if (tem) entregues++;
-                    _albumItem[h].Placa.color = tem ? Art.Coin : Art.Vazio;
-                    _albumItem[h].Glifo.sprite = tem ? Art.Estrela() : Art.Cadeado();
-                    _albumItem[h].Linha.text = Textos.AlbumEstado(tem);
+                    _albumItem[h].Placa.color = tem ? Art.Coin : viu ? Art.Bad : Art.Vazio;
+                    _albumItem[h].Glifo.sprite = tem ? Art.Estrela() : viu ? Art.Heart() : Art.Cadeado();
+                    _albumItem[h].Nome.text = viu ? Textos.Historia[h] : Textos.HistoriaOculta;
+                    _albumItem[h].Linha.text = viu ? Textos.AlbumEstado(tem, x) : Textos.HistoriaOnde(x);
                 }
                 _albumResumo.Pinta(s, Textos.DeTotal(entregues, _albumItem.Length));
             }

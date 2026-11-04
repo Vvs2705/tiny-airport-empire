@@ -31,7 +31,38 @@ namespace TA
         public static readonly string[] AviaoNome = { L("Regional"), L("Jato") };
         /// <summary>Os nomes da Tabelas.Rotas, na mesma ordem: o destino tem um nome so, no quadro, na campanha e na tela do voo.</summary>
         public static readonly string[] Destino = System.Array.ConvertAll(Tabelas.Rotas, r => L(r.Nome));
-        public static readonly string[] Historia = System.Array.ConvertAll(Historias.Texto, L);
+        /// <summary>As 20 historias do TA-3, na ordem de Tabelas.Historias (o indice e' o bit do album). Uma linha cada: cabe na nota do quadro.</summary>
+        public static readonly string[] Historia =
+        {
+            L("Dona Rosa vai ao casamento da neta"), L("Lia vai à entrevista de emprego"), L("Pipoca, o gato, viaja na caixinha"),
+            L("Vô Tonico leva um presente ao neto"), L("A família Souza visita a bisavó"), L("Seu Zé leva o violão da serenata"),
+            L("Gabi reencontra a amiga de escola"), L("Theo, 8 anos, voa pela 1ª vez"), L("Léo e Rafa saem em lua de mel"),
+            L("O time de vôlei vai à final"), L("Dona Lurdes vai ver o mar"), L("Nina leva a prancha de surfe"),
+            L("Bolinha, o cão, sai de férias"), L("Seu Abílio volta à terra natal"), L("Kenji faz conexão para o Japão"),
+            L("O coral da escola canta em Lisboa"), L("Dra. Iara apresenta sua pesquisa"), L("Mariana parte para o intercâmbio"),
+            L("Vô Hiro vai conhecer a netinha"), L("A banda Sol Maior vai ao festival"),
+        };
+        /// <summary>A estacao com a preposicao: "no check-in", "na loja".</summary>
+        public static readonly string[] EstacaoNa = { L("no check-in"), L("na segurança"), L("na loja"), L("no portão"), L("na bagagem"), L("na alimentação"), L("na oficina"), L("no despacho") };
+        /// <summary>O que fecha a historia, numa linha (a regra do nucleo: Historia.Onde, Quem e Todos): "atendente no portão".</summary>
+        public static string HistoriaPedido(Historia x) =>
+            x.Todos ? L("o voo sair sem perder ninguém")
+            : x.Onde is TA.Core.Estacao e ? (x.Quem is TA.Core.Perfil q ? PerfilCurto[(int)q] + " " + EstacaoNa[(int)e] : L("passar ") + EstacaoNa[(int)e])
+            : L("embarcar a tempo");
+        public static string HistoriaPede(Historia x) => L("Pede: ") + HistoriaPedido(x);
+        public static readonly string[] PerfilCurto = { L("atendente"), L("agente"), L("vendedora"), L("bagageira"), L("mecânico"), L("despachante") };
+        /// <summary>A nota do quadro: o titulo e, enquanto falta o pedido, o pedido a cada 3 s. Sem a RegraHistorias, a Dona Rosa da v0.1.</summary>
+        public static string HistoriaNota(Sim s)
+        {
+            Historia x = s.HistoriaAtual;
+            if (x == null) return Historia[0];
+            bool pede = s.HistoriaPasso == 0 && (x.Onde != null || x.Todos) && (int)(s.Time / 3f) % 2 == 1;
+            return pede ? HistoriaPede(x) : Historia[s.HistoriaOnda];
+        }
+        /// <summary>Album: a que ainda nao apareceu mostra so onde vive; a que apareceu, o pedido; a entregue, o selo.</summary>
+        public static string HistoriaOnde(Historia x) => L("Aparece em ") + AeroportoNome[x.Aeroporto] + ", " + L("terminal ") + Nivel(x.Marco);
+        public static string AlbumEstado(bool tem, Historia x) => (tem ? L("Entregue: ") : L("Pede: ")) + HistoriaPedido(x);
+        public static readonly string HistoriaOculta = L("História ainda não vista");
         public static readonly string[] Melhoria = { L("Velocidade"), L("Capacidade") };
 
         public static string Num(long n) => n.ToString("#,0", Br);
@@ -172,7 +203,6 @@ namespace TA
         public static string NaEstacao(int n) => n == 0 ? L("Ninguém aqui") : n == 1 ? L("1 pessoa aqui") : n + L(" pessoas aqui");
         public static string ChecagemEfeito(int tira, float seg) => "-" + tira + "% · " + Seg(seg);
         public static string HangarEfeito(float seg) => L("Zera o desgaste em ") + Tempo(seg);
-        public static string AlbumEstado(bool tem) => tem ? L("Entregue") : L("Ainda não");
 
         // ---------- avisos de perigo (GDD §5.8: causa, duracao e opcoes; bombeiros so de rotina, sem fogo nem acidente) ----------
         /// <summary>Na ordem de TipoIncidente.</summary>

@@ -44,7 +44,10 @@ namespace TA.Tests
             Assert.Greater(Largura(Art.Titulo(), Hud.MenorTexto, "Recife"), 0f, "gerador de texto sem fonte neste modo");
             foreach (string d in Textos.Destino) Assert.LessOrEqual(Largura(Art.Titulo(), 44, d), Hud.LargDestino, d);
             Assert.LessOrEqual(Largura(Art.Titulo(), 36, "PARTIU · 99 ficaram"), Hud.LargSituacao);
-            Assert.LessOrEqual(Largura(Art.Font(), Hud.MenorTexto, Textos.Historia[0]), Hud.LargNota);
+            // TA-3: as 20 historias e o pedido de cada uma (a nota alterna os dois) cabem na nota do quadro
+            Assert.AreEqual(Tabelas.Historias.Length, Textos.Historia.Length, "um texto por historia da tabela");
+            foreach (string h in Textos.Historia) Assert.LessOrEqual(Largura(Art.Font(), Hud.MenorTexto, h), Hud.LargNota, h);
+            foreach (Historia x in Tabelas.Historias) Assert.LessOrEqual(Largura(Art.Font(), Hud.MenorTexto, Textos.HistoriaPede(x)), Hud.LargNota, x.Id);
         }
 
         [Test]

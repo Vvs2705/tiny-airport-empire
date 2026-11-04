@@ -157,6 +157,7 @@ namespace TA
             d.Linha = (atende ? Textos.PaxAtendido[e] : st.Tipo == Estacao.Portao && v != null && v.Embarque ? Textos.NaFilaDoEmbarque : Textos.PaxNaFila[e])
                 + (p.Historia ? Textos.ComHistoria : "");
             d.Info = Textos.NoAeroporto(espera, v != null && !v.Partiu ? (v.FechaPasso - s.PassoNaOnda) * Sim.Step : 0f, v != null && v.Atrasado);
+            if (p.Historia && s.HistoriaAtual != null) { d.Nome = Textos.Historia[s.HistoriaOnda]; d.Nota = Textos.HistoriaPede(s.HistoriaAtual); }   // TA-3: a historia dele
             return d;
         }
 
