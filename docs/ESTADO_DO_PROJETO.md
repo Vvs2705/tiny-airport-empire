@@ -97,6 +97,7 @@ Estado conferido em 2026-11-03. Cada frente termina num PR próprio, pequeno; o 
 |---|---|---|---|
 | `ta-planta-fim` | `feat/planta-salas` (enviado) | PR 2 da organização das 8 salas: ladrilho, tapete, paredes de fundo, letreiro, mobília e três postos refeitos na régua de 0,5 m (balcão da loja, bancada da oficina, mesa do despacho) | Rodada final do `verify.sh full`, fotos de antes e depois, abrir o PR. Entra **antes** da `ta-caminhos`. A arte nova que a frente pediu ao Tripo (5 peças) não foi gerada; o PR usa as peças que já existem |
 | `ta-caminhos` | `claude/practical-sanderson-e254c9` (enviado como `wip`) | Pessoa não atravessar parede, móvel nem equipamento. Medido em 5 cenários: **1.862 encontros caíram para 237** em 2026-11-01 (cadeira já em zero) | Zerar o que sobrou, conferir encontrão e viradas, rodar o `full` e abrir o PR. Há correções novas sem medir |
+| frente H | `claude/beautiful-northcutt-62afbe` | Esteira de restituição: quem chega no núcleo (`Sim.Chegada.cs`, save schema 13, sem Cash) e o saguão de chegada na tela (`Mundo.Chegada.cs`) | A rodada do Unity da leva (`full`, `diag_caixas.py` com chegadas, foto da esteira cheia) e as malhas do Lote 12 |
 | `ta-passe` | `claude/frosty-jepsen-605169` (PR #49, aberto) | Passe de temporada, **trilha gratuita de 30 níveis no núcleo** (`Sim.Passe.cs`, `docs/CONTRATO_FASE_C7.md`, `docs/PASSE.md`; save com mais uma versão). Só núcleo, sem tela | O coordenador mescla: o PR estava com conflito com a `main` (estado `DIRTY` em 2026-11-03). A trilha premium e a tela ficam para depois |
 
 `ta-planta-fim` e `ta-caminhos` seguem sem PR aberto em 2026-11-03; o estado das duas é o de 2026-11-02, acima. Da `ta-config` sobra a **revisão jurídica** do texto da política, que é do dono: o GitHub Pages já está ligado (status `built` em 2026-11-03).
@@ -127,7 +128,7 @@ Ordem de trabalho de 2026-11-03, depois da mistura com o GDD de direção (`GDD.
 1. **A, despesas e salários:** núcleo no PR #56 (parcial); faltam a tela (a conta de hoje e o aviso de falta de caixa) e o painel (I).
 2. **B, velocidades** 1x, 2x e 3x: no PR da `ta-velocidade` (parcial; falta a validação em build na rodada do Unity da leva).
 3. **C, ficha ao tocar** em pessoa, equipamento e sala: parcial (`ta-ficha`: pessoa e sala); faltam o equipamento e as necessidades.
-4. **H, esteira de restituição** (traz junto o desembarque mínimo de quem chega).
+4. **H, esteira de restituição** (traz junto o desembarque mínimo de quem chega): no PR da frente H (parcial; falta a rodada do Unity da leva e as malhas do Lote 12).
 5. **D, contratação** com 3 candidatos e demissão: núcleo e tela no PR #61 (parcial); falta validar no Unity, na rodada da leva.
 6. **E, transferência pelo vestiário**: parcial (`ta-vestiario`: núcleo, tela e as peças do Tripo); falta a validação em build na rodada do Unity da leva.
 7. **F, limpeza e banheiro.**
