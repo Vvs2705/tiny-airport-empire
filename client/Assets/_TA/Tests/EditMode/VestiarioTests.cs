@@ -116,6 +116,7 @@ namespace TA.Tests
         {
             Sim s = ComAna();
             Assert.IsTrue(s.Move(0, Estacao.Seguranca));
+            Assert.AreEqual(s.TransferePassos, Sim.Load(s.Save("t", T0)).Staff[0].Andando, "o save guarda a transferencia inteira, acima da caminhada da v0.1");
             RegrasTests.Run(s, s.T.Caminhada * 0.5f + 0.5f);
             Funcionario f = s.Staff[0];
             Assert.AreEqual(Transferencia.Trocando, s.Fase(f));

@@ -87,7 +87,7 @@ namespace TA
             // armarios de frente para quem troca, 2 bancos fora do caminho (que passa em z = 2) e a arara junto da parede norte
             foreach (float z in new[] { 1f, 1.65f, 2.3f }) Peca("armarios_vestiario", new Vector3(15.55f, 0f, z), Rumo(Vector2.left));
             foreach (float z in new[] { 1.1f, 2.9f }) Peca("banco_vestiario", new Vector3(13.6f, 0f, z), 90f);
-            Peca("arara_uniformes", new Vector3(13.2f, 0f, 3.42f), 180f);
+            Peca("arara_uniformes", new Vector3(13.2f, 0f, 3.45f), 90f);   // o varao sai do Tripo no eixo da frente: girada, corre ao longo da parede
             PlacaVestiario(new Vector3(c.x, AltoFundo + 0.2f, VestMin.y + Lado - Corredor * 0.5f));
         }
 
