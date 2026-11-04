@@ -522,6 +522,28 @@ namespace TA.Tests
             }
         }
 
+        /// <summary>Portao do GDD §5.13 para os 3 candidatos (CONTRATO_FASE_C9 §6): quem compara e troca pelo Senior contra quem contrata sempre o Pleno
+        /// e nunca demite, pelo lucro (receita - conta paga), com o Bom e o Lento, 200 sementes x 20 ondas. Abaixo de 1,10 a experiencia fica so visual.</summary>
+        [Test]
+        public void Portao_FaseC9_Candidatos() => Assert.IsEmpty(MedeCandidatos(Sementes), "GDD §5.13: escolha de candidato com regra precisa de ganho >= 1,10");
+
+        public static string MedeCandidatos(int sementes, int threads = Threads)
+        {
+            var ci = CultureInfo.InvariantCulture;
+            TestContext.Out.WriteLine("| bot | embarque | receita | conta paga | lucro | lucro do Pleno | ganho | regra |\n|---|---|---|---|---|---|---|---|");
+            string falhas = "";
+            foreach ((BotProfile c, BotProfile p) in new[] { (BotProfile.Contratador, BotProfile.Bom), (BotProfile.LentoContratador, BotProfile.Lento) })
+            {
+                Linha a = Rodar(c, null, sementes, OndasFaseC, threads), b = Rodar(p, null, sementes, OndasFaseC, threads);
+                double g = (a.Receita - a.Despesas) / (b.Receita - b.Despesas);
+                bool regra = Tuning.Padrao.RegraExperiencia;
+                TestContext.Out.WriteLine(string.Format(ci, "| {0} | {1:0.0}% | {2:0} | {3:0} | {4:0} | {5:0} | {6:0.000} | {7} |", c.Name, a.Embarque * 100, a.Receita, a.Despesas,
+                    a.Receita - a.Despesas, b.Receita - b.Despesas, g, regra ? "ligada" : "so visual"));
+                if (regra && g < 1.10) falhas += " " + c.Name + "=" + g.ToString("0.000", ci);
+            }
+            return falhas;
+        }
+
         /// <summary>Portao de compras (CONTRATO_FASE_D1 §7): sem compra fecha os 30, e dinheiro sem limite acelera pouco, porque campanha pede embarque, nao Cash.</summary>
         [Test]
         public void Portao_FaseD1_Compras()

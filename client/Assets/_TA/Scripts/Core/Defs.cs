@@ -11,6 +11,9 @@ namespace TA.Core
     /// <summary>Os 6 perfis do GDD §5.5, um por pessoa, na ordem de contratacao (Ana, Beto, Caio, Dani, Edu, Fatima). Indice vai no save.</summary>
     public enum Perfil { Atendente, Seguranca, Vendedor, Bagageiro, Mecanico, Despachante }
 
+    /// <summary>Os 3 candidatos de cada perfil (CONTRATO_FASE_C9 §2): fixos e nomeados, nada sorteado (TA-5). O Pleno e' a pessoa da v0.1. Indice vai no save.</summary>
+    public enum Experiencia { Junior, Pleno, Senior }
+
     /// <summary>Upgrades por estacao (CONTRATO_V01 §4).</summary>
     public enum Melhoria { Velocidade, Capacidade }
 
@@ -94,6 +97,8 @@ namespace TA.Core
         // Fase C8 (CONTRATO_FASE_C8): despesas
         DiaFechado,         // A = dia do jogo, B = Cash pago, C = o que faltou (> 0 = pausa)    -> day_closed
         ContaQuitada,       // A = dia do jogo, B = Cash (a conta atrasada; a pausa acabou)       -> day_bill_paid_late
+        // Fase C9 (CONTRATO_FASE_C9): contratacao e demissao
+        Demitido,           // A = funcionario (o indice que tinha), B = perfil, C = experiencia  -> staff_fired
     }
 
     /// <summary>Funcoes da tripulacao (GDD §5.11). Indice vai no save.</summary>
@@ -191,6 +196,8 @@ namespace TA.Core
         public int Id;
         /// <summary>Perfil fixo (GDD §5.5): a especialidade rende Tuning.Especialista a partir do marco Tuning.EspecialistaMarco.</summary>
         public Perfil Perfil;
+        /// <summary>Qual dos 3 candidatos do perfil foi contratado (Fase C9): rende, custa e ganha pelo nivel (Tuning.ExpRende e cia.).</summary>
+        public Experiencia Experiencia = Experiencia.Pleno;
         /// <summary>Estacao onde esta ou para onde esta andando.</summary>
         public Estacao Em, De;
         /// <summary>Passos da transferencia que faltam (0 = presente e atendendo; a fase sai daqui: Sim.Fase). De = o uniforme que ele veste ate a troca.</summary>
@@ -399,6 +406,12 @@ namespace TA.Core
         /// <summary>Cash por dia do jogo de cada estacao ativa (ordem de Estacao) e quanto cada nivel de melhoria dela soma.</summary>
         public int[] Manutencao = { 12, 12, 9, 9, 9, 9, 18, 12 };
         public int[] ManutencaoNivel = { 6, 6, 5, 5, 5, 5, 7, 0 };
+        // ---- Fase C9 (CONTRATO_FASE_C9, hipoteses) ----
+        /// <summary>Os 3 candidatos de cada perfil, na ordem de Nivel, em % do Pleno: quanto rendem (tempo / x, venda x e forca x, como o especialista),
+        /// quanto custam para contratar (Contratacao) e por dia (Salario). Inteiros: o preco nao depende de arredondamento de float. RegraExperiencia = false
+        /// = so o nome muda: os 3 rendem e custam como o Pleno.</summary>
+        public bool RegraExperiencia = true;
+        public int[] ExpRende = { 80, 100, 125 }, ExpContratacao = { 50, 100, 200 }, ExpSalario = { 70, 100, 150 };
 
         // ---- ta-historico ----
         /// <summary>Anota o registro de ocorrencias (Sim.Historico.cs). So observa: false da o mesmo jogo, numero a numero, sem o registro.</summary>

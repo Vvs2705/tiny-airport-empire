@@ -292,16 +292,48 @@ namespace TA
 
         // ------------------------------------------------------------------ funcionarios
 
+        /// <summary>O ator (FuncAtor) do boneco em cada posicao do Staff. Nasce na ordem de Perfil; Veste e Demitiu (Fase C9) mantem cada pessoa com o
+        /// boneco do perfil dela, mesmo contratando fora de ordem ou demitindo (BonecoDoPerfil e Demitiu).</summary>
+        readonly int[] _ator = { 0, 1, 2, 3, 4, 5 };
+
+        /// <summary>Quem acaba de entrar na posicao k usa o boneco do perfil dele (cabelo e corpo), que esta livre: um por perfil.</summary>
+        void BonecoDoPerfil(int k, int perfil)
+        {
+            int j = System.Array.IndexOf(_ator, perfil);
+            if (j < 0 || j == k) return;
+            (_func[k], _func[j]) = (_func[j], _func[k]);
+            (_ator[k], _ator[j]) = (_ator[j], _ator[k]);
+        }
+
+        /// <summary>Ev.Demitido (o Hud chama no mesmo quadro): quem vinha depois de k sobe uma posicao no Staff e leva o boneco, o uniforme e o caminho;
+        /// o boneco de k vai para o fim, apagado. Inclui o estado do vestiario (Mundo.Vestiario.cs), que tambem e' por posicao.</summary>
+        internal void Demitiu(int k)
+        {
+            int u = _func.Length - 1;
+            if (k < 0 || k > u) return;
+            Boneco b = _func[k]; UnityEngine.UI.Text n = _nome[k]; int a = _ator[k];
+            for (int i = k; i < u; i++)
+            {
+                _func[i] = _func[i + 1]; _nome[i] = _nome[i + 1]; _ator[i] = _ator[i + 1];
+                _colete[i] = _colete[i + 1]; _troca[i] = _troca[i + 1]; _falha[i] = _falha[i + 1]; _rotaPara[i] = _rotaPara[i + 1];
+                _rotaVest[i] = _rotaVest[i + 1]; _posto[i] = _posto[i + 1];
+            }
+            _func[u] = b; _nome[u] = n; _ator[u] = a; _colete[u] = -1; _troca[u] = _falha[u] = 0f; _rotaVest[u] = false; _posto[u] = 0;
+            b.T.gameObject.SetActive(false); n.enabled = false;
+        }
+
         void Funcionarios(Sim s, float dt)
         {
             for (int k = 0; k < _func.Length; k++)
             {
-                Boneco b = _func[k];
                 bool existe = k < s.Staff.Count;
+                if (existe && _colete[k] < 0) BonecoDoPerfil(k, (int)s.Staff[k].Perfil);
+                Boneco b = _func[k];
                 b.T.gameObject.SetActive(existe);
                 _nome[k].enabled = existe;
-                if (!existe) continue;
+                if (!existe) { _colete[k] = -1; continue; }
                 Funcionario f = s.Staff[k];
+                _nome[k].text = Textos.Nome(f);
                 if (_colete[k] < 0)   // contratado: aparece ja de uniforme, no lugar dele (save no meio da transferencia: no armario)
                 {
                     _colete[k] = (int)s.Veste(f); _rotaPara[k] = f.Em; b.Pos = f.Andando > 0 && f.De != f.Em ? VestLugar(k) : Lugar(s, f, out _); _troca[k] = Troca;

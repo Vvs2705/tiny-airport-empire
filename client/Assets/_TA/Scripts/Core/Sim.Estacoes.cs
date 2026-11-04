@@ -41,20 +41,23 @@ namespace TA.Core
 
         bool Especialista(Funcionario f, Estacao e) => Especializa && Funcionario.Especialidade(f.Perfil, e);
 
-        /// <summary>Quanto a estacao rende pelo especialista presente: Tuning.Especialista se ha um la, senao 1 (tempo / x; venda x).
-        /// ponytail: vale para a estacao toda, nao por balcao; por balcao se o playtest pedir.</summary>
+        /// <summary>Quanto a estacao rende pelo melhor presente: Tuning.Especialista o especialista, vezes a experiencia dele (Fase C9); 1 sem ninguem
+        /// (o toque). Tempo / x; venda x. ponytail: vale para a estacao toda, nao por balcao; por balcao se o playtest pedir.</summary>
         public float Rende(Estacao e)
         {
-            foreach (Funcionario f in Staff) if (f.Em == e && f.Andando == 0 && Especialista(f, e)) return T.Especialista;
-            return 1f;
+            float r = 0f;
+            foreach (Funcionario f in Staff) if (f.Em == e && f.Andando == 0) r = Math.Max(r, Rende(f, e));
+            return r > 0f ? r : 1f;
         }
 
-        /// <summary>Forca dos presentes na oficina ou no despacho (ate os postos dela): 1 por pessoa, Tuning.Especialista o especialista.</summary>
+        float Rende(Funcionario f, Estacao e) => (Especialista(f, e) ? T.Especialista : 1f) * Rendimento(f.Experiencia);
+
+        /// <summary>Forca dos presentes na oficina ou no despacho (ate os postos dela): o rendimento de cada um (1 o Pleno sem especialidade).</summary>
         public float Forca(Estacao e)
         {
             float soma = 0f; int n = 0;
             foreach (Funcionario f in Staff)
-                if (f.Em == e && f.Andando == 0 && n++ < St(e).Postos) soma += Especialista(f, e) ? T.Especialista : 1f;
+                if (f.Em == e && f.Andando == 0 && n++ < St(e).Postos) soma += Rende(f, e);
             return soma;
         }
 

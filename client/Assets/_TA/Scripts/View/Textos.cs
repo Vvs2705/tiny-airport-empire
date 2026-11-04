@@ -14,6 +14,15 @@ namespace TA
 
         public static readonly string[] Estacao = { L("CHECK-IN"), L("SEGURANÇA"), L("LOJA"), L("PORTÃO"), L("BAGAGEM"), L("ALIMENTAÇÃO"), L("OFICINA"), L("DESPACHO") };
         public static readonly string[] Funcionario = { L("Ana"), L("Beto"), L("Cida"), L("Dani"), L("Edu"), L("Fátima") };
+        /// <summary>Os 3 candidatos de cada perfil (Fase C9), na ordem de Experiencia; o Pleno e' a pessoa de Funcionario. Fixos, como no nucleo (TA-5).</summary>
+        public static readonly string[][] Candidato =
+        {
+            new[] { L("Lia"), L("Ana"), L("Vânia") }, new[] { L("Téo"), L("Beto"), L("Hélio") }, new[] { L("Bia"), L("Cida"), L("Vera") },
+            new[] { L("Duda"), L("Dani"), L("Neide") }, new[] { L("Igor"), L("Edu"), L("Paulo") }, new[] { L("Júlia"), L("Fátima"), L("Sônia") },
+        };
+        public static readonly string[] ExperienciaNome = { L("Júnior"), L("Pleno"), L("Sênior") };
+        public static string Nome(TA.Core.Perfil p, TA.Core.Experiencia x) => Candidato[(int)p][(int)x];
+        public static string Nome(TA.Core.Funcionario f) => Nome(f.Perfil, f.Experiencia);
         public static readonly string[] Perfil = { L("Atendente"), L("Agente de segurança"), L("Vendedora"), L("Bagageira"), L("Mecânico"), L("Despachante") };
         /// <summary>Onde cada perfil trabalha melhor (GDD §5.5). A especializacao e so visual (D-C2a): o texto diz a casa, sem prometer bonus.</summary>
         public static readonly string[] PerfilCasa = { L("check-in e portão"), L("segurança"), L("loja e alimentação"), L("bagagem"), L("oficina"), L("despacho") };
@@ -59,7 +68,7 @@ namespace TA
         public static string Balcoes(int n, float seg) => n + (n == 1 ? L(" balcão · ") : L(" balcões · ")) + Seg(seg);
         public static string EstadoTexto(Estado e, int voo) => e == Estado.Critico ? L("CRÍTICO: ") + Voo(voo) + L(" em risco")
             : e == Estado.Atencao ? L("ATENÇÃO: ") + Voo(voo) : L("Normal");
-        public static string Mover(int f) => L("Mover ") + Funcionario[f] + L(" para:");
+        public static string Mover(string nome) => L("Mover ") + nome + L(" para:");
         public static string Andando(int f) => Funcionario[f] + L(" a caminho");
         /// <summary>O voo no quadro. Passou da hora do embarque sem abrir: diz o que esta segurando (CONTRATO_FASE_C §1: "o quadro avisa").</summary>
         public static string Status(Voo v, Aviao a, int passoNaOnda)
@@ -126,7 +135,19 @@ namespace TA
         public static readonly string[] EstacaoPara = { L("para o check-in"), L("para a segurança"), L("para a loja"), L("para o portão"), L("para a bagagem"), L("para a alimentação"), L("para a oficina"), L("para o despacho") };
         public static string EmEstacao(int e, bool andando) => andando ? L("Indo ") + EstacaoPara[e] : L("Trabalhando ") + EstacaoNo[e];
         public static string PerfilInfo(int p) => L("Melhor em ") + PerfilCasa[p];
-        public static readonly string ContratarCurto = L("Contratar"), ContrateAntes = L("Contrate antes"), Contratados = L("Contratados"), CashNome = L("Cash"), TerminalNome = L("Terminal");
+        // ---------- equipe: os 3 candidatos e a demissao (Fase C9) ----------
+        public static readonly string VagaAberta = L("Vaga aberta"), VerCandidatos = L("Candidatos"), FolhaEquipe = L("Equipe por dia"), Demitir = L("Demitir"),
+            Confirmar = L("Confirmar"), ContaAtrasada = L("Conta atrasada");
+        public static string VagaDe(int p) => L("Vaga: ") + Perfil[p];
+        public static string Contratado(TA.Core.Funcionario f) => Perfil[(int)f.Perfil] + " · " + ExperienciaNome[(int)f.Experiencia];
+        public static string PorDia(long cash) => Num(cash) + L(" Cash/dia");
+        /// <summary>O rendimento em % do Pleno: o tempo nas filas, a venda e a forca da oficina e do despacho.</summary>
+        public static string Rende(int pct) => pct == 100 ? L("Rende o normal") : pct < 100 ? L("Rende ") + (100 - pct) + L("% menos") : L("Rende ") + (pct - 100) + L("% mais");
+        public static string DemitirNome(string nome) => L("Demitir ") + nome;
+        public static string DemitirInfo(long salario) => L("Sai agora, sem custo. A folha cai ") + PorDia(salario) + L(" e o posto fica vazio.");
+        public static string DemitirConfirma(string nome) => L("Toque em Confirmar para demitir ") + nome + L(". Não tem volta, mas a vaga reabre.");
+        public static string Demitido(string nome) => nome + L(" saiu da equipe.");
+        public static readonly string ContratarCurto = L("Contratar"), Contratados = L("Contratados"), CashNome = L("Cash"), TerminalNome = L("Terminal");
         public static string Faltam(long c) => (c == 1 ? L("Falta ") : L("Faltam ")) + Num(c);
         public static string DeTotal(int a, int b) => a + L(" de ") + b;
         public static string NivelNome(int nivel) => L("Nível ") + nivel;

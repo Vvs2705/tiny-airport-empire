@@ -1077,3 +1077,75 @@ Resultado em 2026-11-04: **6 de 6 mortos**.
 | o uniforme só muda no fim da troca | 5, entre eles `Invariantes_NoBotLento_TresOndas` e `MigracaoDaV01_AbreComTudoEOVooDaFilaEmbarca` |
 | a fase sai do `Andando` | 4, entre eles `Transferencia_EncerraVaiTrocaEChega_NaOrdem_UniformeSoNoVestiario` |
 | o save guarda a transferência inteira | `Encerrando_TerminaOAtendimentoNoPostoAntesDeSair` |
+
+## 16. Fase C9: os 3 candidatos e a demissão (2026-11-03, `CONTRATO_FASE_C9.md`)
+
+Cada vaga tem um Júnior, um Pleno e um Sênior fixos. O Pleno é a pessoa e o preço de antes; os outros dois rendem, custam e ganham em % dele (o `CONTRATO_FASE_C9.md` §2 tem a tabela). Os bots de sempre contratam o Pleno e nunca demitem: o jogo deles é o de antes, número a número. A migração do save real do schema 10 prova isso (migrar = jogar até ali com o código novo).
+
+### A sonda: quanto a experiência pesa (40 sementes × 20 ondas, todos os perfis iguais)
+
+| equipe | Bom: lucro | Lento: lucro | Guiado: lucro |
+|---|---|---|---|
+| toda Pleno (o jogo de antes) | 26 374 | 14 128 | 33 208 |
+| toda Sênior (125%, contratação 200%, salário 150%) | 29 754 (1,128) | 17 911 (1,268) | 40 707 (1,226) |
+| toda Júnior (80%, contratação 50%, salário 70%) | 23 050 (0,874) | 8 584 (0,608) | 31 495 (0,948) |
+| Sênior de graça (125%, preço do Pleno) | 32 943 | 19 695 | 35 827 |
+| Júnior de graça (80%, preço do Pleno) | 22 811 | 8 053 | 30 121 |
+
+Lucro = receita − conta paga. **Ao contrário do especialista** (só visual, ganho 1,00, D-C2a), a experiência pesa muito: o especialista só vale na casa dele, e a experiência vale em toda estação onde a pessoa estiver. O salário é pequeno perto do que cada pessoa rende, por isso o Sênior compensa mesmo pagando o dobro.
+
+### D-C9c. A decisão é de caixa, não de tipo
+
+Com estes números o Sênior quase sempre é o melhor. O Júnior põe gente no posto cedo, com pouco Cash, e a demissão serve para trocá-lo por alguém melhor depois. É o que o bot `Contratador` faz. Se o playtest achar o Sênior óbvio demais, o ajuste é no preço (`ExpContratacao`), não na lista.
+
+### O portão do §5.13 (`Portao_FaseC9_Candidatos`)
+
+O `Contratador` (e o `LentoContratador`) compara os 3, contrata o melhor que o caixa paga e troca pelo Sênior, pesando a troca pela metade do preço (D-C9d). O portão compara o lucro dele com o do Bom (e do Lento), que contrata sempre o Pleno, com as mesmas sementes, 200 × 20 ondas.
+
+| bot | embarque | receita | conta paga | lucro | lucro do Pleno | ganho |
+|---|---|---|---|---|---|---|
+| Contratador | 96,2% | 30 957 | 1 652 | 29 305 | 26 213 | **1,118** |
+| LentoContratador | 88,0% | 20 461 | 1 581 | 18 881 | 13 356 | **1,414** |
+
+Com o vestiário da frente E (PR #63), que entrou depois: antes dele, 1,118 e 1,405.
+
+### D-C9d. O bot que mede a escolha troca pelo Sênior com prioridade
+
+A 1ª versão do `Contratador` pesava a troca pelo preço inteiro: deu 1,120 com 40 sementes e **1,099 com 200** no CI (PR #61), um milésimo abaixo do piso. As variantes, todas com 200 sementes (Bom / Lento):
+
+| variante | Bom | Lento |
+|---|---|---|
+| vaga pelo preço do Júnior, troca pelo preço inteiro (a 1ª) | 1,099 | 1,323 |
+| vaga pelo preço do Sênior: espera o caixa e contrata o Sênior | 1,030 | 0,324 |
+| vaga pelo preço do Pleno, troca pelo preço inteiro | 1,094 | 1,282 |
+| vaga pelo preço do Pleno, sem troca | 1,027 | 1,057 |
+| vaga pelo preço do Júnior, sem troca | 0,936 | 0,854 |
+| **vaga pelo preço do Júnior, troca pesando metade do preço (a final)** | **1,118** | **1,405** |
+| vaga pelo preço do Júnior, troca pesando um quarto | 1,121 | 1,398 |
+
+Esperar o Sênior para contratar atrasa demais, e o Lento desaba (44% de embarque). O que rende é pôr gente no posto cedo e trocar pelo Sênior logo. A troca pesa metade porque o Sênior rende 25% na estação toda, cerca do dobro de um nível de velocidade (12%). Nenhum número do jogo mudou: só o bot que mede.
+
+### Prova de mutação (`MUTACAO_TESTES="FullyQualifiedName~EquipeTests|FullyQualifiedName~SaveTests.Lixo|FullyQualifiedName~SaveTests.MigracaoDoSchema10|FullyQualifiedName~DespesasTests" python client/tools/mutacao.py candidato demitir`)
+
+As 13 travas novas entram no `mutacao.py`. Resultado em 2026-11-03: **13 de 13 mortos**.
+
+| trava retirada | testes que caíram |
+|---|---|
+| cada um custa o preço dele | `Hire_Recusa_SemCaixa_NivelInvalido_AntesDoMarco` e mais 1 |
+| salário pela experiência | `Tabela_TresCandidatos_OPlenoEOPrecoDeAntes_NenhumDomina` |
+| a folha é a da experiência | `Hire_CadaNivel_CobraOPrecoDele_EEntraNaFolha` e mais 1 |
+| rende pela experiência | `Rende_PeloNivel_NoTempoNaVendaENaForca` |
+| regra desligada iguala os 3 | `Rende_PeloNivel_NoTempoNaVendaENaForca` |
+| vaga fechada não contrata | `Hire_CadaNivel_CobraOPrecoDele_EEntraNaFolha` e mais 1 |
+| experiência inválida não contrata | `Hire_Recusa_SemCaixa_NivelInvalido_AntesDoMarco` |
+| demitir não devolve Cash | `Invariante_C9_ContratarEDemitirNuncaDaCash` e mais 1 |
+| quem vinha depois sobe | `Demite_AtualizaEscalaFolhaECobertura_EReabreAVaga` e mais 1 |
+| demitir vale com a conta atrasada | `Invariante_C9_ComContaAtrasada_DemitirTiraDaPausa` |
+| a experiência vai no save | `MigracaoDoSchema10_SaveReal_TodosPleno` e mais 1 |
+| lixo no save vira o Pleno | `LixoNoNivel_ViraOPleno` |
+| teto do atendimento é o do mais lento | `Lixo_ViraPadraoLimitado` e mais 1 |
+
+### Para medir com gente
+
+- **O Sênior parece óbvio?** Ver se a pessoa compara os 3 ou vai direto no mais caro, e se usa o Júnior para começar.
+- **Demitir sem custo** (D-C9b). Ver se alguém demite e recontrata para fugir da conta; a conta é do estado na hora do fechamento (D-C8b), então demitir antes e recontratar depois economiza no máximo um salário, pagando a contratação de novo.
