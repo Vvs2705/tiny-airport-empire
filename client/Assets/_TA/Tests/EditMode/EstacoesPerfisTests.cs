@@ -8,6 +8,8 @@ namespace TA.Tests
     public class EstacoesPerfisTests
     {
         static void Run(Sim s, float seg) => RegrasTests.Run(s, seg);
+        /// <summary>Anda ate todos chegarem ao posto (a transferencia passa pelo vestiario: Sim.Vestiario.cs).</summary>
+        static void Chegam(Sim s) { while (s.Staff.Exists(f => f.Andando > 0)) s.Tick(Sim.Step); }
         static System.Collections.Generic.List<Evento> Coleta(Sim s, float seg) => RegrasTests.Coleta(s, seg);
 
         /// <summary>Tudo aberto desde o comeco e com regra, inclusive a especializacao (so visual no padrao: BALANCE.md D-C2a).</summary>
@@ -79,11 +81,11 @@ namespace TA.Tests
             Assert.AreEqual(45, s.TempoPassos(Estacao.Portao), "portao sem a Atendente: 1,5 s");
             s.Move(0, Estacao.Portao);
             s.Move(2, Estacao.CheckIn);
-            Run(s, 3f);
+            Chegam(s);
             Assert.AreEqual((120, 30), (s.TempoPassos(Estacao.CheckIn), s.TempoPassos(Estacao.Portao)), "Caio no check-in rende 1; Ana no portao, 1,5");
             Assert.AreEqual(1.5f, s.Rende(Estacao.Portao));
             s.Move(2, Estacao.Loja);
-            Run(s, 3f);
+            Chegam(s);
             Assert.AreEqual((1.5f, 90), (s.Rende(Estacao.Loja), s.TempoPassos(Estacao.Loja)), "o Vendedor vende mais, nao atende mais rapido");
         }
 
