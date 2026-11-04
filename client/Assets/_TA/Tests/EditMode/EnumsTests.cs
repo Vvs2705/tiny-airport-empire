@@ -19,6 +19,7 @@ namespace TA.Tests
         {
             SoCresceNoFim<Estacao>("CheckIn", "Seguranca", "Loja", "Portao", "Bagagem", "Alimentacao", "Manutencao", "Despacho");
             SoCresceNoFim<Perfil>("Atendente", "Seguranca", "Vendedor", "Bagageiro", "Mecanico", "Despachante");
+            SoCresceNoFim<Experiencia>("Junior", "Pleno", "Senior");
             SoCresceNoFim<Melhoria>("Velocidade", "Capacidade");
             SoCresceNoFim<Estado>("Normal", "Atencao", "Critico");
             SoCresceNoFim<Funcao>("Piloto", "Comissario");

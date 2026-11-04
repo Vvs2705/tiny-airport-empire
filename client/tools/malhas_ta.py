@@ -124,6 +124,10 @@ PECAS = {
     # a mala solta (balanca, esteira, bandeja, carrinho)
     "mala_rodinha": (500, 256, -0.42),
     "balanca_bagagem": (1000, 256, 0.6),
+    # Lote 12, frente E: o vestiario (medidas de ~/.tiny-airport/arte_lote12_EFH.md, adulto de 0,5 m)
+    "armarios_vestiario": (1500, 512, 0.6),
+    "banco_vestiario": (800, 256, 0.6),
+    "arara_uniformes": (1200, 512, 0.4),
 }
 
 

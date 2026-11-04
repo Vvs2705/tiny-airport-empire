@@ -127,13 +127,13 @@ namespace TA.Tests
         }
 
         [Test]
-        public void Mover_Anda2_5sSemAtenderEmNenhumaDasDuas()
+        public void Mover_PeloVestiario_SemAtenderEmNenhumaDasDuas()
         {
             Sim s = ComEquipe(1);
             Assert.IsFalse(s.Move(0, Estacao.CheckIn), "ja esta la");
             Assert.IsFalse(s.Move(5, Estacao.Seguranca), "funcionario que nao existe");
             Assert.IsTrue(s.Move(0, Estacao.Seguranca));
-            var ev = Coleta(s, 2.5f - Sim.Step);
+            var ev = Coleta(s, (s.TransferePassos - 1) * Sim.Step);   // Sim.Vestiario.cs
             Assert.AreEqual((0, 0), (s.Presentes(Estacao.CheckIn), s.Presentes(Estacao.Seguranca)));
             Assert.AreEqual(1, s.Alocados(Estacao.Seguranca));
             ev = Coleta(s, Sim.Step);

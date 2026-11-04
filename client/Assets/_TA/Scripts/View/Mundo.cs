@@ -383,6 +383,9 @@ namespace TA
                     _vazio[e, i].enabled = vazio;
                     EstadoPosto(s, st, e, i, vazio);
                     if (!vazio) continue;
+                    float chega = Chegando(s, st.Tipo, i - gente);   // quem vem pelo vestiario: o relogio da troca no lugar do X
+                    _vazio[e, i].sprite = chega < 0f ? Art.Xis() : Art.Arc(chega);
+                    _vazio[e, i].color = chega < 0f ? Art.A(Art.Off, 0.85f) : Art.Warn;
                     Vector3 pv = V3(Balcao(e, i), 0.68f);
                     _vazio[e, i].transform.SetPositionAndRotation(pv, _cam.transform.rotation);
                     _vazio[e, i].sortingOrder = Ordem(pv) + 8;

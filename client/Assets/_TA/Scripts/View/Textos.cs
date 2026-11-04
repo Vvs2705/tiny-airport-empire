@@ -14,6 +14,15 @@ namespace TA
 
         public static readonly string[] Estacao = { L("CHECK-IN"), L("SEGURANÇA"), L("LOJA"), L("PORTÃO"), L("BAGAGEM"), L("ALIMENTAÇÃO"), L("OFICINA"), L("DESPACHO") };
         public static readonly string[] Funcionario = { L("Ana"), L("Beto"), L("Cida"), L("Dani"), L("Edu"), L("Fátima") };
+        /// <summary>Os 3 candidatos de cada perfil (Fase C9), na ordem de Experiencia; o Pleno e' a pessoa de Funcionario. Fixos, como no nucleo (TA-5).</summary>
+        public static readonly string[][] Candidato =
+        {
+            new[] { L("Lia"), L("Ana"), L("Vânia") }, new[] { L("Téo"), L("Beto"), L("Hélio") }, new[] { L("Bia"), L("Cida"), L("Vera") },
+            new[] { L("Duda"), L("Dani"), L("Neide") }, new[] { L("Igor"), L("Edu"), L("Paulo") }, new[] { L("Júlia"), L("Fátima"), L("Sônia") },
+        };
+        public static readonly string[] ExperienciaNome = { L("Júnior"), L("Pleno"), L("Sênior") };
+        public static string Nome(TA.Core.Perfil p, TA.Core.Experiencia x) => Candidato[(int)p][(int)x];
+        public static string Nome(TA.Core.Funcionario f) => Nome(f.Perfil, f.Experiencia);
         public static readonly string[] Perfil = { L("Atendente"), L("Agente de segurança"), L("Vendedora"), L("Bagageira"), L("Mecânico"), L("Despachante") };
         /// <summary>Onde cada perfil trabalha melhor (GDD §5.5). A especializacao e so visual (D-C2a): o texto diz a casa, sem prometer bonus.</summary>
         public static readonly string[] PerfilCasa = { L("check-in e portão"), L("segurança"), L("loja e alimentação"), L("bagagem"), L("oficina"), L("despacho") };
@@ -59,7 +68,7 @@ namespace TA
         public static string Balcoes(int n, float seg) => n + (n == 1 ? L(" balcão · ") : L(" balcões · ")) + Seg(seg);
         public static string EstadoTexto(Estado e, int voo) => e == Estado.Critico ? L("CRÍTICO: ") + Voo(voo) + L(" em risco")
             : e == Estado.Atencao ? L("ATENÇÃO: ") + Voo(voo) : L("Normal");
-        public static string Mover(int f) => L("Mover ") + Funcionario[f] + L(" para:");
+        public static string Mover(string nome) => L("Mover ") + nome + L(" para:");
         public static string Andando(int f) => Funcionario[f] + L(" a caminho");
         /// <summary>O voo no quadro. Passou da hora do embarque sem abrir: diz o que esta segurando (CONTRATO_FASE_C §1: "o quadro avisa").</summary>
         public static string Status(Voo v, Aviao a, int passoNaOnda)
@@ -126,7 +135,19 @@ namespace TA
         public static readonly string[] EstacaoPara = { L("para o check-in"), L("para a segurança"), L("para a loja"), L("para o portão"), L("para a bagagem"), L("para a alimentação"), L("para a oficina"), L("para o despacho") };
         public static string EmEstacao(int e, bool andando) => andando ? L("Indo ") + EstacaoPara[e] : L("Trabalhando ") + EstacaoNo[e];
         public static string PerfilInfo(int p) => L("Melhor em ") + PerfilCasa[p];
-        public static readonly string ContratarCurto = L("Contratar"), ContrateAntes = L("Contrate antes"), Contratados = L("Contratados"), CashNome = L("Cash"), TerminalNome = L("Terminal");
+        // ---------- equipe: os 3 candidatos e a demissao (Fase C9) ----------
+        public static readonly string VagaAberta = L("Vaga aberta"), VerCandidatos = L("Candidatos"), FolhaEquipe = L("Equipe por dia"), Demitir = L("Demitir"),
+            Confirmar = L("Confirmar"), ContaAtrasada = L("Conta atrasada");
+        public static string VagaDe(int p) => L("Vaga: ") + Perfil[p];
+        public static string Contratado(TA.Core.Funcionario f) => Perfil[(int)f.Perfil] + " · " + ExperienciaNome[(int)f.Experiencia];
+        public static string PorDia(long cash) => Num(cash) + L(" Cash/dia");
+        /// <summary>O rendimento em % do Pleno: o tempo nas filas, a venda e a forca da oficina e do despacho.</summary>
+        public static string Rende(int pct) => pct == 100 ? L("Rende o normal") : pct < 100 ? L("Rende ") + (100 - pct) + L("% menos") : L("Rende ") + (pct - 100) + L("% mais");
+        public static string DemitirNome(string nome) => L("Demitir ") + nome;
+        public static string DemitirInfo(long salario) => L("Sai agora, sem custo. A folha cai ") + PorDia(salario) + L(" e o posto fica vazio.");
+        public static string DemitirConfirma(string nome) => L("Toque em Confirmar para demitir ") + nome + L(". Não tem volta, mas a vaga reabre.");
+        public static string Demitido(string nome) => nome + L(" saiu da equipe.");
+        public static readonly string ContratarCurto = L("Contratar"), Contratados = L("Contratados"), CashNome = L("Cash"), TerminalNome = L("Terminal");
         public static string Faltam(long c) => (c == 1 ? L("Falta ") : L("Faltam ")) + Num(c);
         public static string DeTotal(int a, int b) => a + L(" de ") + b;
         public static string NivelNome(int nivel) => L("Nível ") + nivel;
@@ -178,6 +199,29 @@ namespace TA
             PousoPrioridade = L("Pouso seguro, com prioridade"), Prontidao = L("Bombeiros em prontidão, de rotina"), NadaAFazer = L("Não precisa fazer nada"),
             Adiantar = L("Adiantar"), Atrasar = L("Atrasar"), Priorizar = L("Priorizar"), Reparar = L("Reparar"),
             AtrasoNao = L("Não dá para atrasar: o clima passa da virada da onda."), MecanicoOcupado = L("O mecânico está ocupado."), PousoSeguro = L("Pouso seguro. Passageiros remarcados.");
+
+        // ---------- registro de ocorrencias (Sim.Historico; a tela vem nas frentes G e I) ----------
+        /// <summary>A explicacao curta da ocorrencia (Ocorrencia.Motivo): por que deu certo ou onde travou. 1 s de jogo = 1 min no quadro.</summary>
+        public static string Explica(Ocorrencia o)
+        {
+            string no = EstacaoNo[(int)o.Estacao];
+            switch (o.Motivo)
+            {
+                case Motivo.Fila: return L("Fila ") + no + ": " + o.Espera + L(" min com ") + Plural(o.Postos, L("posto aberto"), L("postos abertos"));
+                case Motivo.SemEquipe: return L("Ninguém ") + no + L(": só o toque atendia");
+                case Motivo.Equipamento: return L("Equipamento em falha ") + no;
+                case Motivo.Clima: return L("O clima fechou ou segurou a pista");
+                case Motivo.Pista: return L("Pista bloqueada por outro avião");
+                case Motivo.Patio: return L("Pátio atrasado: desembarque, limpeza, combustível ou bagagem");
+                case Motivo.Tripulacao: return L("Faltou tripulação a bordo");
+                case Motivo.Manutencao: return L("Avião parado na inspeção");
+                case Motivo.Pane: return L("Avião em pane no portão");
+                case Motivo.Hangar: return L("Avião mandado ao hangar");
+                case Motivo.Pouso: return L("O avião não pousou a tempo");
+                case Motivo.Caixa: return L("O caixa não cobriu a conta do dia: contratar e melhorar ficam pausados até quitar");
+                default: return L("Deu certo: ninguém perdeu o voo");
+            }
+        }
 
         // ---------- metas: campanha, missoes e conquistas (docs/CAMPANHA.md e docs/MISSOES.md; o nome e' o da tabela do nucleo) ----------
         public static readonly string[] AeroportoNome = System.Array.ConvertAll(Tabelas.Aeroportos, a => L(a.Nome));
@@ -297,14 +341,17 @@ namespace TA
             ABordoLogo = L("A bordo em instantes"), PortaoFechou = L("O portão fechou antes do embarque"), ComHistoria = L(" · com história"),
             AtendendoUm = L("Atendendo um passageiro"), ChamandoProximo = L("Chamando o próximo da fila"), EsperandoPax = L("Esperando passageiro"),
             NaChecagem = L("Ajudando na checagem do avião"), ProntoChecagem = L("Pronto para a próxima checagem"), NoBonus = L("Garantindo o bônus de pontualidade"),
-            NaEspecialidade = L("Está na especialidade"), ACaminho = L("A caminho"), Atendendo = L("Atendendo"), Trabalhando = L("Trabalhando"), Livre = L("Livre"),
+            NaEspecialidade = L("Está na especialidade"), Atendendo = L("Atendendo"), Trabalhando = L("Trabalhando"), Livre = L("Livre"),
             VoltaSala = L("Voltando para a sala da tripulação"), EscalaNaTela = L("A escala fica na tela Tripulação"),
             GargaloFalha = L("Gargalo: em falha, atende mais devagar"), GargaloToque = L("Sem equipe: só anda com o seu toque"), GargaloFechada = L("Fechada: ninguém da equipe aqui"),
             EquipeVindo = L("A equipe está a caminho"), SemGargalo = L("Fluindo: sem gargalo"), Trancada = L("Abre quando o terminal crescer");
         public static string HumorLinha(int h) => Humor[h] + ": " + HumorPorque[h];
         public static string NoAeroporto(float seg, float fecha, bool atrasado) => L("No aeroporto há ") + Tempo(seg)
             + (fecha <= 0f ? "" : (atrasado ? L(" · portão atrasado: fecha em ") : L(" · portão fecha em ")) + Tempo(fecha));
-        public static string ChegaEm(float seg) => L("Chega em ") + Tempo(seg);
+        /// <summary>Frente E: a transferencia pelo vestiario (Sim.Fase, na ordem de Transferencia) e o preparo com o relogio (Sim.Preparo).</summary>
+        public static readonly string[] FaseTransf = { L("No posto"), L("Terminando o atendimento"), L("Indo ao vestiário"), L("Trocando o uniforme"), L("Indo ao posto") };
+        public static readonly string Vestiario = L("Vestiário");
+        public static string Preparo(float frac, float seg) => L("Preparo ") + (int)System.Math.Round(frac * 100f) + L("% · no posto em ") + Tempo(seg);
         public static string NaFila(int n) => n + L(" na fila");
         public static string FuncaoDe(Tripulante t) => t.Funcao == TA.Core.Funcao.Piloto ? L("Piloto") : t.Indice % 2 == 0 ? L("Comissária") : L("Comissário");   // a folha da comissaria vai nos indices pares
         public static string IndoPara(int voo) => voo >= 0 ? L("Indo para o ") + Voo(voo) : IndoAoAviao;
