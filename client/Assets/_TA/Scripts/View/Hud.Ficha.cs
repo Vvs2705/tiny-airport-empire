@@ -172,8 +172,8 @@ namespace TA
                 : atende ? Textos.AtendendoUm : s.St(f.Em).Fila.Count > 0 ? Textos.ChamandoProximo : Textos.EsperandoPax;
             return new FichaDados
             {
-                Topo = Textos.Funcionario[p] + " · " + (andando ? Textos.ACaminho : atende ? Textos.Atendendo : semFila ? Textos.Trabalhando : Textos.Livre),
-                Nome = Textos.Funcionario[p] + " · " + Textos.Perfil[p],
+                Topo = Textos.Nome(f) + " · " + (andando ? Textos.ACaminho : atende ? Textos.Atendendo : semFila ? Textos.Trabalhando : Textos.Livre),
+                Nome = Textos.Nome(f) + " · " + Textos.Contratado(f),
                 Linha = Textos.EmEstacao(e, andando), Info = tarefa,
                 Nota = casa ? Textos.NaEspecialidade : Textos.PerfilInfo(p), Cor = casa ? NotaBem : Art.Fraco,
                 Placa = Art.EstacaoCor[e], Glifo = Art.Pessoa(), Mover = true,

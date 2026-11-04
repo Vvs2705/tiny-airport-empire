@@ -23,6 +23,9 @@ namespace TA.Core
         public bool Missoes;
         /// <summary>Compra = produtos creditados no 1o passo (o bot faz o papel do servidor). Gasta = gasta as Gems: booster sempre, pacote de Cash com pouco Cash (CONTRATO_FASE_D1 §7).</summary>
         public string[] Compra; public bool Gasta;
+        /// <summary>Candidatos = compara os 3 candidatos: a vaga entra na conta pelo preco do Junior e contrata o melhor que o caixa paga; e troca quem
+        /// rende menos pelo Senior quando ele e' a compra mais barata (CONTRATO_FASE_C9 §6). Sem ele, contrata sempre o Pleno e nunca demite.</summary>
+        public bool Candidatos;
 
         public static readonly BotProfile Bom = new BotProfile { Name = "Bom", Decide = 1f, Move = true, Planeja = true, Equipe = true, Rotas = true, Viaja = true, Incidentes = true, Clima = true, Falhas = true };
         public static readonly BotProfile Lento = new BotProfile { Name = "Lento", Decide = 2.5f, Move = true, Planeja = true, Equipe = true, Rotas = true, Viaja = true, Incidentes = true, Clima = true, Falhas = true };
@@ -46,7 +49,15 @@ namespace TA.Core
         public static readonly BotProfile BoasVindas = Comprador("BoasVindas", "welcome_bundle_01");
         public static readonly BotProfile PacoteGrande = Comprador("PacoteGrande", "gems_pack_large");
         public static readonly BotProfile Baleia = Comprador("Baleia", Enumerable.Repeat("gems_pack_large", 200).ToArray());
+        /// <summary>Portao da Fase C9: o Bom e o Lento que comparam os candidatos e trocam pelo Senior.</summary>
+        public static readonly BotProfile Contratador = Candidato(Bom, "Contratador"), LentoContratador = Candidato(Lento, "LentoContratador");
         public static readonly BotProfile[] All = { Bom, Lento, Parado };
+
+        static BotProfile Candidato(BotProfile p, string nome)
+        {
+            p.Name = nome; p.Candidatos = true;
+            return p;
+        }
 
         static BotProfile Comprador(string nome, params string[] compra)
         {
@@ -416,11 +427,17 @@ namespace TA.Core
         {
             // hire: -2 = o proximo da v0.1 (Hire()), >= 0 = o perfil novo, -1 = upgrade. Fase C8: com a conta atrasada (Pausado) a tela trava
             // contratar e melhorar, e o bot so olha rota e viagem
-            long best = s.Pausado ? -1 : s.CustoContratar(); Estacao be = 0; Melhoria bm = 0; int hire = best >= 0 ? -2 : -1;
-            for (int p = Sim.MaxFuncionarios; p < Sim.MaxEquipe && !s.Pausado; p++)
+            // Fase C9 (Candidatos): as 6 vagas pelo preco do Junior, em qualquer ordem, e a troca pelo Senior (hire = -5)
+            long best = s.Pausado || P.Candidatos ? -1 : s.CustoContratar(); Estacao be = 0; Melhoria bm = 0; int hire = best >= 0 ? -2 : -1, troca = -1;
+            for (int p = P.Candidatos ? 0 : Sim.MaxFuncionarios; p < Sim.MaxEquipe && !s.Pausado; p++)
             {
-                long c = s.CustoContratar((Perfil)p);
+                long c = P.Candidatos ? s.CustoContratar((Perfil)p, Experiencia.Junior) : s.CustoContratar((Perfil)p);
                 if (c >= 0 && (best < 0 || c < best)) { best = c; hire = p; }
+            }
+            for (int k = 0; k < s.Staff.Count && P.Candidatos && !s.Pausado; k++)
+            {
+                long c = s.Staff[k].Experiencia == Experiencia.Senior ? -1 : s.Preco(s.Staff[k].Perfil, Experiencia.Senior);
+                if (c >= 0 && (best < 0 || c < best)) { best = c; hire = -5; troca = k; }
             }
             foreach (Station st in s.Estacoes)
             {
@@ -448,7 +465,17 @@ namespace TA.Core
             long v = s.CustoViagem(s.AeroportoAtual + 1);
             if (P.Viaja && !P.Objetivos && _embarque >= ViajaCom && v >= 0 && (best < 0 || v < best)) { best = v; hire = -4; }
             if (best < 0 || s.Cash < best) return false;
+            if (hire == -5) { Perfil tp = s.Staff[troca].Perfil; return s.Demite(troca) && s.Hire(tp, Experiencia.Senior); }
+            if (hire >= 0 && P.Candidatos) return Contrata(s, (Perfil)hire);
             return hire == -2 ? s.Hire() : hire == -3 ? s.AbreRota(rota) : hire == -4 ? s.Viajar(s.AeroportoAtual + 1) : hire >= 0 ? s.Hire((Perfil)hire) : s.Buy(be, bm);
+        }
+
+        /// <summary>Fase C9: o melhor dos 3 candidatos que o caixa paga.</summary>
+        static bool Contrata(Sim s, Perfil p)
+        {
+            for (var x = Experiencia.Senior; x >= Experiencia.Junior; x--)
+                if (s.Cash >= s.CustoContratar(p, x)) return s.Hire(p, x);
+            return false;
         }
 
         /// <summary>So viaja quem esta dando conta: embarque do ultimo voo.</summary>

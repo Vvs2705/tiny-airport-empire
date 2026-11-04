@@ -805,6 +805,84 @@ MUTANTES = [
         "c.Pago = Math.Max(0, Math.Min(c.Despesa, x[1]));",
         "c.Pago = x[1];",
     ),
+    (
+        "candidato: cada um custa o preco dele",
+        "Sim.Equipe.cs",
+        "DoPct(T.Contratacao[(int)p], Pct(T.ExpContratacao, n));",
+        "T.Contratacao[(int)p];",
+    ),
+    (
+        "candidato: salario pela experiencia",
+        "Sim.Equipe.cs",
+        "DoPct(T.Salario[(int)p], Pct(T.ExpSalario, n));",
+        "T.Salario[(int)p];",
+    ),
+    (
+        "candidato: a folha e' a da experiencia",
+        "Sim.Despesas.cs",
+        "n += Salario(f.Perfil, f.Experiencia);",
+        "n += T.Salario[(int)f.Perfil];",
+    ),
+    (
+        "candidato: rende pela experiencia",
+        "Sim.Estacoes.cs",
+        "* Rendimento(f.Experiencia);",
+        ";",
+    ),
+    (
+        "candidato: regra desligada iguala os 3",
+        "Sim.Equipe.cs",
+        "T.RegraExperiencia ? tabela[(int)n] : 100;",
+        "tabela[(int)n];",
+    ),
+    (
+        "candidato: vaga fechada nao contrata",
+        "Sim.Equipe.cs",
+        "CustoContratar(p) < 0 ? -1 : Preco(p, n);",
+        "Preco(p, n);",
+    ),
+    (
+        "candidato: experiencia invalida nao contrata",
+        "Sim.Equipe.cs",
+        "|| !ExpValida(n) ? -1 :",
+        "? -1 :",
+    ),
+    (
+        "demitir: nao devolve Cash",
+        "Sim.Equipe.cs",
+        "Staff.RemoveAt(funcionario);",
+        "Staff.RemoveAt(funcionario); Cash += T.Contratacao[(int)f.Perfil];",
+    ),
+    (
+        "demitir: quem vinha depois sobe",
+        "Sim.Equipe.cs",
+        "for (int i = funcionario; i < Staff.Count; i++) Staff[i].Id = i;",
+        "",
+    ),
+    (
+        "demitir: vale com a conta atrasada",
+        "Sim.Equipe.cs",
+        "if (funcionario < 0 || funcionario >= Staff.Count) return false;",
+        "if (funcionario < 0 || funcionario >= Staff.Count || Pausado) return false;",
+    ),
+    (
+        "candidato: a experiencia vai no save",
+        "Sim.Save.cs",
+        ".Append(',').Append((int)f.Experiencia)",
+        "",
+    ),
+    (
+        "candidato: lixo no save vira o Pleno",
+        "Sim.Save.cs",
+        "f.Length >= 5 && f[4] >= (int)Experiencia.Junior && f[4] <= (int)Experiencia.Senior ?",
+        "f.Length >= 5 ?",
+    ),
+    (
+        "candidato: teto do atendimento e' o do mais lento",
+        "Sim.Save.cs",
+        "Math.Min(TempoTeto(st.Tipo), L(a[1], 1))",
+        "Math.Min(TempoBase(st.Tipo), L(a[1], 1))",
+    ),
 ]
 
 
@@ -817,7 +895,11 @@ def testa():
             os.path.join(RAIZ, "client", "tools", "coretests"),
             "-nologo",
         ]
-        + (["--filter", os.environ["MUTACAO_TESTES"]] if "MUTACAO_TESTES" in os.environ else []),
+        + (
+            ["--filter", os.environ["MUTACAO_TESTES"]]
+            if "MUTACAO_TESTES" in os.environ
+            else []
+        ),
         capture_output=True,
         text=True,
         env=env,

@@ -74,7 +74,7 @@ namespace TA.Tests
             Assert.AreEqual(10, s.Voos[0].Criados, "criados no total do voo");
             Assert.AreEqual(1, s.St(Estacao.CheckIn).Fila.Count, "duplicado, de outra onda, de outro voo ou lixo: sai");
             Assert.AreEqual(2, s.St(Estacao.Seguranca).Atendendo.Count);
-            Assert.AreEqual(s.TempoPassos(Estacao.Seguranca), s.St(Estacao.Seguranca).Atendendo[0].Resto);
+            Assert.AreEqual(s.TempoPassos(Estacao.Seguranca) * 100 / s.T.ExpRende.Min() + 1, s.St(Estacao.Seguranca).Atendendo[0].Resto, "o teto e' o do candidato mais lento (Fase C9)");
             Assert.AreEqual(1, s.St(Estacao.Seguranca).Atendendo[1].Resto);
             Assert.AreEqual(0, s.Anuncios.Pago[0]);
             s.Tick(1f);   // e o jogo anda
@@ -656,6 +656,40 @@ namespace TA.Tests
             DiaConta d = m.Historico.Single();
             Assert.AreEqual((1, folha, folha), (d.Dia, d.Despesa, d.Pago), "a 1a conta e' a do dia em que o jogo abriu, inteira");
             Assert.Greater(d.Receita, 0, "o relatorio conta desde a abertura");
+        }
+
+        /// <summary>Save real do schema 10 (commit 03c40bd, a base da Fase C9): semente 7, bot Bom, 2 790 s, com os 6 perfis contratados.</summary>
+        const string V10 = "sha256=d6ace12d0ccc0f0937b0681c95f044f5b14231ff596271299943cdf8d8753862\nschema=10\ncontent=0.10.0\nat=1800000000\nt=83700\ncash=4424\nseed=7\nonda=15" +
+            "\nemb=996\nperd=47\nalbum=1\nbst=0\nema=9.359414870706443\nsaved=1800000000\nclaim=0\nclaimcash=0\ndia=0\nest.0=5,2\nfila.0=15501;15502;15503;15504;15" +
+            "505;15506;15507;15508;15509;15510;15511;15512;15513;15514;15515;15516;15517;15518;15519;15520;15521;15522;15523;15524;15525;15526;15527;15528;15529;15" +
+            "530;15531;15532;15533;15534\nat.0=15044:2;15045:32;15500:62\nest.1=5,2\nat.1=15042:40;15043:70\nest.2=0,0\nest.3=5,2\nfila.3=15011;15016;15015;15017;1" +
+            "5014;15020;15019;15018;15022;15023;15021;15024;15025;15026;15027;15028;15029;15031;15030;15033;15032;15035;15036;15034;15037;15038;15039;15040;15041\n" +
+            "est.4=5,2\nest.5=5,2\nest.6=5,2\nest.7=0,0\nfunc.0=1,0,0,0\nfunc.1=1,0,0,1\nfunc.2=4,0,0,3\nfunc.3=5,1,0,2\nfunc.4=6,0,0,4\nfunc.5=7,1,0,5\nvoo.0=46,1" +
+            "3,182,1,0\nvoo.1=35,0,0,0,0\naviao.0=50,82200,1,30,-1,0,0,1,0,0\nsrv.0=0:0,0:0,0:0,0:0\naviao.1=100,83700,0,-1,-1,0,0,1,0,0\nsrv.1=0:0,0:0,0:0,0:0\ntr" +
+            "ip.0=0,1,3872,0\ntrip.1=0,1,5400,1\ntrip.2=0,3,1499,-1\ntrip.3=1,1,3842,0\ntrip.4=1,1,5400,1\ntrip.5=1,3,1499,-1\npatio=3\npatioatraso=7\naero=1,3,-1" +
+            "\nrotas=127\nprog=6,6\nvr.0=6,46,0,0,0,0,1800,0\nvr.1=6,46,0,0,0,0,3300,0\nav.0=6,15\nav.1=6,15\nstt.0=1,31,5.666665818542242\nstt.1=0,-1,27.9000014252" +
+            "96068\nstt.3=1,30,8.099999587982893\nreparo=0\nincw=14\ncamp.0=6,10,0,0,3,0,1,0,1,3,0\ncamp.1=1,0,1,40,40,3,0,1,0,2,0\ncamp.2=0,0,0,0,0,0,0,0,0,0,0\nm" +
+            "iss=1,0\nmd.0=14,3,0,0\nmd.1=12,30,0,1\nmd.2=6,300,0,1\nms.0=4,30,1,0\nms.1=2,10,0,0\nms.2=3,20,0,0\nms.3=1,0,5,0\nms.4=0,996,0,0\ncq=34848,0,0,30,30," +
+            "25,4,21,93,0,208,241,25,0,2,0,0,0,0,0,5\ngems=0\npasse=0,0,325,3\natrasada=0\nhoje=1,0,7336,960,0,1728,1772,950,0,0,0,0,0,0\ndc.0=0,585,4570,445,0,528" +
+            ",1000,790,0,0,195,108,54,228\n";
+
+        /// <summary>CONTRATO_FASE_C9 §5: o schema 10 nao tem o nivel. Todos viram o Pleno, a pessoa e o preco de antes: a folha nao muda, e migrar =
+        /// jogar ate ali com o codigo novo (o Pleno e' o caminho de antes, numero a numero).</summary>
+        [Test]
+        public void MigracaoDoSchema10_SaveReal_TodosPleno()
+        {
+            const long U = 1800000000;
+            Sim m = Sim.Load(V10, null, 7);
+            Assert.IsFalse(m.SaveRefused, "schema 10 migra, nao e' recusado");
+            Assert.AreEqual(6, m.Staff.Count);
+            Assert.IsTrue(m.Staff.All(f => f.Experiencia == Experiencia.Pleno), "todos sao o Pleno");
+            Assert.AreEqual((long)m.T.Salario.Sum(), m.Folha(Despesa.Equipe), "a folha e' a de antes");
+            string texto = m.Save("0.11.0", U);
+            StringAssert.Contains("\nschema=" + Sim.Schema + "\n", texto);
+            StringAssert.Contains("\nfunc.0=1,0,0,0,1\n", texto);
+            Assert.AreEqual(texto, Sim.Load(texto, null, 7).Save("0.11.0", U), "ida e volta estavel no schema 11");
+            Sim n = Jogado(2790f, 7);
+            Assert.AreEqual(SemEma(n.Save("0.10.0", U)), SemEma(Sim.Load(V10, null, 7).Save("0.10.0", U)), "migrar = jogar ate ali com o codigo novo");
         }
 
         static string SemEma(string save) =>
