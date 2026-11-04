@@ -266,5 +266,55 @@ namespace TA.Tests
             Assert.IsTrue(q.Sentou && q.Reclamou);
             Assert.IsTrue(m.Nota(q) >= 0 && m.Nota(q) <= 100);
         }
+
+        /// <summary>Save real gravado pela main b099e80 (schema 16, com as historias, os suprimentos, a limpeza e a esteira), na onda 15 da semente 7:
+        /// abre no 17 com ninguem saido e todos zerados, a ida e volta e estavel, e migrar e o mesmo jogo de jogar ate ali com o codigo novo, fora a
+        /// satisfacao, que so le (a cadeia 12 -> 13 -> 14 -> 15 -> 16 esta no SaveTests, no SuprimentosTests e no HistoriasTests).</summary>
+        [Test]
+        public void MigracaoDoSchema16_SaveReal_SatisfacaoZerada_EOMesmoJogo()
+        {
+            Sim m = Sim.Load(V16, null, 7);
+            Assert.IsFalse(m.SaveRefused, "schema 16 migra, nao e recusado");
+            Assert.AreEqual((15, 83700L), (m.Onda, m.Steps));
+            Assert.AreEqual((0L, -1.0), (m.SatAmostras, m.SatMedia), "ninguem saiu ainda");
+            Pax[] todos = m.Estacoes.SelectMany(st => st.Fila.Concat(st.Atendendo)).ToArray();
+            Assert.IsNotEmpty(todos);
+            Assert.IsTrue(todos.All(p => p.Espera + p.Sujo + p.FilaBanheiro + p.Atraso + p.EmPe == 0 && !p.Reclamou), "todos chegam zerados");
+            string texto = m.Save("0.17.0", T0);
+            StringAssert.Contains("\nschema=" + Sim.Schema + "\n", texto);
+            StringAssert.Contains("\nsat=0,", texto);
+            Assert.AreEqual(texto, Sim.Load(texto, null, 7).Save("0.17.0", T0), "ida e volta estavel no schema 17");
+            var n = new Sim(null, 7);
+            var bn = new Bot(BotProfile.Bom);
+            for (int i = 0; i < (int)(2790f * Sim.Hz); i++) bn.Step(n);
+            Assert.AreEqual(SemSat(n.Save("0.16.0", T0)), SemSat(Sim.Load(V16, null, 7).Save("0.16.0", T0)), "migrar = jogar ate ali com o codigo novo");
+            var bm = new Bot(BotProfile.Bom);
+            for (int i = 0; i < 600 * Sim.Hz; i++) { bm.Step(m); bn.Step(n); }
+            Assert.AreEqual((n.Cash, n.TotalEmbarcados, n.TotalPerdidos), (m.Cash, m.TotalEmbarcados, m.TotalPerdidos), "e o mesmo jogo dali em diante");
+            Assert.Greater(m.SatAmostras, 0, "a satisfacao conta dali em diante");
+        }
+
+        /// <summary>Sem as linhas da satisfacao e o hash, com os double em 5 casas (o save real saiu do .NET, e o Mono do Unity difere na 8a casa).</summary>
+        static string SemSat(string save) => string.Join("\n", save.Split('\n').Where(l => !l.StartsWith("sat") && !l.StartsWith("sha256="))
+            .Select(l => System.Text.RegularExpressions.Regex.Replace(l, @"-?\d+\.\d+", x => double.Parse(x.Value, System.Globalization.CultureInfo.InvariantCulture)
+                .ToString("F5", System.Globalization.CultureInfo.InvariantCulture))));
+
+        const string V16 =
+            "sha256=9cb7510ad9b4ed92926c011ee150b5a76c82b27c5c56bdd5c654373d2efba02b\nschema=16\ncontent=0.16.0\nat=1800000000\nt=83700\ncash=5792\nseed=7\nonda=15" +
+            "\nemb=1020\nperd=28\nalbum=1175\nbst=0\nema=9.39020983056686\nsaved=1800000000\nclaim=0\nclaimcash=0\ndia=0\nest.0=5,2\nfila.0=15501;15502;15503;15504" +
+            ";15505;15506;15507;15508;15509;15510;15511;15512;15513;15514;15515;15516;15517;15518;15519;15520;15521;15522;15523;15524;15525;15526;15527;15528;15529" +
+            ";15530;15531;15532;15533;15534\nat.0=15044:2;15045:32;15500:62\nest.1=5,2\nat.1=15042:40;15043:70\nest.2=0,0\nest.3=5,2\nfila.3=15011;15016;15015;1501" +
+            "7;15014;15020;15019;15018;15022;15023;15021;15024;15025;15026;15027;15028;15029;15031;15030;15033;15032;15035;15036;15034;15037;15038;15039;15040;1504" +
+            "1\nest.4=5,2\nest.5=5,2\nest.6=5,2\nest.7=0,0\nfunc.0=1,0,0,0,1\nfunc.1=1,0,0,1,1\nfunc.2=4,0,0,3,1\nfunc.3=5,1,0,2,1\nfunc.4=6,0,0,4,1\nfunc.5=7,1,0," +
+            "5,1\nvoo.0=46,13,182,1,0\nvoo.1=35,0,0,0,0\naviao.0=50,82200,1,30,-1,0,0,1,0,0\nsrv.0=0:0,0:0,0:0,0:0\naviao.1=100,83700,0,-1,-1,0,0,1,0,0\nsrv.1=0:0," +
+            "0:0,0:0,0:0\ntrip.0=0,1,3872,0\ntrip.1=0,1,5400,1\ntrip.2=0,3,1499,-1\ntrip.3=1,1,3842,0\ntrip.4=1,1,5400,1\ntrip.5=1,3,1499,-1\npatio=3\npatioatraso=" +
+            "8\naero=1,3,-1\nrotas=127\nprog=6,6\nvr.0=6,46,0,0,0,0,1800,0\nvr.1=6,46,0,0,0,0,3300,0\nav.0=6,15\nav.1=6,15\nstt.0=1,31,5.666665818542242\nstt.1=0,-" +
+            "1,27.900001425296068\nstt.3=1,30,8.099999587982893\nreparo=0\nincw=14\ncamp.0=6,10,0,0,3,0,1,0,1,3,0\ncamp.1=1,0,1,40,40,3,0,1,0,2,0\ncamp.2=0,0,0,0,0" +
+            ",0,0,0,0,0,0\nmiss=1,0\nmd.0=14,4,0,1\nmd.1=12,30,0,1\nmd.2=6,300,0,1\nms.0=4,30,1,0\nms.1=2,10,0,0\nms.2=3,20,0,0\nms.3=1,0,5,0\nms.4=0,1000,0,0\ncq=" +
+            "34849,0,0,30,30,27,4,24,70,0,232,252,25,0,2,1,0,0,0,0,6\ngems=0\npasse=0,0,350,3\natrasada=0\nhoje=1,0,7818,1015,0,1904,2236,1200,0,0,0,0,0,0,33\ndc.0" +
+            "=0,644,4570,445,0,528,1000,790,0,0,210,108,54,228,44\nhist=3600,4,-1,0,0,10,0,4,0,0,0,6,0,0,0,0;25200,3,-1,0,8,26,3,0,0,0,0,2,3,7,0,0;41460,1,4,0,15,4" +
+            "0,0,7,1,0,0,0,0,0,0,0;43200,5,-1,0,-1,0,0,0,0,1,161,12,0,0,0,0;46800,3,-1,0,16,58,16,0,0,0,0,1,3,18,2,0;62400,0,1,0,23,32,0,0,3,1,0,0,0,0,0,0;69900,3," +
+            "-1,0,25,54,7,0,0,0,0,1,3,2,3,0;73800,3,-1,0,26,43,2,0,0,0,0,2,3,16,0,0;79260,1,5,0,29,40,0,0,1,0,0,0,0,0,0,0\nsuj=176,120,0,114,176,12,80\nbh=0\nbhneg" +
+            "=0\nzels=1\nzel.0=5,1,0,0,330,0\nsup.0=4,0,0,0\nsup.1=4,0,0,0\nhp=11,15026,1,4095\n";
     }
 }

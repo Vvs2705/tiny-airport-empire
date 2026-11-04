@@ -83,6 +83,8 @@ namespace TA.Tests
             linhas.Add(Textos.NoBanheiro + Textos.ComHistoria);
             foreach (string l in linhas) Assert.LessOrEqual(Largura(corpo, l), Hud.LargFicha, l);
             foreach (string d in Textos.Destino) Assert.LessOrEqual(Largura(nome, Textos.Voo(199) + " · " + d), Hud.LargFicha, d);
+            foreach (string h in Textos.Historia) Assert.LessOrEqual(Largura(nome, h), Hud.LargFicha, h);   // TA-3: a ficha de quem tem historia
+            foreach (Historia x in Tabelas.Historias) Assert.LessOrEqual(Largura(corpo, Textos.HistoriaPede(x)), Hud.LargFicha, x.Id);
             for (int p = 0; p < Textos.Perfil.Length; p++)   // com o Mover a direita
             {
                 Assert.LessOrEqual(Largura(nome, Textos.Funcionario[p] + " · " + Textos.Perfil[p]), Hud.LargFichaMover, Textos.Perfil[p]);

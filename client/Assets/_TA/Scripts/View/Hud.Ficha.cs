@@ -169,6 +169,7 @@ namespace TA
             d.Topo = Textos.Voo(vooId) + " · " + Textos.PerfilPaxNome[(int)s.PerfilDe(p)] + " · " + Textos.Humor[(int)h];
             d.Nota = Textos.SatPax(nota, c, fp, s.Peso(p, fp), p.Reclamou);
             d.Cor = p.Reclamou ? NotaMal : CorDa(c);
+            if (p.Historia && s.HistoriaAtual != null) { d.Nome = Textos.Historia[s.HistoriaOnda]; d.Info = Textos.HistoriaPede(s.HistoriaAtual); }   // TA-3: a historia dele e o pedido; a ultima linha segue a satisfacao (frente G)
             return d;
         }
 

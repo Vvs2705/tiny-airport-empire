@@ -243,7 +243,7 @@ namespace TA.Tests
 
         static string SemEma(string save) =>
             string.Join("\n", save.Split('\n').Where(l => !l.StartsWith("ema=") && !l.StartsWith("sha256=") && !l.StartsWith("stt.") && !l.StartsWith("camp.") && !l.StartsWith("miss=") && !l.StartsWith("md.") && !l.StartsWith("ms.") && !l.StartsWith("cq=") && !l.StartsWith("passe=")
-                && !l.StartsWith("atrasada=") && !l.StartsWith("hoje=") && !l.StartsWith("dc.") && !l.StartsWith("hist=")
+                && !l.StartsWith("atrasada=") && !l.StartsWith("hoje=") && !l.StartsWith("dc.") && !l.StartsWith("hist=") && !l.StartsWith("hp=")
                 && !l.StartsWith("sat")));   // schema 17: o save antigo nao tinha a satisfacao (sat, satm, satp), que so le o jogo
 
         /// <summary>O schema 14 (sem suprimentos) abre com o deposito cheio, nada a caminho, nenhum aviao devendo carga e a 5a categoria zerada; e migrar =
@@ -261,7 +261,7 @@ namespace TA.Tests
             StringAssert.Contains("\nschema=" + Sim.Schema + "\n", texto);
             StringAssert.Contains("\nsup.0=8,0,0,0\nsup.1=8,0,0,0\n", texto);
             Assert.AreEqual(texto, Sim.Load(texto, null, 7).Save("0.15.0", U), "ida e volta estavel no schema novo");
-            var sem = new Tuning { RegraSuprimentos = false };
+            var sem = new Tuning { RegraSuprimentos = false, RegraHistorias = false };
             var n = new Sim(sem, 7);
             var b = new Bot(BotProfile.Bom);
             for (int i = 0; i < 2790 * Sim.Hz; i++) b.Step(n);

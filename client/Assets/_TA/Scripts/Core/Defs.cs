@@ -492,11 +492,10 @@ namespace TA.Core
         /// <summary>Carinha: contente a partir de SatContente, brava abaixo de SatBrava; abaixo de SatReclama o passageiro reclama (1x). Gorjeta de
         /// quem embarca com nota &gt;= SatGorjeta: SatBonus x a tarifa dele. A media do aeroporto e' a dos ultimos ~SatJanela que sairam.</summary>
         public int SatContente = 70, SatBrava = 50, SatReclama = 40, SatGorjeta = 80, SatJanela = 100; public float SatBonus = 0.1f;
-    }
 
-    /// <summary>Historias do TA-3 (GDD §5.9). A v0.1 tem 1. Id = indice (vai no album do save): so cresce no fim.</summary>
-    public static class Historias
-    {
-        public static readonly string[] Texto = { "Dona Rosa vai ao casamento da neta" };
+        // ---- ta-historias ----
+        /// <summary>As 20 historias do TA-3 (Sim.Historias.cs). False = a v0.1: so a Dona Rosa, do meio da fila, entregue ao embarcar.</summary>
+        public bool RegraHistorias = true;
+        public Historia[] Historias = Tabelas.Historias;
     }
 }
