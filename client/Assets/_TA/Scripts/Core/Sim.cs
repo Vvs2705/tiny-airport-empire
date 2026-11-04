@@ -5,7 +5,7 @@ using System.Collections.Generic;
 // Regras e numeros: docs/CONTRATO_V01.md §3 e §4 e docs/CONTRATO_FASE_C.md (Defs.cs, Tuning). Arquivos: Sim.cs (relogio, onda, filas,
 // equipe), Sim.Estados.cs (estado das estacoes), Sim.Patio.cs (ciclo do aviao, patio e manutencao), Sim.Tripulacao.cs, Sim.Save.cs,
 // Sim.Offline.cs (cofre e dia local), Sim.Metas.cs (campanha), Sim.Missoes.cs (missoes e conquistas), Anuncios.cs (2 rewarded), Compras.cs (Gems e compras),
-// Sim.Passe.cs (passe de temporada), Bot.cs.
+// Sim.Passe.cs (passe de temporada), Sim.Historico.cs (registro de ocorrencias), Bot.cs.
 //
 //   Abrir:      var sim = Sim.Load(texto) ("" ou null = jogo novo; Sim.Load(texto, tuning, semente) para teste). sim.SaveRefused => save
 //               de schema futuro ou corrompido: avise e NUNCA grave por cima (sim.Save devolve null). Depois: sim.Agora(nowUnix, fusoSeg)
@@ -17,7 +17,7 @@ using System.Collections.Generic;
 //               sim.HirePatio(), sim.BuyPatio(servico, melhoria), sim.Checagem(aviao) e sim.Hangar(aviao) (so Cash e tempo). O resto e' o
 //               padrao do nucleo: escala automatica (1o livre na ordem), servicos do patio, inspecao obrigatoria do aviao pendente.
 //   Ler:        sim.Time, sim.Cash, sim.Voos[0..1] (quadro da onda: horario em passos da onda, sim.PassoNaOnda), sim.Stations[e]
-//               (fila, atendendo, Estado/Folga/VooEmRisco), sim.Staff (Em, Andando), sim.Presentes(e), sim.Custo(e, m),
+//               (fila, atendendo, Estado/Folga/VooEmRisco), sim.Staff (Em, De, Andando), sim.Presentes(e), sim.Custo(e, m),
 //               sim.CustoContratar(), sim.Marco, sim.Tarifa, sim.Album, sim.BoostLeft, sim.Anuncios (Pode/Oferta/Pagar).
 //               Fase C: sim.Avioes[f] (o aviao do voo f: Desgaste, NoPatio, Falta/Fazendo por Servico, Check/Inspecao, Hangar, VooId),
 //               sim.Pronto(aviao) (o embarque pode abrir), sim.Tripulacao (Nome, Funcao, Trechos, Aviao; sim.Livre, sim.DescansoFalta),
@@ -48,8 +48,18 @@ using System.Collections.Generic;
 //   Fase C7:    tabela sim.T.Temporadas (Id, Produto da trilha premium, Dias do jogo, Gratis[nivel - 1]: Premio Cash, Tempo em s de 2x ou Cosmetico com Id).
 //               sim.Temporada (null = passe fechado), sim.DiasRestantesPasse, sim.PontosPasse, sim.NivelPasse, sim.T.PassePontosNivel; o nivel paga sozinho:
 //               Ev.PasseNivel (ja pago). Cosmetico do passe: sim.Tem(id). A temporada corre em dias do jogo (sim.DiaJogo), nunca os do aparelho.
+//   Fase C8:    sim.Hoje (o dia em curso: Receitas por Fonte) e sim.Historico (os ultimos 7 dias fechados: Receitas, Despesas por Despesa, Pago,
+//               Lucro, Falta), sim.Folha(d) e sim.Folha() (a conta por dia agora), sim.Atrasada e sim.Pausado (faltou caixa: Hire, HireTripulante,
+//               HirePatio, Buy e BuyPatio devolvem false ate o caixa cobrir). Ev.DiaFechado, Ev.ContaQuitada.
+//   Fase C9:    os 3 candidatos de cada vaga (Experiencia Junior, Pleno, Senior; fixos): sim.CustoContratar(p, x), sim.Salario(p, x),
+//               sim.Rendimento(x) e sim.Hire(p, x); Funcionario.Experiencia. sim.Demite(funcionario) (sem custo; vale com a conta atrasada;
+//               quem vinha depois sobe uma posicao no Staff). Ev.Demitido.
+//   Ocorrencias: sim.Ocorrencias (as dos ultimos Sim.OcorrenciasDias dias do jogo, na ordem em que entraram: Tipo, Sub, Passo, Dia, Causa, Voo,
+//               Total, Perdidos, Atraso, Resposta, Auto, Custo, Motivo com Estacao, Espera e Postos, Aberta, Eficaz) e sim.HoraDe(passo). So observa.
+//   Frente E:   sim.Move passa pelo vestiario (Sim.Vestiario.cs): sim.Fase(f) (Encerrando, IndoVestiario, Trocando, IndoPosto), sim.Veste(f) (o uniforme
+//               muda so no fim da troca), sim.Preparo(f) (0 a 1) e sim.TransferePassos; Funcionario.Andando = passos que faltam. Nada novo no save.
 //   Gravar:     texto = sim.Save(versaoDoJogo, nowUnix): payload chave=valor dentro do SaveEnvelope (SHA-256 + schema). Grava filas e o
-//               relogio do quadro: reabrir retoma a onda do ponto gravado. Schema 9; os saves dos schemas 1 a 8 migram no Load.
+//               relogio do quadro: reabrir retoma a onda do ponto gravado. Schema 12; os saves dos schemas 1 a 11 migram no Load.
 //
 // Nomes acima sao estaveis (so crescem). Mudou a API: atualize este cabecalho e o docs/MAPA_CODIGO.md no mesmo PR.
 
@@ -63,9 +73,9 @@ namespace TA.Core
         /// <summary>Teto do dt de um quadro (s): uma travada longa nao vira um salto de minutos no relogio do quadro de partidas.</summary>
         public const float MaxFrame = 0.25f;
         /// <summary>Versao do formato do save (SaveEnvelope). Sobe a cada mudanca de formato; save de schema maior e' recusado; menor migra
-        /// no Load (9 = Fase C7: passe de temporada; 8 = Fase D1: Gems e compras; 7 = Fase C6: missoes e conquistas; 6 = Fase C5: campanha; 5 = Fase C4: falhas de aviao e portao atrasado;
+        /// no Load (12 = Fase C9: a experiencia de cada funcionario; 11 = registro de ocorrencias; 10 = Fase C8: despesas e relatorio do dia; 9 = Fase C7: passe de temporada; 8 = Fase D1: Gems e compras; 7 = Fase C6: missoes e conquistas; 6 = Fase C5: campanha; 5 = Fase C4: falhas de aviao e portao atrasado;
         /// 4 = Fase C3: aeroportos, rotas e incidentes; 3 = Fase C2: 8 estacoes e o perfil de cada funcionario; 2 = Fase C: avioes, tripulacao e patio; o 1 e' a v0.1).</summary>
-        public const int Schema = 9;
+        public const int Schema = 12;
         /// <summary>A equipe da v0.1 (Hire()): Ana, Beto e Caio. MaxEquipe = os 6 perfis, com Dani, Edu e Fatima (Hire(perfil)).</summary>
         public const int MaxFuncionarios = 3, MaxEquipe = 6;
 
@@ -151,6 +161,7 @@ namespace TA.Core
 
         void Passo()
         {
+            PassoDespesas();
             int w = (int)(Steps / OndaPassos), loc = PassoNaOnda;
             if (w != Onda) NovaOnda(w);
             PassoIncidente();
@@ -325,18 +336,18 @@ namespace TA.Core
             {
                 case Estacao.CheckIn: St(Para(p.Mala, Estacao.Bagagem, v, loc) ? Estacao.Bagagem : Estacao.Seguranca).Fila.Add(p); break;
                 case Estacao.Bagagem:
-                    Emit(Ev.Venda, p.Id, (int)Ganha(T.MalaTaxa));
+                    Emit(Ev.Venda, p.Id, (int)Ganha(T.MalaTaxa, Fonte.Bagagem));
                     St(Estacao.Seguranca).Fila.Add(p);
                     break;
                 case Estacao.Seguranca:
                     St(Para(p.Loja, Estacao.Loja, v, loc) ? Estacao.Loja : Para(p.Fome, Estacao.Alimentacao, v, loc) ? Estacao.Alimentacao : Estacao.Portao).Fila.Add(p);
                     break;
                 case Estacao.Loja:
-                    Emit(Ev.Venda, p.Id, (int)Ganha((long)Math.Round(T.LojaVenda * (double)Rende(Estacao.Loja) * Gasto(v))));
+                    Emit(Ev.Venda, p.Id, (int)Ganha((long)Math.Round(T.LojaVenda * (double)Rende(Estacao.Loja) * Gasto(v)), Fonte.Loja));
                     St(Para(p.Fome, Estacao.Alimentacao, v, loc) ? Estacao.Alimentacao : Estacao.Portao).Fila.Add(p);
                     break;
                 case Estacao.Alimentacao:
-                    Emit(Ev.Venda, p.Id, (int)Ganha((long)Math.Round(T.ComidaVenda * (double)Rende(Estacao.Alimentacao) * Gasto(v))));
+                    Emit(Ev.Venda, p.Id, (int)Ganha((long)Math.Round(T.ComidaVenda * (double)Rende(Estacao.Alimentacao) * Gasto(v)), Fonte.Alimentacao));
                     St(Estacao.Portao).Fila.Add(p);
                     break;
                 case Estacao.Portao:
@@ -344,7 +355,7 @@ namespace TA.Core
                     int marco = Marco, tarifa = TarifaDe(v, p);
                     v.Embarcados++;
                     v.Receita += tarifa;
-                    Emit(Ev.Embarcou, p.Id, (int)Ganha(tarifa));
+                    Emit(Ev.Embarcou, p.Id, (int)Ganha(tarifa, Fonte.Tarifas));
                     TotalEmbarcados++;
                     if (Marco > marco)
                     {
@@ -363,10 +374,10 @@ namespace TA.Core
         }
 
         /// <summary>Renda de jogo (tarifa, loja, bonus): 2x durante o rewarded 2. A media movel (cofre offline) aprende so a base.</summary>
-        long Ganha(long baseCash)
+        long Ganha(long baseCash, Fonte f)
         {
             long g = BoostLeft > 0 ? baseCash * 2 : baseCash;
-            Cash += g;
+            Recebe(g, f);
             _ganhoPasso += baseCash;
             return g;
         }
@@ -377,6 +388,7 @@ namespace TA.Core
         void Fecha(Voo v)
         {
             FechaAviao(v);
+            AnotaVoo(v);
             foreach (Station s in Estacoes)
             {
                 s.Fila.RemoveAll(p => p.Onda == v.Onda && p.Voo == v.Indice);
@@ -388,7 +400,7 @@ namespace TA.Core
             // Fase C2: o despacho com gente aumenta o bonus de quem sai na hora (CONTRATO_FASE_C2 §2)
             double bonus = T.Bonus + (Ativa(Estacao.Despacho) ? T.DespachoBonus * Forca(Estacao.Despacho) : 0) + Efeito(v).Bonus;
             if (v.Perdidos == 0 && v.Total > 0 && NoHorario(v))
-                Emit(Ev.Bonus, v.Id, (int)Ganha((long)Math.Round(v.Receita * bonus)));
+                Emit(Ev.Bonus, v.Id, (int)Ganha((long)Math.Round(v.Receita * bonus), Fonte.Bonus));
             Emit(Ev.VooPartiu, v.Id, v.Embarcados, v.Total);
             if (v.Perdidos > 0) Emit(Ev.VooPerdido, v.Id, v.Perdidos, v.Total);
         }
@@ -418,16 +430,19 @@ namespace TA.Core
             return false;
         }
 
-        /// <summary>TA-2: manda o funcionario para outra estacao. Ele anda Tuning.Caminhada s e, nesse tempo, nao atende em nenhuma das duas
-        /// (quem ja estava em atendimento termina). Redirecionar no meio do caminho recomeca a caminhada.</summary>
+        /// <summary>TA-2: manda o funcionario para outra estacao, pelo vestiario (Sim.Vestiario.cs): termina o atendimento em curso, anda, troca o
+        /// uniforme e anda ate o posto. Nesse tempo nao atende em nenhuma das duas. Redirecionar no meio recomeca; voltar ao setor do uniforme que
+        /// ele veste e' so a caminhada.</summary>
         public bool Move(int funcionario, Estacao destino)
         {
             if (funcionario < 0 || funcionario >= Staff.Count || (int)destino < 0 || (int)destino >= Estacoes.Length || !Desbloqueada(destino)) return false;
             Funcionario f = Staff[funcionario];
             if (f.Em == destino) return false;
-            f.De = f.Em;
+            Estacao veste = Veste(f);
+            int encerra = f.Andando == 0 ? Encerra(f.Em) : 0;
+            f.De = veste;
             f.Em = destino;
-            f.Andando = Math.Max(1, (int)Math.Round(T.Caminhada * Hz));
+            f.Andando = encerra + TransferePassos;   // De == Em (voltou ao setor do uniforme): so a caminhada, sem troca
             Emit(Ev.Movido, f.Id, (int)f.De, (int)destino);
             return true;
         }
@@ -455,18 +470,9 @@ namespace TA.Core
         }
 
         /// <summary>Contrata o perfil: aparece no 1o posto vazio (Lugar), como na v0.1. O nucleo nao escolhe a estacao pelo perfil: levar a
-        /// pessoa para a especialidade ou para uma estacao nova e' a decisao do jogador (CONTRATO_FASE_C2 §2, BALANCE.md D-C2b).</summary>
-        public bool Hire(Perfil p)
-        {
-            long c = CustoContratar(p);
-            if (c < 0 || Cash < c) return false;
-            Cash -= c;
-            var f = new Funcionario { Id = Staff.Count, Perfil = p, Em = Lugar() };
-            f.De = f.Em;
-            Staff.Add(f);
-            Emit(Ev.Contratado, f.Id, (int)c, (int)f.Em);
-            return true;
-        }
+        /// pessoa para a especialidade ou para uma estacao nova e' a decisao do jogador (CONTRATO_FASE_C2 §2, BALANCE.md D-C2b). E' o candidato
+        /// Pleno; os outros 2, com Hire(p, experiencia) (Sim.Equipe.cs).</summary>
+        public bool Hire(Perfil p) => Hire(p, Experiencia.Pleno);
 
         public bool Contratado(Perfil p)
         {
@@ -498,7 +504,7 @@ namespace TA.Core
         public bool Buy(Estacao e, Melhoria m)
         {
             long c = Custo(e, m);
-            if (c < 0 || Cash < c) return false;
+            if (!PodeComprar(c)) return false;
             Cash -= c;
             if (m == Melhoria.Velocidade) St(e).Vel++; else { St(e).Cap++; St(e).Postos++; }
             Emit(Ev.Melhorou, (int)e, (int)m, Nivel(e, m));
@@ -545,6 +551,7 @@ namespace TA.Core
         {
             AnotaMeta(t, a, b, c);
             AnotaPasse(t, a, c);
+            AnotaHistorico(t, a, b, c);
             Events.Add(new Evento { Tipo = t, A = a, B = b, C = c });
         }
 

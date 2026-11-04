@@ -240,6 +240,7 @@ namespace TA
                 _moverItem[i] = NovoItem(lista, "Estacao" + i, Art.IconeEstacao(i), Art.Vazio, () => { int q = _moverQuem; Fecha(_mover); _g.Move(q, e); }, 168f, 34f);
                 _moverItem[i].Nome.text = Textos.Estacao[i];
             }
+            _demitir = NovoDemitir(lista);   // Fase C9 (Hud.Operacao.cs)
         }
 
         Item ItemPausa(RectTransform lista, string name, Sprite icone, Color cor, string nome, string legenda, string botao, Action<Item> acao)
@@ -260,7 +261,7 @@ namespace TA
             m.Rt.SetAsLastSibling();
         }
 
-        /// <summary>Abre uma tela pelo nome (botoes e a flag -tela): melhorias, mover, cofre, anuncio, pausa, album, config, excluir, metas, missoes, conquistas, rotas (rotas0 a rotas2: a aba do aeroporto). "jogo" = nenhuma.</summary>
+        /// <summary>Abre uma tela pelo nome (botoes e a flag -tela): melhorias, mover, cofre, anuncio, pausa, album, config, excluir, metas, missoes, conquistas, rotas (rotas0 a rotas2: a aba do aeroporto), passe. "jogo" = nenhuma.</summary>
         public void AbreTela(string nome)
         {
             switch (nome)
@@ -278,14 +279,17 @@ namespace TA
                 case "voo": AbreVoo(0); break;
                 case "metas": case "missoes": case "conquistas": AbreMetas(nome); break;
                 case "rotas": case "rotas0": case "rotas1": case "rotas2": AbreRotas(nome); break;
+                case "passe": AbrePasse(); break;
                 case "fichapax": case "fichafunc": case "fichaestacao": case "fichatrip": FichaDev(nome); break;
+                case "vaga": case "demitir": TelaEquipeDev(nome); break;   // Fase C9 (Hud.Operacao.cs)
             }
         }
 
         internal void AbreMover(int quem)
         {
             _moverQuem = quem;
-            _mover.Titulo.text = Textos.Mover((int)S.Staff[quem].Perfil);   // quem e a posicao em Staff: Edu pode vir antes da Dani
+            _demitirArmado = false;
+            _mover.Titulo.text = Textos.Mover(Textos.Nome(S.Staff[quem]));   // quem e a posicao em Staff: Edu pode vir antes da Dani
             Abre(_mover);
         }
 
@@ -361,6 +365,7 @@ namespace TA
                 it.Linha.text = Textos.NaEstacao(s.Alocados(e));
                 if (s.Staff[_moverQuem].Em == e) it.Btn.Maximo(Textos.Aqui); else it.Btn.Secundario(Textos.MoverCurto);
             }
+            PintaDemitir(s);
         }
 
         void PintaTelas()

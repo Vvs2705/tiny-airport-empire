@@ -21,7 +21,7 @@ namespace TA
     ///   -autoplay N   sem render: o bot joga N ondas (Bom, Lento, Parado; retomada no meio da onda), loga AUTOPLAY OK|FAIL e sai 0/1.
     ///                 Usar com -batchmode -nographics (client/tools/verify.sh full).
     ///   -bot          o bot Bom joga na tela.        -speed N   multiplica o dt (0,1..20).   -vel V   comeca em V (0 = pausa, 1..3 = 1x..3x).
-    ///   -tela nome    jogo | melhorias | mover | cofre | anuncio | pausa | pausada (sem o menu) | album | config | excluir | equipe | tripulacao | patio | voo | metas | missoes | conquistas | rotas (rotas0..rotas2 = aba do aeroporto) | fichapax | fichafunc | fichaestacao | fichatrip (Hud.FichaDev) | passoN (tutorial, passo N).
+    ///   -tela nome    jogo | melhorias | mover | cofre | anuncio | pausa | pausada (sem o menu) | album | config | excluir | equipe | tripulacao | patio | voo | metas | missoes | conquistas | rotas (rotas0..rotas2 = aba do aeroporto) | passe | fichapax | fichafunc | fichaestacao | fichatrip (Hud.FichaDev) | passoN (tutorial, passo N).
     ///   -textomaior, -reduzmovimento   ligam o ajuste so nesta sessao (o -testsession nao le as preferencias do PC).
     ///   -onda K       comeca na onda K (1 = a 1a).   -passageiros N   estresse: N passageiros por onda (60 = o K3).
     ///   -tutorial     liga o tutorial no -testsession (sem gravar; com -bot o ENTENDI se aperta sozinho).
@@ -194,7 +194,8 @@ namespace TA
         public bool Move(int f, Estacao e) => Sim.Move(f, e);
         public void Buy(Estacao e, Melhoria m) => Sim.Buy(e, m);
         public void Hire() => Sim.Hire();
-        public void Hire(Perfil p) => Sim.Hire(p);
+        public bool Hire(Perfil p, Experiencia x) => Sim.Hire(p, x);
+        public bool Demite(int f) => Sim.Demite(f);
         public void HireTripulante(Funcao f) => Sim.HireTripulante(f);
         public void Escala(int voo, int tripulante) => Sim.Escala(voo, tripulante);
         public void HirePatio() => Sim.HirePatio();
@@ -276,6 +277,7 @@ namespace TA
                 case Ev.Melhorou: Diario("station_upgraded", e.A, e.B, e.C); break;
                 case Ev.Movido: Diario("staff_moved", e.A, e.B, e.C); break;
                 case Ev.Contratado: Diario("staff_hired", e.A, e.B, e.C); break;
+                case Ev.Demitido: Diario("staff_fired", e.A, e.B, e.C); _hud.Demitido(e.A, (Perfil)e.B, (Experiencia)e.C); break;
                 case Ev.Historia: Diario("story_delivered", e.A, e.B, e.C); _hud.Toast(Textos.HistoriaEntregue); break;
                 case Ev.Offline: Diario("offline_claim", e.A, e.B); break;
                 case Ev.Recompensa: Diario("reward_granted", e.A, e.B); break;
@@ -308,6 +310,7 @@ namespace TA
                 case Ev.RotaProgramada: Diario("route_scheduled", e.A, e.B); break;
                 case Ev.Viagem: Diario("airport_trip", e.A, e.B); _hud.Toast(Textos.ViagemAviso(e.A)); break;
                 case Ev.AeroportoChegada: Diario("airport_arrived", e.A); _hud.Toast(Textos.ChegadaAviso(e.A)); break;
+                case Ev.PasseNivel: Diario("season_reward_claimed", e.A, e.B, e.C); _hud.PasseNivel(e.A, e.B); break;
             }
         }
 

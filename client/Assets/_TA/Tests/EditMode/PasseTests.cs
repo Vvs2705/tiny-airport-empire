@@ -12,7 +12,7 @@ namespace TA.Tests
         const string Bandeirolas = "terminal_decor_flags_s1";
 
         /// <summary>A tabela com outras temporadas e o resto do jogo de sempre.</summary>
-        internal static Tuning Com(params Temporada[] ts) => new Tuning { Temporadas = ts };
+        internal static Tuning Com(params Temporada[] ts) => new Tuning { Temporadas = ts, RegraDespesas = false };   // a conta do dia: DespesasTests
 
         internal static Temporada Curta(string id, int dias) => new Temporada { Id = id, Produto = "season_pass_" + id, Dias = dias, Gratis = Tabelas.Temporadas[0].Gratis };
 
