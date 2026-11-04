@@ -45,7 +45,6 @@ namespace TA.Tests
             Tuning t = s.T;
             Assert.AreEqual(((long)t.LimpezaIniciais * t.SalarioLimpeza, 3L * t.SalarioTrip[0] + 3L * t.SalarioTrip[1], (long)t.SalarioPatio, (long)t.Manutencao.Take(4).Sum()),
                 (s.Folha(Despesa.Equipe), s.Folha(Despesa.Tripulacao), s.Folha(Despesa.Patio), s.Folha(Despesa.Manutencao)), "jogo novo: so a limpeza inicial (frente F), a tripulacao inicial, 1 de patio e as 4 estacoes da v0.1");
-
             Assert.IsTrue(s.Hire(Perfil.Atendente) && s.HirePatio());
             Assert.IsTrue(s.Buy(Estacao.CheckIn, Melhoria.Velocidade) && s.Buy(Estacao.CheckIn, Melhoria.Velocidade) && s.Buy(Estacao.CheckIn, Melhoria.Capacidade));
             Assert.AreEqual(((long)t.Salario[0] + t.LimpezaIniciais * t.SalarioLimpeza, 2L * t.SalarioPatio, t.Manutencao.Take(4).Sum() + 3L * t.ManutencaoNivel[0]),

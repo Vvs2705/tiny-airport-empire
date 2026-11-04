@@ -108,8 +108,7 @@ namespace TA.Tests
 
             Sim d = Aberto(new Tuning { RegraExperiencia = false });
             Assert.IsTrue(d.Hire(Perfil.Atendente, Experiencia.Senior));
-            Assert.AreEqual((1f, (long)d.T.Contratacao[0], (long)d.T.Salario[0] + d.Limpeza.Count * d.T.SalarioLimpeza), (d.Rende
-(Estacao.CheckIn), 1000000 - d.Cash, d.Folha(Despesa.Equipe)),
+            Assert.AreEqual((1f, (long)d.T.Contratacao[0], (long)d.T.Salario[0] + d.Limpeza.Count * d.T.SalarioLimpeza), (d.Rende(Estacao.CheckIn), 1000000 - d.Cash, d.Folha(Despesa.Equipe)),
                 "regra desligada: so o nome muda");
         }
 

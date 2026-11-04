@@ -26,6 +26,7 @@ namespace TA.Tests
             public BotProfile P; public double Embarque, EmbarqueP10, Receita, Moves, Taps; public double[] Marco;
             public double SemTrip, Inspecoes, Hangares, Checagens, Trocas, Incidentes, Reacoes, Climas, Falhas, Reparos, Objetivos, Recompensas, Diarias, Semanais, PagoMissoes, Conquistas;
             public double Despesas, Apertos;
+            public double Usos, Negados, Interdicoes, Limpezas, FilaBanheiro, SujeiraMedia;
         }
 
         public static Linha Rodar(BotProfile p, Tuning t = null, int sementes = Sementes, int ondas = Ondas, int threads = Threads)
@@ -47,6 +48,8 @@ namespace TA.Tests
                 l.Objetivos += r.Objetivos * k; l.Recompensas += r.Recompensas * k;
                 l.Diarias += r.Diarias * k; l.Semanais += r.Semanais * k; l.PagoMissoes += r.PagoMissoes * k; l.Conquistas += r.Conquistas * k;
                 l.Despesas += r.Despesas * k; l.Apertos += r.Apertos * k;
+                l.Usos += r.Usos * k; l.Negados += r.Negados * k; l.Interdicoes += r.Interdicoes * k; l.Limpezas += r.Limpezas * k;
+                l.FilaBanheiro = Math.Max(l.FilaBanheiro, r.FilaBanheiro); l.SujeiraMedia += r.SujeiraMedia * k;
                 for (int m = 0; m < 3; m++) if (r.MarcoEm[m] >= 0) { l.Marco[m] += r.MarcoEm[m]; marcos[m]++; }
             }
             for (int m = 0; m < 3; m++) l.Marco[m] = marcos[m] > 0 ? l.Marco[m] / marcos[m] : -1;
@@ -519,6 +522,24 @@ namespace TA.Tests
                 Linha l = Rodar(p, null, Sementes, ondas);
                 TestContext.Out.WriteLine(string.Format(ci, "| {0} | {1} | {2:0.0}% | {3:0} | {4:0} | {5:0.0}% | {6:0.00} |", p.Name, ondas, l.Embarque * 100, l.Receita, l.Despesas,
                     100 * l.Despesas / l.Receita, l.Apertos));
+            }
+        }
+
+        /// <summary>Portao da frente F (BALANCE.md §17): o banheiro, a sujeira e a equipe de limpeza nao derrubam nada. As mesmas sementes com e sem a
+        /// regra: o banheiro nunca faz perder voo (embarque) e o salario quase nao pesa (receita); e o que a satisfacao (frente G) vai ler.</summary>
+        [Test]
+        public void Portao_FrenteF_Limpeza()
+        {
+            var ci = CultureInfo.InvariantCulture;
+            TestContext.Out.WriteLine("| bot | ondas | embarque sem / com | receita sem / com | usos | maior fila | negados | interdicoes | limpezas | sujeira media |\n|---|---|---|---|---|---|---|---|---|---|");
+            foreach ((BotProfile p, int ondas) in new[] { (BotProfile.Bom, Ondas), (BotProfile.Lento, Ondas), (BotProfile.Guiado, OndasFaseC) })
+            {
+                Linha com = Rodar(p, null, Sementes, ondas), sem = Rodar(p, new Tuning { RegraLimpeza = false }, Sementes, ondas);
+                TestContext.Out.WriteLine(string.Format(ci, "| {0} | {1} | {2:0.0}% / {3:0.0}% | {4:0} / {5:0} | {6:0.0} | {7:0} | {8:0.00} | {9:0.00} | {10:0.0} | {11:0} |", p.Name, ondas,
+                    sem.Embarque * 100, com.Embarque * 100, sem.Receita, com.Receita, com.Usos, com.FilaBanheiro, com.Negados, com.Interdicoes, com.Limpezas, com.SujeiraMedia));
+                Assert.GreaterOrEqual(com.Embarque, sem.Embarque - 0.005, p.Name + ": o banheiro nao faz perder voo");
+                Assert.GreaterOrEqual(com.Receita, sem.Receita * 0.98, p.Name + ": a limpeza custa pouco");
+                Assert.Greater(com.Usos, 0, p.Name + ": o banheiro e' usado");
             }
         }
 

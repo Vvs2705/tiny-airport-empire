@@ -522,7 +522,6 @@ namespace TA.Core
             double soma = 0;
             long passos = (long)ondas * s.OndaPassos, amostras = 0;
             int usos = 0, usando = 0;
-
             while (s.Steps < passos && !(ateFechar && s.CampanhaCompleta))
             {
                 if (reabre && s.Steps % s.OndaPassos == s.OndaPassos / 2) s = Sim.Load(s.Save("autoplay", 1000 + s.Steps), t, seed);

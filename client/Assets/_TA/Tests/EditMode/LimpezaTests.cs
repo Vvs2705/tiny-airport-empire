@@ -126,6 +126,19 @@ namespace TA.Tests
             Assert.Greater(usos, 50, "o banheiro e' usado");
         }
 
+        /// <summary>Com a folga, ninguem fica la quando o voo fecha; se ficar (portao adiantado, save editado), o voo leva: perdeu, como numa fila.</summary>
+        [Test]
+        public void FechaOVoo_LevaQuemFicouNoBanheiro()
+        {
+            Sim s = Parado();
+            Pax p = s.NovoPax(Sim.PaxId(0, 0, 400));
+            p.Resto = p.Total = 100000;
+            s.Banheiro.Indo.Add(p);
+            Voo v = s.Voos[0];
+            while (!v.Partiu) s.Tick(Sim.Step);
+            Assert.AreEqual(0, s.Banheiro.Pessoas);
+        }
+
         [Test]
         public void Escala_VaiAMaisSujaAcimaDoGatilho_SoLimpaDepoisDeChegar_ELiberaNoZero()
         {
