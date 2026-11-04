@@ -4,7 +4,7 @@ Fonte da verdade: `GDD.md` §0.5 (regra 6: nenhuma despesa leva a derrota inevit
 
 Todo número é **hipótese**: o bot mede e o `BALANCE.md` registra.
 
-**Medido em 2026-11-03 (`BALANCE.md` §13):** todos os portões seguem verdes com a conta ligada. TA-1: Bom 94,4%, Lento 79,1%. TA-2: 1,411. Aeroportos, o que mais cai: 1,122. Campanha 1,142, missões 1,164. Sem compra, os 30 objetivos fecham em 200 de 200 sementes; com o passe (Fase C7), a trilha gratuita também. A conta pesa 8% a 11% da receita nas 10 primeiras ondas. **A 1ª tabela era 1,67 × esta e derrubava os aeroportos para 1,078** (D-C8c): o §2 já tem a final. Mudou regra ou número? Atualize aqui e no `BALANCE.md` no mesmo commit.
+**Medido em 2026-11-03 (`BALANCE.md` §13), com o passe (Fase C7) na `main`:** todos os portões seguem verdes com a conta ligada. TA-1: Bom 95,5%, Lento 79,6%. TA-2: 1,843. Aeroportos, o que mais cai: 1,122. Campanha 1,395, missões 1,451. Sem compra, os 30 objetivos fecham em 200 de 200 sementes, e o LentoCompleto fecha a trilha gratuita do passe em 200 de 200, no dia 19,9 (pior 23,4). A conta pesa 6% a 10% da receita nas 10 primeiras ondas. Sem o passe, a tabela do §13 também passa (TA-2 1,411). **A 1ª tabela era 1,67 × esta e derrubava os aeroportos para 1,078** (D-C8c): o §2 já tem a final. Mudou regra ou número? Atualize aqui e no `BALANCE.md` no mesmo commit.
 
 ## 1. O que entra
 
