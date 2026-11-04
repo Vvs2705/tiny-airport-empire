@@ -64,7 +64,7 @@ Em % do Pleno (`Tuning.ExpRende`, `ExpContratacao`, `ExpSalario`), sobre `Tuning
 
 **Schema 12** (combinado com o coordenador em 04/11: o 11 fica para o histórico, PR #60). `func.<i>` ganha o 5º campo, a experiência: `em,de,andando,perfil,experiencia`. Os schemas 10 e 11 não têm o campo: todos viram o Pleno, com a folha de antes. Lixo (fora de 0 a 2) também vira o Pleno. O teto do atendimento gravado passou a ser o do candidato mais lento (`TempoTeto`), porque um Júnior pode ter saído no meio.
 
-Teste com save real gravado pelo código do schema 10 (commit 03c40bd, semente 7, bot Bom, 2 790 s, os 6 perfis contratados): migrar dá o mesmo jogo que jogar até ali com o código novo, número a número. Os saves dos schemas 1 a 9 continuam migrando pelo mesmo caminho.
+A cadeia 10 → 11 → 12 tem teste nos dois elos, cada um com um save real (semente 7, bot Bom, 2 790 s, os 6 perfis contratados): o do schema 10 gravado pelo commit 03c40bd, e o do schema 11 pelo 96a6e40 (a `main` com o registro de ocorrências). Nos dois, todos viram o Pleno, a folha é a de antes e migrar dá o mesmo jogo que jogar até ali com o código novo, número a número; o do 11 traz o registro de volta. Os saves dos schemas 1 a 9 continuam migrando pelo mesmo caminho.
 
 ## 6. Bot e portão
 
@@ -90,7 +90,7 @@ Teste com save real gravado pelo código do schema 10 (commit 03c40bd, semente 7
 | 4 | Animação ou retorno visual | parcial: o contratado aparece de uniforme no posto e a demissão mostra o aviso; quem sai some na hora, sem andar até a porta |
 | 5 | Requisitos e custos definidos | feito: §2 |
 | 6 | Integração com as estações e os departamentos | feito: rendimento nas 8 estações, folha da frente A, cobertura do posto, escala e Mover |
-| 7 | Estado salvo e restaurado | feito: schema 12, migração do save real do schema 10 |
-| 8 | Testes das regras principais | feito: `EquipeTests` (11), `SaveTests` (migração e lixo), prova de mutação 13 de 13 |
+| 7 | Estado salvo e restaurado | feito: schema 12, migração dos saves reais dos schemas 10 e 11 |
+| 8 | Testes das regras principais | feito: `EquipeTests` (11), `SaveTests` (migração do 10 e do 11, lixo), prova de mutação 13 de 13 |
 | 9 | Nenhum bloqueio de navegação conhecido | a conferir na rodada da leva: Equipe → Vaga → Contratar volta à Equipe; Mover → Demitir → Confirmar fecha a folha |
 | 10 | Validação em build e no Android | na rodada de integração da leva, com o Unity do coordenador; o aparelho fica para o último passo (D-24) |
