@@ -138,7 +138,7 @@ namespace TA
         // ---------- equipe: os 3 candidatos e a demissao (Fase C9) ----------
         public static readonly string VagaAberta = L("Vaga aberta"), VerCandidatos = L("Candidatos"), FolhaEquipe = L("Equipe por dia"), Demitir = L("Demitir"),
             Confirmar = L("Confirmar"), ContaAtrasada = L("Conta atrasada");
-        public static string Vaga(int p) => L("Vaga: ") + Perfil[p];
+        public static string VagaDe(int p) => L("Vaga: ") + Perfil[p];
         public static string Contratado(TA.Core.Funcionario f) => Perfil[(int)f.Perfil] + " · " + ExperienciaNome[(int)f.Experiencia];
         public static string PorDia(long cash) => Num(cash) + L(" Cash/dia");
         /// <summary>O rendimento em % do Pleno: o tempo nas filas, a venda e a forca da oficina e do despacho.</summary>

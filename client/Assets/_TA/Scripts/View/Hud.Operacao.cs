@@ -172,7 +172,7 @@ namespace TA
         void PintaVaga(Sim s)
         {
             var p = (Perfil)_vagaPerfil;
-            _vaga.Titulo.text = Textos.Vaga(_vagaPerfil);
+            _vaga.Titulo.text = Textos.VagaDe(_vagaPerfil);
             _vagaResumo.Pinta(s, Textos.Num(s.Folha(Despesa.Equipe)));
             for (int x = 0; x < 3; x++)
             {

@@ -966,3 +966,59 @@ As 14 travas novas entram no `mutacao.py`. Resultado em 2026-11-03: **14 de 14 m
 - **A conta é pequena.** Pesa 8% a 11% da receita nas 10 primeiras ondas e 3% a 5% em 64 ondas. Não resolve o Cash sem destino (§9 e §10): para isso faltam o mapa que cresce e a construção. Com mais sumidouro, dá para subir a tabela de novo, medindo os aeroportos.
 - **Contratar sem demanda ainda não dá prejuízo.** O pior salário (90) é menos de 1% da receita de um dia a partir do dia 2. O GDD de direção §12 pede que dê; isso precisa da demissão (frente D), para o jogador poder corrigir.
 - **O 1º fechamento sempre aperta** (D-C8e). Ver se a pessoa entende a pausa e o que fazer: mostrar o valor que falta e a hora do fechamento.
+
+## 14. Fase C9: os 3 candidatos e a demissão (2026-11-03, `CONTRATO_FASE_C9.md`)
+
+Cada vaga tem um Júnior, um Pleno e um Sênior fixos. O Pleno é a pessoa e o preço de antes; os outros dois rendem, custam e ganham em % dele (o `CONTRATO_FASE_C9.md` §2 tem a tabela). Os bots de sempre contratam o Pleno e nunca demitem: o jogo deles é o de antes, número a número. A migração do save real do schema 10 prova isso (migrar = jogar até ali com o código novo).
+
+### A sonda: quanto a experiência pesa (40 sementes × 20 ondas, todos os perfis iguais)
+
+| equipe | Bom: lucro | Lento: lucro | Guiado: lucro |
+|---|---|---|---|
+| toda Pleno (o jogo de antes) | 26 374 | 14 128 | 33 208 |
+| toda Sênior (125%, contratação 200%, salário 150%) | 29 754 (1,128) | 17 911 (1,268) | 40 707 (1,226) |
+| toda Júnior (80%, contratação 50%, salário 70%) | 23 050 (0,874) | 8 584 (0,608) | 31 495 (0,948) |
+| Sênior de graça (125%, preço do Pleno) | 32 943 | 19 695 | 35 827 |
+| Júnior de graça (80%, preço do Pleno) | 22 811 | 8 053 | 30 121 |
+
+Lucro = receita − conta paga. **Ao contrário do especialista** (só visual, ganho 1,00, D-C2a), a experiência pesa muito: o especialista só vale na casa dele, e a experiência vale em toda estação onde a pessoa estiver. O salário é pequeno perto do que cada pessoa rende, por isso o Sênior compensa mesmo pagando o dobro.
+
+### D-C9c. A decisão é de caixa, não de tipo
+
+Com estes números o Sênior quase sempre é o melhor. O Júnior põe gente no posto cedo, com pouco Cash, e a demissão serve para trocá-lo por alguém melhor depois. É o que o bot `Contratador` faz. Se o playtest achar o Sênior óbvio demais, o ajuste é no preço (`ExpContratacao`), não na lista.
+
+### O portão do §5.13 (`Portao_FaseC9_Candidatos`)
+
+O `Contratador` (e o `LentoContratador`) compara os 3, contrata o melhor que o caixa paga e troca pelo Sênior quando essa é a compra mais barata. O portão compara o lucro dele com o do Bom (e do Lento), que contrata sempre o Pleno, com as mesmas sementes.
+
+| bot | embarque | receita | conta paga | lucro | lucro do Pleno | ganho |
+|---|---|---|---|---|---|---|
+| Contratador (40 sementes, calibração) | 96,4% | 31 186 | 1 655 | 29 532 | 26 374 | 1,120 |
+| LentoContratador (40 sementes, calibração) | 86,8% | 19 864 | 1 539 | 18 325 | 14 128 | 1,297 |
+
+As 200 sementes rodam no CI, na parte "resto" do `balanco.yml`; o número de lá vai no PR.
+
+### Prova de mutação (`MUTACAO_TESTES="FullyQualifiedName~EquipeTests|FullyQualifiedName~SaveTests.Lixo|FullyQualifiedName~SaveTests.MigracaoDoSchema10|FullyQualifiedName~DespesasTests" python client/tools/mutacao.py candidato demitir`)
+
+As 13 travas novas entram no `mutacao.py`. Resultado em 2026-11-03: **13 de 13 mortos**.
+
+| trava retirada | testes que caíram |
+|---|---|
+| cada um custa o preço dele | `Hire_Recusa_SemCaixa_NivelInvalido_AntesDoMarco` e mais 1 |
+| salário pela experiência | `Tabela_TresCandidatos_OPlenoEOPrecoDeAntes_NenhumDomina` |
+| a folha é a da experiência | `Hire_CadaNivel_CobraOPrecoDele_EEntraNaFolha` e mais 1 |
+| rende pela experiência | `Rende_PeloNivel_NoTempoNaVendaENaForca` |
+| regra desligada iguala os 3 | `Rende_PeloNivel_NoTempoNaVendaENaForca` |
+| vaga fechada não contrata | `Hire_CadaNivel_CobraOPrecoDele_EEntraNaFolha` e mais 1 |
+| experiência inválida não contrata | `Hire_Recusa_SemCaixa_NivelInvalido_AntesDoMarco` |
+| demitir não devolve Cash | `Invariante_C9_ContratarEDemitirNuncaDaCash` e mais 1 |
+| quem vinha depois sobe | `Demite_AtualizaEscalaFolhaECobertura_EReabreAVaga` e mais 1 |
+| demitir vale com a conta atrasada | `Invariante_C9_ComContaAtrasada_DemitirTiraDaPausa` |
+| a experiência vai no save | `MigracaoDoSchema10_SaveReal_TodosPleno` e mais 1 |
+| lixo no save vira o Pleno | `LixoNoNivel_ViraOPleno` |
+| teto do atendimento é o do mais lento | `Lixo_ViraPadraoLimitado` e mais 1 |
+
+### Para medir com gente
+
+- **O Sênior parece óbvio?** Ver se a pessoa compara os 3 ou vai direto no mais caro, e se usa o Júnior para começar.
+- **Demitir sem custo** (D-C9b). Ver se alguém demite e recontrata para fugir da conta; a conta é do estado na hora do fechamento (D-C8b), então demitir antes e recontratar depois economiza no máximo um salário, pagando a contratação de novo.
