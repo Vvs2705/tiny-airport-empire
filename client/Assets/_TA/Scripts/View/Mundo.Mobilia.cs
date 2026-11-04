@@ -44,7 +44,7 @@ namespace TA
 
             new Mov(SalaMalas, "conteiner_bagagem", 3.1f, 1.3f, 0f, -1f, 0.42f),
             new Mov(SalaMalas, "conteiner_bagagem", 3.1f, 0.72f, 0f, -1f, 0.42f),
-            new Mov(SalaMalas, "placa_direcao", 3.15f, -0.65f, -1f, 0f),
+            new Mov(SalaMalas, "placa_direcao", 3.15f, -0.95f, -1f, 0f),   // entre os postos 0 e 2: quem vem da porta sobe reto até o balcão
             new Mov(SalaMalas, "vaso_planta", 3.2f, -1.52f, 1f, 0f, 0.7f),
 
             new Mov(SalaComida, "mesas_alimentacao", 3.05f, -1.05f, 1f, 0f),

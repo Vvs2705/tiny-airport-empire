@@ -22,7 +22,7 @@ namespace TA
         static readonly float[] ChkA = { -0.45f, 0.45f, -1.25f, 1.25f };
         /// <summary>Distâncias da parede de saída: esteira, atendente, centro da bancada e passageiro; a balança no vão do par, a meia sala até a boca
         /// lateral e a largura, o fundo e a altura da bancada.</summary>
-        const float ChkEsteiraD = 0.14f, ChkAtrasD = 0.3f, ChkBalcaoD = 0.52f, ChkFrenteD = 0.8f, ChkBalancaD = 0.6f, ChkBalancaA = 0.85f, MeiaChk = 1.62f, BancadaL = 0.6f, BancadaF = 0.28f, BancadaH = 0.32f;
+        const float ChkEsteiraD = 0.14f, ChkAtrasD = 0.28f, ChkBalcaoD = 0.52f, ChkFrenteD = 0.8f, ChkBalancaD = 0.6f, ChkBalancaA = 0.85f, MeiaChk = 1.62f, BancadaL = 0.6f, BancadaF = 0.28f, BancadaH = 0.32f;
         /// <summary>O roteiro, em fração do atendimento: entrega o documento até aqui; põe a mala; etiqueta; e a devolução começa aqui.</summary>
         const float EntregaAte = 0.16f, MalaDe = 0.22f, MalaAte = 0.38f, EtiquetaAte = 0.6f, DevolveDe = 0.82f;
         /// <summary>O roteiro inteiro cabe em tanto, em s de jogo, quando o serviço é mais curto que isso.</summary>

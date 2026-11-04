@@ -118,7 +118,8 @@ namespace TA
             return Em(e, FilaDe(e) + r * FilaLinha, a);
         }
 
-        /// <summary>1ª fileira da fila. Na segurança ela recua: entre ela e as mesas passa a faixa de quem vai à linha (FaixaSegD), sem roçar em quem espera.</summary>
+        /// <summary>1ª fileira da fila. Na segurança os lugares recuam, e a fita e os postes ficam (Planta): entre a fila e as mesas passa a faixa de quem
+        /// vai à linha (FaixaSegD) sem roçar em quem espera, e quem entra pela porta segue longe da fita.</summary>
         static float FilaDe(int e) => e == SalaSeg ? FilaD + 0.07f : FilaD;
 
         public static int SalaEm(Vector2 p)
