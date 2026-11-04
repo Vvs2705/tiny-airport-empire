@@ -8,14 +8,15 @@ namespace TA.Core
     /// produto e de pacote de Gems. Indice vai no save: so cresce no fim.</summary>
     public enum Fonte { Tarifas, Bagagem, Loja, Alimentacao, Bonus, Premios, Cofre, Compras }
 
-    /// <summary>Categorias da conta do dia (CONTRATO_FASE_C8 §2). Indice vai no save: so cresce no fim.</summary>
-    public enum Despesa { Equipe, Tripulacao, Patio, Manutencao }
+    /// <summary>Categorias da conta do dia (CONTRATO_FASE_C8 §2). Indice vai no save: so cresce no fim. Suprimentos (ta-suprimentos) nao e' folha:
+    /// soma cada entrega pedida no dia.</summary>
+    public enum Despesa { Equipe, Tripulacao, Patio, Manutencao, Suprimentos }
 
     /// <summary>O relatorio de um dia do jogo: receita por fonte, a conta do fechamento por categoria e quanto dela o caixa pagou.</summary>
     public sealed class DiaConta
     {
         public int Dia;
-        public readonly long[] Receitas = new long[8], Despesas = new long[4];
+        public readonly long[] Receitas = new long[8], Despesas = new long[5];
         /// <summary>Pago no fechamento e, se faltou, depois, ate o fechamento seguinte (Sim.Atrasada).</summary>
         public long Pago;
         public long Receita => Soma(Receitas);
@@ -62,6 +63,7 @@ namespace TA.Core
                     break;
                 case Despesa.Tripulacao: foreach (Tripulante t in Tripulacao) n += T.SalarioTrip[(int)t.Funcao]; break;
                 case Despesa.Patio: n = (long)EquipePatio * T.SalarioPatio; break;
+                case Despesa.Suprimentos: n = Hoje.Despesas[(int)d]; break;   // as entregas ja pedidas hoje
                 default:
                     // ponytail: o despacho nao tem melhoria; as visuais (regra desligada) nao cobram
                     foreach (Station s in Estacoes) if (Ativa(s.Tipo)) n += T.Manutencao[(int)s.Tipo] + (long)T.ManutencaoNivel[(int)s.Tipo] * (s.Vel + s.Cap);
@@ -73,7 +75,7 @@ namespace TA.Core
         public long Folha()
         {
             long n = 0;
-            for (int d = 0; d < 4; d++) n += Folha((Despesa)d);
+            for (int d = 0; d < Hoje.Despesas.Length; d++) n += Folha((Despesa)d);
             return n;
         }
 
@@ -82,6 +84,12 @@ namespace TA.Core
         {
             Cash = Cash > long.MaxValue - v ? long.MaxValue : Cash + v;
             Hoje.Receitas[(int)f] += v;
+        }
+
+        /// <summary>Despesa que nao e' folha (a entrega de suprimento): soma na conta de hoje, que o fechamento cobra junto. Regra desligada: nada.</summary>
+        internal void Gasta(long v, Despesa d)
+        {
+            if (T.RegraDespesas) Hoje.Despesas[(int)d] = Math.Min(TetoConta, Hoje.Despesas[(int)d] + v);
         }
 
         /// <summary>Comeco do passo fixo: paga a conta atrasada se o caixa cobre e, se o dia virou, fecha o anterior.</summary>
@@ -97,7 +105,7 @@ namespace TA.Core
             }
             if (Hoje.Dia < 0) Hoje.Dia = DiaJogo;   // jogo novo ou save sem relatorio: o dia comeca a contar agora
             if (Hoje.Dia == DiaJogo) return;
-            for (int d = 0; d < 4; d++) Hoje.Despesas[d] = Folha((Despesa)d);
+            for (int d = 0; d < 4; d++) Hoje.Despesas[d] = Folha((Despesa)d);   // as folhas; Suprimentos ja somou o dia
             long conta = Hoje.Despesa;
             Hoje.Pago = Math.Min(conta, Cash);
             Cash -= Hoje.Pago;
@@ -108,7 +116,8 @@ namespace TA.Core
             Hoje = new DiaConta { Dia = DiaJogo };
         }
 
-        /// <summary>Schema 10 (CONTRATO_FASE_C8 §5): a conta atrasada, o dia em curso e os fechados. Linha: dia, pago, 8 receitas, 4 despesas.</summary>
+        /// <summary>Schema 10 (CONTRATO_FASE_C8 §5): a conta atrasada, o dia em curso e os fechados. Linha: dia, pago, 8 receitas, 4 despesas (5 desde o
+        /// schema 15: Suprimentos).</summary>
         void SalvaDespesas(StringBuilder sb)
         {
             Kv(sb, "atrasada", Atrasada);
@@ -127,7 +136,7 @@ namespace TA.Core
                 if (x.Length < 14 || x[0] < min || x[0] > DiaJogo) return null;
                 var c = new DiaConta { Dia = (int)x[0] };
                 for (int i = 0; i < 8; i++) c.Receitas[i] = Math.Max(0, Math.Min(TetoConta, x[2 + i]));
-                for (int i = 0; i < 4; i++) c.Despesas[i] = Math.Max(0, Math.Min(TetoConta, x[10 + i]));
+                for (int i = 0; i < c.Despesas.Length; i++) c.Despesas[i] = 10 + i < x.Length ? Math.Max(0, Math.Min(TetoConta, x[10 + i])) : 0;   // ate o 14: 4 despesas
                 c.Pago = Math.Max(0, Math.Min(c.Despesa, x[1]));
                 return c;
             }
