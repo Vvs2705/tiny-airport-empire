@@ -63,7 +63,7 @@ Os bots `Contador` e `LentoContador` (o Completo e o LentoCompleto que levam o p
 | 4 | Animação ou retorno visual | parcial: aviso "História entregue!" e o coração some com quem embarcou; sem animação própria de entrega |
 | 5 | Requisitos e custos definidos | feito: §1 e §2 (sem custo; nada pago) |
 | 6 | Integração com as estações e os departamentos | feito: paradas opcionais, perfis por estação, voo e portão; campanha e missões contam as entregas |
-| 7 | Estado salvo e restaurado | feito: schema 16 (`hp=` história da onda, passageiro, passo e as que já saíram), migração do save real do schema 12 |
+| 7 | Estado salvo e restaurado | feito: schema 16 (`hp=` história da onda, passageiro, passo e as que já saíram), migração do save real do schema 15 (a cadeia 12 → 15 nos testes das outras frentes) |
 | 8 | Testes das regras principais | feito: `HistoriasTests` (13), `Portao_Historias` (200 sementes, pelo CI), prova de mutação local 11 de 11 |
 | 9 | Nenhum bloqueio de navegação conhecido | a conferir na rodada da leva: Pausa → Álbum → fechar volta à Pausa |
 | 10 | Validação em build e no Android | na rodada de integração da leva, com o Unity do coordenador; o aparelho fica para o último passo (D-24) |

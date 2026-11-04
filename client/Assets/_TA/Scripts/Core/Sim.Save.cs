@@ -52,6 +52,9 @@ namespace TA.Core
             SalvaPasse(sb);
             SalvaDespesas(sb);
             SalvaHistorico(sb);
+            SalvaChegada(sb);
+            SalvaLimpeza(sb);
+            SalvaSuprimentos(sb);
             SalvaHistorias(sb);
             return SaveEnvelope.Wrap(sb.ToString(), content, nowUnix);
         }
@@ -356,6 +359,9 @@ namespace TA.Core
             s.CarregaPasse(kv);
             s.CarregaDespesas(kv);
             s.CarregaHistorico(kv);
+            s.CarregaChegada(kv);
+            s.CarregaLimpeza(kv);
+            s.CarregaSuprimentos(kv);
             return s;
         }
 
@@ -407,6 +413,7 @@ namespace TA.Core
                         if (p != null) st.Fila.Add(p);
                     }
             }
+            CarregaBanheiro(kv, vistos);
         }
 
         /// <summary>Passageiro do save: da onda gravada, de voo que nao partiu, ja chegado e ainda nao visto. Senao null.</summary>

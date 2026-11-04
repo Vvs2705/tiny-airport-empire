@@ -212,7 +212,7 @@ namespace TA
                 return d;
             }
             bool pax = e != Estacao.Manutencao && e != Estacao.Despacho;
-            d.Linha = e == Estacao.Despacho ? Textos.SemMelhoria
+            d.Linha = e == Estacao.Despacho ? Textos.Estoques(s.Estoque, new[] { s.Tanque(Suprimento.Combustivel), s.Tanque(Suprimento.Refeicoes) })   // o despacho cuida do patio
                 : Textos.MelhoriaNome(Melhoria.Velocidade, st.Vel, s.T.VelNiveis) + " · " + Textos.MelhoriaNome(Melhoria.Capacidade, st.Cap, s.T.CapNiveis);
             d.Info = (pax ? Textos.Balcoes(st.Postos, s.TempoSeg(e)) + " · " + Textos.NaFila(st.Fila.Count) + " · " : "") + Textos.NaEstacao(s.Alocados(e));
             if (pax) d.Topo += " · " + Textos.NaFila(st.Fila.Count);

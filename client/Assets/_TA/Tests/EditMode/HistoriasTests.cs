@@ -297,13 +297,14 @@ namespace TA.Tests
             return s;
         }
 
-        /// <summary>Save real gravado pela main 6703774 (schema 12), na onda 15 da semente 7: abre no 16 com a historia da onda sorteada, as
-        /// entregues como ja vistas, e sem a regra e' o mesmo jogo de jogar ate ali com o codigo novo.</summary>
+        /// <summary>Save real gravado pela main 219c1de (schema 15, com a esteira, a limpeza e os suprimentos), na onda 15 da semente 7: abre no 16
+        /// com a historia da onda sorteada, as entregues como ja vistas, e sem a regra e' o mesmo jogo de jogar ate ali com o codigo novo. A
+        /// cadeia 12 -> 13 -> 14 -> 15 esta no SaveTests e no SuprimentosTests.</summary>
         [Test]
-        public void MigracaoDoSchema12_SaveReal_SorteiaAHistoriaDaOnda()
+        public void MigracaoDoSchema15_SaveReal_SorteiaAHistoriaDaOnda()
         {
-            Sim m = Sim.Load(V12, null, 7);
-            Assert.IsFalse(m.SaveRefused, "schema 12 migra, nao e' recusado");
+            Sim m = Sim.Load(V15, null, 7);
+            Assert.IsFalse(m.SaveRefused, "schema 15 migra, nao e' recusado");
             Assert.AreEqual((15, 1), (m.Onda, m.Album));
             Assert.GreaterOrEqual(m.HistoriaOnda, 0, "a onda 15 tem historia");
             Assert.AreEqual(1 | 1 << m.HistoriaOnda, m.HistoriasSaiu, "a Dona Rosa entregue e a da onda");
@@ -315,26 +316,30 @@ namespace TA.Tests
             Assert.AreEqual(texto, Sim.Load(texto, null, 7).Save("0.16.0", U), "ida e volta estavel no schema 16");
             var sem = new Tuning { RegraHistorias = false };
             Sim n = Jogado(2790f, 7, sem);
-            Assert.AreEqual(SemHp(n.Save("0.12.0", U)), SemHp(Sim.Load(V12, sem, 7).Save("0.12.0", U)), "migrar = jogar ate ali com o codigo novo");
+            Assert.AreEqual(SemHp(n.Save("0.15.0", U)), SemHp(Sim.Load(V15, sem, 7).Save("0.15.0", U)), "migrar = jogar ate ali com o codigo novo");
         }
 
-        static string SemHp(string save) => string.Join("\n", save.Split('\n').Where(l => !l.StartsWith("hp=") && !l.StartsWith("sha256=")));
+        /// <summary>Sem a linha hp= e o hash, com os double em 5 casas: o save real saiu do .NET, e o Mono do Unity difere na 8a casa.</summary>
+        static string SemHp(string save) => string.Join("\n", save.Split('\n').Where(l => !l.StartsWith("hp=") && !l.StartsWith("sha256="))
+            .Select(l => System.Text.RegularExpressions.Regex.Replace(l, @"-?\d+\.\d+", x => double.Parse(x.Value, System.Globalization.CultureInfo.InvariantCulture)
+                .ToString("F5", System.Globalization.CultureInfo.InvariantCulture))));
 
-        const string V12 =
-            "sha256=eb7453c431a4a7e1709bf523fa3568f96695d81eb6fb9356896d17592d20a894\nschema=12\ncontent=0.12.0\nat=1800000000\nt=83700\ncash=5964\nseed=7\nonda=15" +
-            "\nemb=1020\nperd=28\nalbum=1\nbst=0\nema=9.395198961373023\nsaved=1800000000\nclaim=0\nclaimcash=0\ndia=0\nest.0=5,2\nfila.0=15501;15502;15503;15504;1" +
-            "5505;15506;15507;15508;15509;15510;15511;15512;15513;15514;15515;15516;15517;15518;15519;15520;15521;15522;15523;15524;15525;15526;15527;15528;15529;1" +
-            "5530;15531;15532;15533;15534\nat.0=15044:2;15045:32;15500:62\nest.1=5,2\nat.1=15042:40;15043:70\nest.2=0,0\nest.3=5,2\nfila.3=15011;15016;15015;15017;" +
-            "15014;15020;15019;15018;15022;15023;15021;15024;15025;15026;15027;15028;15029;15031;15030;15033;15032;15035;15036;15034;15037;15038;15039;15040;15041\n" +
+        const string V15 =
+            "sha256=a814abdff5f82102b723e0fdf20b8a890eaffb9edf31b1f8e97aec25e67af893\nschema=15\ncontent=0.15.0\nat=1800000000\nt=83700\ncash=5792\nseed=7\nonda=15" +
+            "\nemb=1020\nperd=28\nalbum=1\nbst=0\nema=9.39020983056686\nsaved=1800000000\nclaim=0\nclaimcash=0\ndia=0\nest.0=5,2\nfila.0=15501;15502;15503;15504;15" +
+            "505;15506;15507;15508;15509;15510;15511;15512;15513;15514;15515;15516;15517;15518;15519;15520;15521;15522;15523;15524;15525;15526;15527;15528;15529;15" +
+            "530;15531;15532;15533;15534\nat.0=15044:2;15045:32;15500:62\nest.1=5,2\nat.1=15042:40;15043:70\nest.2=0,0\nest.3=5,2\nfila.3=15011;15016;15015;15017;1" +
+            "5014;15020;15019;15018;15022;15023;15021;15024;15025;15026;15027;15028;15029;15031;15030;15033;15032;15035;15036;15034;15037;15038;15039;15040;15041\n" +
             "est.4=5,2\nest.5=5,2\nest.6=5,2\nest.7=0,0\nfunc.0=1,0,0,0,1\nfunc.1=1,0,0,1,1\nfunc.2=4,0,0,3,1\nfunc.3=5,1,0,2,1\nfunc.4=6,0,0,4,1\nfunc.5=7,1,0,5,1" +
             "\nvoo.0=46,13,182,1,0\nvoo.1=35,0,0,0,0\naviao.0=50,82200,1,30,-1,0,0,1,0,0\nsrv.0=0:0,0:0,0:0,0:0\naviao.1=100,83700,0,-1,-1,0,0,1,0,0\nsrv.1=0:0,0:0" +
             ",0:0,0:0\ntrip.0=0,1,3872,0\ntrip.1=0,1,5400,1\ntrip.2=0,3,1499,-1\ntrip.3=1,1,3842,0\ntrip.4=1,1,5400,1\ntrip.5=1,3,1499,-1\npatio=3\npatioatraso=8\n" +
             "aero=1,3,-1\nrotas=127\nprog=6,6\nvr.0=6,46,0,0,0,0,1800,0\nvr.1=6,46,0,0,0,0,3300,0\nav.0=6,15\nav.1=6,15\nstt.0=1,31,5.666665818542242\nstt.1=0,-1,2" +
             "7.900001425296068\nstt.3=1,30,8.099999587982893\nreparo=0\nincw=14\ncamp.0=6,10,0,0,3,0,1,0,1,3,0\ncamp.1=1,0,1,40,40,3,0,1,0,2,0\ncamp.2=0,0,0,0,0,0," +
             "0,0,0,0,0\nmiss=1,0\nmd.0=14,4,0,1\nmd.1=12,30,0,1\nmd.2=6,300,0,1\nms.0=4,30,1,0\nms.1=2,10,0,0\nms.2=3,20,0,0\nms.3=1,0,5,0\nms.4=0,1000,0,0\ncq=348" +
-            "49,0,0,30,30,27,4,24,70,0,232,252,25,0,2,1,0,0,0,0,6\ngems=0\npasse=0,0,350,3\natrasada=0\nhoje=1,0,7818,1015,0,1904,2349,1200,0,0,0,0,0,0\ndc.0=0,585" +
-            ",4570,445,0,528,1000,790,0,0,195,108,54,228\nhist=3600,4,-1,0,0,10,0,4,0,0,0,6,0,0,0,0;25200,3,-1,0,8,26,3,0,0,0,0,2,3,7,0,0;41460,1,4,0,15,40,0,7,1,0" +
-            ",0,0,0,0,0,0;43200,5,-1,0,-1,0,0,0,0,1,102,12,0,0,0,0;46800,3,-1,0,16,58,16,0,0,0,0,1,3,18,2,0;62400,0,1,0,23,32,0,0,3,1,0,0,0,0,0,0;69900,3,-1,0,25,5" +
-            "4,7,0,0,0,0,1,3,2,3,0;73800,3,-1,0,26,43,2,0,0,0,0,2,3,16,0,0;79260,1,5,0,29,40,0,0,1,0,0,0,0,0,0,0\n";
+            "49,0,0,30,30,27,4,24,70,0,232,252,25,0,2,1,0,0,0,0,6\ngems=0\npasse=0,0,350,3\natrasada=0\nhoje=1,0,7818,1015,0,1904,2236,1200,0,0,0,0,0,0,33\ndc.0=0," +
+            "644,4570,445,0,528,1000,790,0,0,210,108,54,228,44\nhist=3600,4,-1,0,0,10,0,4,0,0,0,6,0,0,0,0;25200,3,-1,0,8,26,3,0,0,0,0,2,3,7,0,0;41460,1,4,0,15,40,0" +
+            ",7,1,0,0,0,0,0,0,0;43200,5,-1,0,-1,0,0,0,0,1,161,12,0,0,0,0;46800,3,-1,0,16,58,16,0,0,0,0,1,3,18,2,0;62400,0,1,0,23,32,0,0,3,1,0,0,0,0,0,0;69900,3,-1," +
+            "0,25,54,7,0,0,0,0,1,3,2,3,0;73800,3,-1,0,26,43,2,0,0,0,0,2,3,16,0,0;79260,1,5,0,29,40,0,0,1,0,0,0,0,0,0,0\nsuj=176,120,0,114,176,12,80\nbh=0\nbhneg=0" +
+            "\nzels=1\nzel.0=5,1,0,0,330,0\nsup.0=4,0,0,0\nsup.1=4,0,0,0\n";
     }
 }

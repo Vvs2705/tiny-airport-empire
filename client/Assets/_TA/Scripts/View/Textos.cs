@@ -94,7 +94,7 @@ namespace TA
             Escala = L("ESCALA DO VOO"), Reparo = L("Reparo só com Cash e tempo. Nenhum avião se perde."),
             EscalaFechada = L("A escala fecha quando o embarque abre."), EscalaSemVoo = L("O avião ainda não encostou para este voo."),
             AvisoHangar = L("No hangar, este voo não embarca: você perde só o Cash dele."),
-            TripulacaoSala = L("Tripulação na sala");
+            TripulacaoSala = L("Tripulação na sala"), Restituicao = L("RESTITUIÇÃO");
 
         public static string Balcoes(int n, float seg) => n + (n == 1 ? L(" balcão · ") : L(" balcões · ")) + Seg(seg);
         public static string EstadoTexto(Estado e, int voo) => e == Estado.Critico ? L("CRÍTICO: ") + Voo(voo) + L(" em risco")
@@ -249,9 +249,24 @@ namespace TA
                 case Motivo.Hangar: return L("Avião mandado ao hangar");
                 case Motivo.Pouso: return L("O avião não pousou a tempo");
                 case Motivo.Caixa: return L("O caixa não cobriu a conta do dia: contratar e melhorar ficam pausados até quitar");
+                case Motivo.Suprimento: return L("Faltou combustível ou refeição: o caminhão esperou a entrega");
                 default: return L("Deu certo: ninguém perdeu o voo");
             }
         }
+
+        // ---------- suprimentos: combustivel e refeicoes (ta-suprimentos; a ficha do despacho, o aviso e o cartao do patio) ----------
+        public static readonly string[] Suprimento = { L("Combustível"), L("Refeições") };
+        public static readonly string Suprimentos = L("Suprimentos"), SupSoAtrasa = L("Só a decolagem atrasa; tanque maior evita"),
+            SupReposicao = L("Reposição automática: a entrega enche o tanque"), SupCheio = L("Depósito em dia");
+        /// <summary>"Combustível 6/8 · Refeições 5/8": o deposito dos dois na ficha do despacho.</summary>
+        public static string Estoques(int[] estoque, int[] tanque) => Suprimento[0] + " " + estoque[0] + "/" + tanque[0] + " · " + Suprimento[1] + " " + estoque[1] + "/" + tanque[1];
+        public static string EntregaEm(int sup, float seg) => L("Entrega de ") + Suprimento[sup].ToLower(Br) + L(" em ") + SegInt(seg);
+        public static string VaiFaltar(int sup) => Suprimento[sup] + L(" vai faltar");
+        public static string Faltou(int sup) => L("Faltou ") + Suprimento[sup].ToLower(Br);
+        public static string EsperaEntrega(string aviao, float seg) => aviao + L(" espera a entrega: ") + SegInt(seg);
+        public static string PousaAntes(string aviao, float seg) => aviao + L(" pousa antes da entrega, em ") + SegInt(seg);
+        public static string TanqueNome(int sup, int nivel, int max) => L("Tanque de ") + Suprimento[sup].ToLower(Br) + " " + nivel + "/" + max;
+        public static string TanqueDe(string n) => n + L(" cargas · menos entregas por dia");
 
         // ---------- metas: campanha, missoes e conquistas (docs/CAMPANHA.md e docs/MISSOES.md; o nome e' o da tabela do nucleo) ----------
         public static readonly string[] AeroportoNome = System.Array.ConvertAll(Tabelas.Aeroportos, a => L(a.Nome));
@@ -381,6 +396,9 @@ namespace TA
         /// <summary>Frente E: a transferencia pelo vestiario (Sim.Fase, na ordem de Transferencia) e o preparo com o relogio (Sim.Preparo).</summary>
         public static readonly string[] FaseTransf = { L("No posto"), L("Terminando o atendimento"), L("Indo ao vestiário"), L("Trocando o uniforme"), L("Indo ao posto") };
         public static readonly string Vestiario = L("Vestiário");
+        /// <summary>Frente F: o letreiro do banheiro (interditado = fechado para limpeza) e o que o zelador faz (Sim.Limpeza.cs, na ordem de Faxina).</summary>
+        public static readonly string Banheiro = L("Banheiro"), BanheiroFechado = L("Banheiro · em limpeza");
+        public static readonly string[] Faxina = { L("Livre"), L("Indo limpar"), L("Limpando") };
         public static string Preparo(float frac, float seg) => L("Preparo ") + (int)System.Math.Round(frac * 100f) + L("% · no posto em ") + Tempo(seg);
         public static string NaFila(int n) => n + L(" na fila");
         public static string FuncaoDe(Tripulante t) => t.Funcao == TA.Core.Funcao.Piloto ? L("Piloto") : t.Indice % 2 == 0 ? L("Comissária") : L("Comissário");   // a folha da comissaria vai nos indices pares

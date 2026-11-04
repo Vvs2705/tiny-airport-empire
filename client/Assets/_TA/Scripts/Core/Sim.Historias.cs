@@ -118,10 +118,10 @@ namespace TA.Core
         /// <summary>Embarcou: com o pedido cumprido, entra no album (Todos: espera o portao fechar sem perder ninguem). Sem a regra, a v0.1.</summary>
         void EmbarcaHistoria(Pax p)
         {
-            if (!T.RegraHistorias) { Entrega(0, p.Id); return; }
+            if (!T.RegraHistorias) { EntregaHistoria(0, p.Id); return; }
             Historia x = HistoriaAtual;
             if (x == null || x.Onde != null && HistoriaPasso != 1) return;   // nao cumpriu: volta numa proxima onda
-            if (x.Todos) HistoriaPasso = 2; else Entrega(HistoriaOnda, p.Id);
+            if (x.Todos) HistoriaPasso = 2; else EntregaHistoria(HistoriaOnda, p.Id);
         }
 
         /// <summary>No fechamento do portao: a historia Todos fecha se o voo dela partiu sem perder ninguem.</summary>
@@ -129,10 +129,10 @@ namespace TA.Core
         {
             if (HistoriaPasso != 2 || HistoriaPax / 1000 != v.Onda || HistoriaPax / 500 % 2 != v.Indice) return;
             HistoriaPasso = 0;
-            if (v.Perdidos == 0) Entrega(HistoriaOnda, HistoriaPax);
+            if (v.Perdidos == 0) EntregaHistoria(HistoriaOnda, HistoriaPax);
         }
 
-        void Entrega(int h, int pax)
+        void EntregaHistoria(int h, int pax)
         {
             bool nova = (Album >> h & 1) == 0;
             Album |= 1 << h;

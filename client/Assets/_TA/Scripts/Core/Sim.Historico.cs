@@ -8,7 +8,7 @@ namespace TA.Core
     public enum TipoOcorrencia { Incidente, Clima, FalhaAviao, VooPerdido, VooAtrasado, FaltaCaixa }
 
     /// <summary>A chave da explicacao curta (Textos.Explica): por que deu certo ou onde travou. Indice vai no save: so cresce no fim.</summary>
-    public enum Motivo { Nenhum, Fila, SemEquipe, Equipamento, Clima, Pista, Patio, Tripulacao, Manutencao, Pane, Hangar, Pouso, Caixa }
+    public enum Motivo { Nenhum, Fila, SemEquipe, Equipamento, Clima, Pista, Patio, Tripulacao, Manutencao, Pane, Hangar, Pouso, Caixa, Suprimento }
 
     /// <summary>Uma ocorrencia do dia de jogo: o que aconteceu, a causa, a resposta e o resultado (GDD de direcao §14).</summary>
     public sealed class Ocorrencia
@@ -111,7 +111,7 @@ namespace TA.Core
                 Ocorrencia o = Nova(TipoOcorrencia.VooAtrasado, -1, v.Id, Steps);
                 Aviao a = Avioes[v.Indice];
                 o.Total = v.Total; o.Aberta = true;
-                o.Motivo = T.RegraPatio && !(a.VooId == v.Id && a.PatioPronto) ? Motivo.Patio : Motivo.Clima;
+                o.Motivo = T.RegraPatio && !(a.VooId == v.Id && a.PatioPronto) ? (a.Carga[0] == CargaEspera || a.Carga[1] == CargaEspera ? Motivo.Suprimento : Motivo.Patio) : Motivo.Clima;
             }
         }
 
