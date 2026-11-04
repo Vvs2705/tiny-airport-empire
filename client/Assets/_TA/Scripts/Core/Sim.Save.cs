@@ -50,6 +50,7 @@ namespace TA.Core
             SalvaMissoes(sb);
             SalvaCompras(sb);
             SalvaPasse(sb);
+            SalvaChegada(sb);
             return SaveEnvelope.Wrap(sb.ToString(), content, nowUnix);
         }
 
@@ -347,6 +348,7 @@ namespace TA.Core
             s.CarregaMissoes(kv);
             s.CarregaCompras(kv);
             s.CarregaPasse(kv);
+            s.CarregaChegada(kv);
             return s;
         }
 

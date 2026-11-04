@@ -56,6 +56,9 @@ PECAS = {
     "radar": (1500, 256, -2.4),
     # as 4 salas novas (Fase C2), a sala da tripulacao e o que muda de nivel fora das salas
     "esteira_bagagem": (2500, 512, 1.15),
+    # Lote 12 (frente H): restituicao de bagagem, sem malas na malha (as que giram sao do nucleo); carrinho de mao do passageiro
+    "esteira_restituicao": (3000, 512, 1.6),
+    "carrinho_passageiro": (1200, 256, 0.35),
     "esteira_bagagem_n2": (2500, 512, 1.15),
     "esteira_bagagem_n3": (2500, 512, 1.15),
     "alimentacao": (2500, 512, 1.4),

@@ -723,6 +723,54 @@ MUTANTES = [
         "else if (v > 0) _posse.Add(n.Id);",
         "else _posse.Add(n.Id);",
     ),
+    (
+        "chegada: a boca so poe no lugar vazio",
+        "Sim.Chegada.cs",
+        "if (e[boca] < 0 && Carrinho.Count > 0)",
+        "if (Carrinho.Count > 0)",
+    ),
+    (
+        "chegada: pega so com a mala em frente",
+        "Sim.Chegada.cs",
+        " || c.Vaga % n != (int)((j + giro) % n)) continue;",
+        ") continue;",
+    ),
+    (
+        "chegada: so pega quem esta esperando",
+        "Sim.Chegada.cs",
+        "c.Estado != EstadoChegada.Esperando || ",
+        "",
+    ),
+    (
+        "chegada: o carrinho entra na ordem",
+        "Sim.Chegada.cs",
+        "e[boca] = Carrinho[0];",
+        "e[boca] = Carrinho[Carrinho.Count - 1]; Carrinho.RemoveAt(Carrinho.Count - 1); Carrinho.Insert(0, -9);",
+    ),
+    (
+        "chegada: desce com o desembarque do patio",
+        "Sim.Chegada.cs",
+        "Solta(a, Feito(a, Servico.Desembarque, _chegam[a.Id]), false);",
+        "Solta(a, _chegam[a.Id], false);",
+    ),
+    (
+        "chegada: mala sai com o servico de bagagem",
+        "Sim.Chegada.cs",
+        "Solta(a, Feito(a, Servico.Bagagem, _malas[a.Id]), true);",
+        "Solta(a, _malas[a.Id], true);",
+    ),
+    (
+        "chegada: nao mexe no Cash",
+        "Sim.Chegada.cs",
+        "else if (c.Estado == EstadoChegada.Pegando && --c.Resto <= 0) Chegantes.RemoveAt(i--);",
+        "else if (c.Estado == EstadoChegada.Pegando && --c.Resto <= 0) { Chegantes.RemoveAt(i--); Cash++; }",
+    ),
+    (
+        "chegada: mala que o save perdeu volta ao carrinho",
+        "Sim.Chegada.cs",
+        "foreach (Chegante c in Chegantes) if (c.MalaSolta && c.Estado != EstadoChegada.Pegando && malas.Add(c.Id)) Carrinho.Add(c.Id);",
+        "",
+    ),
 ]
 
 
