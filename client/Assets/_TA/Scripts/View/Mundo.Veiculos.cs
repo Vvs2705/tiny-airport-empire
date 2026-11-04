@@ -110,11 +110,11 @@ namespace TA
 
         // ------------------------------------------------------------------ rebocador
 
-        /// <summary>O aviao da ponte quer sair: o rebocador recua da vaga e encosta a barra no nariz.</summary>
+        /// <summary>O aviao da ponte quer sair: o rebocador recua da vaga e encosta a barra no nariz (o da variante pode estar recuado).</summary>
         void ReboqueVai()
         {
             Veiculo r = _veiculos[0];
-            Trecho t = Caminho(1f, 0.8f, ReboqueVaga, ReboqueNariz);
+            Trecho t = Caminho(1f, 0.8f, ReboqueVaga, ReboqueNariz + Vector3.forward * _avioes[0].Recuo);
             t.A = 0.5f; t.F = 0.6f; t.Re = t.Para = true;
             r.Rotas.Enqueue(t);
             r.S = 0f;
@@ -333,20 +333,36 @@ namespace TA
 
         static Vector3 Centro(Veiculo v) => v.T.position + v.T.forward * v.Eixo;
 
-        /// <summary>A pessoa espera: o proximo passo entra na caixa de um veiculo (com folga maior se ele esta andando) e chega mais perto dele.
-        /// Quem ja parou por causa de gente nao conta: se os 2 esperassem, ninguem saia dali.</summary>
+        /// <summary>A pessoa espera: o proximo passo (pelo caminho, virando na quina) entra na caixa de um veiculo e chega mais perto dele. A folga
+        /// do parado e a meia largura da pessoa (0,2 m, a do diag_caixas.py) menos 1 cm: a calcada passa rente ao bico de quem esta na faixa (0,2 m
+        /// do catering, 0,25 do onibus) e nao e entrar nele; com 0,25 o mecanico parava na rua oeste diante do onibus e o catering esperava por ele
+        /// ate o jato sair. Quem ja parou por causa de gente nao conta: se os 2 esperassem, ninguem saia dali.</summary>
         bool VeiculoNoPasso(Boneco b)
         {
-            Vector2 prox = b.Pos + (b.Caminho[0] - b.Pos).normalized * 0.4f;
+            Vector2 prox = Adiante(b, 0.4f);
             foreach (Veiculo v in _veiculos)
             {
                 if (v.EsperaGente || (_escada && b.Estande == 1 && v.Tipo?.Encosta == true)) continue;   // sobe nela
                 Vector3 c = Centro(v), f = v.T.forward;
                 Vector2 eixo = new Vector2(f.x, f.z), lado = new Vector2(f.z, -f.x), a = prox - new Vector2(c.x, c.z), n = b.Pos - new Vector2(c.x, c.z);
-                float folga = v.V > 0.1f ? 0.45f : 0.25f, ax = Mathf.Abs(Vector2.Dot(a, eixo)), ay = Mathf.Abs(Vector2.Dot(a, lado));
+                float folga = v.V > 0.1f ? 0.45f : 0.19f, ax = Mathf.Abs(Vector2.Dot(a, eixo)), ay = Mathf.Abs(Vector2.Dot(a, lado));
                 if (ax < v.Comp * 0.5f + folga && ay < v.Larg * 0.5f + folga && (ax < Mathf.Abs(Vector2.Dot(n, eixo)) || ay < Mathf.Abs(Vector2.Dot(n, lado)))) return true;
             }
             return false;
+        }
+
+        /// <summary>O ponto `d` m adiante no caminho da pessoa (o fim, se ele acaba antes).</summary>
+        static Vector2 Adiante(Boneco b, float d)
+        {
+            Vector2 p = b.Pos;
+            foreach (Vector2 c in b.Caminho)
+            {
+                float l = Vector2.Distance(p, c);
+                if (l > 0f && l >= d) return p + (c - p) * (d / l);
+                d -= l;
+                p = c;
+            }
+            return p;
         }
 
         void VeiculoPasso(Veiculo v, float dt)

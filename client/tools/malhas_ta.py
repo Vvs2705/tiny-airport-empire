@@ -41,6 +41,14 @@ PECAS = {
     "vaso_planta": (800, 256, 0.5),
     "aviao_regional": (5000, 1024, 7.6),
     "aviao_narrow": (5000, 1024, 9.0),
+    # as outras 6 variantes do patio (Mundo.Patio.cs, Modelos): familia da vaga G ate o regional, da R ate o narrow; a medida e a que
+    # cabe na vaga sem tocar a ponte, a escada nem os veiculos parados nas faixas (voxels da malha contra as caixas deles)
+    "aviao_bimotor_helice": (5000, 1024, 7.56),
+    "aviao_jato_regional": (5000, 1024, 7.38),
+    "jato_executivo": (5000, 1024, 7.38),
+    "aviao_wide": (5000, 1024, 9.0),
+    "aviao_wide_quad": (5000, 1024, 9.0),
+    "aviao_cargo": (5000, 1024, 9.0),
     "rebocador": (2000, 512, 1.5),
     "carrinho_bagagem": (2500, 512, 2.6),
     "caminhao_combustivel": (2500, 512, 2.6),
@@ -98,6 +106,7 @@ PECAS = {
     "mesa_lounge": (800, 256, 0.35),
     "bar_lounge": (2000, 512, 0.72),
     "caixa_ferramentas": (600, 256, 0.25),
+    "painel_ferramentas_parede": (1200, 512, -0.3),
     "carrinho_cafe": (1200, 512, 0.5),
     "carrinho_limpeza": (1000, 256, 0.3),
     "cavalete_manutencao": (800, 256, 0.5),

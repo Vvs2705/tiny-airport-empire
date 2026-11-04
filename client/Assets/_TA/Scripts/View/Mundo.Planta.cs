@@ -35,7 +35,7 @@ namespace TA
         /// escorregando 90 graus (medido em 30/10 com -diag; a frente de cada uma foi conferida na vista de cima e de ponta no Blender).</summary>
         static readonly Dictionary<string, float> Frente = new Dictionary<string, float>
         {
-            { "aviao_narrow", -90f }, { "rebocador", -90f }, { "carrinho_bagagem", -90f }, { "caminhao_combustivel", -90f }, { "caminhao_catering", -90f }, { "escada_embarque", 180f }, { "catraca_embarque", 90f },
+            { "aviao_narrow", -90f }, { "aviao_wide", -90f }, { "aviao_cargo", -90f }, { "rebocador", -90f }, { "carrinho_bagagem", -90f }, { "caminhao_combustivel", -90f }, { "caminhao_catering", -90f }, { "escada_embarque", 180f }, { "catraca_embarque", 90f }, { "painel_ferramentas_parede", -90f },
         };
 
         /// <summary>Malha do Tripo (Resources/Malhas/nome.fbx + nome.png, pivo no chao, de frente para +z) num pai que gira em yaw; null se a
