@@ -505,6 +505,8 @@ namespace TA.Core
             public int Niveis, PasseEm; public long PagoPasse;
             /// <summary>Fase C8: Cash pago nas contas do dia e dias fechados com falta de caixa (pausa).</summary>
             public long Despesas; public int Apertos;
+            /// <summary>ta-suprimentos: vezes que um aviao esperou suprimento e o custo das entregas pedidas.</summary>
+            public int Faltas; public long Suprimentos;
         }
 
         /// <summary>Joga `ondas` ondas inteiras com o perfil `p` e a semente `seed`, sem render. `reabre` = fecha e reabre o jogo (Save ->
@@ -547,6 +549,8 @@ namespace TA.Core
                             break;
                         case Ev.DiaFechado: r.Despesas += e.B; if (e.C > 0) r.Apertos++; break;
                         case Ev.ContaQuitada: r.Despesas += e.B; break;
+                        case Ev.SuprimentoFaltou: r.Faltas++; break;
+                        case Ev.SuprimentoPedido: r.Suprimentos += e.C; break;
                     }
             }
             r.Embarque = r.Voos > 0 ? soma / r.Voos : 0;

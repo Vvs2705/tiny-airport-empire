@@ -128,5 +128,28 @@ namespace TA.Tests
             a.SaiEm = 0; a.NoPatio = false; a.Retorno = s.Steps; a.Chega = s.Steps + 25 * Sim.Hz;
             StringAssert.Contains("25", Hud.AvisoDaVez(s).Titulo);
         }
+
+        /// <summary>ta-suprimentos: o aviso vem antes da falta (quem pousa antes da entrega), vira "Faltou" com o caminhao esperando, cabe e leva ao patio.</summary>
+        [Test]
+        public void Aviso_Suprimento_AntesEDepoisDaFalta_CabeELevaAoPatio()
+        {
+            Sim s = SimLigado();
+            Assert.IsNull(Hud.DoSuprimento(s), "deposito cheio, sem aviso");
+            s.Estoque[0] = 0;
+            s.Tick(Sim.Step);   // pede a entrega, que chega em 45 s; o regional pousa antes
+            AvisoPerigo p = Hud.DoSuprimento(s);
+            Assert.AreEqual((true, Textos.VaiFaltar(0)), (p.Patio, p.Titulo));
+            Aviao a = s.Avioes[0];
+            a.NoPatio = true; a.Carga[0] = Sim.CargaEspera;
+            AvisoPerigo q = Hud.DoSuprimento(s);
+            Assert.AreEqual(Textos.Faltou(0), q.Titulo);
+            foreach (AvisoPerigo x in new[] { p, q })
+            {
+                Assert.LessOrEqual(Largura(Art.Titulo(), 44, x.Titulo), Hud.LargAviso, x.Titulo);
+                string[] linhas = x.Texto.Split('\n');
+                Assert.AreEqual(2, linhas.Length, x.Texto);
+                foreach (string l in linhas) Assert.LessOrEqual(Largura(Art.Font(), Hud.MenorTexto, l), Hud.LargAviso, l);
+            }
+        }
     }
 }

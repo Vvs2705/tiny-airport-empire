@@ -200,6 +200,7 @@ namespace TA
         public void Escala(int voo, int tripulante) => Sim.Escala(voo, tripulante);
         public void HirePatio() => Sim.HirePatio();
         public void BuyPatio(Servico s, Melhoria m) => Sim.BuyPatio(s, m);
+        public void BuyTanque(Suprimento s) => Sim.BuyTanque(s);
         public void Checagem(int aviao) => Sim.Checagem(aviao);
         public void Hangar(int aviao) => Sim.Hangar(aviao);
         public bool Adianta() => Sim.Adianta();
@@ -294,6 +295,10 @@ namespace TA
                 case Ev.Decolou: Diario("flight_takeoff", e.A, e.B, e.C); break;
                 case Ev.PatioContratado: Diario("ground_staff_hired", e.A, e.B); break;
                 case Ev.PatioMelhorou: Diario("ground_vehicle_upgraded", e.A, e.B, e.C); break;
+                case Ev.SuprimentoPedido: Diario("supply_ordered", e.A, e.B, e.C); break;
+                case Ev.SuprimentoChegou: Diario("supply_delivered", e.A, e.B); break;
+                case Ev.SuprimentoFaltou: Diario("supply_shortage", e.A, e.B); break;
+                case Ev.SuprimentoMelhorou: Diario("supply_upgraded", e.A, e.B, e.C); break;
                 case Ev.ManutencaoAviso: Diario("maintenance_warning", e.A, e.B); _hud.Toast(Textos.ManutencaoAviso(e.B)); break;
                 case Ev.ManutencaoPendente: Diario("maintenance_due", e.A, e.B); _hud.Toast(Textos.ManutencaoPendente); break;
                 case Ev.ChecagemIniciada: Diario("maintenance_check_started", e.A, e.B, e.C); break;

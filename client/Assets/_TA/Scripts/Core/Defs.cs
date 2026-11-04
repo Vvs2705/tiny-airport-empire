@@ -99,6 +99,11 @@ namespace TA.Core
         ContaQuitada,       // A = dia do jogo, B = Cash (a conta atrasada; a pausa acabou)       -> day_bill_paid_late
         // Fase C9 (CONTRATO_FASE_C9): contratacao e demissao
         Demitido,           // A = funcionario (o indice que tinha), B = perfil, C = experiencia  -> staff_fired
+        // ta-suprimentos: combustivel e refeicoes com estoque
+        SuprimentoPedido,   // A = Suprimento, B = cargas, C = custo (entra na conta do dia)      -> supply_ordered
+        SuprimentoChegou,   // A = Suprimento, B = cargas                                         -> supply_delivered
+        SuprimentoFaltou,   // A = aviao, B = Suprimento (o caminhao espera; so a decolagem atrasa) -> supply_shortage
+        SuprimentoMelhorou, // A = Suprimento, B = Melhoria, C = nivel novo                       -> supply_upgraded
     }
 
     /// <summary>Funcoes da tripulacao (GDD §5.11). Indice vai no save.</summary>
@@ -151,8 +156,12 @@ namespace TA.Core
         /// <summary>Fase C4: em pane (parado ate o reparo), voo que ja falhou (sem novo sorteio), passo a partir do qual decola depois de rejeitar
         /// e passo em que pede para voltar (0 = nao esta voltando).</summary>
         public bool Pane; public int Falhou = -1; public long SaiEm, Retorno;
+        /// <summary>ta-suprimentos, por Suprimento: 0 = nada a carregar, Sim.CargaPede = o servico dele ainda corre e tira do deposito no fim,
+        /// Sim.CargaEspera = o servico acabou e o deposito nao tinha (o caminhao espera a entrega no aviao).</summary>
+        public readonly int[] Carga = new int[2];
         public bool Pendente => Desgaste >= 100;
-        public bool PatioPronto { get { foreach (int f in Falta) if (f > 0) return false; return true; } }
+        /// <summary>Servicos feitos e suprimentos a bordo: a decolagem pede isto. O embarque so pede o desembarque e a limpeza (Sim.Pronto).</summary>
+        public bool PatioPronto { get { foreach (int f in Falta) if (f > 0) return false; return Carga[0] == 0 && Carga[1] == 0; } }
     }
 
     public struct Evento
@@ -416,6 +425,18 @@ namespace TA.Core
         // ---- ta-historico ----
         /// <summary>Anota o registro de ocorrencias (Sim.Historico.cs). So observa: false da o mesmo jogo, numero a numero, sem o registro.</summary>
         public bool RegraHistorico = true;
+
+        // ---- ta-suprimentos (hipoteses; BALANCE.md §17) ----
+        /// <summary>Estoque de combustivel e refeicoes (Sim.Suprimentos.cs). false = so visual: o deposito fica cheio, nada se pede, nada se cobra e nada espera.</summary>
+        public bool RegraSuprimentos = true;
+        /// <summary>Por Suprimento (combustivel, refeicoes): cargas que cada aviao leva por turnaround (regional, jato), tanque no nivel 0 e quanto cada nivel
+        /// soma, o ponto do pedido automatico (cargas no deposito) e a entrega, que enche o tanque: prazo (s) e custo fixos (Cash, na conta do dia).</summary>
+        public int[][] SupGasto = { new[] { 1, 2 }, new[] { 1, 2 } };
+        public int[] SupTanque = { 8, 8 }, SupTanqueMais = { 4, 4 }, SupPonto = { 3, 3 };
+        public float[] SupPrazo = { 45f, 35f };
+        public int[] SupCusto = { 6, 5 };
+        /// <summary>A melhoria (tanque maior: menos entregas por dia), preco de cada nivel; a quantidade de niveis e' o tamanho.</summary>
+        public int[] SupTanqueCusto = { 40, 80 };
     }
 
     /// <summary>Historias do TA-3 (GDD §5.9). A v0.1 tem 1. Id = indice (vai no album do save): so cresce no fim.</summary>
