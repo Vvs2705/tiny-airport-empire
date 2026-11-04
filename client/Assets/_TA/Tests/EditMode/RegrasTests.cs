@@ -212,7 +212,7 @@ namespace TA.Tests
         [Test]
         public void Historia_1PorOndaAPartirDaOnda2()
         {
-            var s = new Sim();
+            var s = new Sim(new Tuning { RegraHistorias = false }, 1);   // a regra da v0.1, pura do Id; as 20 do TA-3 no HistoriasTests
             for (int w = 0; w < 6; w++)
             {
                 int n = 0;

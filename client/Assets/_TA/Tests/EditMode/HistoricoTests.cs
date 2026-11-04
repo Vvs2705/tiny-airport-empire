@@ -32,7 +32,7 @@ namespace TA.Tests
             return null;
         }
 
-        static string SemHist(string save) => string.Join("\n", save.Split('\n').Where(l => !l.StartsWith("hist=") && !l.StartsWith("sha256=")));
+        static string SemHist(string save) => string.Join("\n", save.Split('\n').Where(l => !l.StartsWith("hist=") && !l.StartsWith("hp=") && !l.StartsWith("sha256=")));
 
         static string Hist(string save) => save.Split('\n').Single(l => l.StartsWith("hist="));
 
@@ -382,7 +382,7 @@ namespace TA.Tests
         public void MigracaoDoSchema10_SaveReal_RegistroVazio_EOMesmoJogo()
         {
             const long U = 1800000000;
-            var t = new Tuning { RegraVestiario = false, RegraLimpeza = false, RegraSuprimentos = false };   // o jogo que o schema 10 gravava: sem o vestiario (frente E), a limpeza e os suprimentos
+            var t = new Tuning { RegraVestiario = false, RegraLimpeza = false, RegraSuprimentos = false, RegraHistorias = false };   // o jogo que o schema 10 gravava: sem o vestiario (frente E), a limpeza, os suprimentos e as historias
             Sim m = Sim.Load(V10, t, 7);
             Assert.IsFalse(m.SaveRefused, "schema 10 migra, nao e' recusado");
             Assert.AreEqual((4424L, 83700L), (m.Cash, m.Steps));
