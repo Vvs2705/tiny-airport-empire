@@ -39,6 +39,22 @@ namespace TA.Tests
         }
 
         [Test]
+        public void Eventos_TocamSomExistenteENuncaDeQuedaOuFogo()
+        {
+            AudioClip[] sfx = Resources.LoadAll<AudioClip>("Audio/sfx");
+            foreach (TA.Core.Ev ev in System.Enum.GetValues(typeof(TA.Core.Ev)))
+                foreach (int aero in new[] { 0, 1, 2 })
+                {
+                    string som = AudioEventos.Som(ev, aero);
+                    if (som != null) Assert.IsTrue(sfx.Any(c => c.name.StartsWith(som + "_")), ev + " -> " + som);
+                }
+            Assert.AreEqual("toque", AudioEventos.Som(TA.Core.Ev.Toque, 0));
+            Assert.AreEqual("decolagem_helice", AudioEventos.Som(TA.Core.Ev.Decolou, 0));
+            Assert.AreEqual("decolagem_jato", AudioEventos.Som(TA.Core.Ev.Decolou, 1));
+            Assert.IsNull(AudioEventos.Som(TA.Core.Ev.Embarcou, 0), "evento frequente demais fica mudo");
+        }
+
+        [Test]
         public void ClipeAusente_FicaEmSilencio()
         {
             Audio.Play("nao_existe");

@@ -22,7 +22,7 @@ namespace TA
         static readonly float[] ChkA = { -0.45f, 0.45f, -1.25f, 1.25f };
         /// <summary>Distâncias da parede de saída: esteira, atendente, centro da bancada e passageiro; a balança no vão do par, a meia sala até a boca
         /// lateral e a largura, o fundo e a altura da bancada.</summary>
-        const float ChkEsteiraD = 0.14f, ChkAtrasD = 0.3f, ChkBalcaoD = 0.52f, ChkFrenteD = 0.8f, ChkBalancaD = 0.6f, ChkBalancaA = 0.85f, MeiaChk = 1.62f, BancadaL = 0.6f, BancadaF = 0.28f, BancadaH = 0.32f;
+        const float ChkEsteiraD = 0.14f, ChkAtrasD = 0.28f, ChkBalcaoD = 0.52f, ChkFrenteD = 0.8f, ChkBalancaD = 0.6f, ChkBalancaA = 0.85f, MeiaChk = 1.62f, BancadaL = 0.6f, BancadaF = 0.28f, BancadaH = 0.32f;
         /// <summary>O roteiro, em fração do atendimento: entrega o documento até aqui; põe a mala; etiqueta; e a devolução começa aqui.</summary>
         const float EntregaAte = 0.16f, MalaDe = 0.22f, MalaAte = 0.38f, EtiquetaAte = 0.6f, DevolveDe = 0.82f;
         /// <summary>O roteiro inteiro cabe em tanto, em s de jogo, quando o serviço é mais curto que isso.</summary>
@@ -157,8 +157,9 @@ namespace TA
             }
             _cont = Grupo("Fechado" + i, sala);
             _fechado[e, i] = _cont.gameObject;
-            if (Peca("cordao_fila", V3(frente), Rumo(n), EscalaGuiche) == null) Bloco("Cordao", PrimitiveType.Cube, V3(frente, 0.2f), Mathf.Abs(n.x) > 0.5f ? new Vector3(0.02f, 0.03f, 0.6f) : new Vector3(0.6f, 0.03f, 0.02f), Fita);
-            Vector2 placa = frente - n * ((e == SalaSeg ? 0f : 0.16f) * EscalaFunc) + t * (0.22f * EscalaFunc);   // na segurança, a 1a fileira da fila passa rente
+            Vector2 corda = e == SalaSeg ? frente + n * 0.1f : frente;   // na segurança, a 1a fileira da fila passa a 0,2 m da entrada: a base do poste encostava em quem espera
+            if (Peca("cordao_fila", V3(corda), Rumo(n), EscalaGuiche) == null) Bloco("Cordao", PrimitiveType.Cube, V3(corda, 0.2f), Mathf.Abs(n.x) > 0.5f ? new Vector3(0.02f, 0.03f, 0.6f) : new Vector3(0.6f, 0.03f, 0.02f), Fita);
+            Vector2 placa = corda - n * ((e == SalaSeg ? 0f : 0.16f) * EscalaFunc) + t * (0.22f * EscalaFunc);
             if (Peca("placa_fora_de_servico", V3(placa), Rumo(-n), 0.5f * EscalaFunc) == null) Bloco("Placa", PrimitiveType.Cube, V3(placa, 0.2f), Vector3.one * 0.2f, Art.Bad);
             _cont = sala;
         }

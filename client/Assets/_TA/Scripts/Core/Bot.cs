@@ -34,6 +34,9 @@ namespace TA.Core
         /// <summary>Satisfacao = olha os 3 motivos que mais pesam no aeroporto (frente G): limpeza ou banheiro contra = manda limpar ali e contrata
         /// zelador; espera contra = velocidade na estacao da espera. Sem ele, a satisfacao nao muda nenhuma decisao do bot.</summary>
         public bool Satisfacao;
+        /// <summary>Politicas = as politicas do diretor que liga no X padrao (bit = Politica; 7 = as 3) na 1a decisao (frente ta-politicas, BALANCE §20).
+        /// O resto do bot nao muda.</summary>
+        public int Politicas;
 
         public static readonly BotProfile Bom = new BotProfile { Name = "Bom", Decide = 1f, Move = true, Planeja = true, Equipe = true, Rotas = true, Viaja = true, Incidentes = true, Clima = true, Falhas = true };
         public static readonly BotProfile Lento = new BotProfile { Name = "Lento", Decide = 2.5f, Move = true, Planeja = true, Equipe = true, Rotas = true, Viaja = true, Incidentes = true, Clima = true, Falhas = true };
@@ -60,6 +63,9 @@ namespace TA.Core
         /// <summary>Portao da Fase C9: o Bom e o Lento que comparam os candidatos e trocam pelo Senior.</summary>
         public static readonly BotProfile Contratador = Candidato(Bom, "Contratador"), LentoContratador = Candidato(Lento, "LentoContratador");
         public static readonly BotProfile Satisfeito = Satisfaz(Bom, "Satisfeito"), LentoSatisfeito = Satisfaz(Lento, "LentoSatisfeito");
+        /// <summary>Portao da ta-politicas: os 3 de sempre com as politicas ligadas.</summary>
+        public static readonly BotProfile BomPoliticas = ComPoliticas(Bom, "BomPoliticas"), LentoPoliticas = ComPoliticas(Lento, "LentoPoliticas"),
+            ParadoPoliticas = ComPoliticas(Parado, "ParadoPoliticas");
         public static readonly BotProfile[] All = { Bom, Lento, Parado };
         /// <summary>Alcance do TA-3: o Completo e o LentoCompleto que jogam pelas historias.</summary>
         public static readonly BotProfile Contador = ComHistorias(Completo, "Contador"), LentoContador = ComHistorias(LentoCompleto, "LentoContador");
@@ -67,6 +73,12 @@ namespace TA.Core
         static BotProfile ComHistorias(BotProfile p, string nome)
         {
             p.Name = nome; p.Historias = true;
+            return p;
+        }
+
+        public static BotProfile ComPoliticas(BotProfile p, string nome, int quais = 7)
+        {
+            p.Name = nome; p.Politicas = quais;
             return p;
         }
 
@@ -121,6 +133,7 @@ namespace TA.Core
             _t += dt;
             if (_t + 1e-4f < P.Decide) return;
             _t = Math.Min(_t - P.Decide, P.Decide);   // le o estado das estacoes como a tela mostra (atualizado a cada 0,5 s)
+            for (int p = 0; p < Sim.Politicas; p++) if ((P.Politicas >> p & 1) != 0) s.LigaPolitica((Politica)p, true);
             bool moveu = P.Historias && Historia(s) || P.Move && Mover(s);
             if (!moveu && Tocar(s)) Taps++;
             _rotaFixa = false;
@@ -590,6 +603,8 @@ namespace TA.Core
             public int Faltas; public long Suprimentos;
             /// <summary>Frente G: a media do aeroporto no fim (-1 = ninguem saiu), as reclamacoes e o Cash das gorjetas (ja na Receita).</summary>
             public double SatMedia; public int Reclamacoes; public long Gorjetas;
+            /// <summary>ta-politicas: acoes de cada Politica (hangar, estoque, reforco).</summary>
+            public int[] Politicas;
         }
 
         /// <summary>Joga `ondas` ondas inteiras com o perfil `p` e a semente `seed`, sem render. `reabre` = fecha e reabre o jogo (Save ->
@@ -598,7 +613,7 @@ namespace TA.Core
         {
             var s = new Sim(t, seed);
             var bot = new Bot(p);
-            var r = new Resultado { MarcoEm = new[] { -1f, -1f, -1f }, ChegouEm = new[] { 0, -1, -1 }, ObjetivoEm = new int[30], ConquistaEm = new int[s.T.Conquistas.Length], PasseEm = -1 };
+            var r = new Resultado { MarcoEm = new[] { -1f, -1f, -1f }, ChegouEm = new[] { 0, -1, -1 }, ObjetivoEm = new int[30], ConquistaEm = new int[s.T.Conquistas.Length], PasseEm = -1, Politicas = new int[Sim.Politicas] };
             for (int i = 0; i < 30; i++) r.ObjetivoEm[i] = -1;
             for (int i = 0; i < r.ConquistaEm.Length; i++) r.ConquistaEm[i] = -1;
             double soma = 0;
@@ -639,6 +654,7 @@ namespace TA.Core
                         case Ev.SuprimentoPedido: r.Suprimentos += e.C; break;
                         case Ev.Reclamou: r.Reclamacoes++; break;
                         case Ev.Gorjeta: r.Receita += e.B; r.Gorjetas += e.B; break;
+                        case Ev.PoliticaAgiu: r.Politicas[e.A]++; break;
                     }
                 if (s.Steps % Sim.Hz == 0)
                 {

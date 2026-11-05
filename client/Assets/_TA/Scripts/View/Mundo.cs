@@ -36,8 +36,8 @@ namespace TA
         /// <summary>Grade das salas, corredor entre elas (metade para cada sala: as paredes ficam recuadas) e o adulto. `Em` mede a partir da parede.</summary>
         public const float Lado = 4f, Corredor = 0.6f, Gente = 0.5f, Interno = Lado - Corredor;
         const float Elev = 45f, VelPax = 1.2f, Troca = 0.35f, EscalaFunc = Gente, PortaLarg = 0.45f;
-        /// <summary>Fileiras de quem atende e de quem e atendido, a partir da parede de saida; a fila em pessoas (1,35 por lugar).</summary>
-        const float AtrasD = 0.16f, BalcaoD = 0.62f, FrenteD = 1.08f, FaixaD = 1.25f, FilaD = 1.42f, FilaPasso = 0.24f, FilaLinha = 0.34f;
+        /// <summary>Fileiras do balcao e de quem e atendido, a partir da parede de saida (quem atende sai do movel: PostoNaMalha); a fila em pessoas (1,35 por lugar).</summary>
+        const float BalcaoD = 0.62f, FrenteD = 1.08f, FaixaD = 1.25f, FilaD = 1.42f, FilaPasso = 0.24f, FilaLinha = 0.34f;
         static readonly float[] Desloc = { -0.6f, 0.6f, -1.3f, 1.3f };   // balcoes ao longo da parede de saida, com o corredor no meio
 
         /// <summary>Sala de cada estacao: canto (x, z), porta de entrada e de saida (no meio da parede) e a direcao da saida (para fora).</summary>
@@ -105,7 +105,9 @@ namespace TA
         static Vector2 Em(int e, float d, float a) => Salas[e].Out - Salas[e].N * (d + Corredor * 0.5f) + Salas[e].T * a;
         static Vector2 Balcao(int e, int i) => Em(e, e == SalaCheckIn ? ChkBalcaoD : BalcaoD, Posto(e, i));
         static Vector2 NoBalcao(int e, int i) => Em(e, e == SalaCheckIn ? ChkFrenteD : e == Portao ? BalcaoD + PassoPodio : FrenteD, Posto(e, i));
-        static Vector2 AtrasBalcao(int e, int i) => e == SalaSeg ? Agente(i) : Em(e, e == SalaCheckIn ? ChkAtrasD : e == Portao ? BalcaoD - PassoPodio : AtrasD, Posto(e, i));
+        /// <summary>Lugar de quem atende no posto `i`: nas salas de móvel único, sai da malha do nível (PostoNaMalha), não da parede.</summary>
+        static Vector2 AtrasBalcao(int e, int i, int nivel = 0) =>
+            e == SalaSeg ? Agente(i) : Em(e, e == SalaCheckIn ? ChkAtrasD : e == Portao ? BalcaoD - PassoPodio : BalcaoD + PostoNaMalha(MalhaDoNivel(e, nivel)), Posto(e, i));
         static Vector2 Centro(int e) => Salas[e].Min + new Vector2(Lado * 0.5f, Lado * 0.5f);
         /// <summary>Rumo (graus de yaw do Unity) da direcao `d` do chao: +z = 0.</summary>
         static float Rumo(Vector2 d) => Mathf.Atan2(d.x, d.y) * Mathf.Rad2Deg;
@@ -115,8 +117,12 @@ namespace TA
         {
             int r = Mathf.Min(k / 12, 4), c = k % 12;
             float a = (r % 2 == 0 ? c - 5.5f : 5.5f - c) * FilaPasso;
-            return Em(e, FilaD + r * FilaLinha, a);
+            return Em(e, FilaDe(e) + r * FilaLinha, a);
         }
+
+        /// <summary>1ª fileira da fila. Na segurança os lugares recuam, e a fita e os postes ficam (Planta): entre a fila e as mesas passa a faixa de quem
+        /// vai à linha (FaixaSegD) sem roçar em quem espera, e quem entra pela porta segue longe da fita.</summary>
+        static float FilaDe(int e) => e == SalaSeg ? FilaD + 0.07f : FilaD;
 
         public static int SalaEm(Vector2 p)
         {
@@ -233,13 +239,13 @@ namespace TA
             Entrada();
             Posiciona();
             Sim s = S;
+            Salas3D(s);   // antes da gente: a rota do quadro já vê o balcão, a fita e o cordão que acenderam (no 1º quadro, nada estava aceso)
             int antes = _naFaixa.Count;
             EmbarquePasso(s, dt);
             SincronizaPax(s, dt);
             ChegadaPasso(s, dt);
             Funcionarios(s, dt);
             LimpezaPasso(s, dt);   // banheiro, sujeira e equipe de limpeza (Mundo.Limpeza.cs)
-            Salas3D(s);
             _paxNaFaixa.Clear();   // quem andou uma vez neste quadro: os veiculos o veem em todos os pedacos (sem isso, so no 1o, e o onibus avancava de re sobre quem esperava na calcada)
             for (int i = antes; i < _naFaixa.Count; i++) _paxNaFaixa.Add(_naFaixa[i]);
             int n = Mathf.Max(1, Mathf.CeilToInt(dt / PatioDtMax - 1e-3f));   // a 3x num aparelho a 30 qps, 3 pedacos de 1/30 s
@@ -378,7 +384,7 @@ namespace TA
                 {
                     int nivel = NivelDe(st.Vel);
                     while (nivel > 0 && _mesa[e, i, nivel] == null) nivel--;
-                    for (int n = 0; n < NivelMalha.Length; n++) if (_mesa[e, i, n] != null) Acende(_mesa[e, i, n], i < st.Postos && n == nivel);
+                    for (int n = 0; n < NivelMalha.Length; n++) if (_mesa[e, i, n] != null) Acende(_mesa[e, i, n], i < st.Postos && n == nivel, false);
                 }
                 for (int r = 0; r < 4; r++) if (_fita[e, r] != null) Acende(_fita[e, r], st.Fila.Count > 12 * (r + 1));   // a fita abre conforme a fila cresce: ninguem a atravessa
                 int gente = s.Presentes(st.Tipo);

@@ -114,6 +114,9 @@ namespace TA.Core
         // Frente G (Sim.Satisfacao.cs): satisfacao com motivo
         Reclamou,           // A = passageiro, B = Fator (o motivo principal; 1x por passageiro)   -> pax_complained
         Gorjeta,            // A = passageiro, B = Cash (bonus da satisfacao, so com RegraSatBonus) -> pax_tip
+        // ta-politicas (Sim.Politicas.cs): regras automaticas de operacao
+        PoliticaMudou,      // A = Politica, B = 1 se ligada, C = indice do X                     -> policy_changed
+        PoliticaAgiu,       // A = Politica, B = aviao / Suprimento / funcionario, C = desgaste / deposito antes / estacao -> policy_action
     }
 
     /// <summary>Funcoes da tripulacao (GDD §5.11). Indice vai no save.</summary>
@@ -492,6 +495,14 @@ namespace TA.Core
         /// <summary>Carinha: contente a partir de SatContente, brava abaixo de SatBrava; abaixo de SatReclama o passageiro reclama (1x). Gorjeta de
         /// quem embarca com nota &gt;= SatGorjeta: SatBonus x a tarifa dele. A media do aeroporto e' a dos ultimos ~SatJanela que sairam.</summary>
         public int SatContente = 70, SatBrava = 50, SatReclama = 40, SatGorjeta = 80, SatJanela = 100; public float SatBonus = 0.1f;
+
+        // ---- ta-politicas (hipoteses; BALANCE.md §20) ----
+        /// <summary>A lista fixa do X de cada Politica (o jogador escolhe pelo indice): desgaste (%) que manda ao hangar, teto da reposicao da politica
+        /// (Cash por dia de jogo) e fila (pessoas) que pede reforco; PoliticaPadrao = o indice do jogo novo.</summary>
+        public int[][] PoliticaX = { new[] { 70, 80, 90 }, new[] { 12, 24, 48 }, new[] { 6, 10, 15 } };
+        public int[] PoliticaPadrao = { 1, 1, 1 };
+        /// <summary>A politica de estoque pede quando o deposito fica abaixo deste % do tanque; o reforco espera ReforcoCada s entre dois movimentos.</summary>
+        public int PoliticaRepoe = 75; public float ReforcoCada = 20f;
 
         // ---- ta-historias ----
         /// <summary>As 20 historias do TA-3 (Sim.Historias.cs). False = a v0.1: so a Dona Rosa, do meio da fila, entregue ao embarcar.</summary>
