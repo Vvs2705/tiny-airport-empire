@@ -63,12 +63,29 @@ Respostas gerais para essa coluna: dados **criptografados em trânsito: sim** (H
 |---|---|
 | Política de privacidade | `https://vvs2705.github.io/tiny-airport-empire/privacidade/` (a mesma do jogo) |
 | Anúncios | "Contém anúncios": **não** enquanto o anúncio for simulado; **sim** quando o LevelPlay entrar |
-| Acesso ao app | Todo o app fica disponível sem login nem código |
+| Acesso ao app | Todo o app fica disponível sem login nem código (a conta é opcional, `docs/CONTAS.md`) |
 | Público-alvo | 13 anos ou mais; fora do programa Famílias (política, D-10). Se a Google classificar como "atraente para crianças", rever com a revisão jurídica |
 | Classificação (IARC) | Sem violência, sem jogo de azar, **sem compra de item aleatório**; marcar "compras no app" quando a loja entrar; sem chat nem interação entre usuários |
 | ID de publicidade | "O app usa ID de publicidade?": **não** (a permissão é retirada) |
-| Exclusão de conta | Não há conta; a exclusão dos dados do aparelho está no jogo |
+| Exclusão de conta | Sem a UGS no build: não há conta, e a exclusão dos dados do aparelho está no jogo. **Com a conta (§3.4):** "O app permite criar conta": sim; exclusão no app em Pausa › Configurações › Excluir meus dados, e na web em `https://vvs2705.github.io/tiny-airport-empire/privacidade/excluir-conta/` (apaga a conta, o save na nuvem e o histórico de compras; nada fica guardado depois) |
 | Apps governamentais, financeiros, de saúde, VPN | Não |
+
+### 3.4. Build com a conta opcional (Unity Authentication, Cloud Save, Google Play Games e Facebook)
+
+Vale quando o pacote `com.unity.services.authentication` entra no `manifest.json` (rodada do PC, `docs/CONTAS.md` §6). Soma-se à coluna do §3.2.
+
+| Categoria › tipo | Coletado | Compartilhado | Finalidade | Opcional? | Quem |
+|---|---|---|---|---|---|
+| Informações pessoais › IDs do usuário | Sim | Não | Funcionalidade do app (save na nuvem), gerenciamento da conta, prevenção de fraude (compra ligada à conta) | **Opcional** (só quem liga a conta) | Unity (UGS) e nosso servidor (só o SHA-256 do id) |
+| Atividade no app › outro conteúdo gerado pelo usuário | **Não**: o save é estado do jogo, sem texto livre | — | — | — | — |
+| o save do jogo (progresso), no tipo que o formulário do dia oferecer para estado do app (hoje o mais perto é "Atividade no app › outras ações"; conferir no preenchimento) | Sim | Não | Funcionalidade do app | Opcional | Unity (Cloud Save) |
+| Informações financeiras › histórico de compras | Sim (já na §3.2), agora ligado à conta | Não | Funcionalidade do app (histórico e restaurar), prevenção de fraude | Obrigatório para quem compra | nosso servidor |
+
+Não marcar e-mail, nome nem foto: o jogo pede ao Facebook só o `public_profile` e não lê nem guarda nome ou foto; o Play Games não entrega e-mail. Dados **criptografados em trânsito: sim**. **O usuário pode pedir exclusão: sim**, no app e na URL da exclusão (§3.3). A Unity recebe o login do Google ou do Facebook para fazer a conta; o Facebook fica sem eventos automáticos e sem o id de publicidade (`checa_repo`, `facebook:`).
+
+**Texto para as 2 políticas** (entra no PR que ligar o pacote; o `checa_repo` cobra `com.unity.services.authentication`, `com.unity.services.cloudsave` e `UnityWebRequest`):
+
+> **Conta (opcional).** Você pode ligar o jogo a uma conta do Google Play Games ou do Facebook em Configurações › Conta, para guardar o progresso na nuvem e jogar em outro aparelho. Sem ligar, o jogo funciona igual, só com o save do aparelho. Para isso usamos a Unity Authentication e o Cloud Save da Unity (`com.unity.services.authentication`, `com.unity.services.cloudsave`): a Unity cria um ID de jogador e guarda o seu save. Com o Google Play Games, a Unity recebe o código do seu login no Google. Com o Facebook, recebe o token do login, e o jogo pede só o perfil público: nem e-mail, nem amigos, nem publicação. Não lemos nem guardamos seu nome, foto ou e-mail. Nosso servidor de compras (pelo `UnityWebRequest`) recebe o token da conta para ligar a compra a ela e guarda o histórico de compras (produto e data) com um código derivado do ID, nunca o ID em si. O SDK do Facebook fica sem eventos automáticos e sem o ID de publicidade. **Excluir:** Configurações › Excluir meus dados apaga a conta, o save na nuvem e o histórico de compras, e depois o aparelho. Sem o jogo instalado: <https://vvs2705.github.io/tiny-airport-empire/privacidade/excluir-conta/>.
 
 ## 4. O que cada frente futura muda junto
 
@@ -77,6 +94,7 @@ Uma frente que acrescente qualquer item abaixo atualiza, **no mesmo PR**, as dua
 - **Anúncio com recompensa (LevelPlay):** não personalizado para todos, configurado **antes** do `Init` (sem consentimento de personalização, "do not sell" e o equivalente de cada rede mediada); nenhuma rede que exija `AD_ID`; recompensa com ID único e limite diário (§8.7); anúncio de teste no QA e configuração de produção só no release. Lançar só em BR, PH e ID (D-09) evita a CMP do EEE e do Reino Unido.
 - **Compra (Unity IAP) e servidor (`ta-servidor`):** o servidor é a autoridade (§8.2): valida o token na API da Google Play com conta de serviço de menor privilégio, guarda o token por hash, recusa repetido, cancelado e reembolsado, responde sem stack trace, com limite de taxa e alerta de orçamento. A conta de serviço e qualquer chave ficam no secret manager, nunca no app nem no git.
 - **Telemetria (FPS e p10 no diário):** feita no diário local (05/11), sem modelo de aparelho (só RAM em GB e núcleos, com teto), e só sai pelo Exportar diário; a seção 3.1 continua "Não". **Quando o SDK do Unity Analytics (D-11) entrar:** manda só os eventos do catálogo, sem o código da instalação do diário; vira "Informações e desempenho do app › diagnóstico" e "Atividade no app › outras ações" (coletado, não compartilhado, análise) na seção 3.2; as duas políticas citam o pacote antes (o `checa_repo` cobra); e o envio só começa depois do aviso.
+- **Conta opcional (UGS, `docs/CONTAS.md`, 05/11):** código pronto, atrás de `#if VS_UGS`. O PR que ligar o pacote cola o texto do §3.4 nas 2 políticas, troca o "Em resumo" (deixa de ser "Não tem conta nem login") e preenche o Data safety com o §3.4. O `checa_repo` cobra os pacotes e o `UnityWebRequest` do módulo; o `FB.Init` sem desligar eventos e id de publicidade é derrubado; o `checa_apk` segue sem `AD_ID`. No servidor, o token é conferido pela chave pública da Unity (`servidor/src/conta.js`) e só o hash do id é guardado.
 - **Notificação, câmera, arquivos ou qualquer permissão nova:** só com linha nova em `PERMISSOES` do `checa_apk`, explicação contextual na hora de pedir (§9.2) e política atualizada.
 
 ## 5. CI e segredos no repositório público
@@ -98,6 +116,6 @@ Uma frente que acrescente qualquer item abaixo atualiza, **no mesmo PR**, as dua
 
 | Portão | O que derruba |
 |---|---|
-| `checa_repo.py` (CI `nucleo`, `verify.sh quick`) | segredo em arquivo, arquivo de chave ou licença no git, `.gitignore` sem as travas, interstitial ou sorteio pago, `Setup` sem tirar o `AD_ID`, flag de linha de comando sem `Debug.isDebugBuild`, workflow com `pull_request_target`/`workflow_run`/sem `permissions:`/imprimindo segredo, política que não cita pacote que coleta ou API de rede (arquivo atrás de `#if TA_X` conta quando o pacote entra), `LevelPlay.Init` antes de `SetConsent(false)` e `do_not_sell` |
+| `checa_repo.py` (CI `nucleo`, `verify.sh quick`) | segredo em arquivo, arquivo de chave ou licença no git, `.gitignore` sem as travas, interstitial ou sorteio pago, `Setup` sem tirar o `AD_ID`, flag de linha de comando sem `Debug.isDebugBuild`, workflow com `pull_request_target`/`workflow_run`/sem `permissions:`/imprimindo segredo, política que não cita pacote que coleta ou API de rede (arquivo atrás de `#if TA_X`/`VS_X` conta quando o pacote entra; vale também para `client/Assets/Vstack/`), `LevelPlay.Init` antes de `SetConsent(false)` e `do_not_sell`, `FB.Init` sem desligar os eventos automáticos e o id de publicidade, `Core/` do módulo do estúdio usando a Unity |
 | `checa_apk.py` (`verify.sh android`; `--selftest` no CI `nucleo`) | targetSdk < 36, ABI, `AD_ID`, permissão fora da lista, 16 KB; com `--release`, app depurável |
-| `node --test` em `servidor/` (CI `nucleo`, job `servidor`) | validação de compra: ambiente, pendente, cancelado, consumido, repetido, entrada mal formada, limite, kill switch, token no log, 503 sem detalhe (`docs/LOJA_SERVIDOR.md` §7) |
+| `node --test` em `servidor/` (CI `nucleo`, job `servidor`) | validação de compra: ambiente, pendente, cancelado, consumido, repetido, entrada mal formada, limite, kill switch, token no log, 503 sem detalhe (`docs/LOJA_SERVIDOR.md` §7); conta (`test/conta.test.js`): token forjado, vencido, de outro projeto ou ambiente, `alg: none` e alg trocado, corpo mexido, 401 sem conta com `EXIGE_CONTA`, histórico só da própria conta, exclusão e id do jogador fora do log |

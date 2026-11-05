@@ -3,5 +3,8 @@
   <PropertyGroup><AssemblyName>TA</AssemblyName></PropertyGroup>
   <ItemGroup>
     <Compile Include="$(ProjClient)\Assets\_TA\Scripts\View\*.cs" />
+    <!-- o modulo de conta (client/Assets/Vstack/Conta): no Unity sao 2 assemblies; aqui entram no da View so para compilar -->
+    <Compile Include="$(ProjClient)\Assets\Vstack\Conta\Core\*.cs" />
+    <Compile Include="$(ProjClient)\Assets\Vstack\Conta\Unity\*.cs" />
   </ItemGroup>
 </Project>

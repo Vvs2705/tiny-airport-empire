@@ -37,6 +37,9 @@ ASSETS = "client/Assets/"
 CORE = "client/Assets/_TA/Scripts/Core/"
 ASMDEF_CORE = CORE + "TA.Core.asmdef"
 ASMDEF_VIEW = "client/Assets/_TA/Scripts/View/TA.asmdef"
+# codigo do jogo e os modulos reaproveitaveis do estudio (client/Assets/Vstack/<modulo>/, docs/CONTAS.md): as mesmas regras
+SCRIPTS = ("client/Assets/_TA/Scripts/", "client/Assets/Vstack/")
+VSTACK = "client/Assets/Vstack/"
 SETUP = "client/Assets/_TA/Editor/Setup.cs"
 MANIFESTO = "client/Packages/manifest.json"
 MAPA = "docs/MAPA_CODIGO.md"
@@ -107,12 +110,14 @@ def sem_comentario(cs):
 
 
 def defines_ligados(repo):
-    """Os TA_X que o TA.asmdef liga por versionDefines com o pacote presente no manifest (o Unity so liga com o pacote instalado)."""
-    if ASMDEF_VIEW not in repo:
-        return set()
+    """Os TA_X / VS_X que os asmdefs de client/Assets ligam por versionDefines com o pacote presente no manifest (o Unity so liga com o
+    pacote instalado)."""
     tem = json.loads(texto(repo[MANIFESTO]))["dependencies"]
-    vd = json.loads(texto(repo[ASMDEF_VIEW])).get("versionDefines", [])
-    return {d.get("define") for d in vd if d.get("name") in tem}
+    ligados = set()
+    for p in (x for x in repo if x.startswith(ASSETS) and x.endswith(".asmdef")):
+        vd = json.loads(texto(repo[p])).get("versionDefines", [])
+        ligados |= {d.get("define") for d in vd if d.get("name") in tem}
+    return ligados
 
 
 def codigo(repo, p, ligados):
@@ -171,6 +176,12 @@ def checa_nucleo(repo):
     ]
     if not json.loads(texto(repo[ASMDEF_CORE])).get("noEngineReferences"):
         erros.append(f"nucleo: {ASMDEF_CORE} sem noEngineReferences")
+    # modulo do estudio: Core/ e' C# puro, como o TA.Core (testado no dotnet test, fora do Unity)
+    for p in sorted(x for x in repo if x.startswith(VSTACK) and "/Core/" in x):
+        if p.endswith(".cs") and re.search(r"^\s*using\s+Unity", texto(repo[p]), re.M):
+            erros.append(f"nucleo: {p} usa a Unity")
+        if p.endswith(".asmdef") and not json.loads(texto(repo[p])).get("noEngineReferences"):
+            erros.append(f"nucleo: {p} sem noEngineReferences")
     return erros
 
 
@@ -194,7 +205,7 @@ def checa_guardrails(repo):
     for p in sorted(
         x
         for x in repo
-        if x.startswith("client/Assets/_TA/Scripts/") and x.endswith(".cs")
+        if x.startswith(SCRIPTS) and x.endswith(".cs")
     ):
         m = re.search(
             r"interstitial|gacha|loot ?box", sem_comentario(texto(repo[p])), re.I
@@ -207,6 +218,11 @@ def checa_guardrails(repo):
         if "GetCommandLineArgs" in cs and "isDebugBuild" not in cs:
             erros.append(
                 f"guardrails: {p} le flags de linha de comando sem Debug.isDebugBuild (flag de teste so em build de dev, GDD §8.3)"
+            )
+        f = cs.find("FB.Init(")
+        if f >= 0 and not all(x in cs for x in ("SetAutoLogAppEventsEnabled(false)", "SetAdvertiserIDCollectionEnabled(false)")):
+            erros.append(
+                f"facebook: {p} chama FB.Init sem desligar os eventos automaticos e o id de publicidade (o SDK so serve para o login, docs/CONTAS.md)"
             )
         i = cs.find("LevelPlay.Init(")
         if i >= 0 and not all(0 <= cs.find(x) < i for x in ("SetConsent(false)", '"do_not_sell", "true"')):
@@ -266,7 +282,7 @@ def checa_mapa(repo):
     mapa = texto(repo[MAPA])
     erros = []
     for p in sorted(repo):
-        codigo = p.endswith(".cs") and p.startswith("client/Assets/_TA/")
+        codigo = p.endswith(".cs") and p.startswith(("client/Assets/_TA/", VSTACK))
         ferramenta = p.startswith("client/tools/") and p.endswith((".py", ".sh"))
         if (codigo or ferramenta) and not re.search(
             r"(?<![\w.])" + re.escape(os.path.basename(p)), mapa
@@ -299,7 +315,7 @@ def checa_privacidade(repo):
     for p in (
         x
         for x in repo
-        if x.startswith("client/Assets/_TA/Scripts/") and x.endswith(".cs")
+        if x.startswith(SCRIPTS) and x.endswith(".cs")
     ):
         citar.update(re.findall(REDE, codigo(repo, p, ligados)))
     for p in POLITICAS:
@@ -327,7 +343,7 @@ def checa_telemetria(repo):
         for ev in re.findall(r"^- `([a-z_]+)`", sec.group(1) if sec else "", re.M):
             if ev not in catalogo:
                 erros.append(f"telemetria: {ev} (GDD §15.1) fora do catalogo de {TELEMETRIA}")
-    for p in sorted(x for x in repo if x.startswith("client/Assets/_TA/Scripts/") and x.endswith(".cs")):
+    for p in sorted(x for x in repo if x.startswith(SCRIPTS) and x.endswith(".cs")):
         cs = sem_comentario(texto(repo[p]))
         for chamada in re.findall(r"\bDiario\(([^;]*)", cs):
             erros += [
@@ -491,6 +507,32 @@ TEXTOS_BOM = b'static string L(string pt) => pt; var x = L("Ola ") + L("Mundo");
 INGLES_BOM = b'            ["Ola "] = "Hi ",\n            ["Mundo"] = "World",\n'
 
 
+def vstack(cs=b"class C {}\n", asmdef=b'{"noEngineReferences": true}'):
+    """Um modulo do estudio em client/Assets/Vstack/M/Core, com os .meta."""
+    m = VSTACK + "M"
+    return {
+        VSTACK[:-1] + ".meta": b"guid: " + b"9" * 32, m + ".meta": b"guid: " + b"a1" * 16, m + "/Core.meta": b"guid: " + b"a2" * 16,
+        m + "/Core/C.cs": cs, m + "/Core/C.cs.meta": b"guid: " + b"a3" * 16,
+        m + "/Core/M.Core.asmdef": asmdef, m + "/Core/M.Core.asmdef.meta": b"guid: " + b"a4" * 16,
+        MAPA: b"Sim.cs Setup.cs verify.sh Telemetria.cs C.cs U.cs",
+    }
+
+
+def ugs_ligado():
+    """O pacote da UGS entrou: o VS_UGS do asmdef do modulo liga, e a rede atras dele passa a contar na politica."""
+    m = VSTACK + "M"
+    return {
+        **vstack(),
+        m + "/Unity.meta": b"guid: " + b"a5" * 16,
+        m + "/Unity/U.cs": b"#if VS_UGS\nclass U { UnityWebRequest w; }\n#endif\n", m + "/Unity/U.cs.meta": b"guid: " + b"a6" * 16,
+        m + "/Unity/M.Unity.asmdef": b'{"versionDefines": [{"name": "com.unity.services.authentication", "expression": "3.0.0", "define": "VS_UGS"}]}',
+        m + "/Unity/M.Unity.asmdef.meta": b"guid: " + b"a7" * 16,
+        MANIFESTO: b'{"dependencies": {"com.unity.services.authentication": "3.5.0", "com.unity.modules.unitywebrequest": "1.0.0"}}',
+        # a politica ja cita os 2 pacotes: o erro tem de ser o UnityWebRequest, que so conta com o VS_UGS ligado
+        **{p: EMAIL_SUPORTE.encode() + b" com.unity.services.authentication com.unity.modules.unitywebrequest" for p in POLITICAS},
+    }
+
+
 def selftest():
     base = repo_bom()
     assert checa(base) == [], checa(base)
@@ -639,6 +681,10 @@ def selftest():
         ("anuncio: ", lambda r: r.update({CORE + "Sim.cs": b'class A { void I() { LevelPlay.Init(k); LevelPlay.SetConsent(false); } }\n'})),
         ("anuncio: ", lambda r: r.update({CORE + "Sim.cs": b'class A { void I() { LevelPlay.SetConsent(false); LevelPlay.Init(k); } }\n'})),
         ("modulos: ", lambda r: r.update(iap_ligado(r))),
+        ("nucleo: ", lambda r: r.update(vstack(b"using UnityEngine;\nclass C {}\n"))),
+        ("nucleo: ", lambda r: r.update(vstack(asmdef=b'{"noEngineReferences": false}'))),
+        ("facebook: ", lambda r: r.update({CORE + "Sim.cs": b"class F { void I() { FB.Init(Ok); FB.Mobile.SetAutoLogAppEventsEnabled(false); } }\n"})),
+        ("privacidade: ", lambda r: r.update(ugs_ligado())),
         ("privacidade: ", lambda r: r.update(iap_ligado(r, politica=True))),
         ("ingles: sem par", lambda r: r.update({TEXTOS: TEXTOS_BOM, INGLES: INGLES_BOM, CORE + "Rotas.cs": b'new Rota { Nome = "Lisboa" };'})),
         ("ingles: par vazio", lambda r: r.update({TEXTOS: TEXTOS_BOM, INGLES: b'[\"Ola\"] = \" \",\n'.replace(b"\\", b"")})),
@@ -665,6 +711,15 @@ def selftest():
     r.update(view_asmdef())
     assert checa(r) == [], checa(r)
     r[CORE + "Sim.cs"] = b'class A { void I() { LevelPlay.SetConsent(false); LevelPlay.SetMetaData("do_not_sell", "true"); LevelPlay.Init(k); } }\n'
+    assert checa(r) == [], checa(r)
+    # o modulo do estudio bom passa; com o pacote fora do manifest, a rede atras do VS_UGS nao conta; FB.Init com tudo desligado passa
+    r = dict(base)
+    r.update(vstack())
+    assert checa(r) == [], checa(r)
+    r.update(ugs_ligado())
+    r[MANIFESTO] = b'{"dependencies": {}}'
+    assert checa(r) == [], checa(r)
+    r[CORE + "Sim.cs"] = b"class F { void I() { FB.Init(Ok); FB.Mobile.SetAutoLogAppEventsEnabled(false); FB.Mobile.SetAdvertiserIDCollectionEnabled(false); } }\n"
     assert checa(r) == [], checa(r)
     r = dict(base)
     r[MANIFESTO] = b"\xef\xbb\xbf" + r[MANIFESTO]  # BOM nao derruba o json

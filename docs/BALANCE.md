@@ -1436,3 +1436,26 @@ As 3 regras do portão: o Lento com as políticas não passa o Bom sem elas, nem
 - **O reforço tira a decisão do TA-2 de quem não move ninguém.** Ver se, com ele ligado, a pessoa ainda arrasta funcionário ou só olha; se ninguém mais move, o X padrão sobe para 15.
 - **O hangar automático perde o voo.** Ver se a pessoa entende o aviso ("foi ao hangar com 82% de desgaste") e o voo que não embarcou, ou se acha que a política errou.
 - **A folha fica dentro de Melhorias.** Ver se alguém procura as políticas na pausa ou no pátio.
+
+## 21. Brinde de ligar a conta (2026-11-05, frente de contas, `docs/CONTAS.md`)
+
+### D-CT. Ligar a conta dá 100 Gems e 30 min de 2x, uma vez
+
+Pedido do Vinicius em 2026-11-05: um brinde ao vincular a conta, "comum entre os jogos". Valor fixo da tabela, sem sorteio e sem nada pago (`Tuning.BrindeContaGems = 100`, `Tuning.BrindeContaBoostSeg = 1800`).
+
+| Comparação | Valor |
+|---|---|
+| Fechar a cadeia de 1 aeroporto (D-D1c) | 100 Gems |
+| Menor pacote pago (`gems_pack_small`) | 100 Gems |
+| Booster pago com Gems (`boost_30min`) | 150 Gems por 30 min de 2x |
+| **Brinde da conta** | **100 Gems + 30 min de 2x** (≈ 250 Gems de valor) |
+
+Por que esse tamanho: dá para sentir na hora (o booster liga e o saldo sobe), mas fica abaixo de 1 cosmético (300) e é 1/3 das Gems que a campanha dá. Quem nunca compra ganha 400 Gems na vida do save em vez de 300, e mesmo assim não compra nada que mexa no jogo, só pacote de Cash, booster ou cosmético (D-D1). O booster do brinde é o mesmo 2x do `boost_30min`: não acumula além do teto do passe (`BoostTeto`) e não encurta um que já esteja ligado. Também não entra na média móvel do cofre, como o resto das Gems.
+
+**Uma vez por save, e o save é o da conta.** Desligar e ligar de novo, ligar o 2º login ou trocar para uma conta que já existia não paga de novo (`ContaTests.Ligar_LoginDeOutraConta_TrocarCarregaONuvemSemBrinde`, `ContaBrindeTests`). Excluir a conta apaga o save, então um jogo novo do zero ganha de novo. Isso é recomeçar, não duplicar.
+
+Nenhum portão de balanço muda: nenhum bot liga conta, e o brinde não toca em voo, passageiro, marco nem campanha.
+
+### Para medir com gente
+
+- **O brinde puxa o login?** Ver quantos ligam a conta na 1ª semana e se alguém liga só pelo brinde e desliga em seguida (o brinde não volta, então desligar não custa nada ao jogo).

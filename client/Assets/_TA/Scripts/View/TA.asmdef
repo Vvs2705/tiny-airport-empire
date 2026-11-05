@@ -1,7 +1,7 @@
 {
     "name": "TA",
     "rootNamespace": "TA",
-    "references": ["TA.Core"],
+    "references": ["TA.Core", "Vstack.Conta.Core", "Vstack.Conta.Unity"],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

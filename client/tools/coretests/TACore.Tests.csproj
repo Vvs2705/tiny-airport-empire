@@ -11,6 +11,9 @@
   <ItemGroup>
     <Compile Include="../../Assets/_TA/Scripts/Core/**/*.cs" />
     <Compile Include="../../Assets/_TA/Tests/EditMode/**/*.cs" />
+    <!-- o modulo de conta reaproveitavel (client/Assets/Vstack/Conta/README.md): nucleo e testes, sem a cola com a Unity -->
+    <Compile Include="../../Assets/Vstack/Conta/Core/**/*.cs" />
+    <Compile Include="../../Assets/Vstack/Conta/Tests/**/*.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />

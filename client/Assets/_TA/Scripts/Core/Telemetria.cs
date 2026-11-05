@@ -34,6 +34,7 @@ namespace TA.Core
             "session_start", "diary_export", "device_class", "staff_fired", "achievement_unlocked", "clock_back",
             "supply_ordered", "supply_delivered", "supply_shortage", "supply_upgraded",
             "route_scheduled", "airport_trip", "airport_arrived", "policy_changed", "policy_action",
+            "account_linked", "account_deleted",
         };
 
         public static bool Valido(string evento) => evento != null && Eventos.Contains(evento);
