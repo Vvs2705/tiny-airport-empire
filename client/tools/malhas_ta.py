@@ -146,7 +146,7 @@ PECAS = {
 }
 
 # pecas que ainda saem do Tripo (Lote 12): sem o FBX, a rodada completa pula com aviso em vez de parar; com ele, entram como as outras
-PENDENTES = {"pia_banheiro", "maquina_piso", "cone_piso_molhado"}
+PENDENTES = set()  # Lote 12 completo em 05/11
 
 
 # a View pinta na cor do voo (_Color x textura): a textura guarda so o sombreado

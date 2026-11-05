@@ -242,7 +242,7 @@ namespace TA
             float l = t1 - t0 + 0.06f;
             bool x = Mathf.Abs(d.x) > 0.5f;
             Vector3 tam(float h, float esp) => x ? new Vector3(l, h, esp) : new Vector3(esp, h, l);
-            Fixo(PrimitiveType.Cube, new Vector3(c.x, alto * 0.5f, c.y), tam(alto, EspParede), CorParede);
+            Fixo(PrimitiveType.Cube, new Vector3(c.x, alto * 0.5f, c.y), tam(alto, EspParede), ParedeCor(e));
             Fixo(PrimitiveType.Cube, new Vector3(c.x, alto + 0.012f, c.y), tam(0.024f, EspParede + 0.03f), CorCapa);
             if (alto > AltoFrente) Fixo(PrimitiveType.Cube, new Vector3(c.x, 0.09f, c.y), tam(0.18f, EspParede + 0.012f), Art.EstacaoCor[e]);   // rodape na cor da sala
         }
