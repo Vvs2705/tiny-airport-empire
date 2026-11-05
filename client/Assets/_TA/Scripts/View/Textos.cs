@@ -488,9 +488,25 @@ namespace TA
             Privacidade = L("Política de privacidade"), PrivacidadeLegenda = L("O que o jogo guarda e por quê"),
             Suporte = L("Suporte"), Escrever = L("Escrever"), Creditos = L("Créditos"),
             CreditosTexto = L("Fontes Lilita One (© 2011 Juan Montoreano, com o Nome de Fonte Reservado Lilita) e Nunito (© 2014 The Nunito Project Authors), na SIL Open Font License 1.1."),
-            ExcluirDados = L("Excluir meus dados"), ExcluirLegenda = L("Apaga o progresso deste aparelho"), Excluir = L("Excluir"),
+            ExcluirDados = L("Excluir meus dados"), ExcluirLegenda = L("Apaga o progresso e a conta"), Excluir = L("Excluir"),
             Cancelar = L("Cancelar"), ApagarTudo = L("Apagar tudo"),
-            ExcluirTexto = L("Apaga deste aparelho o seu progresso, as configurações, o tutorial já visto e o diário de jogo. Não dá para desfazer: o jogo fecha e, ao abrir de novo, começa do zero.\n\nO jogo não guarda seus dados em servidor nosso. Cópias do diário que você exportou ficam onde você as salvou. Para qualquer pedido sobre seus dados, escreva para ") + EmailSuporte + ".";
+            ExcluirTexto = L("Apaga deste aparelho o seu progresso, as configurações, o tutorial já visto e o diário de jogo. Não dá para desfazer: o jogo fecha e, ao abrir de novo, começa do zero.\n\nCom a conta ligada, também apaga a conta, o progresso na nuvem e o histórico de compras no nosso servidor (precisa de internet). Cópias do diário que você exportou ficam onde você as salvou. Para qualquer pedido sobre seus dados, escreva para ") + EmailSuporte + ".";
+        // ---------- conta opcional (frente de contas, Hud.Conta.cs; o modulo e' client/Assets/Vstack/Conta, docs/CONTAS.md) ----------
+        public static readonly string ContaTitulo = L("Conta"), ContaAnonima = L("Ligue para salvar na nuvem"), ContaLigada = L("Progresso salvo na nuvem"),
+            ContaSincronizando = L("Salvando na nuvem…"), ContaFora = L("Sem conexão com a conta"), Conectar = L("Conectar"), Conectado = L("Conectado"),
+            Desconectar = L("Desconectar"), GooglePlayGames = L("Google Play Games"), Facebook = L("Facebook"),
+            ContaGanhou = L("Conta ligada! Brinde recebido"), ContaLigou = L("Conta ligada"), ContaSemRede = L("Sem conexão. Tente de novo"),
+            ContaFalhou = L("Não deu para conectar"), ContaJaExiste = L("Conta já existente"),
+            ContaJaExisteTexto = L("Este login já tem um progresso salvo. Quer carregar esse progresso? O progresso deste aparelho será substituído."),
+            Carregar = L("Carregar"), DoisProgressos = L("Dois progressos"),
+            DoisProgressosTexto = L("Este aparelho e a nuvem têm progressos diferentes. Escolha qual continua; o outro é substituído."),
+            EsteAparelho = L("Este aparelho"), Nuvem = L("Nuvem"), ProgressoCarregado = L("Progresso carregado"),
+            ProgressoCarregadoTexto = L("O progresso da sua conta está neste aparelho. O jogo vai fechar: abra de novo para continuar de onde parou."),
+            FecharJogo = L("Fechar o jogo"), ContaNova = L("Atualize o jogo para abrir este progresso"), IdDaConta = L("ID da conta: ");
+        /// <summary>O que a legenda do cartao da conta promete antes de ligar (Tuning.BrindeConta*, BALANCE.md §D-CT).</summary>
+        public static string BrindeConta(int gems, int minutos) => L("Brinde: ") + Num(gems) + L(" Gems e 2x por ") + minutos + " min";
+        /// <summary>Um dos lados da escolha: quantos passageiros ja embarcaram.</summary>
+        public static string Progresso(long embarcados) => Num(embarcados) + L(" embarcados");
         // ---------- painel de operacoes e relatorio do dia (frente I, Hud.Painel.cs; so le o nucleo, Sim.Painel.cs) ----------
         public static readonly string Painel = L("Painel de operações"), PainelLegenda = L("Voos, alertas e o relatório do dia"), SaldoHoje = L("Saldo de hoje"),
             TudoEmOrdem = L("Tudo em ordem"), SemAlertas = L("Nenhum alerta agora"), AvioesEChegadas = L("Pátio e chegadas"), RelatorioDia = L("Relatório do dia"),

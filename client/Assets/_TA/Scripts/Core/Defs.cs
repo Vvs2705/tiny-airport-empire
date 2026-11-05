@@ -91,7 +91,7 @@ namespace TA.Core
         // Fase D1 (CONTRATO_FASE_D1): Gems e compras
         CompraCreditada,    // A = produto, B = Gems, C = Cash                                    -> purchase_succeeded_server_verified
         GemsGastas,         // A = item, B = preco, C = Cash do pacote, s do booster ou 1         -> gems_spent
-        GemsGanhas,         // A = aeroporto, B = Gems (cadeia fechada)                           -> gems_earned
+        GemsGanhas,         // A = aeroporto (-1 = brinde de ligar a conta), B = Gems                -> gems_earned
         // Fase C7 (CONTRATO_FASE_C7): passe de temporada, trilha gratuita
         PasseNivel,         // A = temporada, B = nivel (1..30), C = Cash, s de 2x ou 1 cosmetico   -> season_reward_claimed
         // Fase C8 (CONTRATO_FASE_C8): despesas
@@ -421,6 +421,8 @@ namespace TA.Core
         public int PacoteSeg = 600, PacotePiso = 200, PacoteTeto = 10000;
         /// <summary>Booster: 2x renda por BoosterSeg s de jogo (so anda com o jogo aberto).</summary>
         public int BoosterSeg = 1800;
+        /// <summary>Brinde de ligar a conta (frente de contas, BALANCE.md §D-CT): Gems e s de 2x renda, 1 vez por save. Valor fixo, nada sorteado.</summary>
+        public int BrindeContaGems = 100, BrindeContaBoostSeg = 1800;
 
         // ---- Fase C7 (CONTRATO_FASE_C7, hipoteses) ----
         /// <summary>Paga o passe (false = so visual: conta e mostra, sem pagar), as temporadas (Sim.Passe.cs), os pontos de cada nivel e o

@@ -47,6 +47,8 @@ namespace TA
         const string Cabecalho = "utc,instalacao,versao,sessao,t_sessao,t_jogo,evento,a,b,c,onda";
 
         public Sim Sim { get; private set; }
+        /// <summary>A conta opcional (ContaJogo.cs, docs/CONTAS.md). null = build sem a UGS, no -testsession e no autoplay.</summary>
+        public ContaJogo Conta { get; private set; }
         /// <summary>s de jogo do ultimo quadro (0 com o relogio parado): o Mundo anda os bonecos no tempo do jogo.</summary>
         public float DtJogo { get; private set; }
         /// <summary>Velocidade do relogio (GDD de direcao §5): 0 = pausa operacional (o relogio e o mundo param; telas e melhorias seguem
@@ -57,7 +59,7 @@ namespace TA
         Bot _bot;
         float _speed = 1f;
         Action<Evento> _le;
-        bool _headless, _test, _apagado;   // _apagado: Excluir meus dados, nada mais grava
+        bool _headless, _test, _apagado, _trocado;   // _apagado: Excluir meus dados, nada mais grava; _trocado: o save da nuvem esta no disco
         string _save, _diario, _instalacao, _sessao;
         long _ultimoSave;
         float _ultimoFlush;
@@ -113,6 +115,14 @@ namespace TA
                 status = Sim.SaveRefused ? 2 : string.IsNullOrEmpty(texto) ? 0 : 1;
             }
             _ultimoSave = Sim.Steps;
+            if (!_test)
+            {
+                string servidor = "";
+#if TA_IAP || TA_LEVELPLAY
+                servidor = LojaConfig.Carrega().servidor;
+#endif
+                Conta = ContaJogo.Cria(this, servidor);
+            }
 
             Camera cam = new GameObject("Camera", typeof(Camera)).GetComponent<Camera>();
             cam.orthographic = true;
@@ -129,6 +139,7 @@ namespace TA
             Diario("save_loaded", status);
             Diario("device_class", Telemetria.MemoriaGb(SystemInfo.systemMemorySize), Telemetria.Nucleos(SystemInfo.processorCount));
             if (!_test) Retorno();
+            Conta?.Abre(SaveAtual());
         }
 
         void Start()
@@ -158,6 +169,7 @@ namespace TA
             string oferta = Sim.Anuncios.Oferta(Anuncio.Receita);
             if (oferta != null && oferta != _ofertaLogada) { _ofertaLogada = oferta; Diario("rewarded_ad_offered", (int)Anuncio.Receita); }
             if (Sim.Steps - _ultimoSave >= 5 * Sim.Hz) Grava();
+            Conta?.Tick(Time.realtimeSinceStartupAsDouble);
             if (Time.unscaledTime - _ultimoFlush > 5f) Flush();
         }
 
@@ -186,7 +198,7 @@ namespace TA
         void OnApplicationPause(bool pausado)
         {
             if (_headless || Sim == null) return;
-            if (pausado) { Grava(); Flush(); }
+            if (pausado) { Grava(); Flush(); Conta?.Tick(Time.realtimeSinceStartupAsDouble, true); }
             else { _fps.Reinicia(); Retorno(); }
         }
 
@@ -195,6 +207,7 @@ namespace TA
             if (_headless || Sim == null) return;
             Grava();
             Flush();
+            Conta?.Tick(Time.realtimeSinceStartupAsDouble, true);
         }
 
         // ------------------------------------------------------------------ intencoes da tela (o Hud chama)
@@ -245,6 +258,12 @@ namespace TA
         /// <summary>Configuracoes > Excluir meus dados, ja confirmado: apaga o save, o diario e todo o PlayerPrefs (preferencias, tutorial e o
         /// id da instalacao) e fecha o jogo; ao abrir de novo, comeca do zero. Nada mais grava depois disso, nem na saida.</summary>
         public void ApagaDados()
+        {
+            if (Conta != null) { Conta.Excluir(ApagaLocal); return; }   // com a conta: servidor, nuvem e conta primeiro (Play)
+            ApagaLocal();
+        }
+
+        void ApagaLocal()
         {
             _apagado = true;
             _buf.Clear();
@@ -368,12 +387,43 @@ namespace TA
         static long Agora => DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
         /// <summary>Grava o save (escrita atomica: .tmp e depois troca). Save recusado ou -testsession: nunca grava.</summary>
+        /// <summary>O save como esta no disco (para a conta comparar com a nuvem). null = nada gravado.</summary>
+        public string SaveAtual()
+        {
+            if (_test || _apagado) return null;
+            try { return File.Exists(_save) ? File.ReadAllText(_save) : null; }
+            catch (Exception e) { Debug.LogWarning("TA save: " + e.Message); return null; }
+        }
+
+        /// <summary>Grava ja (o brinde da conta nao espera os 5 s).</summary>
+        public void GravaAgora() => Grava();
+
+        /// <summary>
+        /// O save da nuvem substitui o deste aparelho: grava o arquivo e para de gravar o Sim aberto (a tela fecha o jogo e, ao abrir de novo,
+        /// o Awake carrega este). false = o texto nao abre neste build (schema mais novo ou corrompido): nada muda.
+        /// </summary>
+        public bool CarregaSave(string texto)
+        {
+            if (_test || _apagado || _trocado || Sim.Load(texto).SaveRefused) return false;
+            try
+            {
+                string tmp = _save + ".tmp";
+                File.WriteAllText(tmp, texto);
+                if (File.Exists(_save)) File.Replace(tmp, _save, null);
+                else File.Move(tmp, _save);
+            }
+            catch (Exception e) { Debug.LogWarning("TA save: " + e.Message); return false; }
+            _trocado = true;   // nada mais grava por cima ate reabrir
+            return true;
+        }
+
         void Grava()
         {
             _ultimoSave = Sim.Steps;
-            if (_test || _apagado || Sim.SaveRefused) return;
+            if (_test || _apagado || _trocado || Sim.SaveRefused) return;
             string texto = Sim.Save(Application.version, Agora);
             if (texto == null) return;
+            Conta?.Gravou(texto);
             if (Sim.ClockWentBack > 0) Diario("clock_back", Sim.ClockWentBack);
             try
             {

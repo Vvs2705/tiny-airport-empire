@@ -20,6 +20,7 @@ namespace TA
         readonly Loja _loja;
         readonly LojaConfig _cfg;
         readonly System.Func<bool> _grava;
+        readonly System.Func<string> _conta;
         readonly StoreController _store;
         readonly Dictionary<string, PendingOrder> _ordens = new Dictionary<string, PendingOrder>();
         UnityWebRequest _web;
@@ -30,9 +31,11 @@ namespace TA
         /// <summary>A tela mostra: cancelada pelo jogador, produto indisponivel, falha da loja.</summary>
         public event System.Action<string, string> Falhou;
 
-        /// <summary>grava: grava o save e diz se gravou (Game.Grava). Sem gravar, nada e' confirmado.</summary>
-        public LojaIap(Loja loja, LojaConfig cfg, System.Func<bool> grava)
+        /// <summary>grava: grava o save e diz se gravou (Game.Grava). Sem gravar, nada e' confirmado. conta: o token da conta (Game.Conta?.Token)
+        /// para a compra entrar no historico dela no servidor (docs/CONTAS.md); null ou vazio = compra sem conta.</summary>
+        public LojaIap(Loja loja, LojaConfig cfg, System.Func<bool> grava, System.Func<string> conta = null)
         {
+            _conta = conta;
             _loja = loja;
             _cfg = cfg;
             _grava = grava;
@@ -119,10 +122,13 @@ namespace TA
                 timeout = 15,
             };
             _web.SetRequestHeader("Content-Type", "application/json");
+            string conta = _conta?.Invoke();
+            if (!string.IsNullOrEmpty(conta)) _web.SetRequestHeader("Authorization", "Bearer " + conta);
             _web.SendWebRequest();
         }
 
-        /// <summary>200 com resultado = o veredito; 4xx de pedido mal formado = recusado; rede, 429 e 5xx = tenta de novo depois.</summary>
+        /// <summary>200 com resultado = o veredito; 4xx de pedido mal formado = recusado; rede, 401 (token da conta vencido: o SDK renova), 429 e
+        /// 5xx = tenta de novo depois. O 401 nunca vira recusa: sem acknowledge, a loja devolveria o dinheiro de uma compra boa.</summary>
         void Responde(double agora)
         {
             UnityWebRequest w = _web;
@@ -133,7 +139,7 @@ namespace TA
             if (w.result == UnityWebRequest.Result.Success && st == 200)
                 try { r = JsonUtility.FromJson<Resposta>(w.downloadHandler.text); } catch (System.ArgumentException) { }
             w.Dispose();
-            Veredito v = r == null ? (st >= 400 && st < 500 && st != 429 ? Veredito.Recusado : Veredito.Indisponivel)
+            Veredito v = r == null ? (st >= 400 && st < 500 && st != 429 && st != 401 ? Veredito.Recusado : Veredito.Indisponivel)
                 : r.resultado == "ok" ? Veredito.Ok : r.resultado == "pendente" ? Veredito.Pendente : r.resultado == "recusado" ? Veredito.Recusado : Veredito.Indisponivel;
             _loja.Resposta(token, v, r?.tx, r?.motivo, agora);
         }

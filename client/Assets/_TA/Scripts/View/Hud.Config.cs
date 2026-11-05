@@ -94,6 +94,7 @@ namespace TA
                     it.Linha.text = Textos.ReabraIdioma;
                     it.Btn.Secundario(Textos.NomeDoIdioma(Outro(nova)));
                 });
+            ItemConta(lista);   // so com a UGS no build (Hud.Conta.cs)
             ItemPausa(lista, "Privacidade", Art.Escudo(), Art.EstacaoCor[5], Textos.Privacidade, Textos.PrivacidadeLegenda, Textos.Abrir,
                 it => Application.OpenURL(Textos.UrlPrivacidade));
             ItemPausa(lista, "Suporte", Art.Balao(), Art.EstacaoCor[0], Textos.Suporte, Textos.EmailSuporte, Textos.Escrever,
@@ -102,6 +103,8 @@ namespace TA
             cr.Nome.text = Textos.Creditos; cr.Linha.text = Textos.Versao(Application.version); cr.Info.text = Textos.CreditosTexto;
             Item ex = ItemPausa(lista, "Excluir", Art.Xis(), Art.Perigo, Textos.ExcluirDados, Textos.ExcluirLegenda, Textos.Excluir, it => Abre(_excluir));
             ex.Btn.Valor.color = Art.Perigo;
+
+            BuildConta(canvas);
 
             _excluir = NovaFolhaModal(canvas, "Excluir", Textos.ExcluirDados, Art.Alerta(), 1100f);
             RectTransform pe = _excluir.F.Corpo, le = Art.NovaLista(pe, Vector2.zero, Vector2.one);
@@ -157,6 +160,7 @@ namespace TA
 
         void PintaConfig()
         {
+            PintaConta();
             if (!_config.Rt.gameObject.activeSelf) return;
             for (int k = 0; k < 2; k++)
             {

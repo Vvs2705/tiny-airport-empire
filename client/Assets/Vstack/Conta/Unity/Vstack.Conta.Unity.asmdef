@@ -1,0 +1,23 @@
+{
+    "name": "Vstack.Conta.Unity",
+    "rootNamespace": "Vstack.Conta.Unity",
+    "references": [
+        "Vstack.Conta.Core",
+        "Unity.Services.Core",
+        "Unity.Services.Core.Environments",
+        "Unity.Services.Authentication",
+        "Unity.Services.CloudSave"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        { "name": "com.unity.services.authentication", "expression": "3.0.0", "define": "VS_UGS" },
+        { "name": "com.google.play.games", "expression": "2.0.0", "define": "VS_GPGS" }
+    ],
+    "noEngineReferences": false
+}

@@ -25,5 +25,5 @@ export async function sobe(opcoes = {}) {
     const r = await fetch(base + rota);
     return { status: r.status, corpo: await r.json() };
   };
-  return { post, get, logs, fecha: () => new Promise((r) => srv.close(r)) };
+  return { base, post, get, logs, fecha: () => new Promise((r) => srv.close(r)) };
 }

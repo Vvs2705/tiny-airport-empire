@@ -27,6 +27,8 @@
 8. Recusado (token forjado, cancelado, reembolsado, consumido, compra de teste em produção): nada creditado nem confirmado; sem acknowledge, a Google devolve o dinheiro em 3 dias.
 9. Restaurar compras (reinstalou): a loja devolve os não consumíveis já confirmados, o servidor diz `ok` e o núcleo devolve a posse (e o pacote de boas-vindas volta inteiro com o save novo, o que é restauração e não duplicação, GDD §7.3). Não confirma de novo.
 
+**Com a conta opcional** (`docs/CONTAS.md`, 2026-11-05): o `LojaIap` manda o token da conta (`Authorization: Bearer`), o servidor confere pela chave pública da Unity e anota a compra no histórico da conta; 401 nunca vira recusa no cliente (tenta de novo). Variáveis novas: `PROJETO_UGS`, `AMBIENTE_UGS`, `EXIGE_CONTA`.
+
 **Limite honesto (GDD §7.4):** sem login, o servidor impede compra forjada e token reaproveitado depois de consumido, mas não impede quem edita o próprio save. Um consumível apresentado mais de 5 vezes sem ser consumido é recusado (`repetido`).
 
 ## 3. Ambientes e modo de teste
