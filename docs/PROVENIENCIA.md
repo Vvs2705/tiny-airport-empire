@@ -675,6 +675,12 @@ Nada aqui gasta crédito: tudo sai dos arquivos HD do §2 por script, no Blender
 | `caixa_registradora` | 42826 → 500 | 0.16 × 0.09 × 0.12 | 256 px | `c63866ba03ccb9c59fb3ab6221dc598a32cf0ab5d18b936fa2e788cae2492701` |
 | `carrinho_cafe` | 47024 → 1200 | 0.50 × 0.43 × 0.56 | 512 px | `aac342d889c641349ff13a159cbddd27e4b710f32021c25ef806677c446ed1d0` |
 | `carrinho_limpeza` | 42012 → 1000 | 0.30 × 0.19 × 0.36 | 256 px | `0ac67331948394ed7a85d04f3aa7b09bffa1a1f58df9682144f39e9126c225dc` |
+| `cabine_banheiro` | 47895 → 1500 | 0.35 × 0.45 × 0.55 | 512 px | `5c106f921056d2d4f467e360e534f153dafe9e79dcea81a3326faae544f128b4` |
+| `carrinho_passageiro` | 41170 → 1200 | 0.22 × 0.35 × 0.41 | 256 px | `3a98a32e809e83a77b8c07ea1443ce0f10bd5db0eff64f8e990bb65b7fb318a7` |
+| `cone_piso_molhado` | 48118 → 400 | 0.07 × 0.10 × 0.12 | 256 px | `50025fa6b31305227b330b60743a40f919dffb25766f17f0d222f30a7c0c4373` |
+| `esteira_restituicao` | 44888 → 3000 | 1.60 × 0.85 × 0.20 | 512 px | `d72c11f1cde0504345354c35f7f4ca346e440d72f8e3f5c3f5ba5871f95efe5b` |
+| `maquina_piso` | 44024 → 1000 | 0.25 × 0.12 × 0.27 | 256 px | `e3ea335d63ae4c822f199e004df53555bc259da3cdabb257bc4291bfd3718234` |
+| `pia_banheiro` | 37393 → 1200 | 0.60 × 0.39 × 0.55 | 512 px | `f9300efe67d124f46ee2e97b83d1fa30f0dc6cc18e58d2af4038bb0ba13e32a2` |
 | `caixa_ferramentas` | 46836 → 600 | 0.25 × 0.16 × 0.20 | 256 px | `968ec3ff9f3c6d6ce583816d39866474073251ee638fa5ffd1dd5012395aa79f` |
 | `cavalete_manutencao` | 47996 → 800 | 0.50 × 0.32 × 0.50 | 256 px | `30995e354f555165b04a34323a4cf1624b8a6236ad0765e70613577925da6a31` |
 | `escada_manutencao` | 44714 → 800 | 0.28 × 0.41 × 0.60 | 256 px | `52de90ea4801495f97c199a6525d10f820dbc13d3f725eeca8d4c9721f453595` |
