@@ -513,6 +513,22 @@ Gerado pelo coordenador no Browser 1 (conta Max), 55 créditos, saldo 16 035, pa
 |---|---|---|---|---|
 | painel_ferramentas_parede | `painel_ferramentas_parede_hd/painel_ferramentas_parede_hd.zip` | 9.3 MiB | `610d2c943edc43969855d92ea907a71329ea28b8ffa4042199f458fc226ef5b0` | `a073dd4af6a4628d1debf7b88ba0d67aa2763fe4d9a661170530d6d20b4067fc` |
 
+### 2.10 Conta nova, 2026-11-03 e 05: Lote 12 (frentes E, F e H)
+
+9 modelos HD (imagem Nano Banana grátis, a melhor de 2; modelo 55 créditos cada; export FBX "Blender, 4K"), 495 créditos: saldo 16 035 → 15 540. O `carrinho_limpeza` da lista do lote não foi gerado de novo: já existia desde 29/10 (§2). Prompts e ids das tarefas fora do git, em `%USERPROFILE%\.tiny-airportrte_lote12_EFH.md`.
+
+| Peça | Gerada | Arquivo | SHA-256 do zip | SHA-256 do FBX |
+|---|---|---|---|---|
+| armarios_vestiario | 03/11 | `armarios_vestiario_hd/armarios_vestiario_hd.zip` | `4c53087eb2aacdf2ddd56e65d0fff62773c24ec3cd7900e8c84ae703427e5733` | `97431b1963d39ce17d5b78a6f488759ff5a6d1274e4f2eb07dc35be03377a0d2` |
+| banco_vestiario | 03/11 | `banco_vestiario_hd/banco_vestiario_hd.zip` | `e827a640f0d06cde3639e203051b83b11b0ac327fb08e90a584ffa0cf4d019b8` | `0d5379862278c31f3c1a6d72cb53ce53eb948df0d4d5de108d9e6a575dfded0a` |
+| arara_uniformes | 03/11 | `arara_uniformes_hd/arara_uniformes_hd.zip` | `f756b81fb86a31b87ac7792202dfe83f5783d2e1b9a4b124a63c36e0aeee517d` | `4847a3d4f6cc4e616bf904c39144356b9b0cb6a01f8534318a24165e47861064` |
+| cabine_banheiro | 03/11 | `cabine_banheiro_hd/cabine_banheiro_hd.zip` | `45e074c5259ad4251a6ea44dc29e2d014708fc0a2b0851c88b98322a9ea19dc7` | `30ef6dc0d3aa8a4e4fd10c28119bf013a65e63adc732da5c959e8b8e4f3e61c3` |
+| pia_banheiro | 03/11 (export 05/11) | `pia_banheiro_hd/pia_banheiro_hd.zip` | `ce7a7f112c93e5c5ed9c8989679f3912cbddb1b25af10e97d52f4b884aea23d8` | `aae699562d7ab7be1753dc02cf4fe2fab5d0a169113389f6bed29df711399fa9` |
+| esteira_restituicao | 05/11 | `esteira_restituicao_hd/esteira_restituicao_hd.zip` | `116cbd69aee17b505157a35360675456a9e389ef5a6b045b67b778d52e3376ea` | `6e090c7813b067676308aff8465e7f1e6673272a7a3ac70c2f018650873682c8` |
+| carrinho_passageiro | 05/11 | `carrinho_passageiro_hd/carrinho_passageiro_hd.zip` | `6c7c9ab04218453fb652942b5c0f4fe58a2107bbdd002a5cce6525e2add134c5` | `adf1b2c7e8ec4538e916254b44b4441c05acb4244022c15ad3498bdccf368ac1` |
+| maquina_piso | 05/11 | `maquina_piso_hd/maquina_piso_hd.zip` | `8fb2110912325a66edb77c886058a4723379a7c2840d14dc9d7819d04ef26285` | `dd2101bc3c4cfd9776503cbf69783504d2e529fb681fa043bfb19e92155117a4` |
+| cone_piso_molhado | 05/11 | `cone_piso_molhado_hd/cone_piso_molhado_hd.zip` | `adefac8428bd3c766ef4c17abadcce3fc7d763eb3c618bf4ef066399c16c7056` | `fa2bbc0dd7692295c3fa3989e3005f7193d553fbe81c80744fa386e3103f5bc6` |
+
 ## 3. Marca e arte de instalação (imagem, sem modelo 3D)
 
 Geradas no gerador de imagem do Tripo (Nano Banana 2, 1024 px; splash 9:16 em 768 × 1376) e ampliadas para 4K pelo botão "4K" (10 créditos cada, §1). Os originais 4K ficam em `arte/marca/` (fora do git, com backup). As versões do jogo, em `client/Assets/_TA/Art/Marca/`, saem do script `client/tools/marca.py` (determinístico; recorte do fundo azul-marinho por inundação a partir da borda, tolerância 38; conferido sobre xadrez).

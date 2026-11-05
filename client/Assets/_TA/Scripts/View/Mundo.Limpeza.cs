@@ -293,8 +293,8 @@ namespace TA
         void Banheiro3D()
         {
             Vector2 c = BanMin + Vector2.one * (Lado * 0.5f), m = BanMin + Vector2.one * (Corredor * 0.5f);
-            Renderer piso = Bloco("PisoBanheiro", PrimitiveType.Cube, new Vector3(c.x, -0.05f, c.y), new Vector3(Interno, 0.1f, Interno), PisoPublico);
-            if (Material != null) { piso.sharedMaterial = MatPiso(); Cor(piso, PisoPublico); }
+            Renderer piso = Bloco("PisoBanheiro", PrimitiveType.Cube, new Vector3(c.x, -0.05f, c.y), new Vector3(Interno, 0.1f, Interno), PisoAr);
+            if (Material != null) { piso.sharedMaterial = MatPiso(); Cor(piso, PisoAr); }
             float porta = BanEntra.y - m.y;
             const int Rodape = (int)Estacao.Bagagem;   // rodape turquesa, como a placa
             Muro(Rodape, m, Vector2.right, 0f, Interno, AltoFrente);                                     // sul

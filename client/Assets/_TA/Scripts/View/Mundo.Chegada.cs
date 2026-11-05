@@ -33,7 +33,7 @@ namespace TA
         public static readonly Vector2 PortaNorte = new Vector2(8f, -0.3f), PortaOeste = new Vector2(4.3f, -2f), SaidaRua = new Vector2(-2.6f, -2f), BocaCorredor = new Vector2(8f, PasseioZ);
         /// <summary>Cor da mala de quem chega: uma por pessoa (a mala certa se ve), longe das 2 cores de voo do quadro.</summary>
         static readonly Color[] CorMala = { Art.Hex(0x7E57C2), Art.Hex(0x26A69A), Art.Hex(0xEC407A), Art.Hex(0x8D6E63), Art.Hex(0xFFCA28), Art.Hex(0x5C6BC0) };
-        static readonly Color CorPisoChegada = Art.Hex(0xDCE6EE), CorPlaca = Art.Hex(0x26A69A);
+        static readonly Color CorPisoChegada = Art.Hex(0xF5D8BE), CorPlaca = Art.Hex(0x26A69A);
 
         sealed class Chegou { public Boneco B; public int Id, Vaga = -1; public EstadoChegada Visto; public bool Saindo; }
 
