@@ -8,7 +8,7 @@
 - **O ID de publicidade não entra no APK:** o `Setup.SemIdDePublicidade` tira o `AD_ID` e as APIs do Privacy Sandbox do manifesto; o `checa_apk` derruba o APK que tiver `AD_ID`.
 - **Nenhum segredo no git**, nem no histórico: varri os 181 mil linhas de `git log --all -p` com os padrões do `checa_repo` e os novos (Stripe, Slack, OAuth do Google, licença `.ulf` da Unity, senha de keystore). Nada achado. Nenhum `.jks`, `.keystore`, `.ulf`, `.env` ou `upload.properties` jamais entrou num commit.
 - **Achado corrigido neste PR:** as flags de teste (`-onda`, `-bot`, `-cenario`, `-passageiros`...) valiam em qualquer build. No Android, qualquer app pode abrir a atividade do jogo com o extra `unity` e passar essas flags, o que viraria trapaça num build da loja. Agora `Game.Arg` só lê flags com `Debug.isDebugBuild` (build de desenvolvimento e Editor), como o GDD §8.3 manda, e o `checa_repo` derruba código que leia a linha de comando sem essa trava.
-- **Falta, e não é desta frente:** o servidor de validação de compra (`ta-servidor`), o consentimento e a configuração do anúncio não personalizado quando o LevelPlay entrar (frente de loja/anúncio) e a revisão jurídica.
+- **Falta, e não é desta frente:** subir o servidor de validação (pronto em `servidor/`), ligar os pacotes do IAP e do LevelPlay com a política nova (passo a passo e texto da política em `docs/LOJA_SERVIDOR.md`) e a revisão jurídica.
 
 ## 2. Auditoria (o que foi conferido)
 
@@ -25,7 +25,7 @@
 | Flags de teste no build público (§8.3) | **Corrigido aqui:** só em build de desenvolvimento | `Game.Arg`; `checa_repo` (guardrails) |
 | App depurável em release (§8.3) | Conferido quando houver release: `checa_apk --release` derruba `android:debuggable` | `checa_apk.py` |
 | Save (§8.6) | Envelope versionado com SHA-256, escrita atômica, migração, valores fora do limite recusados; teto offline de 2 h | `SaveEnvelope.cs`, `SaveTests`, `ExploitTests` |
-| Compras (§7.4, §8.2) | Crédito idempotente e sem token no disco; falta o servidor | `ComprasTests` (PR #43); `ta-servidor` na fila |
+| Compras (§7.4, §8.2) | Crédito idempotente e sem token no disco; servidor de validação e compra em 2 passos prontos em modo de teste | `ComprasTests` (PR #43); `servidor/` e `LojaTests` (`docs/LOJA_SERVIDOR.md`) |
 | Segredos no repo público (§8.4) | Nenhum no histórico; travas no `.gitignore` e no `checa_repo` | seção 1; `.gitignore` ganhou `*.jks`, `*.keystore`, `*.ulf`, `upload.properties` |
 | CI no repo público (§8.4) | `nucleo` e `balanco` sem segredo e com `permissions: contents: read` | `checa_repo` (ci) agora derruba `pull_request_target`, `workflow_run`, workflow sem `permissions:` e segredo impresso em `run:` |
 
@@ -97,5 +97,6 @@ Uma frente que acrescente qualquer item abaixo atualiza, **no mesmo PR**, as dua
 
 | Portão | O que derruba |
 |---|---|
-| `checa_repo.py` (CI `nucleo`, `verify.sh quick`) | segredo em arquivo, arquivo de chave ou licença no git, `.gitignore` sem as travas, interstitial ou sorteio pago, `Setup` sem tirar o `AD_ID`, flag de linha de comando sem `Debug.isDebugBuild`, workflow com `pull_request_target`/`workflow_run`/sem `permissions:`/imprimindo segredo, política que não cita pacote que coleta ou API de rede |
+| `checa_repo.py` (CI `nucleo`, `verify.sh quick`) | segredo em arquivo, arquivo de chave ou licença no git, `.gitignore` sem as travas, interstitial ou sorteio pago, `Setup` sem tirar o `AD_ID`, flag de linha de comando sem `Debug.isDebugBuild`, workflow com `pull_request_target`/`workflow_run`/sem `permissions:`/imprimindo segredo, política que não cita pacote que coleta ou API de rede (arquivo atrás de `#if TA_X` conta quando o pacote entra), `LevelPlay.Init` antes de `SetConsent(false)` e `do_not_sell` |
 | `checa_apk.py` (`verify.sh android`; `--selftest` no CI `nucleo`) | targetSdk < 36, ABI, `AD_ID`, permissão fora da lista, 16 KB; com `--release`, app depurável |
+| `node --test` em `servidor/` (CI `nucleo`, job `servidor`) | validação de compra: ambiente, pendente, cancelado, consumido, repetido, entrada mal formada, limite, kill switch, token no log, 503 sem detalhe (`docs/LOJA_SERVIDOR.md` §7) |

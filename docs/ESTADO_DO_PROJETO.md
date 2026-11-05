@@ -138,8 +138,8 @@ Ordem de trabalho de 2026-11-03, depois da mistura com o GDD de direção (`GDD.
 
 **Depois, a loja e o servidor, e então a lista de antes:**
 
-10. **`ta-loja`:** Unity IAP em modo de teste, tela da loja e Gems no HUD (usa o núcleo da D1).
-11. **`ta-servidor`:** validação de compra no Cloud Run (projeto próprio, sem chave JSON). Se não passar nos testes do GDD §16.6, o jogo lança só com anúncio recompensado (opção A de D-05).
+10. **`ta-loja`:** tela da loja e Gems no HUD (usa o núcleo da D1). A compra em 2 passos (`Loja.cs`) e a cola do Unity IAP (`LojaIap.cs`, atrás de `#if TA_IAP`) estão prontas (`docs/LOJA_SERVIDOR.md`); falta ligar o pacote na rodada do PC.
+11. **`ta-servidor`:** **feito em modo de teste** (`servidor/`, `docs/LOJA_SERVIDOR.md`, 2026-11-05): Cloud Run sem chave JSON, loja falsa, teste e produção separados, 21 testes no CI. Falta o dono criar o projeto GCP com alerta de orçamento e subir o serviço (§5 do documento). Se não passar nos testes do GDD §16.6 no aparelho, o jogo lança só com anúncio recompensado (opção A de D-05).
 12. **`ta-rotas-tela`:** tela de aeroportos e de rotas (`Hud.Rotas.cs`): PR aberto em 03/11 com o `quick` verde; falta a rodada da leva (EditMode `RotasTests` e fotos `-tela rotas`, `rotas1` e `rotas2`).
 13. **`ta-patio-avioes`:** 8 variantes de aeronave por rota no PR #69, com a trava do mecânico da onda 8, os cruzamentos a 3x com `-speed 2` e o painel da oficina. Medido no ramo: `diag_caixas` com 0 cruzamento no pátio a 1x, 3x e 3x com `-speed 2` e nas 5 rotas (antes 2, 1 e 10, sem os cones); fotos do pátio com as variantes e da oficina. Falta a confirmação na rodada de integração da leva.
 14. **`ta-historias`:** as 20 micro-histórias de passageiros (`Sim.Historias.cs`, `docs/HISTORIAS.md`, save schema 16): PR aberto em 2026-11-04 com o `quick` verde; falta a rodada da leva (EditMode `HudTests` e fotos `-tela album` e do coração no quadro).
@@ -149,7 +149,7 @@ Ordem de trabalho de 2026-11-03, depois da mistura com o GDD de direção (`GDD.
 18. **`ta-estetica`:** auditoria visual contra os concorrentes; refazer o que estiver abaixo.
 19. **`ta-ingles`:** textos em inglês (D-08: pt-BR e en no lançamento; es e id depois, com revisão humana).
 20. **`ta-telemetria`:** Unity Analytics sem dado pessoal (D-11).
-21. **`ta-lgpd`:** auditoria, Data safety e exclusão feitas (`docs/SEGURANCA_PRIVACIDADE.md`, 2026-11-05); falta o consentimento e o anúncio não personalizado quando o LevelPlay entrar.
+21. **`ta-lgpd`:** auditoria, Data safety e exclusão feitas (`docs/SEGURANCA_PRIVACIDADE.md`, 2026-11-05); o anúncio não personalizado está pronto atrás de `#if TA_LEVELPLAY` (`docs/LOJA_SERVIDOR.md`); falta ligar o pacote com a política do §6 de lá.
 22. **`ta-playtest`:** K2 com 20 pessoas; K3 nos aparelhos dos amigos do dono.
 23. **`ta-loja-assets`:** ícone aplicado no build, screenshots, descrição, criativos gravados do jogo real.
 24. **Fim:** atualizações de ferramentas com a fila vazia, AAB assinado, regressão final, GO/NO-GO (GDD §25) e, por último, o celular de teste.
@@ -195,7 +195,7 @@ Nada disso o time de código consegue resolver sozinho.
 - **Feito (12):** projeto Unity e portão; equipe móvel; pátio e manutenção; quadro de partidas; fluxo de passageiros; 4 incidentes; campanha de 30 objetivos; missões; 20 conquistas; sem interstitial; offline de 2 h; tutorial de 12 passos.
 - **Falta (2):** regressão final; e 1 das 9 frentes de gestão da v1.5 (I painel de operações).
 - **Depende (2):** anúncios recompensados reais; AAB assinado e enviado.
-- **Parcial (23):** segurança e privacidade (auditoria de 05/11; falta o servidor e o consentimento do anúncio); aeroportos; rotas; aeronaves; estações; perfis; tripulação; dia a dia; histórias; passe de temporada; loja; save; configurações, política e suporte; telemetria; arte final; despesas e salários (A); velocidades (B); ficha ao tocar (C); contratação e demissão (D); vestiário (E); limpeza e banheiro (F); satisfação com motivo (G); esteira de restituição (H). Uma a uma, estão em `docs/CONTRATO_LANCAMENTO.md` §1, com a evidência de cada PR e o que falta.
+- **Parcial (23):** segurança e privacidade (auditoria de 05/11; servidor e anúncio não personalizado prontos em modo de teste, falta subir e ligar); aeroportos; rotas; aeronaves; estações; perfis; tripulação; dia a dia; histórias; passe de temporada; loja; save; configurações, política e suporte; telemetria; arte final; despesas e salários (A); velocidades (B); ficha ao tocar (C); contratação e demissão (D); vestiário (E); limpeza e banheiro (F); satisfação com motivo (G); esteira de restituição (H). Uma a uma, estão em `docs/CONTRATO_LANCAMENTO.md` §1, com a evidência de cada PR e o que falta.
 
 **O que o número não mostra.** A porcentagem mede **cobertura do contrato**, não esforço restante nem risco. A maior parte do que falta é tela (aeroportos, rotas, passe e loja), as 9 frentes de gestão (nenhuma começada, e cada uma só fecha com o critério de pronto em 10 itens, `GDD.md` §0.5), integração (IAP, servidor, anúncios, telemetria) e medida em aparelho, e quase toda a parte que depende do dono está na janela de 2026-11-25 em diante. As frentes A a I valem 9 linhas do mesmo peso das demais, mas variam muito de tamanho: a conta não diz isso.
 

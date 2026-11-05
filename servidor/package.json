@@ -1,0 +1,11 @@
+{
+  "name": "little-terminal-servidor",
+  "private": true,
+  "description": "Validacao de compra do Little Terminal (GDD §7.4): Cloud Run, Node 22, sem dependencia de terceiros.",
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node --test"
+  }
+}

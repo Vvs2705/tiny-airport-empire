@@ -14,7 +14,9 @@ conteudo_check.py do Forge). Olha os arquivos versionados e os novos ainda sem c
   ci          workflows do repo publico: nunca pull_request_target nem workflow_run (dariam os segredos a PR de fork), sempre com
               permissions: explicito e sem segredo impresso em run: (GDD §8.4)
   privacidade as 2 politicas (docs/privacidade, docs/privacy) com o e-mail de suporte e citando cada pacote que pode coletar dados e
-              cada API de rede do jogo (a politica tem de bater com o codigo, GDD §9.3)
+              cada API de rede do jogo (a politica tem de bater com o codigo, GDD §9.3). Arquivo que comeca com #if TA_X so conta quando o
+              TA.asmdef liga TA_X por versionDefines de um pacote que esta no manifest (a loja e o anuncio reais, docs/LOJA_SERVIDOR.md)
+  anuncio     LevelPlay.Init so depois de SetConsent(false) e do do_not_sell (nao personalizado para todos, GDD §7.2)
 Aviso, sem falhar: arquivo .cs acima de ~600 linhas (regra do estudio: vira partial).
 """
 
@@ -28,6 +30,7 @@ RAIZ = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 ASSETS = "client/Assets/"
 CORE = "client/Assets/_TA/Scripts/Core/"
 ASMDEF_CORE = CORE + "TA.Core.asmdef"
+ASMDEF_VIEW = "client/Assets/_TA/Scripts/View/TA.asmdef"
 SETUP = "client/Assets/_TA/Editor/Setup.cs"
 MANIFESTO = "client/Packages/manifest.json"
 MAPA = "docs/MAPA_CODIGO.md"
@@ -87,6 +90,24 @@ def sem_comentario(cs):
     return "\n".join(linha.split("//")[0] for linha in cs.splitlines())
 
 
+def defines_ligados(repo):
+    """Os TA_X que o TA.asmdef liga por versionDefines com o pacote presente no manifest (o Unity so liga com o pacote instalado)."""
+    if ASMDEF_VIEW not in repo:
+        return set()
+    tem = json.loads(texto(repo[MANIFESTO]))["dependencies"]
+    vd = json.loads(texto(repo[ASMDEF_VIEW])).get("versionDefines", [])
+    return {d.get("define") for d in vd if d.get("name") in tem}
+
+
+def codigo(repo, p, ligados):
+    """O codigo de `p` sem comentario; vazio se o arquivo inteiro esta atras de #if TA_X || TA_Y com nenhum deles ligado."""
+    cs = texto(repo[p])
+    m = re.match(r"\s*#if\s+([A-Z_][A-Z0-9_]*(?:\s*\|\|\s*[A-Z_][A-Z0-9_]*)*)\s*\n", cs)
+    if m and not set(re.findall(r"[A-Z_][A-Z0-9_]*", m.group(1))) & ligados:
+        return ""
+    return sem_comentario(cs)
+
+
 def checa_meta(repo):
     erros = []
     no_assets = [p for p in repo if p.startswith(ASSETS)]
@@ -139,12 +160,13 @@ def checa_nucleo(repo):
 
 def checa_modulos(repo):
     tem = json.loads(texto(repo[MANIFESTO]))["dependencies"]
+    ligados = defines_ligados(repo)
     erros = []
     for modulo, api in MODULOS.items():
         if "com.unity.modules." + modulo in tem:
             continue
         for p in sorted(x for x in repo if x.startswith(ASSETS) and x.endswith(".cs")):
-            if re.search(api, sem_comentario(texto(repo[p]))):
+            if re.search(api, codigo(repo, p, ligados)):
                 erros.append(
                     f"modulos: {p} usa a API de {modulo}, fora do {MANIFESTO}: adicione com.unity.modules.{modulo}"
                 )
@@ -169,6 +191,11 @@ def checa_guardrails(repo):
         if "GetCommandLineArgs" in cs and "isDebugBuild" not in cs:
             erros.append(
                 f"guardrails: {p} le flags de linha de comando sem Debug.isDebugBuild (flag de teste so em build de dev, GDD §8.3)"
+            )
+        i = cs.find("LevelPlay.Init(")
+        if i >= 0 and not all(0 <= cs.find(x) < i for x in ("SetConsent(false)", '"do_not_sell", "true"')):
+            erros.append(
+                f"anuncio: {p} chama LevelPlay.Init antes de SetConsent(false) e do do_not_sell (nao personalizado para todos, GDD §7.2)"
             )
     setup = texto(repo[SETUP])
     if "SemIdDePublicidade" not in setup or "permission.AD_ID" not in setup:
@@ -252,12 +279,13 @@ def checa_privacidade(repo):
         for d in json.loads(texto(repo[MANIFESTO]))["dependencies"]
         if not pacote_sem_dados(d)
     }
+    ligados = defines_ligados(repo)
     for p in (
         x
         for x in repo
         if x.startswith("client/Assets/_TA/Scripts/") and x.endswith(".cs")
     ):
-        citar.update(re.findall(REDE, sem_comentario(texto(repo[p]))))
+        citar.update(re.findall(REDE, codigo(repo, p, ligados)))
     for p in POLITICAS:
         html = texto(repo[p])
         if EMAIL_SUPORTE not in html:
@@ -333,6 +361,25 @@ def repo_bom():
         POLITICAS[1]: EMAIL_SUPORTE.encode(),
         WORKFLOWS + "nucleo.yml": b"on:\n  pull_request:\npermissions:\n  contents: read\n",
     }
+
+
+IAP_CS = b"#if TA_IAP || TA_OUTRO\nclass L { UnityWebRequest w; }\n#endif\n"
+VERSION_DEFINES = b'{"versionDefines": [{"name": "com.unity.purchasing", "expression": "5.0.0", "define": "TA_IAP"}]}'
+
+
+def view_asmdef():
+    v = ASSETS + "_TA/Scripts/View"
+    return {ASMDEF_VIEW: VERSION_DEFINES, v + ".meta": b"guid: " + b"7" * 32, ASMDEF_VIEW + ".meta": b"guid: " + b"8" * 32}
+
+
+def iap_ligado(r, politica=False):
+    """O pacote do IAP entrou e o asmdef liga TA_IAP: a rede do arquivo passa a contar. politica: o modulo e os pacotes ja estao no
+    manifest e na politica, menos o UnityWebRequest, que o erro tem de apontar."""
+    pac = b'"com.unity.purchasing": "5.0.0"' + (b', "com.unity.modules.unitywebrequest": "1.0.0"' if politica else b"")
+    novo = {CORE + "Sim.cs": IAP_CS, MANIFESTO: b'{"dependencies": {' + pac + b"}}", **view_asmdef()}
+    if politica:
+        novo.update({p: r[p] + b" com.unity.purchasing com.unity.modules.unitywebrequest" for p in POLITICAS})
+    return novo
 
 
 def selftest():
@@ -457,6 +504,10 @@ def selftest():
                 {CORE + "Sim.cs": b"class Sim { UnityWebRequest w; }\n"}
             ),
         ),
+        ("anuncio: ", lambda r: r.update({CORE + "Sim.cs": b'class A { void I() { LevelPlay.Init(k); LevelPlay.SetConsent(false); } }\n'})),
+        ("anuncio: ", lambda r: r.update({CORE + "Sim.cs": b'class A { void I() { LevelPlay.SetConsent(false); LevelPlay.Init(k); } }\n'})),
+        ("modulos: ", lambda r: r.update(iap_ligado(r))),
+        ("privacidade: ", lambda r: r.update(iap_ligado(r, politica=True))),
     ]
     for esperado, quebra in casos:
         r = dict(base)
@@ -470,6 +521,13 @@ def selftest():
     r = dict(base)
     r["docs/nota.md"] = falso["gh"]
     assert all(texto(falso["gh"]) not in e for e in checa(r))
+    # atras de #if TA_IAP sem o pacote, a rede e o modulo nao contam; o anuncio na ordem certa passa
+    r = dict(base)
+    r[CORE + "Sim.cs"] = IAP_CS
+    r.update(view_asmdef())
+    assert checa(r) == [], checa(r)
+    r[CORE + "Sim.cs"] = b'class A { void I() { LevelPlay.SetConsent(false); LevelPlay.SetMetaData("do_not_sell", "true"); LevelPlay.Init(k); } }\n'
+    assert checa(r) == [], checa(r)
     r = dict(base)
     r[MANIFESTO] = b"\xef\xbb\xbf" + r[MANIFESTO]  # BOM nao derruba o json
     assert checa(r) == [], checa(r)

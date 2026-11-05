@@ -27,3 +27,7 @@ upload.properties
 # malhas decimadas do Tripo (tools/malhas_ta.py): a licenca nao deixa redistribuir o modelo (GDD §10.2, decisao A de 29/10)
 client/Assets/_TA/ArtLocal/
 client/Assets/_TA/ArtLocal.meta
+
+# config da loja e do anuncio (servidor, app key e ad unit do LevelPlay): nao e segredo, mas e da conta; vai no build pelo PC
+client/Assets/_TA/Resources/loja_config.json
+client/Assets/_TA/Resources/loja_config.json.meta
