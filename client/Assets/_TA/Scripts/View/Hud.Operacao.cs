@@ -27,6 +27,7 @@ namespace TA
         readonly Item[] _patioAviao = new Item[2];
         readonly BarraNivel[] _patioDesgaste = new BarraNivel[2];
         readonly Compra[,] _patioCompra = new Compra[4, 2];
+        readonly Compra[] _tanque = new Compra[Sim.Suprimentos];
         readonly Text[] _equipeNome = new Text[Sim.MaxEquipe], _equipeCargo = new Text[Sim.MaxEquipe], _equipeInfo = new Text[Sim.MaxEquipe];
         readonly Image[] _equipePlaca = new Image[Sim.MaxEquipe];
         readonly BotaoPreco[] _equipeBtn = new BotaoPreco[Sim.MaxEquipe];
@@ -132,6 +133,13 @@ namespace TA
                 RectTransform c = NovoCartaoCompra(lista, "Servico" + sv, Textos.Servico[sv], Art.IconeServico(sv), Art.Azul);
                 _patioCompra[sv, 0] = NovaCompra(c, 0, Art.Raio(), S.T.PatioVelNiveis, () => _g.BuyPatio(ss, Melhoria.Velocidade));
                 _patioCompra[sv, 1] = NovaCompra(c, 1, Art.Caminhao(), S.T.PatioCapNiveis, () => _g.BuyPatio(ss, Melhoria.Capacidade));
+            }
+            // ta-suprimentos: o tanque de cada um, na ordem de Suprimento
+            RectTransform sc = NovoCartaoCompra(lista, "Suprimentos", Textos.Suprimentos, Art.Caminhao(), Art.Azul);
+            for (int i = 0; i < Sim.Suprimentos; i++)
+            {
+                var sup = (Suprimento)i;
+                _tanque[i] = NovaCompra(sc, i, Art.IconeServico((int)Sim.ServicoDe(sup)), S.T.SupTanqueCusto.Length, () => _g.BuyTanque(sup));
             }
         }
 
@@ -357,6 +365,14 @@ namespace TA
                     Textos.PorAviao(cv >= 0 ? Art.DePara(Textos.Seg(seg), Textos.Seg(seg * s.T.VelFator)) : Textos.Seg(seg)), nv, cv, s.Cash);
                 _patioCompra[sv, 1].Pinta(Textos.VeiculosNome(nc, s.T.PatioCapNiveis),
                     Textos.VeiculosDe(cc >= 0 ? Art.DePara(veic.ToString(), (veic + 1).ToString()) : veic.ToString()), nc, cc, s.Cash);
+            }
+            for (int i = 0; i < Sim.Suprimentos; i++)
+            {
+                var sup = (Suprimento)i;
+                long ct = s.CustoTanque(sup);
+                int t = s.Tanque(sup);
+                _tanque[i].Pinta(Textos.TanqueNome(i, s.TanqueNivel[i], s.T.SupTanqueCusto.Length),
+                    Textos.TanqueDe(ct >= 0 ? Art.DePara(t.ToString(), (t + s.T.SupTanqueMais[i]).ToString()) : t.ToString()), s.TanqueNivel[i], ct, s.Cash);
             }
         }
 

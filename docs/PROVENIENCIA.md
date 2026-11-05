@@ -505,6 +505,14 @@ Peças pedidas pela frente `ta-planta` e geradas pelo coordenador. SHA-256 infor
 | mesa_despacho | `mesa_despacho_hd/mesa_despacho_hd.zip` | 10.0 MiB | `402cafb189731cfd519a3a332021b9623741ecf5e8dca5f80dcfda835ae378df` | `929d2bd0e774a27365f27b0f583cd743f541a1ba203870913764e727d65cf61c` |
 | pneus_empilhados | `pneus_empilhados_hd/pneus_empilhados_hd.zip` | 9.8 MiB | `2d525322696d9b7585480be5f3029d6ade88bb555013f97800ce10eb567e0270` | `3261279f234943f1862af9243ed1f131432ead8d356cc9df7966110f8222a65f` |
 
+### 2.9 Conta nova, 2026-11-02: painel de ferramentas da oficina
+
+Gerado pelo coordenador no Browser 1 (conta Max), 55 créditos, saldo 16 035, para a parede de fundo da oficina. SHA-256 conferidos pela frente `ta-patio-avioes` no arquivo de `arte/tripo/` (o do zip bate com o que o coordenador anotou, `610d2c94…ef5b0`). A peça é quase quadrada (0,70 × 0,75 m na medida provisória): no jogo, 0,3 m de altura e 0,28 m de largura, como os painéis de parede das outras salas.
+
+| Peça | Arquivo | Tamanho | SHA-256 do zip | SHA-256 do FBX |
+|---|---|---|---|---|
+| painel_ferramentas_parede | `painel_ferramentas_parede_hd/painel_ferramentas_parede_hd.zip` | 9.3 MiB | `610d2c943edc43969855d92ea907a71329ea28b8ffa4042199f458fc226ef5b0` | `a073dd4af6a4628d1debf7b88ba0d67aa2763fe4d9a661170530d6d20b4067fc` |
+
 ## 3. Marca e arte de instalação (imagem, sem modelo 3D)
 
 Geradas no gerador de imagem do Tripo (Nano Banana 2, 1024 px; splash 9:16 em 768 × 1376) e ampliadas para 4K pelo botão "4K" (10 créditos cada, §1). Os originais 4K ficam em `arte/marca/` (fora do git, com backup). As versões do jogo, em `client/Assets/_TA/Art/Marca/`, saem do script `client/tools/marca.py` (determinístico; recorte do fundo azul-marinho por inundação a partir da borda, tolerância 38; conferido sobre xadrez).
@@ -642,6 +650,13 @@ Nada aqui gasta crédito: tudo sai dos arquivos HD do §2 por script, no Blender
 | `sofa_lounge` | 47131 → 1200 | 0.80 × 0.45 × 0.48 | 512 px | `db4b8ceb45598917aed1d245dc260f8f1c9180135d7edb159a0fdf79bc532618` |
 | `mesa_lounge` | 48158 → 800 | 0.35 × 0.35 × 0.30 | 256 px | `6c8180011f2086134c39411003ec06e81dfefab514a6f48b9d7363b071c6db6e` |
 | `placa_direcao` | 45815 → 600 | 0.38 × 0.13 × 0.60 | 256 px | `2f10c62dda5a6e9489bd64e4ed91b894b4506bb90c3b756040bb431599a58b35` |
+| `aviao_bimotor_helice` | 48425 → 4999 | 7.56 × 7.12 × 3.01 | 1024 px | `6002b08ba7b0753773922dadacfd51060704ac717c51744c2555eaf78b6c2568` |
+| `aviao_jato_regional` | 47058 → 5000 | 7.38 × 7.38 × 3.45 | 1024 px | `d3701c3aa0a48cc7dda9c64cfd4467603eed35cfa06a918f14839ab9b95a7388` |
+| `jato_executivo` | 47684 → 4999 | 7.38 × 7.37 × 3.95 | 1024 px | `eb2b5caaada3e9fd0faa04c6fc17d1cde53f897be035853b0b4886354f099d10` |
+| `aviao_wide` | 48385 → 5000 | 9.00 × 8.98 × 4.44 | 1024 px | `71e3fcb3263aa12155b875b76ab119fa2d38e8bf402ea259f6e34fac0ff24ec4` |
+| `aviao_wide_quad` | 46950 → 5000 | 9.00 × 8.63 × 3.54 | 1024 px | `a96152d178de33cad81a359e79cf8dbfd437a1b442ec0d478499b2fcc3420485` |
+| `aviao_cargo` | 47270 → 5000 | 7.70 × 9.00 × 4.29 | 1024 px | `c0fd1134dbd787facec53c9977751b0efa727f700eaf716dfcf6ec290eca4266` |
+| `painel_ferramentas_parede` | 43460 → 1200 | 0.06 × 0.28 × 0.30 | 512 px | `55ed288f7609b7e97390270982a088f74887ac488af00b0b528b6afdbcf50eed` |
 
 ### 5.2 Clipes de animação (fora do git, `arte/mixamo/ta_pax` e `ta_func`)
 

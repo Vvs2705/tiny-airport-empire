@@ -41,6 +41,14 @@ PECAS = {
     "vaso_planta": (800, 256, 0.5),
     "aviao_regional": (5000, 1024, 7.6),
     "aviao_narrow": (5000, 1024, 9.0),
+    # as outras 6 variantes do patio (Mundo.Patio.cs, Modelos): familia da vaga G ate o regional, da R ate o narrow; a medida e a que
+    # cabe na vaga sem tocar a ponte, a escada nem os veiculos parados nas faixas (voxels da malha contra as caixas deles)
+    "aviao_bimotor_helice": (5000, 1024, 7.56),
+    "aviao_jato_regional": (5000, 1024, 7.38),
+    "jato_executivo": (5000, 1024, 7.38),
+    "aviao_wide": (5000, 1024, 9.0),
+    "aviao_wide_quad": (5000, 1024, 9.0),
+    "aviao_cargo": (5000, 1024, 9.0),
     "rebocador": (2000, 512, 1.5),
     "carrinho_bagagem": (2500, 512, 2.6),
     "caminhao_combustivel": (2500, 512, 2.6),
@@ -56,6 +64,9 @@ PECAS = {
     "radar": (1500, 256, -2.4),
     # as 4 salas novas (Fase C2), a sala da tripulacao e o que muda de nivel fora das salas
     "esteira_bagagem": (2500, 512, 1.15),
+    # Lote 12 (frente H): restituicao de bagagem, sem malas na malha (as que giram sao do nucleo); carrinho de mao do passageiro
+    "esteira_restituicao": (3000, 512, 1.6),
+    "carrinho_passageiro": (1200, 256, 0.35),
     "esteira_bagagem_n2": (2500, 512, 1.15),
     "esteira_bagagem_n3": (2500, 512, 1.15),
     "alimentacao": (2500, 512, 1.4),
@@ -98,6 +109,7 @@ PECAS = {
     "mesa_lounge": (800, 256, 0.35),
     "bar_lounge": (2000, 512, 0.72),
     "caixa_ferramentas": (600, 256, 0.25),
+    "painel_ferramentas_parede": (1200, 512, -0.3),
     "carrinho_cafe": (1200, 512, 0.5),
     "carrinho_limpeza": (1000, 256, 0.3),
     "cavalete_manutencao": (800, 256, 0.5),
@@ -125,7 +137,16 @@ PECAS = {
     "armarios_vestiario": (1500, 512, 0.6),
     "banco_vestiario": (800, 256, 0.6),
     "arara_uniformes": (1200, 512, 0.4),
+    # Lote 12, frente F: banheiro e limpeza (mesma lista de medidas); sem a malha, Mundo.Limpeza.cs desenha a primitiva no lugar
+    "cabine_banheiro": (1500, 512, -0.55),
+    "pia_banheiro": (1200, 512, 0.6),
+    "carrinho_limpeza": (1200, 512, 0.3),
+    "maquina_piso": (1000, 256, 0.25),
+    "cone_piso_molhado": (400, 256, -0.12),
 }
+
+# pecas que ainda saem do Tripo (Lote 12): sem o FBX, a rodada completa pula com aviso em vez de parar; com ele, entram como as outras
+PENDENTES = {"pia_banheiro", "maquina_piso", "cone_piso_molhado"}
 
 
 # a View pinta na cor do voo (_Color x textura): a textura guarda so o sombreado
@@ -310,6 +331,9 @@ def main():
         with open(jpath) as f:
             registro = json.load(f)
     for nome in nomes:
+        if nome in PENDENTES and not glob.glob(os.path.join(a.src, nome + "_hd", "*.fbx")):
+            print("PENDENTE " + nome + ": sem FBX ainda, fica a primitiva")
+            continue
         ob, info = peca(nome, a.src, a.out)
         registro[nome] = info
         obs.append(ob)

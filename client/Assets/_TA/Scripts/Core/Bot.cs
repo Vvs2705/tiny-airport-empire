@@ -28,6 +28,9 @@ namespace TA.Core
         /// rende 25% na estacao toda, cerca do dobro de um nivel de velocidade (CONTRATO_FASE_C9 §6, BALANCE §16). Sem ele, contrata sempre o Pleno e
         /// nunca demite.</summary>
         public bool Candidatos;
+        /// <summary>Historias = joga pelas historias do TA-3: leva o perfil pedido (ou alguem, na parada opcional) a estacao antes de o passageiro
+        /// passar e so troca de aeroporto com o album dele cheio. Sem ele, a historia fecha quando o jogo de sempre ja cumpre o pedido.</summary>
+        public bool Historias;
 
         public static readonly BotProfile Bom = new BotProfile { Name = "Bom", Decide = 1f, Move = true, Planeja = true, Equipe = true, Rotas = true, Viaja = true, Incidentes = true, Clima = true, Falhas = true };
         public static readonly BotProfile Lento = new BotProfile { Name = "Lento", Decide = 2.5f, Move = true, Planeja = true, Equipe = true, Rotas = true, Viaja = true, Incidentes = true, Clima = true, Falhas = true };
@@ -54,6 +57,14 @@ namespace TA.Core
         /// <summary>Portao da Fase C9: o Bom e o Lento que comparam os candidatos e trocam pelo Senior.</summary>
         public static readonly BotProfile Contratador = Candidato(Bom, "Contratador"), LentoContratador = Candidato(Lento, "LentoContratador");
         public static readonly BotProfile[] All = { Bom, Lento, Parado };
+        /// <summary>Alcance do TA-3: o Completo e o LentoCompleto que jogam pelas historias.</summary>
+        public static readonly BotProfile Contador = ComHistorias(Completo, "Contador"), LentoContador = ComHistorias(LentoCompleto, "LentoContador");
+
+        static BotProfile ComHistorias(BotProfile p, string nome)
+        {
+            p.Name = nome; p.Historias = true;
+            return p;
+        }
 
         static BotProfile Candidato(BotProfile p, string nome)
         {
@@ -100,7 +111,7 @@ namespace TA.Core
             _t += dt;
             if (_t + 1e-4f < P.Decide) return;
             _t = Math.Min(_t - P.Decide, P.Decide);   // le o estado das estacoes como a tela mostra (atualizado a cada 0,5 s)
-            bool moveu = P.Move && Mover(s);
+            bool moveu = P.Historias && Historia(s) || P.Move && Mover(s);
             if (!moveu && Tocar(s)) Taps++;
             _rotaFixa = false;
             bool junta = P.Objetivos && Guia(s);
@@ -137,6 +148,7 @@ namespace TA.Core
             Objetivo o = s.ObjetivoAtual(s.AeroportoAtual);
             if (o == null)
             {
+                if (P.Historias && FaltaHistoria(s)) return false;   // so viaja com o album deste aeroporto cheio
                 for (int a = 0; a < s.T.Objetivos.Length; a++)
                 {
                     int destino = a;
@@ -248,7 +260,7 @@ namespace TA.Core
             if (s.Alocados(e) > 0) return;
             Funcionario quem = null;
             foreach (Funcionario f in s.Staff)
-                if (f.Andando == 0 && !(foraDoFluxo && (Fluxo(f.Em) || Pedida(s, f.Em))) && (quem == null || s.St(f.Em).Folga > s.St(quem.Em).Folga)) quem = f;
+                if (f.Andando == 0 && !Reservado(s, f) && !(foraDoFluxo && (Fluxo(f.Em) || Pedida(s, f.Em))) && (quem == null || s.St(f.Em).Folga > s.St(quem.Em).Folga)) quem = f;
             if (quem != null && s.Move(quem.Id, e)) Moves++;
         }
 
@@ -330,7 +342,7 @@ namespace TA.Core
                 Funcionario quem = null;
                 foreach (Funcionario f in s.Staff)
                 {
-                    if (f.Andando > 0 || f.Em == Estacao.Manutencao || s.St(f.Em).Estado == Estado.Critico) continue;
+                    if (f.Andando > 0 || f.Em == Estacao.Manutencao || s.St(f.Em).Estado == Estado.Critico || Reservado(s, f)) continue;
                     bool mec = f.Perfil == Perfil.Mecanico;
                     if (quem == null || mec || quem.Perfil != Perfil.Mecanico && s.St(f.Em).Estado == Estado.Normal && s.St(f.Em).Folga > s.St(quem.Em).Folga) quem = f;
                 }
@@ -341,7 +353,7 @@ namespace TA.Core
             {
                 Estacao casa = Funcionario.Casa(f.Perfil);
                 // Ana e Beto so voltam pela especializacao; o Caio vai a alimentacao (estacao nova) quando ela abre
-                if (f.Andando > 0 || f.Perfil == Perfil.Mecanico || !s.Especializa && (int)casa < 4 || P.Missoes && Pedida(s, f.Em)) continue;
+                if (f.Andando > 0 || f.Perfil == Perfil.Mecanico || !s.Especializa && (int)casa < 4 || P.Missoes && Pedida(s, f.Em) || Reservado(s, f)) continue;
                 if (!s.Ativa(casa) || Funcionario.Especialidade(f.Perfil, f.Em) || s.St(f.Em).Estado != Estado.Normal || s.Alocados(casa) >= s.St(casa).Postos) continue;
                 if (f.Em == Estacao.Manutencao && OficinaPrecisa(s)) continue;
                 if (s.Move(f.Id, casa)) { Moves++; return; }
@@ -356,6 +368,44 @@ namespace TA.Core
         }
 
         static bool Fluxo(Estacao e) => e == Estacao.CheckIn || e == Estacao.Seguranca || e == Estacao.Portao;
+
+        /// <summary>A ordem do fluxo, por Estacao: check-in, bagagem, seguranca, loja, alimentacao, portao (oficina e despacho fora).</summary>
+        static readonly int[] Ordem = { 0, 2, 3, 5, 1, 4, 9, 9 };
+
+        /// <summary>TA-3: o passageiro da historia esta no aeroporto e ainda nao passou da estacao `e`.</summary>
+        static bool AindaVai(Sim s, Estacao e)
+        {
+            foreach (Station st in s.Estacoes)
+                if (st.Fila.Exists(p => p.Id == s.HistoriaPax) || st.Atendendo.Exists(p => p.Id == s.HistoriaPax)) return Ordem[(int)st.Tipo] <= Ordem[(int)e];
+            return false;
+        }
+
+        /// <summary>TA-3 (Historias): leva o perfil pedido, ou alguem se a parada opcional estiver vazia, a estacao do pedido. true = moveu.</summary>
+        bool Historia(Sim s)
+        {
+            Historia x = s.HistoriaAtual;
+            if (x?.Onde is not Estacao e || s.HistoriaPasso != 0 || !AindaVai(s, e)) return false;
+            if (x.Quem is Perfil q)
+            {
+                Funcionario f = s.Staff.Find(g => g.Perfil == q);
+                if (f == null || f.Em == e || !s.Move(f.Id, e)) return false;
+                Moves++;
+                return true;
+            }
+            int antes = Moves;
+            PoeGente(s, e);
+            return Moves > antes;
+        }
+
+        static bool FaltaHistoria(Sim s)
+        {
+            for (int h = 0; h < s.T.Historias.Length; h++) if (s.T.Historias[h].Aeroporto == s.AeroportoAtual && (s.Album >> h & 1) == 0) return true;
+            return false;
+        }
+
+        /// <summary>Quem a historia segura na estacao do pedido ate o passageiro passar: o perfil pedido, ou o unico da parada opcional.</summary>
+        bool Reservado(Sim s, Funcionario f) =>
+            P.Historias && s.HistoriaAtual is Historia x && x.Onde == f.Em && s.HistoriaPasso == 0 && (x.Quem is Perfil q ? f.Perfil == q : s.Alocados(f.Em) == 1) && AindaVai(s, f.Em);
 
         /// <summary>
         /// Tripulacao: em cada voo no patio antes do embarque, a bordo fica quem tem menos trechos (descansado = 0); no empate, quem acabou de
@@ -404,7 +454,7 @@ namespace TA.Core
             foreach (Funcionario f in s.Staff)
             {
                 Station de = s.St(f.Em);
-                if (f.Andando > 0 || de == alvo || de.Estado != Estado.Normal || oficina && f.Em == Estacao.Manutencao) continue;
+                if (f.Andando > 0 || de == alvo || de.Estado != Estado.Normal || oficina && f.Em == Estacao.Manutencao || Reservado(s, f)) continue;
                 bool esp = P.Equipe && s.Especializa && Funcionario.Especialidade(f.Perfil, alvo.Tipo);
                 bool fixo = P.Equipe && (int)f.Em >= 4 && f.Em == Funcionario.Casa(f.Perfil);
                 int nota = (fixo ? 0 : 2) + (esp ? 1 : 0);
@@ -505,6 +555,11 @@ namespace TA.Core
             public int Niveis, PasseEm; public long PagoPasse;
             /// <summary>Fase C8: Cash pago nas contas do dia e dias fechados com falta de caixa (pausa).</summary>
             public long Despesas; public int Apertos;
+            /// <summary>Frente F: usos do banheiro, quem achou fechado, interdicoes, limpezas feitas, sujeira media (de 0 a Sim.SujeiraMax, media das 7 areas
+            /// medida a cada s) e a maior fila na porta do banheiro.</summary>
+            public int Usos, Negados, Interdicoes, Limpezas, FilaBanheiro; public double SujeiraMedia;
+            /// <summary>ta-suprimentos: vezes que um aviao esperou suprimento e o custo das entregas pedidas.</summary>
+            public int Faltas; public long Suprimentos;
         }
 
         /// <summary>Joga `ondas` ondas inteiras com o perfil `p` e a semente `seed`, sem render. `reabre` = fecha e reabre o jogo (Save ->
@@ -517,7 +572,8 @@ namespace TA.Core
             for (int i = 0; i < 30; i++) r.ObjetivoEm[i] = -1;
             for (int i = 0; i < r.ConquistaEm.Length; i++) r.ConquistaEm[i] = -1;
             double soma = 0;
-            long passos = (long)ondas * s.OndaPassos;
+            long passos = (long)ondas * s.OndaPassos, amostras = 0;
+            int usos = 0, usando = 0;
             while (s.Steps < passos && !(ateFechar && s.CampanhaCompleta))
             {
                 if (reabre && s.Steps % s.OndaPassos == s.OndaPassos / 2) s = Sim.Load(s.Save("autoplay", 1000 + s.Steps), t, seed);
@@ -547,8 +603,22 @@ namespace TA.Core
                             break;
                         case Ev.DiaFechado: r.Despesas += e.B; if (e.C > 0) r.Apertos++; break;
                         case Ev.ContaQuitada: r.Despesas += e.B; break;
+                        case Ev.Limpou: r.Limpezas++; break;
+                        case Ev.BanheiroInterditado: if (e.A == 1) r.Interdicoes++; break;
+                        case Ev.SuprimentoFaltou: r.Faltas++; break;
+                        case Ev.SuprimentoPedido: r.Suprimentos += e.C; break;
                     }
+                if (s.Steps % Sim.Hz == 0)
+                {
+                    foreach (int x in s.Sujeira) r.SujeiraMedia += x;
+                    amostras += Sim.Areas;
+                }
+                r.FilaBanheiro = Math.Max(r.FilaBanheiro, s.Banheiro.Fila.Count);
+                usos += Math.Max(0, s.Banheiro.Usando.Count - usando);
+                usando = s.Banheiro.Usando.Count;
             }
+            r.SujeiraMedia = amostras > 0 ? r.SujeiraMedia / amostras : 0;
+            r.Usos = usos; r.Negados = (int)Math.Min(int.MaxValue, s.Banheiro.Negados);
             r.Embarque = r.Voos > 0 ? soma / r.Voos : 0;
             r.Moves = bot.Moves; r.Taps = bot.Taps; r.Reacoes = bot.Reacoes; r.Reparos = bot.Reparos;
             return r;

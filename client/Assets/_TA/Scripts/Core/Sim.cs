@@ -58,8 +58,21 @@ using System.Collections.Generic;
 //               Total, Perdidos, Atraso, Resposta, Auto, Custo, Motivo com Estacao, Espera e Postos, Aberta, Eficaz) e sim.HoraDe(passo). So observa.
 //   Frente E:   sim.Move passa pelo vestiario (Sim.Vestiario.cs): sim.Fase(f) (Encerrando, IndoVestiario, Trocando, IndoPosto), sim.Veste(f) (o uniforme
 //               muda so no fim da troca), sim.Preparo(f) (0 a 1) e sim.TransferePassos; Funcionario.Andando = passos que faltam. Nada novo no save.
+//   Frente H:   sim.Chegantes (quem chega: Aviao, Estado NoAviao/Andando/Esperando/Pegando, Resto, Vaga, Mala, MalaSolta), sim.Esteira (Id do dono por
+//               lugar, -1 vazio; o lugar j esta na posicao (j + sim.Giro) % EsteiraCap, a boca na 0), sim.EsteiraPassos e sim.Carrinho (a fila da esteira).
+//               Sem Cash e sem intencao: quem chega desce com o desembarque do patio, espera a mala e sai (Sim.Chegada.cs).
+//   Frente F:   limpeza e banheiro (Sim.Limpeza.cs). Ler: sim.Sujeira[Area] (0 a Sim.SujeiraMax), sim.Banheiro (Cabines, Indo, Fila, Usando, Voltando,
+//               Interditado, Negados), sim.BanheiroAberto, sim.Limpeza (Zelador: Em, De, Fase Livre/Indo/Limpando, Andando, AndarTotal, Ordem), sim.Ordens,
+//               sim.TemZelador(a), sim.CustoLimpeza(), sim.TetoLimpeza, sim.Metros(a, b), Pax.Banheiro. Intencoes: sim.HireLimpeza(), sim.Limpar(area)
+//               (ordem do jogador). Ev.Limpeza*, Ev.Limpou, Ev.BanheiroInterditado. O salario entra na Folha(Despesa.Equipe).
+//   Suprimentos: sim.Estoque[s], sim.Tanque(s), sim.Pedido[s] e sim.EntregaEm(s) (passos; -1 = nada a caminho), sim.Gasto(aviao, s), Aviao.Carga
+//               (sim.Esperando(aviao, s): o caminhao de Sim.ServicoDe(s) espera a entrega), sim.VaiFaltar(s) (o aviao do aviso antes de faltar),
+//               sim.CustoTanque(s) e sim.BuyTanque(s); a entrega entra na conta do dia (Despesa.Suprimentos). Ev.Suprimento*.
+//   TA-3:       tabela sim.T.Historias (Id, Aeroporto, Marco, Onde, Quem, Todos; o texto na View). sim.HistoriaOnda (-1 = nenhuma), sim.HistoriaAtual,
+//               sim.HistoriaPax (Pax.Historia), sim.HistoriaPasso (1 = pedido cumprido, 2 = embarcou e espera o voo sem perdidos), sim.HistoriasSaiu e
+//               sim.Album (bits). Ev.Historia (A = indice). Sorteio pela semente, nada pago (Sim.Historias.cs).
 //   Gravar:     texto = sim.Save(versaoDoJogo, nowUnix): payload chave=valor dentro do SaveEnvelope (SHA-256 + schema). Grava filas e o
-//               relogio do quadro: reabrir retoma a onda do ponto gravado. Schema 12; os saves dos schemas 1 a 11 migram no Load.
+//               relogio do quadro: reabrir retoma a onda do ponto gravado. Schema 16; os saves dos schemas 1 a 15 migram no Load.
 //
 // Nomes acima sao estaveis (so crescem). Mudou a API: atualize este cabecalho e o docs/MAPA_CODIGO.md no mesmo PR.
 
@@ -73,9 +86,9 @@ namespace TA.Core
         /// <summary>Teto do dt de um quadro (s): uma travada longa nao vira um salto de minutos no relogio do quadro de partidas.</summary>
         public const float MaxFrame = 0.25f;
         /// <summary>Versao do formato do save (SaveEnvelope). Sobe a cada mudanca de formato; save de schema maior e' recusado; menor migra
-        /// no Load (12 = Fase C9: a experiencia de cada funcionario; 11 = registro de ocorrencias; 10 = Fase C8: despesas e relatorio do dia; 9 = Fase C7: passe de temporada; 8 = Fase D1: Gems e compras; 7 = Fase C6: missoes e conquistas; 6 = Fase C5: campanha; 5 = Fase C4: falhas de aviao e portao atrasado;
+        /// no Load (16 = TA-3: as 20 historias, a da onda e as que ja sairam; 15 = ta-suprimentos: estoque, entrega a caminho, carga de cada aviao e a 5a despesa; 14 = frente F: limpeza, sujeira e banheiro; 13 = frente H: chegada e restituicao; 12 = Fase C9: a experiencia de cada funcionario; 11 = registro de ocorrencias; 10 = Fase C8: despesas e relatorio do dia; 9 = Fase C7: passe de temporada; 8 = Fase D1: Gems e compras; 7 = Fase C6: missoes e conquistas; 6 = Fase C5: campanha; 5 = Fase C4: falhas de aviao e portao atrasado;
         /// 4 = Fase C3: aeroportos, rotas e incidentes; 3 = Fase C2: 8 estacoes e o perfil de cada funcionario; 2 = Fase C: avioes, tripulacao e patio; o 1 e' a v0.1).</summary>
-        public const int Schema = 12;
+        public const int Schema = 16;
         /// <summary>A equipe da v0.1 (Hire()): Ana, Beto e Caio. MaxEquipe = os 6 perfis, com Dani, Edu e Fatima (Hire(perfil)).</summary>
         public const int MaxFuncionarios = 3, MaxEquipe = 6;
 
@@ -101,7 +114,7 @@ namespace TA.Core
         /// <summary>Onda atual (0 = a 1a; -1 antes do 1o passo).</summary>
         public int Onda = -1;
         public long TotalEmbarcados, TotalPerdidos;
-        /// <summary>Historias entregues (bit = id em Historias.Texto).</summary>
+        /// <summary>Historias entregues (bit = indice em T.Historias; Sim.Historias.cs).</summary>
         public int Album;
         /// <summary>Passos de 2x renda que faltam (rewarded 2).</summary>
         public int BoostLeft;
@@ -132,6 +145,9 @@ namespace TA.Core
             Avioes = new[] { new Aviao { Id = 0 }, new Aviao { Id = 1, Rota = 1 } };
             Chega(Math.Max(0, Math.Min(T.Aeroportos.Length - 1, T.AeroportoInicial)));
             EquipePatio = T.PatioIniciais;
+            Banheiro.Cabines = Math.Max(1, T.BanheiroCabines);
+            for (int i = 0; T.RegraLimpeza && i < T.LimpezaIniciais; i++) Limpeza.Add(new Zelador { Id = i });
+            for (int i = 0; i < Suprimentos; i++) Estoque[i] = Tanque((Suprimento)i);   // jogo novo e save sem suprimentos: deposito cheio
             for (int f = 0; f < T.TripPorVoo.Length; f++)
                 for (int i = 0; i < T.TripIniciais; i++) Tripulacao.Add(NovoTripulante((Funcao)f));
         }
@@ -167,6 +183,7 @@ namespace TA.Core
             PassoIncidente();
             Sala();
             Patio();
+            Chegada();
             foreach (Voo v in Voos)
             {
                 if (v.Partiu) continue;
@@ -182,6 +199,7 @@ namespace TA.Core
             foreach (Funcionario f in Staff)
                 if (f.Andando > 0 && --f.Andando == 0) Emit(Ev.Chegou, f.Id, (int)f.Em);
             foreach (Station s in Estacoes) Atende(s, loc);
+            PassoLimpeza();
             foreach (Voo v in Voos) if (!v.Partiu && loc >= v.FechaPasso) Fecha(v);
             Decolagens();
             PassoMetas();
@@ -207,6 +225,7 @@ namespace TA.Core
             }
             for (int f = 0; f < 2; f++) Voos[f] = NovoVoo(w, f, Prog[f]);
             SorteiaIncidente(w);
+            SorteiaHistoria(w);
             if (Previsao is TipoIncidente previsto) Emit(Ev.Previsto, (int)previsto, w + 1);
             foreach (Voo v in Voos) Emit(Ev.VooCriado, v.Id, v.Total, v.FechaPasso);
             PatioNaOnda(w);
@@ -241,11 +260,13 @@ namespace TA.Core
             p.Loja = U(p.Onda, p.Voo, p.Indice, 1) < T.LojaChance;
             p.Mala = U(p.Onda, p.Voo, p.Indice, 2) < T.MalaChance;
             p.Fome = U(p.Onda, p.Voo, p.Indice, 3) < T.FomeChance;
-            p.Historia = p.Onda >= 1 && p.Voo == VooDaHistoria(p.Onda) && p.Indice == T.Pax(p.Onda) / 2;
+            p.Banheiro = U(p.Onda, p.Voo, p.Indice, 4) < T.BanheiroChance;
+            p.Historia = T.RegraHistorias ? p.Id == HistoriaPax : p.Onda >= 1 && p.Voo == VooDaHistoria(p.Onda) && p.Indice == T.Pax(p.Onda) / 2;
             return p;
         }
 
-        /// <summary>TA-3: a partir da onda 2 (indice 1), 1 passageiro por onda, no voo da sequencia de Weyl (como o VIP do Forge), o do meio da fila.</summary>
+        /// <summary>TA-3: a partir da onda 2 (indice 1), 1 passageiro por onda, no voo da sequencia de Weyl (como o VIP do Forge), do meio da
+        /// fila (Sim.Historias.cs escolhe qual historia e quem; sem a RegraHistorias, o do meio).</summary>
         public static int VooDaHistoria(int onda)
         {
             double x = onda * 0.6180339887498949;
@@ -331,6 +352,8 @@ namespace TA.Core
         void Avanca(Station s, Pax p, int loc)
         {
             Conta(Meta.Atendidos, (int)s.Tipo);
+            Suja(s.Tipo);
+            if (p.Historia) CumpreHistoria(s.Tipo);
             Voo v = VooDe(p);
             switch (s.Tipo)
             {
@@ -340,15 +363,17 @@ namespace TA.Core
                     St(Estacao.Seguranca).Fila.Add(p);
                     break;
                 case Estacao.Seguranca:
-                    St(Para(p.Loja, Estacao.Loja, v, loc) ? Estacao.Loja : Para(p.Fome, Estacao.Alimentacao, v, loc) ? Estacao.Alimentacao : Estacao.Portao).Fila.Add(p);
+                    if (Para(p.Loja, Estacao.Loja, v, loc)) St(Estacao.Loja).Fila.Add(p);
+                    else if (Para(p.Fome, Estacao.Alimentacao, v, loc)) St(Estacao.Alimentacao).Fila.Add(p);
+                    else AoPortao(p, v, loc);
                     break;
                 case Estacao.Loja:
                     Emit(Ev.Venda, p.Id, (int)Ganha((long)Math.Round(T.LojaVenda * (double)Rende(Estacao.Loja) * Gasto(v)), Fonte.Loja));
-                    St(Para(p.Fome, Estacao.Alimentacao, v, loc) ? Estacao.Alimentacao : Estacao.Portao).Fila.Add(p);
+                    if (Para(p.Fome, Estacao.Alimentacao, v, loc)) St(Estacao.Alimentacao).Fila.Add(p); else AoPortao(p, v, loc);
                     break;
                 case Estacao.Alimentacao:
                     Emit(Ev.Venda, p.Id, (int)Ganha((long)Math.Round(T.ComidaVenda * (double)Rende(Estacao.Alimentacao) * Gasto(v)), Fonte.Alimentacao));
-                    St(Estacao.Portao).Fila.Add(p);
+                    AoPortao(p, v, loc);
                     break;
                 case Estacao.Portao:
                     if (v == null || v.Embarcados >= v.Total) break;   // so com save adulterado
@@ -362,13 +387,7 @@ namespace TA.Core
                         Emit(Ev.Marco, Marco);
                         for (int e = 0; e < Estacoes.Length; e++) if (T.Abre[e] == Marco) Emit(Ev.EstacaoAberta, e);
                     }
-                    if (p.Historia)
-                    {
-                        const int h = 0;   // ponytail: 1 historia na v0.1; com mais, a proxima ainda fora do album
-                        bool nova = (Album & (1 << h)) == 0;
-                        Album |= 1 << h;
-                        Emit(Ev.Historia, h, p.Id, nova ? 1 : 0);
-                    }
+                    if (p.Historia) EmbarcaHistoria(p);
                     break;
             }
         }
@@ -394,9 +413,11 @@ namespace TA.Core
                 s.Fila.RemoveAll(p => p.Onda == v.Onda && p.Voo == v.Indice);
                 s.Atendendo.RemoveAll(p => p.Onda == v.Onda && p.Voo == v.Indice);
             }
+            TiraDoBanheiro(v);
             v.Partiu = true;
             v.Criados = v.Total;
             TotalPerdidos += v.Perdidos;
+            FechaHistoria(v);
             // Fase C2: o despacho com gente aumenta o bonus de quem sai na hora (CONTRATO_FASE_C2 §2)
             double bonus = T.Bonus + (Ativa(Estacao.Despacho) ? T.DespachoBonus * Forca(Estacao.Despacho) : 0) + Efeito(v).Bonus;
             if (v.Perdidos == 0 && v.Total > 0 && NoHorario(v))

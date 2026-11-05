@@ -35,7 +35,7 @@ namespace TA
         /// escorregando 90 graus (medido em 30/10 com -diag; a frente de cada uma foi conferida na vista de cima e de ponta no Blender).</summary>
         static readonly Dictionary<string, float> Frente = new Dictionary<string, float>
         {
-            { "aviao_narrow", -90f }, { "rebocador", -90f }, { "carrinho_bagagem", -90f }, { "caminhao_combustivel", -90f }, { "caminhao_catering", -90f }, { "escada_embarque", 180f }, { "catraca_embarque", 90f },
+            { "aviao_narrow", -90f }, { "aviao_wide", -90f }, { "aviao_cargo", -90f }, { "rebocador", -90f }, { "carrinho_bagagem", -90f }, { "caminhao_combustivel", -90f }, { "caminhao_catering", -90f }, { "escada_embarque", 180f }, { "catraca_embarque", 90f }, { "painel_ferramentas_parede", -90f },
         };
 
         /// <summary>Malha do Tripo (Resources/Malhas/nome.fbx + nome.png, pivo no chao, de frente para +z) num pai que gira em yaw; null se a
@@ -107,7 +107,9 @@ namespace TA
             Bloco("SaguaoLeste", PrimitiveType.Cube, new Vector3(16.1f, -0.08f, 6f), new Vector3(8f, 0.1f, 4.6f), CorCorredor);
             for (int e = 0; e < Salas.Length; e++) { Sala3D(e); Obra(e); }
             Vestiario3D();
+            Banheiro3D();   // banheiro a leste do vestiario (Mundo.Limpeza.cs): os blocos fixos dele entram no Funde
             Capachos();
+            Chegada3D();   // saguao de chegada (Mundo.Chegada.cs): os blocos fixos dele entram no Funde
             Funde();
             Ponte3D();
             // cenario (so com as malhas; sem elas o greybox da v0.1 nao tinha nada aqui)
@@ -117,15 +119,16 @@ namespace TA
             if (_hangar[2] != null) _hangar[2].position += Vector3.left * 2.66f;   // a malha do nivel 3 e rasa: alinha a fachada com as outras
             Peca("oficina_mecanico", new Vector3(22f, 0f, 5.8f), 180f, 0.75f);
             Peca("sala_tripulacao", new Vector3(6.2f, 0f, 9.9f), 90f, 0.85f);
-            foreach (Vector2 v in new[] { new Vector2(-0.5f, 4.5f), new Vector2(-0.5f, -0.5f), new Vector2(8.5f, -0.5f), new Vector2(12.5f, 3.5f) })
+            foreach (Vector2 v in new[] { new Vector2(-0.5f, 4.5f), new Vector2(-0.5f, -0.5f), new Vector2(12.5f, -0.5f), new Vector2(12.5f, 3.5f) })
                 Peca("vaso_planta", V3(v), 0f, 0.7f);
             // arvores so nas bordas (esquerda, direita e atras da pista, fora do alcance da asa): na frente das salas tampariam a fila
-            foreach (Vector2 v in new[] { new Vector2(-8f, 2f), new Vector2(-8.5f, 8f), new Vector2(-6f, 14.5f), new Vector2(15f, -2f), new Vector2(19f, 1f), new Vector2(0f, 38.6f), new Vector2(9f, 39.1f), new Vector2(18f, 39.3f) })
+            foreach (Vector2 v in new[] { new Vector2(-8f, 2f), new Vector2(-8.5f, 8f), new Vector2(-6f, 14.5f), new Vector2(15f, -2f), new Vector2(21.6f, 1f), new Vector2(0f, 38.6f), new Vector2(9f, 39.1f), new Vector2(18f, 39.3f) })
                 Peca("arvore", V3(v), v.x * 37f);
             foreach (Vector2 v in new[] { new Vector2(8.2f, 12.9f), new Vector2(46f, 7.2f) }) Peca("poste", V3(v), 45f, 0.75f);
             foreach (Vector2 v in new[] { new Vector2(7.3f, 15.6f) }) Peca("cone", V3(v), 0f, 0.7f);
-            Peca("conteiner_bagagem", new Vector3(7f, 0f, 16.6f), 0f);
-            Peca("conteiner_bagagem", new Vector3(8.3f, 0f, 16.6f), 0f);
+            // fora da asa baixa dos jatos da vaga G (3,74 m do eixo em x = 11,4, a 0,9 m do chao), que desce da taxiway por cima daqui
+            Peca("conteiner_bagagem", new Vector3(5.6f, 0f, 16.6f), 0f);
+            Peca("conteiner_bagagem", new Vector3(6.9f, 0f, 16.6f), 0f);
             Peca("biruta", new Vector3(30f, 0f, 19.2f), 0f);
             Peca("radar", new Vector3(29.2f, 0f, 4.4f), 0f);
             Patio3D();

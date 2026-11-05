@@ -26,6 +26,9 @@ namespace TA.Tests
             public BotProfile P; public double Embarque, EmbarqueP10, Receita, Moves, Taps; public double[] Marco;
             public double SemTrip, Inspecoes, Hangares, Checagens, Trocas, Incidentes, Reacoes, Climas, Falhas, Reparos, Objetivos, Recompensas, Diarias, Semanais, PagoMissoes, Conquistas;
             public double Despesas, Apertos;
+            public double Usos, Negados, Interdicoes, Limpezas, FilaBanheiro, SujeiraMedia;
+            /// <summary>ta-suprimentos: esperas por suprimento e custo das entregas (medias por partida).</summary>
+            public double Faltas, Suprimentos;
         }
 
         public static Linha Rodar(BotProfile p, Tuning t = null, int sementes = Sementes, int ondas = Ondas, int threads = Threads)
@@ -47,6 +50,9 @@ namespace TA.Tests
                 l.Objetivos += r.Objetivos * k; l.Recompensas += r.Recompensas * k;
                 l.Diarias += r.Diarias * k; l.Semanais += r.Semanais * k; l.PagoMissoes += r.PagoMissoes * k; l.Conquistas += r.Conquistas * k;
                 l.Despesas += r.Despesas * k; l.Apertos += r.Apertos * k;
+                l.Usos += r.Usos * k; l.Negados += r.Negados * k; l.Interdicoes += r.Interdicoes * k; l.Limpezas += r.Limpezas * k;
+                l.FilaBanheiro = Math.Max(l.FilaBanheiro, r.FilaBanheiro); l.SujeiraMedia += r.SujeiraMedia * k;
+                l.Faltas += r.Faltas * k; l.Suprimentos += r.Suprimentos * k;
                 for (int m = 0; m < 3; m++) if (r.MarcoEm[m] >= 0) { l.Marco[m] += r.MarcoEm[m]; marcos[m]++; }
             }
             for (int m = 0; m < 3; m++) l.Marco[m] = marcos[m] > 0 ? l.Marco[m] / marcos[m] : -1;
@@ -81,10 +87,10 @@ namespace TA.Tests
         /// <summary>As regras da v0.1: tripulacao, patio e manutencao so visuais (o "antes" do BALANCE.md).</summary>
         public static Tuning SemFaseC() => FechaC3(new Tuning { RegraTripulacao = false, RegraPatio = false, RegraManutencao = false });
 
-        /// <summary>O "antes" de cada fase e' o jogo de quando ela entrou: sem a conta do dia (Fase C8) e sem o vestiario (frente E). Os portoes rodam com eles.</summary>
+        /// <summary>O "antes" de cada fase e' o jogo de quando ela entrou: sem a conta do dia (Fase C8), sem o vestiario (frente E) e sem os suprimentos. Os portoes rodam com eles.</summary>
         static Tuning SemC8(Tuning t)
         {
-            t.RegraDespesas = t.RegraVestiario = false;
+            t.RegraDespesas = t.RegraVestiario = t.RegraLimpeza = t.RegraSuprimentos = t.RegraHistorias = false;
             return t;
         }
 
@@ -204,7 +210,7 @@ namespace TA.Tests
         public static Tuning SemFaseC4(Tuning t = null)
         {
             t = t ?? new Tuning();
-            t.RegraClima = t.RegraEpocas = t.RegraPicos = t.RegraFalhas = t.RegraCampanha = t.RegraMissoes = t.RegraPasse = t.RegraVestiario = false;
+            t.RegraClima = t.RegraEpocas = t.RegraPicos = t.RegraFalhas = t.RegraCampanha = t.RegraMissoes = t.RegraPasse = t.RegraVestiario = t.RegraLimpeza = t.RegraSuprimentos = t.RegraHistorias = false;
             return t;
         }
 
@@ -353,7 +359,7 @@ namespace TA.Tests
         [Test]
         public void Antes_FaseC5()
         {
-            var t = new Tuning { RegraCampanha = false, RegraMissoes = false, RegraPasse = false, RegraDespesas = false, RegraVestiario = false };
+            var t = new Tuning { RegraCampanha = false, RegraMissoes = false, RegraPasse = false, RegraDespesas = false, RegraVestiario = false, RegraLimpeza = false, RegraSuprimentos = false, RegraHistorias = false };
             Linha bom = Rodar(BotProfile.Bom, t), lento = Rodar(BotProfile.Lento, t), parado = Rodar(BotProfile.Parado, t);
             Imprime("antes da Fase C5 (a main da Fase C4)", new[] { bom, lento, parado });
             Assert.AreEqual((6279, 3872, 4702), ((int)Math.Round(bom.Receita), (int)Math.Round(lento.Receita), (int)Math.Round(parado.Receita)), "sem pagar, a tabela da fase anterior");
@@ -418,7 +424,7 @@ namespace TA.Tests
         [Test]
         public void Antes_FaseC6()
         {
-            var t = new Tuning { RegraMissoes = false, RegraPasse = false, RegraDespesas = false, RegraVestiario = false };
+            var t = new Tuning { RegraMissoes = false, RegraPasse = false, RegraDespesas = false, RegraVestiario = false, RegraLimpeza = false, RegraSuprimentos = false, RegraHistorias = false };
             Linha bom = Rodar(BotProfile.Bom, t), lento = Rodar(BotProfile.Lento, t), parado = Rodar(BotProfile.Parado, t);
             Imprime("antes da Fase C6 (a main da Fase C5)", new[] { bom, lento, parado });
             Assert.AreEqual((6586, 3534, 4660), ((int)Math.Round(bom.Receita), (int)Math.Round(lento.Receita), (int)Math.Round(parado.Receita)), "sem pagar, a tabela da fase anterior");
@@ -519,6 +525,24 @@ namespace TA.Tests
                 Linha l = Rodar(p, null, Sementes, ondas);
                 TestContext.Out.WriteLine(string.Format(ci, "| {0} | {1} | {2:0.0}% | {3:0} | {4:0} | {5:0.0}% | {6:0.00} |", p.Name, ondas, l.Embarque * 100, l.Receita, l.Despesas,
                     100 * l.Despesas / l.Receita, l.Apertos));
+            }
+        }
+
+        /// <summary>Portao da frente F (BALANCE.md §17): o banheiro, a sujeira e a equipe de limpeza nao derrubam nada. As mesmas sementes com e sem a
+        /// regra: o banheiro nunca faz perder voo (embarque) e o salario quase nao pesa (receita); e o que a satisfacao (frente G) vai ler.</summary>
+        [Test]
+        public void Portao_FrenteF_Limpeza()
+        {
+            var ci = CultureInfo.InvariantCulture;
+            TestContext.Out.WriteLine("| bot | ondas | embarque sem / com | receita sem / com | usos | maior fila | negados | interdicoes | limpezas | sujeira media |\n|---|---|---|---|---|---|---|---|---|---|");
+            foreach ((BotProfile p, int ondas) in new[] { (BotProfile.Bom, Ondas), (BotProfile.Lento, Ondas), (BotProfile.Guiado, OndasFaseC) })
+            {
+                Linha com = Rodar(p, null, Sementes, ondas), sem = Rodar(p, new Tuning { RegraLimpeza = false }, Sementes, ondas);
+                TestContext.Out.WriteLine(string.Format(ci, "| {0} | {1} | {2:0.0}% / {3:0.0}% | {4:0} / {5:0} | {6:0.0} | {7:0} | {8:0.00} | {9:0.00} | {10:0.0} | {11:0} |", p.Name, ondas,
+                    sem.Embarque * 100, com.Embarque * 100, sem.Receita, com.Receita, com.Usos, com.FilaBanheiro, com.Negados, com.Interdicoes, com.Limpezas, com.SujeiraMedia));
+                Assert.GreaterOrEqual(com.Embarque, sem.Embarque - 0.005, p.Name + ": o banheiro nao faz perder voo");
+                Assert.GreaterOrEqual(com.Receita, sem.Receita * 0.98, p.Name + ": a limpeza custa pouco");
+                Assert.Greater(com.Usos, 0, p.Name + ": o banheiro e' usado");
             }
         }
 
@@ -659,6 +683,40 @@ namespace TA.Tests
             }
         }
 
+        /// <summary>Portao da ta-suprimentos (GDD §0.5, regra 6: nenhuma despesa leva a derrota inevitavel; faltar so atrasa): com a tabela padrao, mesmas
+        /// sementes com e sem a regra, nenhum bot espera suprimento, o embarque nao cai e a conta das entregas leva no maximo 2% da receita.</summary>
+        [Test]
+        public void Portao_Suprimentos_SoAtrasa()
+        {
+            var ci = CultureInfo.InvariantCulture;
+            TestContext.Out.WriteLine("| bot | embarque com / sem | receita com / sem | razao | entregas (Cash) | esperas |\n|---|---|---|---|---|---|");
+            string falhas = "";
+            foreach (BotProfile p in new[] { BotProfile.Bom, BotProfile.Lento, BotProfile.Parado })
+            {
+                Linha com = Rodar(p), sem = Rodar(p, new Tuning { RegraSuprimentos = false });
+                double r = com.Receita / sem.Receita;
+                TestContext.Out.WriteLine(string.Format(ci, "| {0} | {1:0.0}% / {2:0.0}% | {3:0} / {4:0} | {5:0.000} | {6:0} | {7:0.00} |", p.Name, com.Embarque * 100, sem.Embarque * 100,
+                    com.Receita, sem.Receita, r, com.Suprimentos, com.Faltas));
+                if (com.Faltas > 0 || com.Embarque < sem.Embarque - 0.005 || r < 0.98) falhas += " " + p.Name + "=" + r.ToString("0.000", ci);
+            }
+            Assert.IsEmpty(falhas, "suprimento nao pode tirar embarque nem pesar mais de 2% da receita");
+        }
+
+        /// <summary>Quanto as entregas pesam ao longo da partida e o que o tanque maior (os 2 niveis, nos dois suprimentos) economiza (BALANCE.md §18).</summary>
+        [Test]
+        public void Medida_Suprimentos()
+        {
+            var ci = CultureInfo.InvariantCulture;
+            TestContext.Out.WriteLine("| bot | ondas | tanque | receita | entregas (Cash) | entregas / receita | conta paga | esperas |\n|---|---|---|---|---|---|---|---|");
+            foreach ((BotProfile p, int ondas) in new[] { (BotProfile.Bom, Ondas), (BotProfile.Guiado, OndasFaseC), (BotProfile.LentoGuiado, OndasFaseC), (BotProfile.Guiado, 64) })
+                foreach (int tanque in new[] { 8, 16 })
+                {
+                    Linha l = Rodar(p, new Tuning { SupTanque = new[] { tanque, tanque } }, 40, ondas);
+                    TestContext.Out.WriteLine(string.Format(ci, "| {0} | {1} | {2} | {3:0} | {4:0} | {5:0.00}% | {6:0} | {7:0.00} |", p.Name, ondas, tanque, l.Receita, l.Suprimentos,
+                        100 * l.Suprimentos / l.Receita, l.Despesas, l.Faltas));
+                }
+        }
+
         /// <summary>Varredura do BALANCE.md (Fase C): cada sistema sozinho, 100 sementes x 20 ondas, ganho de planejar por variante.</summary>
         [Test]
         public void Varredura_FaseC()
@@ -675,6 +733,50 @@ namespace TA.Tests
                 Mede("trip N=" + v[0] + " M=" + v[1], new Tuning { RegraTripulacao = true, RegraManutencao = false, TrechosAteDescanso = v[0], DescansoSeg = v[1] });
             foreach (int[] v in new[] { new[] { 10, 5, 15, 90 }, new[] { 10, 5, 15, 110 }, new[] { 10, 10, 10, 110 }, new[] { 15, 10, 10, 110 }, new[] { 12, 6, 10, 110 }, new[] { 20, 10, 10, 110 } })
                 Mede("manut W=" + v[0] + " Q=" + v[1] + " C=" + v[2] + " I=" + v[3], new Tuning { RegraTripulacao = false, DesgastePorTrecho = v[0], CheckTira = v[1], CheckCusto = v[2], InspecaoSeg = v[3] });
+        }
+
+        // ------------------------------------------------------------------ ta-historias (TA-3)
+
+        /// <summary>TA-3 (docs/HISTORIAS.md): as 20 historias aparecem e fecham em 200 de 200 sementes com quem joga por elas (o Contador e o
+        /// LentoContador: o Completo e o LentoCompleto que levam o perfil pedido a estacao). Nenhum compra nem assiste anuncio. Onda media, p90 e
+        /// pior de cada uma e do album cheio.</summary>
+        [Test]
+        public void Portao_Historias()
+        {
+            var ci = CultureInfo.InvariantCulture;
+            string falta = "";
+            foreach (BotProfile p in new[] { BotProfile.Contador, BotProfile.LentoContador })
+            {
+                var em = new int[Sementes][];
+                Parallel.For(0, Sementes, new ParallelOptions { MaxDegreeOfParallelism = Threads }, i => em[i] = Album(p, i + 1, OndasAlcance));
+                TestContext.Out.WriteLine(p.Name + "\n| historia | fechou | onda media | p90 | pior |\n|---|---|---|---|---|");
+                for (int h = 0; h < Tabelas.Historias.Length; h++)
+                {
+                    int[] o = em.Select(r => r[h]).Where(x => x >= 0).OrderBy(x => x).ToArray();
+                    TestContext.Out.WriteLine(string.Format(ci, "| {0} | {1}/{2} | {3:0.0} | {4} | {5} |", Tabelas.Historias[h].Id, o.Length, Sementes,
+                        o.Length > 0 ? o.Average() : -1, o.Length > 0 ? o[o.Length * 9 / 10] : -1, o.Length > 0 ? o[o.Length - 1] : -1));
+                    if (o.Length < Sementes) falta += " " + p.Name + ":" + Tabelas.Historias[h].Id + "=" + o.Length;
+                }
+                int[] cheio = em.Where(r => r.All(x => x >= 0)).Select(r => r.Max()).OrderBy(x => x).ToArray();
+                if (cheio.Length > 0)
+                    TestContext.Out.WriteLine(string.Format(ci, "album cheio: {0}/{1}, onda media {2:0.0}, p90 {3}, pior {4}", cheio.Length, Sementes, cheio.Average(), cheio[cheio.Length * 9 / 10], cheio[cheio.Length - 1]));
+            }
+            Assert.IsEmpty(falta, "toda historia aparece e fecha");
+        }
+
+        /// <summary>Onda em que cada historia entrou no album (-1 = nunca), ate o album fechar ou `ondas`.</summary>
+        static int[] Album(BotProfile p, int seed, int ondas)
+        {
+            var s = new Sim(null, seed);
+            var bot = new Bot(p);
+            int[] em = Enumerable.Repeat(-1, s.T.Historias.Length).ToArray();
+            long fim = (long)ondas * s.OndaPassos;
+            while (s.Steps < fim && s.Album != s.TodasHistorias)
+            {
+                bot.Step(s);
+                foreach (Evento e in s.Events) if (e.Tipo == Ev.Historia && em[e.A] < 0) em[e.A] = s.Onda;
+            }
+            return em;
         }
     }
 }

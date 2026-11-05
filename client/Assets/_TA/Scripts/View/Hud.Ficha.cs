@@ -157,6 +157,7 @@ namespace TA
             d.Linha = (atende ? Textos.PaxAtendido[e] : st.Tipo == Estacao.Portao && v != null && v.Embarque ? Textos.NaFilaDoEmbarque : Textos.PaxNaFila[e])
                 + (p.Historia ? Textos.ComHistoria : "");
             d.Info = Textos.NoAeroporto(espera, v != null && !v.Partiu ? (v.FechaPasso - s.PassoNaOnda) * Sim.Step : 0f, v != null && v.Atrasado);
+            if (p.Historia && s.HistoriaAtual != null) { d.Nome = Textos.Historia[s.HistoriaOnda]; d.Nota = Textos.HistoriaPede(s.HistoriaAtual); }   // TA-3: a historia dele
             return d;
         }
 
@@ -211,7 +212,7 @@ namespace TA
                 return d;
             }
             bool pax = e != Estacao.Manutencao && e != Estacao.Despacho;
-            d.Linha = e == Estacao.Despacho ? Textos.SemMelhoria
+            d.Linha = e == Estacao.Despacho ? Textos.Estoques(s.Estoque, new[] { s.Tanque(Suprimento.Combustivel), s.Tanque(Suprimento.Refeicoes) })   // o despacho cuida do patio
                 : Textos.MelhoriaNome(Melhoria.Velocidade, st.Vel, s.T.VelNiveis) + " · " + Textos.MelhoriaNome(Melhoria.Capacidade, st.Cap, s.T.CapNiveis);
             d.Info = (pax ? Textos.Balcoes(st.Postos, s.TempoSeg(e)) + " · " + Textos.NaFila(st.Fila.Count) + " · " : "") + Textos.NaEstacao(s.Alocados(e));
             if (pax) d.Topo += " · " + Textos.NaFila(st.Fila.Count);

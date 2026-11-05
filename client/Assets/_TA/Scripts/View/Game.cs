@@ -34,6 +34,7 @@ namespace TA
     ///                 hangar assim que encostar (o -record da manutencao).
     ///   -vista nome   perto | patio | geral: enquadramento das fotos e do -record (Mundo.Vista).
     ///   -perigo k     o perigo k em toda onda (PoePerigo), para fotografar o aviso.
+    ///   -rota r       as 2 vagas comecam na rota r (Tuning.RotaFixa): a foto das variantes de aviao (Mundo.Patio.ModeloDaRota).
     ///   -diag arq.csv [-diagseg s]  grava a pose dos avioes e veiculos (client/tools/diag_patio.py mede o escorregamento) e sai 0.
     ///   -perf s       K3 (GDD §5.13): depois de 5 s de aquecimento, mede s s de quadros, loga PERF p10=.. media=.. com as pessoas, os
     ///                 avioes e os veiculos na tela e sai 0. Usar com -passageiros 60.
@@ -95,6 +96,7 @@ namespace TA
                 var t = new Tuning();
                 if (int.TryParse(Arg("-passageiros"), NumberStyles.Integer, Inv, out int n) && n > 0) t.PaxFixo = Mathf.Max(1, n / 2);
                 if (int.TryParse(Arg("-perigo"), NumberStyles.Integer, Inv, out int perigo)) PoePerigo(t, perigo);
+                if (int.TryParse(Arg("-rota"), NumberStyles.Integer, Inv, out int rota)) t.RotaFixa = rota;
                 Sim = new Sim(t, 1);
                 if (int.TryParse(Arg("-onda"), NumberStyles.Integer, Inv, out int k) && k > 1) Sim.IrParaOnda(k - 1);
                 if (Arg("-bot") != null) _bot = new Bot(BotProfile.Bom);
@@ -200,6 +202,7 @@ namespace TA
         public void Escala(int voo, int tripulante) => Sim.Escala(voo, tripulante);
         public void HirePatio() => Sim.HirePatio();
         public void BuyPatio(Servico s, Melhoria m) => Sim.BuyPatio(s, m);
+        public void BuyTanque(Suprimento s) => Sim.BuyTanque(s);
         public void Checagem(int aviao) => Sim.Checagem(aviao);
         public void Hangar(int aviao) => Sim.Hangar(aviao);
         public bool Adianta() => Sim.Adianta();
@@ -294,6 +297,10 @@ namespace TA
                 case Ev.Decolou: Diario("flight_takeoff", e.A, e.B, e.C); break;
                 case Ev.PatioContratado: Diario("ground_staff_hired", e.A, e.B); break;
                 case Ev.PatioMelhorou: Diario("ground_vehicle_upgraded", e.A, e.B, e.C); break;
+                case Ev.SuprimentoPedido: Diario("supply_ordered", e.A, e.B, e.C); break;
+                case Ev.SuprimentoChegou: Diario("supply_delivered", e.A, e.B); break;
+                case Ev.SuprimentoFaltou: Diario("supply_shortage", e.A, e.B); break;
+                case Ev.SuprimentoMelhorou: Diario("supply_upgraded", e.A, e.B, e.C); break;
                 case Ev.ManutencaoAviso: Diario("maintenance_warning", e.A, e.B); _hud.Toast(Textos.ManutencaoAviso(e.B)); break;
                 case Ev.ManutencaoPendente: Diario("maintenance_due", e.A, e.B); _hud.Toast(Textos.ManutencaoPendente); break;
                 case Ev.ChecagemIniciada: Diario("maintenance_check_started", e.A, e.B, e.C); break;

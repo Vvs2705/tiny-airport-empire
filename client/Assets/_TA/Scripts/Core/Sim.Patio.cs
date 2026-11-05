@@ -64,6 +64,7 @@ namespace TA.Core
             }
             EscalaAuto();
             Servicos();
+            PassoSuprimentos();
             Checagens();
         }
 
@@ -72,8 +73,10 @@ namespace TA.Core
         void Encosta(Aviao a, bool doHangar)
         {
             a.NoPatio = true; a.Chega = Steps;
+            if (!doHangar && a.Retorno == 0) Desembarque(a);   // frente H: do hangar vem vazio; no retorno descem os remarcados
             if (a.Retorno > 0) PousoDeRetorno(a);
             for (int s = 0; s < 4; s++) { a.Falta[s] = doHangar ? 0 : ServicoPassos((Servico)s); a.Fazendo[s] = false; }
+            for (int i = 0; i < Suprimentos; i++) a.Carga[i] = doHangar || !T.RegraSuprimentos ? 0 : CargaPede;   // do hangar volta abastecido
             Desembarca(a, true);
             Liga(a);
             Emit(Ev.Pousou, a.Id, a.VooId);
@@ -180,6 +183,7 @@ namespace TA.Core
                     else if (a.Desgaste >= T.DesgasteAviso && antes < T.DesgasteAviso) Emit(Ev.ManutencaoAviso, a.Id, a.Desgaste);
                 }
                 for (int s = 0; s < 4; s++) { a.Falta[s] = 0; a.Fazendo[s] = false; }
+                Array.Clear(a.Carga, 0, Suprimentos);   // so sobra carga com o patio so visual (RegraPatio = false)
                 a.VoltaOnda = a.VooId / 2 + Efeito(a.Rota).Cada;
                 a.NoPatio = false; a.VooId = -1; a.FechouEm = -1; a.SaiEm = 0;
                 a.Chega = Steps + Passos(TrechoSeg(a.Rota));
@@ -270,6 +274,7 @@ namespace TA.Core
             Cash -= T.HangarCusto;
             Desembarca(a, false);
             for (int s = 0; s < 4; s++) { a.Falta[s] = 0; a.Fazendo[s] = false; }
+            Array.Clear(a.Carga, 0, a.Carga.Length);   // o hangar leva a carga devida
             a.Check = 0; a.NoPatio = false; a.VooId = -1; a.FechouEm = -1; a.Pane = false;
             a.Hangar = Passos(T.HangarSeg);
             Emit(Ev.HangarIniciado, a.Id, T.HangarCusto);

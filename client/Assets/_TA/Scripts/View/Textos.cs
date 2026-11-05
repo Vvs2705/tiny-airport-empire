@@ -31,7 +31,38 @@ namespace TA
         public static readonly string[] AviaoNome = { L("Regional"), L("Jato") };
         /// <summary>Os nomes da Tabelas.Rotas, na mesma ordem: o destino tem um nome so, no quadro, na campanha e na tela do voo.</summary>
         public static readonly string[] Destino = System.Array.ConvertAll(Tabelas.Rotas, r => L(r.Nome));
-        public static readonly string[] Historia = System.Array.ConvertAll(Historias.Texto, L);
+        /// <summary>As 20 historias do TA-3, na ordem de Tabelas.Historias (o indice e' o bit do album). Uma linha cada: cabe na nota do quadro.</summary>
+        public static readonly string[] Historia =
+        {
+            L("Dona Rosa vai ao casamento da neta"), L("Lia vai à entrevista de emprego"), L("Pipoca, o gato, viaja na caixinha"),
+            L("Vô Tonico leva um presente ao neto"), L("A família Souza visita a bisavó"), L("Seu Zé leva o violão da serenata"),
+            L("Gabi reencontra a amiga de escola"), L("Theo, 8 anos, voa pela 1ª vez"), L("Léo e Rafa saem em lua de mel"),
+            L("O time de vôlei vai à final"), L("Dona Lurdes vai ver o mar"), L("Nina leva a prancha de surfe"),
+            L("Bolinha, o cão, sai de férias"), L("Seu Abílio volta à terra natal"), L("Kenji faz conexão para o Japão"),
+            L("O coral da escola canta em Lisboa"), L("Dra. Iara apresenta sua pesquisa"), L("Mariana parte para o intercâmbio"),
+            L("Vô Hiro vai conhecer a netinha"), L("A banda Sol Maior vai ao festival"),
+        };
+        /// <summary>A estacao com a preposicao: "no check-in", "na loja".</summary>
+        public static readonly string[] EstacaoNa = { L("no check-in"), L("na segurança"), L("na loja"), L("no portão"), L("na bagagem"), L("na alimentação"), L("na oficina"), L("no despacho") };
+        /// <summary>O que fecha a historia, numa linha (a regra do nucleo: Historia.Onde, Quem e Todos): "atendente no portão".</summary>
+        public static string HistoriaPedido(Historia x) =>
+            x.Todos ? L("o voo sair sem perder ninguém")
+            : x.Onde is TA.Core.Estacao e ? (x.Quem is TA.Core.Perfil q ? PerfilCurto[(int)q] + " " + EstacaoNa[(int)e] : L("passar ") + EstacaoNa[(int)e])
+            : L("embarcar a tempo");
+        public static string HistoriaPede(Historia x) => L("Pede: ") + HistoriaPedido(x);
+        public static readonly string[] PerfilCurto = { L("atendente"), L("agente"), L("vendedora"), L("bagageira"), L("mecânico"), L("despachante") };
+        /// <summary>A nota do quadro: o titulo e, enquanto falta o pedido, o pedido a cada 3 s. Sem a RegraHistorias, a Dona Rosa da v0.1.</summary>
+        public static string HistoriaNota(Sim s)
+        {
+            Historia x = s.HistoriaAtual;
+            if (x == null) return Historia[0];
+            bool pede = s.HistoriaPasso == 0 && (x.Onde != null || x.Todos) && (int)(s.Time / 3f) % 2 == 1;
+            return pede ? HistoriaPede(x) : Historia[s.HistoriaOnda];
+        }
+        /// <summary>Album: a que ainda nao apareceu mostra so onde vive; a que apareceu, o pedido; a entregue, o selo.</summary>
+        public static string HistoriaOnde(Historia x) => L("Aparece em ") + AeroportoNome[x.Aeroporto] + ", " + L("terminal ") + Nivel(x.Marco);
+        public static string AlbumEstado(bool tem, Historia x) => (tem ? L("Entregue: ") : L("Pede: ")) + HistoriaPedido(x);
+        public static readonly string HistoriaOculta = L("História ainda não vista");
         public static readonly string[] Melhoria = { L("Velocidade"), L("Capacidade") };
 
         public static string Num(long n) => n.ToString("#,0", Br);
@@ -63,7 +94,7 @@ namespace TA
             Escala = L("ESCALA DO VOO"), Reparo = L("Reparo só com Cash e tempo. Nenhum avião se perde."),
             EscalaFechada = L("A escala fecha quando o embarque abre."), EscalaSemVoo = L("O avião ainda não encostou para este voo."),
             AvisoHangar = L("No hangar, este voo não embarca: você perde só o Cash dele."),
-            TripulacaoSala = L("Tripulação na sala");
+            TripulacaoSala = L("Tripulação na sala"), Restituicao = L("RESTITUIÇÃO");
 
         public static string Balcoes(int n, float seg) => n + (n == 1 ? L(" balcão · ") : L(" balcões · ")) + Seg(seg);
         public static string EstadoTexto(Estado e, int voo) => e == Estado.Critico ? L("CRÍTICO: ") + Voo(voo) + L(" em risco")
@@ -172,7 +203,6 @@ namespace TA
         public static string NaEstacao(int n) => n == 0 ? L("Ninguém aqui") : n == 1 ? L("1 pessoa aqui") : n + L(" pessoas aqui");
         public static string ChecagemEfeito(int tira, float seg) => "-" + tira + "% · " + Seg(seg);
         public static string HangarEfeito(float seg) => L("Zera o desgaste em ") + Tempo(seg);
-        public static string AlbumEstado(bool tem) => tem ? L("Entregue") : L("Ainda não");
 
         // ---------- avisos de perigo (GDD §5.8: causa, duracao e opcoes; bombeiros so de rotina, sem fogo nem acidente) ----------
         /// <summary>Na ordem de TipoIncidente.</summary>
@@ -219,9 +249,24 @@ namespace TA
                 case Motivo.Hangar: return L("Avião mandado ao hangar");
                 case Motivo.Pouso: return L("O avião não pousou a tempo");
                 case Motivo.Caixa: return L("O caixa não cobriu a conta do dia: contratar e melhorar ficam pausados até quitar");
+                case Motivo.Suprimento: return L("Faltou combustível ou refeição: o caminhão esperou a entrega");
                 default: return L("Deu certo: ninguém perdeu o voo");
             }
         }
+
+        // ---------- suprimentos: combustivel e refeicoes (ta-suprimentos; a ficha do despacho, o aviso e o cartao do patio) ----------
+        public static readonly string[] Suprimento = { L("Combustível"), L("Refeições") };
+        public static readonly string Suprimentos = L("Suprimentos"), SupSoAtrasa = L("Só a decolagem atrasa; tanque maior evita"),
+            SupReposicao = L("Reposição automática: a entrega enche o tanque"), SupCheio = L("Depósito em dia");
+        /// <summary>"Combustível 6/8 · Refeições 5/8": o deposito dos dois na ficha do despacho.</summary>
+        public static string Estoques(int[] estoque, int[] tanque) => Suprimento[0] + " " + estoque[0] + "/" + tanque[0] + " · " + Suprimento[1] + " " + estoque[1] + "/" + tanque[1];
+        public static string EntregaEm(int sup, float seg) => L("Entrega de ") + Suprimento[sup].ToLower(Br) + L(" em ") + SegInt(seg);
+        public static string VaiFaltar(int sup) => Suprimento[sup] + L(" vai faltar");
+        public static string Faltou(int sup) => L("Faltou ") + Suprimento[sup].ToLower(Br);
+        public static string EsperaEntrega(string aviao, float seg) => aviao + L(" espera a entrega: ") + SegInt(seg);
+        public static string PousaAntes(string aviao, float seg) => aviao + L(" pousa antes da entrega, em ") + SegInt(seg);
+        public static string TanqueNome(int sup, int nivel, int max) => L("Tanque de ") + Suprimento[sup].ToLower(Br) + " " + nivel + "/" + max;
+        public static string TanqueDe(string n) => n + L(" cargas · menos entregas por dia");
 
         // ---------- metas: campanha, missoes e conquistas (docs/CAMPANHA.md e docs/MISSOES.md; o nome e' o da tabela do nucleo) ----------
         public static readonly string[] AeroportoNome = System.Array.ConvertAll(Tabelas.Aeroportos, a => L(a.Nome));
@@ -351,6 +396,9 @@ namespace TA
         /// <summary>Frente E: a transferencia pelo vestiario (Sim.Fase, na ordem de Transferencia) e o preparo com o relogio (Sim.Preparo).</summary>
         public static readonly string[] FaseTransf = { L("No posto"), L("Terminando o atendimento"), L("Indo ao vestiário"), L("Trocando o uniforme"), L("Indo ao posto") };
         public static readonly string Vestiario = L("Vestiário");
+        /// <summary>Frente F: o letreiro do banheiro (interditado = fechado para limpeza) e o que o zelador faz (Sim.Limpeza.cs, na ordem de Faxina).</summary>
+        public static readonly string Banheiro = L("Banheiro"), BanheiroFechado = L("Banheiro · em limpeza");
+        public static readonly string[] Faxina = { L("Livre"), L("Indo limpar"), L("Limpando") };
         public static string Preparo(float frac, float seg) => L("Preparo ") + (int)System.Math.Round(frac * 100f) + L("% · no posto em ") + Tempo(seg);
         public static string NaFila(int n) => n + L(" na fila");
         public static string FuncaoDe(Tripulante t) => t.Funcao == TA.Core.Funcao.Piloto ? L("Piloto") : t.Indice % 2 == 0 ? L("Comissária") : L("Comissário");   // a folha da comissaria vai nos indices pares
