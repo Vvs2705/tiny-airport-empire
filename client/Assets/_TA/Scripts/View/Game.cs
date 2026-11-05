@@ -80,7 +80,7 @@ namespace TA
             if (_test) Application.runInBackground = true;   // fotos e gravacao nao param quando a janela perde o foco
             _speed = _test ? Mathf.Clamp(ArgF("-speed", 1f), 0.1f, 20f) : 1f;
             if (_test && int.TryParse(Arg("-vel"), NumberStyles.Integer, Inv, out int vel)) Velocidade = Mathf.Clamp(vel, 0, 3);
-            _le = e => { Trata(e); _hud.M.Evento(e); };
+            _le = e => { Trata(e); _hud.M.Evento(e); Audio.Play(AudioEventos.Som(e.Tipo, Sim.AeroportoAtual)); if (e.Tipo == Ev.AeroportoChegada) Audio.MusicaAeroporto(Sim.AeroportoAtual + 1); };
             string dir = Application.persistentDataPath;
             _save = Path.Combine(dir, "save.txt");
             _diario = Path.Combine(dir, "diario.csv");
@@ -117,6 +117,8 @@ namespace TA
             cam.backgroundColor = Art.Bg;
             _hud = gameObject.AddComponent<Hud>();
             _hud.Build(this);
+            Audio.Init(gameObject);
+            Audio.MusicaAeroporto(Sim.AeroportoAtual + 1);
             _hud.TourGrava = !_test;
             _hud.TourLigado = !_test || Arg("-tutorial") != null;
             _hud.TourAuto = _bot != null;

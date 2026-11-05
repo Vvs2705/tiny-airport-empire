@@ -1750,7 +1750,7 @@ Estado atualizado em 03/11/2026 sobre a `main` em `49e1597` (48 PRs; o #49 está
 | P-12 | Artes finais e áudio | Obrigatório | Revisão dentro do jogo | `EM ANDAMENTO` (arte do Tripo no jogo, PR #21; áudio gerado e sem ligação, PR #19) | ícone aplicado ao build, variantes de aeronave, `ta-audio`; D-14 aprovada |
 | P-13 | Performance mobile | Bloqueador | Relatório de profiling | `NÃO INICIADO` (K3 só no PC: p10 de 58,7 FPS; aparelho de entrada por último, D-24) | P-02; aparelhos dos amigos do dono |
 | P-14 | AAB/IPA assinados | Bloqueador | Artefatos e hashes | `BLOQUEADO` (appId e chave de upload feitos, PR #39; falta o AAB de release) | AAB: Play Console e a cópia segura da chave. IPA: fora do lançamento (D-04) |
-| P-15 | Página de loja e criativos | Obrigatório | Pacote final | `BLOQUEADO` | build real para gravar; Play Console |
+| P-15 | Página de loja e criativos | Obrigatório | Pacote final | `EM ANDAMENTO` (textos da ficha em pt-BR e inglês, ícone 512, gráfico de recursos 1024×500, roteiro das 8 capturas e as ferramentas `fotos_play.sh` e `ficha_play.py`, em `docs/FICHA_PLAY.md`; o `checa_repo` confere os limites e as promessas proibidas) | as 8 capturas com o Tripo na rodada local; revisão humana do inglês; Play Console |
 | P-16 | Telemetria e crash reporting | Obrigatório | Eventos verificados em ambiente de teste | `EM ANDAMENTO` (diário CSV com os eventos do §15.1; D-11 decidida, PR #38) | SDK do Unity Analytics (`ta-telemetria`) |
 | P-17 | Proteção anti-fraude e segredos | Bloqueador | Checklist de segurança | `EM ANDAMENTO` (crédito idempotente e sem token no disco, PR #43; `checa_repo` contra segredos, PR #16; auditoria de 05/11 em `docs/SEGURANCA_PRIVACIDADE.md`: histórico sem segredo, flags de teste só em build de dev, CI sem `pull_request_target`, permissões Android em lista curta; servidor de validação com limite, kill switch e log sem token, `docs/LOJA_SERVIDOR.md`) | subir o servidor (P-08) |
 | P-18 | Teste de regressão final | Bloqueador | Relatório com todos os testes críticos | `NÃO INICIADO` | todas as anteriores, inclusive P-19 |
@@ -2038,7 +2038,7 @@ Impacto: nenhum em regra de design, guardrail, monetização, privacidade ou seg
 | 7 | Tabela do passe (§6.4, P-07) | `docs/TEMPORADA_S1.md`, 28 dias, 150 pontos por nível | o arquivo não existe; a trilha gratuita está em medição | a decidir quando o PR da `ta-passe` entrar; vale o que o bot medir | em andamento |
 | 8 | Histórias e aeronaves (§4.1) | 20 histórias e 8 variantes de aeronave | 1 história; 8 aeronaves no pátio (PR #69, medido no ramo, à espera da confirmação na rodada da leva) | o texto; é trabalho a fazer | `ta-historias`, `ta-patio-avioes` |
 | 9 | Idiomas (D-08) | pt-BR e en no lançamento | `Textos.cs` só tem pt-BR | o texto; é trabalho a fazer | `ta-ingles` |
-| 10 | Áudio (§12) | efeitos e música no jogo | gerados e sem chamada | o texto; é trabalho a fazer | PR #19; `ta-audio` |
+| 10 | Áudio (§12) | efeitos e música no jogo | tocam por evento e a música segue o aeroporto | o dono ouvir antes de valer | PR #19; `ta-audio` |
 | 11 | Gems (§6.1) | "só se D-05 aprovar" | aprovadas; no save (schema 8); a cadeia de um aeroporto fechada paga 100 Gems | a decisão e o código | PR #43; `CONTRATO_FASE_D1.md` |
 
 ## v1.5 — 03/11/2026 (Claude; mistura aprovada pelo Vinicius em 03/11/2026 com "pode seguir desta forma"; aprovação do texto: **pendente**)

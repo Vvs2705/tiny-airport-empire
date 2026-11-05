@@ -18,9 +18,9 @@ namespace TA
         /// <summary>Vaga da pessoa no portão: cadeira (o índice), lugar na serpentina (VagaFila + k) ou pódio (VagaPosto + posto).</summary>
         const int VagaFila = 1000, VagaPosto = 2000, Chamados = 13;
         /// <summary>Medidas em m, na régua do adulto de 0,5 m. A cadeira tem 4 lugares, encosto em -Frente e o centro do assento a RecuoAssento à frente do centro da malha.</summary>
-        const float EscalaCadeira = 0.5f, LarguraCadeira = 1.6f * EscalaCadeira, PassoAssento = LarguraCadeira / 4f, PassoFileira = 0.44f, FolgaParede = 0.14f, RecuoAssento = 0.045f;
+        const float EscalaCadeira = 0.5f, LarguraCadeira = 1.6f * EscalaCadeira, PassoAssento = LarguraCadeira / 4f, PassoFileira = 0.47f, FolgaParede = 0.14f, RecuoAssento = 0.045f;
         /// <summary>De pé diante do lugar, antes de sentar; meio corredor central; d do corredor atrás da fila, na linha das portas oeste e leste; 1ª fileira da serpentina; a agente e a pessoa da vez, cada uma de um lado do pódio.</summary>
-        const float RecuoPe = 0.17f, MeioCorredor = 0.17f, DCorredor = 1.62f, DFila = 1.06f, PassoFila = 0.22f, PassoLinha = 0.24f, FolgaPorta = 0.24f, PassoPodio = 0.22f;
+        const float RecuoPe = 0.185f, MeioCorredor = 0.17f, DCorredor = 1.62f, DFila = 1.06f, PassoFila = 0.22f, PassoLinha = 0.24f, FolgaPorta = 0.24f, PassoPodio = 0.22f;
         /// <summary>Tempo de sentar (s) e o quanto o boneco sai do chão para a câmera: sentado, desenha por cima da própria cadeira e por baixo da da frente;
         /// no pódio, por cima do tampo, que é alto e está logo atrás dele.</summary>
         const float TempoSenta = 0.42f, FrenteSentado = 0.25f, FrentePodio = 0.28f;
@@ -77,10 +77,14 @@ namespace TA
             }
         }
 
-        /// <summary>As cadeiras de uma coluna em `a`, do fundo da sala até o corredor.</summary>
+        /// <summary>As cadeiras de uma coluna em `a`, do fundo da sala até o corredor.
+        /// ponytail: a rodada da leva 3 achou 45 a 90 pessoa x cadeiras_espera. A folga era 0,01 m entre o corpo (0,1 m) e a frente da cadeira no
+        /// corredor da fileira, 0,02 m até o encosto da coluna seguinte e 0,01 m entre o corredor de trás da fila e a ponta da cadeira. Agora: a pessoa
+        /// fica a 0,185 m do assento (0,025 m da frente), as colunas a 0,47 m (0,035 m do encosto) e as cadeiras a 0,02 m da parede do fundo (0,04 m
+        /// do corredor). Continuam 6 colunas de 2 cadeiras de 4 lugares (as 48 da Tuning.CadeirasPortao).</summary>
         void Fileiras(float a)
         {
-            for (float d = Interno - 0.05f - LarguraCadeira * 0.5f; d - LarguraCadeira * 0.5f > DCorredor + 0.08f; d -= LarguraCadeira + 0.02f)
+            for (float d = Interno - 0.02f - LarguraCadeira * 0.5f; d - LarguraCadeira * 0.5f > DCorredor + 0.08f; d -= LarguraCadeira + 0.02f)
             {
                 Vector2 c = Em(Portao, d, a);
                 _cadeiras.Add(c);
