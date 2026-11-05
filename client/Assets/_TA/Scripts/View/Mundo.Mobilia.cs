@@ -13,7 +13,7 @@ namespace TA
     public sealed partial class Mundo
     {
         const float AltoFundo = 0.6f, AltoFrente = 0.14f, EspParede = 0.08f, LadoLadrilho = 0.85f, PosteA = 1.42f, FitaLarg = 2.54f;
-        static readonly Color PisoPublico = Art.Hex(0xE8E2D4), PisoServico = Art.Hex(0xAEB6C4), CorCorredor = Art.Hex(0x7C8596), CorCapa = Art.Hex(0xFFFFFF), CorCapacho = Art.Hex(0x3A4254), CorZona = Art.Hex(0xF2C14E);
+        static readonly Color PisoServico = Art.Hex(0xAEB6C4), CorCorredor = Art.Hex(0x7C8596), CorCapa = Art.Hex(0xFFFFFF), CorCapacho = Art.Hex(0x3A4254), CorZona = Art.Hex(0xF2C14E);
 
         readonly Transform[] _obra = new Transform[8];
         readonly Dictionary<(Transform pai, Color cor), List<CombineInstance>> _fixos = new Dictionary<(Transform pai, Color cor), List<CombineInstance>>();
@@ -104,7 +104,13 @@ namespace TA
             _fixos.Clear();
         }
 
-        static Color PisoCor(int e) => Color.Lerp(e == SalaOficina || e == SalaDespacho ? PisoServico : PisoPublico, Art.EstacaoCor[e], 0.1f);
+        /// <summary>Cor por zona (COMPETITIVO h.5: a cor do piso diz quem anda ali). Lado terra (check-in, bagagem, chegada) quente, controle (seguranca) lilas claro,
+        /// lado ar (loja, alimentacao, portao, banheiro) azul claro e apoio (oficina, despacho, vestiario) cinza-azulado.</summary>
+        static readonly Color PisoTerra = Art.Hex(0xF5D8BE), PisoControle = Art.Hex(0xE6E1F2), PisoAr = Art.Hex(0xD6E8F2);
+        static Color ZonaCor(int e) => e == SalaOficina || e == SalaDespacho ? PisoServico : e == (int)Estacao.CheckIn || e == (int)Estacao.Bagagem ? PisoTerra : e == (int)Estacao.Seguranca ? PisoControle : PisoAr;
+        static Color PisoCor(int e) => Color.Lerp(ZonaCor(e), Art.EstacaoCor[e], 0.08f);
+        /// <summary>Parede com um toque da zona: o corte inteiro le em blocos de cor, como nos lideres do genero.</summary>
+        static Color ParedeCor(int e) => Color.Lerp(CorParede, ZonaCor(e), 0.35f);
 
         /// <summary>Quatro ladrilhos claros com rejunte, repetidos no piso; a cor da sala vem do _Color.</summary>
         static Texture2D Ladrilho()

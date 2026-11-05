@@ -12,7 +12,7 @@ namespace TA.EditorTools
     ///   Unity -batchmode -quit -projectPath client -executeMethod TA.EditorTools.Setup.Apply
     ///   Unity -batchmode -quit -projectPath client -executeMethod TA.EditorTools.Setup.BuildWindows (ou BuildAndroidDev)
     /// A cena e' artefato gerado e vazia: o Game nasce sozinho (RuntimeInitializeOnLoadMethod).
-    /// Fase A: so builds de desenvolvimento. Release, AAB, chave de upload e icones esperam o nome e o appId (D-03, GDD §23.2).
+    /// Fase A: so builds de desenvolvimento. Release, AAB e chave de upload esperam o nome e o appId (D-03, GDD §23.2).
     /// </summary>
     public static class Setup
     {
@@ -35,6 +35,8 @@ namespace TA.EditorTools
             int Part(int i) => i < n.Length && int.TryParse(n[i], out int x) ? x : 0;
             return (Part(0) * 10000 + Part(1) * 100 + Part(2)) * 10 + stage;
         }
+
+        const string Icone = "Assets/_TA/Art/Marca/icone_app.png";
 
         [MenuItem("TA/Aplicar settings")]
         public static void Apply()
@@ -60,6 +62,11 @@ namespace TA.EditorTools
             PlayerSettings.defaultScreenWidth = 540;
             PlayerSettings.defaultScreenHeight = 960;
             PlayerSettings.resizableWindow = true;
+            // icone do app (Art/Marca, docs/FICHA_PLAY.md §3): o icone padrao vale para todas as plataformas; o Unity gera os tamanhos do Android
+            // ponytail: icone legado; o adaptativo (camada de frente ate 0,64) entra se o launcher cortar o aviao no aparelho
+            Texture2D icone = AssetDatabase.LoadAssetAtPath<Texture2D>(Icone);
+            if (icone != null) PlayerSettings.SetIcons(NamedBuildTarget.Unknown, new[] { icone }, IconKind.Any);
+            else Debug.LogWarning("TA Setup: falta " + Icone);
 
             if (!File.Exists(Scene))
             {

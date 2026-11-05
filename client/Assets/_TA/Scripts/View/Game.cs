@@ -39,7 +39,8 @@ namespace TA
     ///   -rota r       as 2 vagas comecam na rota r (Tuning.RotaFixa): a foto das variantes de aviao (Mundo.Patio.ModeloDaRota).
     ///   -diag arq.csv [-diagseg s]  grava a pose dos avioes e veiculos (client/tools/diag_patio.py mede o escorregamento) e sai 0.
     ///   -perf s       K3 (GDD §5.13): depois de 5 s de aquecimento, mede s s de quadros, loga PERF p10=.. media=.. com as pessoas, os
-    ///                 avioes e os veiculos na tela e sai 0. Usar com -passageiros 60.
+    ///                 avioes e os veiculos na tela, e o veredito K3 OK|FAIL: p10 &gt;= -perfmin (padrao 30) e, no pico da medida, pessoas &gt;= 60,
+    ///                 avioes &gt;= 2 e veiculos &gt;= 6. Sai 0 (OK) ou 1 (FAIL). Usar com -passageiros 60 -bot (client/tools/k3.sh, PC e Android).
     /// </summary>
     public sealed class Game : MonoBehaviour
     {
@@ -552,18 +553,33 @@ namespace TA
             Sim.Hangar(0);
         }
 
-        /// <summary>K3: p10 do FPS (o quadro mais lento dos 90% mais rapidos) e a media, em tempo real, sem o aquecimento.</summary>
+        /// <summary>K3: p10 do FPS (o quadro mais lento dos 90% mais rapidos) e a media, em tempo real, sem o aquecimento; o pico de pessoas,
+        /// avioes e veiculos na medida (amostra a cada 0,5 s) e o veredito contra o criterio (K3Criterio). Sai 0 se passou, 1 se nao.</summary>
         IEnumerator Perf(float seg)
         {
             yield return new WaitForSecondsRealtime(5f);
             var dts = new List<float>();
-            float fim = Time.realtimeSinceStartup + seg;
-            while (Time.realtimeSinceStartup < fim) { yield return null; dts.Add(Time.unscaledDeltaTime); }
+            int pessoas = 0, avioes = 0, veiculos = 0;
+            float fim = Time.realtimeSinceStartup + seg, amostra = 0f;
+            while (Time.realtimeSinceStartup < fim)
+            {
+                yield return null;
+                dts.Add(Time.unscaledDeltaTime);
+                if (Time.realtimeSinceStartup < amostra) continue;
+                amostra = Time.realtimeSinceStartup + 0.5f;
+                _hud.M.Conta(out int p, out int a, out int v);
+                pessoas = Mathf.Max(pessoas, p); avioes = Mathf.Max(avioes, a); veiculos = Mathf.Max(veiculos, v);
+            }
             dts.Sort();
-            float p90 = dts[Mathf.Clamp((int)(dts.Count * 0.9f), 0, dts.Count - 1)], soma = 0f;
+            float p90 = dts[Mathf.Clamp(dts.Count * 9 / 10, 0, dts.Count - 1)], soma = 0f;   // conta inteira, como o Telemetria.Calcula
             foreach (float d in dts) soma += d;
-            Debug.Log(string.Format(Inv, "PERF p10={0:0.0} media={1:0.0} quadros={2} {3} {4}x{5}", 1f / p90, dts.Count / soma, dts.Count, _hud.M.Contagem(), Screen.width, Screen.height));
-            Application.Quit(0);
+            float p10 = 1f / p90;
+            Debug.Log(string.Format(Inv, "PERF p10={0:0.0} media={1:0.0} quadros={2} {3} {4}x{5}", p10, dts.Count / soma, dts.Count, _hud.M.Contagem(), Screen.width, Screen.height));
+            string falta = K3Criterio.Falta(p10, ArgF("-perfmin", K3Criterio.P10Min), pessoas, avioes, veiculos);
+            // sem o modelo do aparelho (telemetria: nenhum dado do aparelho no jogo); o k3.sh android anota o modelo pelo adb
+            Debug.Log(string.Format(Inv, "K3 {0} p10={1:0.0} pico pessoas={2} avioes={3} veiculos={4}", falta == null ? "OK" : "FAIL", p10, pessoas, avioes, veiculos)
+                + (falta == null ? "" : " falta: " + falta));
+            Application.Quit(falta == null ? 0 : 1);
         }
 
         IEnumerator DiagPatio(string arq, float seg)
