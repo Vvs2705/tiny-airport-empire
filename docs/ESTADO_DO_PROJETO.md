@@ -33,6 +33,7 @@ client/tools/verify.sh android   # núcleo, APK de desenvolvimento e checa_apk (
 - `quick` é o do dia a dia (cerca de 3 minutos, medido em 2026-11-02). `full` roda uma vez antes de todo PR que mexe no jogo.
 - O `checa_repo.py` confere `.meta` e GUID, núcleo sem Unity, guardrails (nenhum interstitial, nada aleatório pago, sem `AD_ID`), arquivos proibidos no git, segredos e se todo arquivo novo está em `docs/MAPA_CODIGO.md`.
 - O CI (`.github/workflows/`) repete o `checa_repo` e o `dotnet test` em cada PR (`nucleo.yml`; a `main` exige esse check verde) e roda os portões do bot de balanço (`balanco.yml`, cerca de 15 min).
+- Desde 05/11 o Unity também roda no CI (`unity.yml`, GameCI no runner do GitHub, sem gastar o PC): EditMode (cerca de 20 min) e os builds Windows e Android de dev (cerca de 10 min) em todo PR que mexe em `client/`, com as primitivas, porque as malhas do Tripo ficam fora do git. A frente vê o próprio erro antes do merge; o `full` local fica para o autoplay do .exe, as fotos e as medidas com malha (`diag_caixas`, K3), uma vez por leva. Segredos `UNITY_LICENSE`, `UNITY_EMAIL` e `UNITY_PASSWORD` cadastrados pelo `client/tools/ci-segredos.cmd`. O CI só sobe logs como artefato, nunca APK ou AAB (repositório público).
 - Os logs de cada rodada ficam em `client/Builds/verify/`. Fotos 540×960 de cada tela são conferidas à mão.
 
 **Balanço do jogo.** Não há planilha: um bot headless (`Scripts/Core/Bot.cs`) joga 200 sementes × 10 ou 20 ondas e mede o que o GDD chama de portões (TA-1, TA-2 e o portão de design do §5.13). Toda mudança de número vem com antes e depois em `docs/BALANCE.md`.
@@ -89,7 +90,7 @@ Link de cada PR: `https://github.com/Vvs2705/tiny-airport-empire/pull/<n>`.
 | **Áudio** | 8 sons em 13 arquivos e 3 músicas, sintetizados por script (sem licença); `Audio.cs` ligado no `Game.cs`: 7 sons tocam por evento do núcleo (`AudioEventos.cs`) e a música segue o aeroporto; volume de música e efeitos na tela de configurações (0% = mudo); falta o dono ouvir antes de valer | [#19](https://github.com/Vvs2705/tiny-airport-empire/pull/19) |
 | **Nome e marca** | "Little Terminal", appId, chave de upload (fora do git), 5 companhias renomeadas, aeroportos mantidos | [#39](https://github.com/Vvs2705/tiny-airport-empire/pull/39) |
 
-Medidas que existem: K3 no **PC** (p10 de 58,7 FPS, média de 59,5, trava de 60, com 56 pessoas, 2 aviões e 6 veículos em 540×960; `docs/CONTRATO_V01.md`) e o K3 do núcleo (`K3Tests`, 2026-11-05: na cena do `-passageiros 60` a 3x, pico de 64 passageiros, mediana de 0,004 ms e p99 de 0,05 ms por quadro, 59 bytes de lixo por quadro). O resto das medidas está no `docs/BALANCE.md`.
+Medidas que existem: K3 no **PC** (p10 de 58,7 FPS, média de 59,5, trava de 60, com 56 pessoas, 2 aviões e 6 veículos em 540×960; `docs/CONTRATO_V01.md`) e o K3 do núcleo (`K3Tests`, 2026-11-05: na cena do `-passageiros 60` a 3x, pico de 64 passageiros, mediana de 0,004 ms e p99 de 0,05 ms por quadro, 59 bytes de lixo por quadro). Desde a frente de telemetria (05/11), o diário grava o `performance_sample` (p10 e média do FPS a cada 60 s) e o `device_class` (RAM em GB e núcleos, sem modelo do aparelho), e o `diario_report.py` tira o K3 em campo dos diários. O resto das medidas está no `docs/BALANCE.md`.
 
 ## 6. Em andamento (não está na `main`)
 
@@ -111,7 +112,7 @@ Parada: a geração da peça `painel_ferramentas_parede` no Tripo (o navegador c
 Do mais importante para o menos.
 
 1. **Pessoa atravessando peça.** Em 2026-11-01 eram 237 encontros de pessoa com parede ou móvel nos 5 cenários de medida (153 de parede e 84 de móvel); a meta é **zero**. Medidores: `client/tools/diag_caixas.py` e `client/tools/diag_pessoas.py`. Frente: `ta-caminhos`.
-2. **Desempenho não medido no aparelho.** O K3 (p10 de FPS ≥ 30 num Android de entrada, com 60 pessoas, 2 aviões e 6 veículos) só foi medido na tela do PC. Desde 2026-11-05 o K3 é de máquina, sem amigos (D-24 atualizada): o `K3Tests` mede o núcleo no `quick`, o `-perf` dá o veredito `K3 OK|FAIL` e o `client/tools/k3.sh pc|android` roda a medida; falta o `k3.sh pc` na rodada da leva e o `k3.sh android` no celular de teste, no último passo.
+2. **Desempenho não medido no aparelho.** O K3 (p10 de FPS ≥ 30 num Android de entrada, com 60 pessoas, 2 aviões e 6 veículos) só foi medido na tela do PC. Desde 2026-11-05 o K3 é de máquina, sem amigos (D-24 atualizada): o `K3Tests` mede o núcleo no `quick`, o `-perf` dá o veredito `K3 OK|FAIL` e o `client/tools/k3.sh pc|android` roda a medida; falta o `k3.sh pc` na rodada da leva e o `k3.sh android` no celular de teste, no último passo. Se o dono mandar diários do teste dele, o `diario_report.py` também tira o p10 de cada aparelho (seção "K3 em campo", desde a frente de telemetria).
 3. **K2 sem gente.** O portão da v0.1 pede teste com pelo menos 20 pessoas reais; hoje só o bot jogou. O relatório sai de `client/tools/diario_report.py`.
 4. **`painel_ferramentas_parede` sem gerar** (peça de parede da oficina). Parada por problema de navegador, sem crédito gasto.
 5. **Aviso do firewall do Windows no build de desenvolvimento.** O `.exe` que o `verify.sh full` e as fotos abrem pede liberação do firewall; só o dono aprova esse tipo de janela (UAC e firewall ficam com ele), e há um comando preparado para ele. Enquanto não for liberado, o aviso aparece em cada máquina nova.
@@ -135,7 +136,7 @@ Ordem de trabalho de 2026-11-03, depois da mistura com o GDD de direção (`GDD.
 6. **E, transferência pelo vestiário**: parcial (`ta-vestiario`: núcleo, tela e as peças do Tripo); falta a validação em build na rodada do Unity da leva.
 7. **F, limpeza e banheiro**: parcial (frente F: núcleo, tela e save schema 14; o banheiro nunca faz perder voo e a sujeira ainda não mexe no Cash); falta a validação em build na rodada do Unity da leva, as malhas da pia, da lavadora e do cone, e a tela de contratar e mandar limpar. A API que a G lê está no `CONTRATO_LANCAMENTO.md` §5.
 8. **G, satisfação com motivo**: parcial (frente G: núcleo, ficha do passageiro e selo do HUD, save schema 17; só leitura, a gorjeta ficou desligada pelo portão do §5.13); falta a validação em build na rodada do Unity da leva e o balão de humor do boneco ler a nota do núcleo. A API que a I lê está no `CONTRATO_LANCAMENTO.md` §6.
-9. **I, painel de operações** com o relatório do dia. A última ocorrência e as do dia saem do mesmo registro.
+9. **I, painel de operações** com o relatório do dia: parcial (frente I, 05/11: núcleo `Sim.Painel.cs`, só leitura e sem save, e a tela `Hud.Painel.cs`, pela pausa e pelo coração do selo da satisfação); falta a validação em build na rodada da leva (fotos `-tela painel`) e o inglês revisado. Os textos novos têm o par em inglês em `Ingles.cs`.
 
 **Depois, a loja e o servidor, e então a lista de antes:**
 
@@ -149,7 +150,7 @@ Ordem de trabalho de 2026-11-03, depois da mistura com o GDD de direção (`GDD.
 17. **`ta-incidente5`:** o 5º incidente (volta ao portão por aviso técnico); só entra se passar no portão do §5.13.
 18. **`ta-estetica`:** auditoria visual contra os concorrentes; refazer o que estiver abaixo.
 19. **`ta-ingles`:** feito em 2026-11-05 (D-08: pt-BR e en no lançamento): `Core/Ingles.cs` com o par de cada texto, `Idiomas.cs`, troca nas configurações (vale ao reabrir) e o portão `ingles` no `checa_repo`. Falta a revisão humana do inglês e olhar as telas em inglês no aparelho (textos mais compridos, `-idioma en` nas fotos); es e id depois, com revisão humana.
-20. **`ta-telemetria`:** Unity Analytics sem dado pessoal (D-11).
+20. **`ta-telemetria`:** a parte local está na `main` (05/11): catálogo de eventos no núcleo (`Telemetria.cs`, os 67 do GDD §15.1 e os do diário), FPS e p10 no diário (`performance_sample`), `device_class` grosso e o K3 em campo no `diario_report.py`; o `checa_repo` derruba evento fora do catálogo e API de dado do aparelho. Falta o SDK do Unity Analytics (D-11): o dono liga o projeto da UGS na conta da Unity; depois, a frente instala o pacote, manda só os eventos do catálogo e muda as políticas, o Data safety (`docs/SEGURANCA_PRIVACIDADE.md` §3) e o consentimento **antes** do envio.
 21. **`ta-lgpd`:** auditoria, Data safety e exclusão feitas (`docs/SEGURANCA_PRIVACIDADE.md`, 2026-11-05); falta o consentimento e o anúncio não personalizado quando o LevelPlay entrar.
 22. **`ta-playtest`:** saiu do projeto em 2026-11-05: o dono faz o teste com amigos por conta, sem registro aqui, e os relatos entram depois como ajustes. O K3 virou medida de máquina (`K3Tests` no `quick`, `client/tools/k3.sh pc` na rodada da leva e `k3.sh android` no último passo).
 23. **`ta-loja-assets`:** ficha da Play pronta para colar em `docs/FICHA_PLAY.md` (2026-11-05): textos pt-BR e en, ícone 512 e gráfico de recursos em `docs/play/`, roteiro das 8 capturas, `fotos_play.sh` e `ficha_play.py`. Faltam o ícone aplicado no build (`Setup.cs`, adaptativo), as 8 capturas com o Tripo na rodada local e os criativos de vídeo.
@@ -179,7 +180,7 @@ Nada disso o time de código consegue resolver sozinho.
 
 ## 10. Porcentagem estimada e método
 
-**Aproximadamente 60% do contrato de lançamento** (23,5 de 39 pontos), em 2026-11-04, contados na matriz depois do passe (PR #49, linha 14 em `parcial`), da ficha (C) e das velocidades (B), com a frente A (PR #56), o vestiário (E), a limpeza e o banheiro (F) e a satisfação (G) em `parcial`.
+**Aproximadamente 63% do contrato de lançamento** (24,5 de 39 pontos), em 2026-11-05, contados na matriz depois do passe (PR #49, linha 14 em `parcial`), da ficha (C) e das velocidades (B), com a frente A (PR #56), o vestiário (E), a limpeza e o banheiro (F), a satisfação (G) e o painel de operações (I) em `parcial`.
 
 **Por que caiu de 57% (2026-11-02).** Não foi regressão: em 2026-11-03 o contrato ganhou **9 linhas**, as frentes de gestão A a I, todas em `falta`. Sobre as 30 linhas de antes, a conta **subiu** de 57% para 63% (19,0 de 30), por três mudanças: a tela de configurações (linha 21, de `falta` para `parcial`, PR #48) e a tela de metas, que fechou as linhas 11, 12 e 13 (de `parcial` para `feito`, PR #46, com `verify.sh full` verde e foto). Em pontos: 17,0 + 0,5 + 3 × 0,5 = 19,0.
 
@@ -188,15 +189,15 @@ Nada disso o time de código consegue resolver sozinho.
 | Estado | Linhas | Pontos |
 |---|---|---|
 | Feito | 12 | 12,0 |
-| Parcial | 23 | 11,5 |
+| Parcial | 24 | 12,0 |
 | Depende | 2 | 0,5 |
-| Falta | 2 | 0,0 |
-| **Total** | **39** | **24,0 → 62%** |
+| Falta | 1 | 0,0 |
+| **Total** | **39** | **24,5 → 63%** |
 
 - **Feito (12):** projeto Unity e portão; equipe móvel; pátio e manutenção; quadro de partidas; fluxo de passageiros; 4 incidentes; campanha de 30 objetivos; missões; 20 conquistas; sem interstitial; offline de 2 h; tutorial de 12 passos.
-- **Falta (2):** regressão final; e 1 das 9 frentes de gestão da v1.5 (I painel de operações).
+- **Falta (1):** regressão final.
 - **Depende (2):** anúncios recompensados reais; AAB assinado e enviado.
-- **Parcial (23):** segurança e privacidade (auditoria de 05/11; falta o servidor e o consentimento do anúncio); aeroportos; rotas; aeronaves; estações; perfis; tripulação; dia a dia; histórias; passe de temporada; loja; save; configurações, política e suporte; telemetria; arte final; despesas e salários (A); velocidades (B); ficha ao tocar (C); contratação e demissão (D); vestiário (E); limpeza e banheiro (F); satisfação com motivo (G); esteira de restituição (H). Uma a uma, estão em `docs/CONTRATO_LANCAMENTO.md` §1, com a evidência de cada PR e o que falta.
+- **Parcial (24):** segurança e privacidade (auditoria de 05/11; falta o servidor e o consentimento do anúncio); aeroportos; rotas; aeronaves; estações; perfis; tripulação; dia a dia; histórias; passe de temporada; loja; save; configurações, política e suporte; telemetria; arte final; despesas e salários (A); velocidades (B); ficha ao tocar (C); contratação e demissão (D); vestiário (E); limpeza e banheiro (F); satisfação com motivo (G); esteira de restituição (H); painel de operações (I). Uma a uma, estão em `docs/CONTRATO_LANCAMENTO.md` §1, com a evidência de cada PR e o que falta.
 
 **O que o número não mostra.** A porcentagem mede **cobertura do contrato**, não esforço restante nem risco. A maior parte do que falta é tela (aeroportos, rotas, passe e loja), as 9 frentes de gestão (nenhuma começada, e cada uma só fecha com o critério de pronto em 10 itens, `GDD.md` §0.5), integração (IAP, servidor, anúncios, telemetria) e medida em aparelho, e quase toda a parte que depende do dono está na janela de 2026-11-25 em diante. As frentes A a I valem 9 linhas do mesmo peso das demais, mas variam muito de tamanho: a conta não diz isso.
 

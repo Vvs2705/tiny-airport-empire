@@ -7,7 +7,7 @@ namespace TA
 {
     /// <summary>
     /// Satisfacao do aeroporto no HUD (frente G, Direcao §8.4): o coracao na cor da carinha com a media de quem saiu e os 3 motivos que mais pesam,
-    /// cada um com o icone e o peso medio. Tocar num motivo leva a camera a sala dele e abre a ficha da sala (ou abre o voo atrasado) e diz o motivo,
+    /// cada um com o icone e o peso medio. Tocar no coracao abre o painel de operacoes (Hud.Painel.cs); tocar num motivo leva a camera a sala dele e abre a ficha da sala (ou abre o voo atrasado) e diz o motivo,
     /// onde pesa e as reclamacoes do dia. Fica a direita, logo acima da ficha, por cima do mundo; some ate o 1o passageiro sair.
     /// </summary>
     public sealed partial class Hud
@@ -32,7 +32,7 @@ namespace TA
             Art.Fixa(_sat, Vector2.right, new Vector2(-16f, AltBase + 14f + AltFicha + 10f), new Vector2(LargSat, AltSat));
             Button total = _sat.gameObject.AddComponent<Button>();
             total.targetGraphic = fundo;
-            total.onClick.AddListener(() => { if (S.SatAmostras > 0) Toast(Textos.Satisfacao + " " + SatNota(S) + " · " + Textos.CarinhaNome[(int)S.CarinhaDe(SatNota(S))]); });
+            total.onClick.AddListener(() => AbreTela("painel"));   // o coracao e a nota abrem o painel de operacoes, com o relatorio do dia (frente I)
             _satCoracao = Icone(_sat, "Coracao", Art.Heart(), Art.Good, 14f, 18f, 60f);
             _satNota = Texto(_sat, "Nota", Tipo.Titulo, Color.white, 80f, 8f, LargSatNota - 80f, 80f);
             for (int k = 0; k < 3; k++)

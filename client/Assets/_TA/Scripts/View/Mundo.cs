@@ -444,6 +444,9 @@ namespace TA
             EventoPatio(e);
         }
 
+        /// <summary>Pessoas na tela agora (o c do performance_sample): conta barata, sem varrer renderers.</summary>
+        public int Pessoas() => _pax.Count + _patio.Count + _equipe.Count + _andantes.Count + S.Staff.Count;
+
         /// <summary>Para a medida do K3 (-perf): pessoas, avioes e veiculos ativos agora.</summary>
         public string Contagem()
         {
@@ -456,7 +459,7 @@ namespace TA
         /// <summary>O K3 sem os renderers (barato o bastante para amostrar durante a medida do -perf).</summary>
         public void Conta(out int pessoas, out int avioes, out int veiculos)
         {
-            pessoas = _pax.Count + _patio.Count + _equipe.Count + _andantes.Count + S.Staff.Count;
+            pessoas = Pessoas();
             avioes = 0;
             foreach (Aviao a in _avioes) if (a.T.gameObject.activeSelf) avioes++;
             veiculos = _veiculos.Count;
