@@ -26,6 +26,7 @@ namespace TA.Tests
         [Test]
         public void TresX_MesmoJogoQueUmX_MesmaSemente()
         {
+            Assert.Fail("quebrado de proposito: prova que o CI do Unity derruba o check (branch descartavel, nao fazer merge)");
             var e1 = new List<string>();
             var e3 = new List<string>();
             Sim a = Joga(1, e1), b = Joga(3, e3);
