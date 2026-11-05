@@ -90,7 +90,7 @@ Link de cada PR: `https://github.com/Vvs2705/tiny-airport-empire/pull/<n>`.
 | **Áudio** | 8 sons em 13 arquivos e 3 músicas, sintetizados por script (sem licença); `Audio.cs` ligado no `Game.cs`: 7 sons tocam por evento do núcleo (`AudioEventos.cs`) e a música segue o aeroporto; volume de música e efeitos na tela de configurações (0% = mudo); falta o dono ouvir antes de valer | [#19](https://github.com/Vvs2705/tiny-airport-empire/pull/19) |
 | **Nome e marca** | "Little Terminal", appId, chave de upload (fora do git), 5 companhias renomeadas, aeroportos mantidos | [#39](https://github.com/Vvs2705/tiny-airport-empire/pull/39) |
 
-Medidas que existem: K3 no **PC** (p10 de 58,7 FPS, média de 59,5, trava de 60, com 56 pessoas, 2 aviões e 6 veículos em 540×960; `docs/CONTRATO_V01.md`). O resto das medidas está no `docs/BALANCE.md`.
+Medidas que existem: K3 no **PC** (p10 de 58,7 FPS, média de 59,5, trava de 60, com 56 pessoas, 2 aviões e 6 veículos em 540×960; `docs/CONTRATO_V01.md`). Desde a frente de telemetria (05/11), o diário grava o `performance_sample` (p10 e média do FPS a cada 60 s) e o `device_class` (RAM em GB e núcleos, sem modelo do aparelho), e o `diario_report.py` tira o K3 em campo dos diários do K2. O resto das medidas está no `docs/BALANCE.md`.
 
 ## 6. Em andamento (não está na `main`)
 
@@ -112,7 +112,7 @@ Parada: a geração da peça `painel_ferramentas_parede` no Tripo (o navegador c
 Do mais importante para o menos.
 
 1. **Pessoa atravessando peça.** Em 2026-11-01 eram 237 encontros de pessoa com parede ou móvel nos 5 cenários de medida (153 de parede e 84 de móvel); a meta é **zero**. Medidores: `client/tools/diag_caixas.py` e `client/tools/diag_pessoas.py`. Frente: `ta-caminhos`.
-2. **Desempenho não medido no aparelho.** O K3 (p10 de FPS ≥ 30 num Android de entrada, com 60 pessoas) só foi medido no PC. Por decisão do dono, o celular de teste só entra no último passo de tudo; antes disso, o APK vai para amigos dele (D-24).
+2. **Desempenho não medido no aparelho.** O K3 (p10 de FPS ≥ 30 num Android de entrada, com 60 pessoas) só foi medido no PC. Por decisão do dono, o celular de teste só entra no último passo de tudo; antes disso, o APK vai para amigos dele (D-24). Os diários exportados por eles já trazem o p10 de cada aparelho (seção "K3 em campo" do `diario_report.py`), mas só a partir do APK com a frente de telemetria.
 3. **K2 sem gente.** O portão da v0.1 pede teste com pelo menos 20 pessoas reais; hoje só o bot jogou. O relatório sai de `client/tools/diario_report.py`.
 4. **`painel_ferramentas_parede` sem gerar** (peça de parede da oficina). Parada por problema de navegador, sem crédito gasto.
 5. **Aviso do firewall do Windows no build de desenvolvimento.** O `.exe` que o `verify.sh full` e as fotos abrem pede liberação do firewall; só o dono aprova esse tipo de janela (UAC e firewall ficam com ele), e há um comando preparado para ele. Enquanto não for liberado, o aviso aparece em cada máquina nova.
@@ -150,7 +150,7 @@ Ordem de trabalho de 2026-11-03, depois da mistura com o GDD de direção (`GDD.
 17. **`ta-incidente5`:** o 5º incidente (volta ao portão por aviso técnico); só entra se passar no portão do §5.13.
 18. **`ta-estetica`:** auditoria visual contra os concorrentes; refazer o que estiver abaixo.
 19. **`ta-ingles`:** feito em 2026-11-05 (D-08: pt-BR e en no lançamento): `Core/Ingles.cs` com o par de cada texto, `Idiomas.cs`, troca nas configurações (vale ao reabrir) e o portão `ingles` no `checa_repo`. Falta a revisão humana do inglês e olhar as telas em inglês no aparelho (textos mais compridos, `-idioma en` nas fotos); es e id depois, com revisão humana.
-20. **`ta-telemetria`:** Unity Analytics sem dado pessoal (D-11).
+20. **`ta-telemetria`:** a parte local está na `main` (05/11): catálogo de eventos no núcleo (`Telemetria.cs`, os 67 do GDD §15.1 e os do diário), FPS e p10 no diário (`performance_sample`), `device_class` grosso e o K3 em campo no `diario_report.py`; o `checa_repo` derruba evento fora do catálogo e API de dado do aparelho. Falta o SDK do Unity Analytics (D-11): o dono liga o projeto da UGS na conta da Unity; depois, a frente instala o pacote, manda só os eventos do catálogo e muda as políticas, o Data safety (`docs/SEGURANCA_PRIVACIDADE.md` §3) e o consentimento **antes** do envio.
 21. **`ta-lgpd`:** auditoria, Data safety e exclusão feitas (`docs/SEGURANCA_PRIVACIDADE.md`, 2026-11-05); falta o consentimento e o anúncio não personalizado quando o LevelPlay entrar.
 22. **`ta-playtest`:** K2 com 20 pessoas; K3 nos aparelhos dos amigos do dono.
 23. **`ta-loja-assets`:** ficha da Play pronta para colar em `docs/FICHA_PLAY.md` (2026-11-05): textos pt-BR e en, ícone 512 e gráfico de recursos em `docs/play/`, roteiro das 8 capturas, `fotos_play.sh` e `ficha_play.py`. Faltam o ícone aplicado no build (`Setup.cs`, adaptativo), as 8 capturas com o Tripo na rodada local e os criativos de vídeo.
