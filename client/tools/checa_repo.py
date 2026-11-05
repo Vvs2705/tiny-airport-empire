@@ -6,10 +6,17 @@ conteudo_check.py do Forge). Olha os arquivos versionados e os novos ainda sem c
   meta        todo asset de client/Assets tem .meta, nenhum .meta orfao, nenhum GUID repetido
   nucleo      TA.Core sem UnityEngine/UnityEditor e com noEngineReferences
   modulos     API usada no codigo tem o modulo no manifest.json (o viewcheck compila contra todos os modulos e nao pega)
-  guardrails  sem interstitial nem sorteio pago no codigo; o Setup tira o AD_ID do manifesto Android
+  guardrails  sem interstitial nem sorteio pago no codigo; o Setup tira o AD_ID do manifesto Android; flag de linha de comando so com
+              Debug.isDebugBuild (no Android qualquer app passa o extra "unity")
   proibidos   nada de chave, build ou arte crua no git; nada acima de 10 MB; .gitignore com as travas
   segredos    padroes de token e de chave privada em qualquer arquivo (mostra so o arquivo e o tipo, nunca o valor)
   mapa        todo .cs, .py e .sh citado no docs/MAPA_CODIGO.md
+  ingles      todo texto de tela (L("...") do Textos.cs e Nome = "..." das tabelas do nucleo) com o par em ingles em Core/Ingles.cs, sem
+              par vazio (D-08: pt-BR e en no lancamento)
+  ci          workflows do repo publico: nunca pull_request_target nem workflow_run (dariam os segredos a PR de fork), sempre com
+              permissions: explicito e sem segredo impresso em run: (GDD §8.4)
+  ficha       os textos da ficha da Play (docs/FICHA_PLAY.md) cabem nos limites (titulo 30, curta 80, longa 4000) e nao prometem o
+              que a regra da ficha proibe ("sem anuncios", "para criancas", "melhor jogo"...)
   privacidade as 2 politicas (docs/privacidade, docs/privacy) com o e-mail de suporte e citando cada pacote que pode coletar dados e
               cada API de rede do jogo (a politica tem de bater com o codigo, GDD §9.3)
 Aviso, sem falhar: arquivo .cs acima de ~600 linhas (regra do estudio: vira partial).
@@ -30,7 +37,13 @@ MANIFESTO = "client/Packages/manifest.json"
 MAPA = "docs/MAPA_CODIGO.md"
 POLITICAS = ["docs/privacidade/index.html", "docs/privacy/index.html"]
 EMAIL_SUPORTE = "suporte@vstack-solutions.com.br"
+FICHA = "docs/FICHA_PLAY.md"
+LIMITES_FICHA = {"titulo": 30, "curta": 80, "longa": 4000}
+PROIBIDAS_FICHA = ("sem anúncios", "no ads", "melhor jogo", "best game", "nº 1", "#1", "crianças", "kids", "grátis", "free to play")
 REDE = r"\b(UnityWebRequest|HttpClient|WebClient|TcpClient|UdpClient|ClientWebSocket)\b"
+TEXTOS = "client/Assets/_TA/Scripts/View/Textos.cs"
+INGLES = CORE + "Ingles.cs"
+LITERAL = r'"((?:[^"\\\n]|\\.)*)"'
 MAX_BYTES = 10 * 1024 * 1024
 MAX_LINHAS = 600
 
@@ -44,7 +57,7 @@ MODULOS = {
     "video": r"\bVideoPlayer\b",
 }
 PROIBIDOS = re.compile(
-    r"(\.(keystore|jks|p12|pfx|pem|apk|aab|obb|fbx|blend|blend1|zip|ttf\.bak)$)|(^|/)(\.env(\..+)?|upload\.properties|google-services\.json|GoogleService-Info\.plist)$",
+    r"(\.(keystore|jks|p12|pfx|pem|ulf|alf|apk|aab|obb|fbx|blend|blend1|zip|ttf\.bak)$)|(^|/)(\.env(\..+)?|upload\.properties|keystore\.properties|google-services\.json|GoogleService-Info\.plist)$",
     re.I,
 )
 TRAVAS_GITIGNORE = [
@@ -54,13 +67,24 @@ TRAVAS_GITIGNORE = [
     ".env",
     "*.apk",
     "*.aab",
+    "*.jks",
+    "*.keystore",
+    "*.ulf",
+    "upload.properties",
 ]
+WORKFLOWS = ".github/workflows/"
+CI_PROIBIDO = re.compile(r"^\s*(pull_request_target|workflow_run)\s*:", re.M)
+CI_ECO = re.compile(r"\b(echo|printf|cat)\b[^\n]*\$\{\{\s*secrets\.", re.I)
 SEGREDOS = {
     "token do GitHub": rb"\b(ghp|gho|ghs|ghu)_[0-9A-Za-z]{36}\b|\bgithub_pat_[0-9A-Za-z_]{40,}",
     "chave da Anthropic": rb"\bsk-ant-[0-9A-Za-z_-]{20,}",
     "chave do Google": rb"\bAIza[0-9A-Za-z_-]{35}(?![0-9A-Za-z_-])",
     "chave da AWS": rb"\bAKIA[0-9A-Z]{16}\b",
     "chave privada": rb"-----BEGIN [A-Z ]*PRIVATE KEY-----",
+    "chave da Stripe": rb"\b(sk|rk)_live_[0-9A-Za-z]{20,}",
+    "token do Slack": rb"\bxox[abprs]-[0-9A-Za-z-]{10,}",
+    "segredo OAuth do Google": rb"\bGOCSPX-[0-9A-Za-z_-]{20,}",
+    "licenca da Unity": rb"<DeveloperData Value=\"[A-Za-z0-9+/=]{20,}",
     "JWT": rb"\beyJ[0-9A-Za-z_-]{20,}\.eyJ[0-9A-Za-z_-]{20,}\.[0-9A-Za-z_-]{10,}",
 }
 
@@ -151,6 +175,11 @@ def checa_guardrails(repo):
             erros.append(
                 f"guardrails: {p} tem '{m.group(0)}' (nenhum interstitial, nada aleatorio pago)"
             )
+        cs = sem_comentario(texto(repo[p]))
+        if "GetCommandLineArgs" in cs and "isDebugBuild" not in cs:
+            erros.append(
+                f"guardrails: {p} le flags de linha de comando sem Debug.isDebugBuild (flag de teste so em build de dev, GDD §8.3)"
+            )
     setup = texto(repo[SETUP])
     if "SemIdDePublicidade" not in setup or "permission.AD_ID" not in setup:
         erros.append(f"guardrails: {SETUP} nao tira o AD_ID do manifesto Android")
@@ -184,6 +213,20 @@ def checa_segredos(repo):
         for nome, rx in SEGREDOS.items()
         if re.search(rx, d)
     ]
+
+
+def checa_ci(repo):
+    erros = []
+    for p in sorted(x for x in repo if x.startswith(WORKFLOWS) and x.endswith((".yml", ".yaml"))):
+        y = texto(repo[p])
+        m = CI_PROIBIDO.search(y)
+        if m:
+            erros.append(f"ci: {p} usa {m.group(1)} (repo publico: PR de fork rodaria com os segredos)")
+        if not re.search(r"^permissions\s*:", y, re.M):
+            erros.append(f"ci: {p} sem permissions: no topo (o GITHUB_TOKEN fica com o padrao amplo)")
+        if CI_ECO.search(y):
+            erros.append(f"ci: {p} imprime um segredo num run:")
+    return erros
 
 
 def checa_mapa(repo):
@@ -237,12 +280,70 @@ def checa_privacidade(repo):
     return erros
 
 
+def textos_ficha(md):
+    """{(tipo, lingua): texto} dos blocos marcados com (`titulo_pt`), (`curta_en`)... no docs/FICHA_PLAY.md."""
+    return {
+        (m.group(1), m.group(2)): m.group(3)
+        for m in re.finditer(r"\(`(titulo|curta|longa)_(pt|en)`\)\s+```\n(.*?)\n```", md, re.S)
+    }
+
+
+def checa_ficha(repo):
+    if FICHA not in repo:
+        return []
+    ts, erros = textos_ficha(texto(repo[FICHA])), []
+    for tipo, limite in LIMITES_FICHA.items():
+        for lingua in ("pt", "en"):
+            s = ts.get((tipo, lingua))
+            if s is None:
+                erros.append(f"ficha: falta o bloco {tipo}_{lingua} em {FICHA}")
+                continue
+            if len(s) > limite:
+                erros.append(f"ficha: {tipo}_{lingua} tem {len(s)} caracteres (limite da Play: {limite})")
+            erros += [
+                f"ficha: {tipo}_{lingua} tem '{p}' (regra da ficha em {FICHA})"
+                for p in PROIBIDAS_FICHA
+                if p in s.lower()
+            ]
+    return erros
+
+
 def avisos_tamanho(repo):
     for p in sorted(repo):
         if p.startswith("client/Assets/_TA/") and p.endswith(".cs"):
             n = texto(repo[p]).count("\n")
             if n > MAX_LINHAS:
                 yield f"AVISO: {p} tem {n} linhas (acima de ~{MAX_LINHAS} vira partial)"
+
+
+def desescapa(lit):
+    """O literal C# como o jogo o enxerga: \\u00A0, \\n, \\" e \\\\ viram o caractere."""
+    return re.sub(r"\\(u00A0|n|\"|\\)", lambda m: {"u00A0": "\u00a0", "n": "\n"}.get(m.group(1), m.group(1)), lit)
+
+
+def textos_de_tela(repo):
+    """Os textos pt-BR que passam por Idiomas.Traduz: os L("...") do Textos.cs e os Nome = "..." dos arquivos do nucleo."""
+    achados = set(re.findall(r"\bL\(" + LITERAL + r"\)", texto(repo[TEXTOS])))
+    for p in repo:
+        if p.startswith(CORE) and p.endswith(".cs") and p != INGLES:
+            achados.update(re.findall(r"\bNome = " + LITERAL, texto(repo[p])))
+    return {desescapa(a) for a in achados if a}
+
+
+def checa_ingles(repo):
+    if TEXTOS not in repo or INGLES not in repo:
+        return []
+    pares = re.findall(r"^\s*\[" + LITERAL + r"\]\s*=\s*" + LITERAL + ",?$", texto(repo[INGLES]), re.M)
+    en = {desescapa(pt): desescapa(val) for pt, val in pares}
+    erros = [f"ingles: sem par em {INGLES}: {pt!r}" for pt in sorted(textos_de_tela(repo)) if pt not in en]
+    erros += [f"ingles: par vazio para {pt!r}" for pt, val in sorted(en.items()) if not val.strip()]
+    # quem tem espaco (ou quebra) no comeco ou no fim e' pedaco de frase: o par tem de ter o mesmo molde
+    erros += [
+        f"ingles: {pt!r} e {val!r} diferem no espaco do comeco ou do fim"
+        for pt, val in sorted(en.items())
+        if val.strip() and (pt[:1].isspace() != val[:1].isspace() or pt[-1:].isspace() != val[-1:].isspace())
+    ]
+    return erros
 
 
 def checa(repo):
@@ -253,8 +354,11 @@ def checa(repo):
         + checa_guardrails(repo)
         + checa_proibidos(repo)
         + checa_segredos(repo)
+        + checa_ci(repo)
         + checa_mapa(repo)
         + checa_privacidade(repo)
+        + checa_ingles(repo)
+        + checa_ficha(repo)
     )
 
 
@@ -297,16 +401,30 @@ def repo_bom():
         a + "/Resources/.gitkeep": b"",  # dotfile nao pede .meta, mas a pasta sim
         POLITICAS[0]: EMAIL_SUPORTE.encode(),
         POLITICAS[1]: EMAIL_SUPORTE.encode(),
+        WORKFLOWS + "nucleo.yml": b"on:\n  pull_request:\npermissions:\n  contents: read\n",
     }
+
+
+TEXTOS_BOM = b'static string L(string pt) => pt; var x = L("Ola ") + L("Mundo");'
+INGLES_BOM = b'            ["Ola "] = "Hi ",\n            ["Mundo"] = "World",\n'
 
 
 def selftest():
     base = repo_bom()
     assert checa(base) == [], checa(base)
+    ficha_boa = "".join(
+        f"(`{t}_{l}`)\n```\n{'Little Terminal' if t == 'titulo' else 'Run it.'}\n```\n"
+        for t in LIMITES_FICHA
+        for l in ("pt", "en")
+    ).encode()
+    base[FICHA] = ficha_boa
+    assert checa(base) == [], checa(base)
     falso = {  # montados aqui para o proprio arquivo nao ter um segredo inteiro
         "gh": b"gh" + b"p_" + b"a" * 36,
         "pem": b"-----BEGIN " + b"RSA PRIVATE KEY-----",
         "goo": b"AI" + b"za" + b"b" * 35,
+        "stripe": b"sk" + b"_live_" + b"a" * 24,
+        "ulf": b"<Developer" + b"Data Value=\"" + b"QUJD" * 8,
         "jwt": b"ey" + b"J" + b"a" * 20 + b".ey" + b"J" + b"a" * 20 + b"." + b"c" * 12,
     }
     ceu = CORE + "Ceu.cs"
@@ -354,6 +472,12 @@ def selftest():
             lambda r: r.update({CORE + "Sim.cs": b"class Sim { Gacha g; }\n"}),
         ),
         ("guardrails: ", lambda r: r.update({SETUP: b"class Setup {}"})),
+        (
+            "guardrails: ",
+            lambda r: r.update(
+                {CORE + "Sim.cs": b"class Sim { string[] a = Environment.GetCommandLineArgs(); }\n"}
+            ),
+        ),
         ("proibidos: ", lambda r: r.update({"arte/tripo/x_hd/x.zip": b"x"})),
         ("proibidos: ", lambda r: r.update({"upload.properties": b"x"})),
         ("proibidos: ", lambda r: r.update({".env.local": b"x"})),
@@ -369,6 +493,26 @@ def selftest():
             lambda r: r.update({"docs/nota.md": falso["goo"]}),
         ),
         ("segredos: JWT", lambda r: r.update({"docs/nota.md": falso["jwt"]})),
+        ("segredos: chave da Stripe", lambda r: r.update({"docs/nota.md": falso["stripe"]})),
+        ("segredos: licenca", lambda r: r.update({"docs/nota.md": falso["ulf"]})),
+        ("proibidos: ", lambda r: r.update({"Unity_v6000.ulf": b"x"})),
+        ("proibidos: ", lambda r: r.update({"client/keystore.properties": b"x"})),
+        (
+            "ci: ",
+            lambda r: r.update(
+                {WORKFLOWS + "u.yml": b"on:\n  pull_request_target:\npermissions: {}\n"}
+            ),
+        ),
+        ("ci: ", lambda r: r.update({WORKFLOWS + "u.yml": b"on:\n  push:\n"})),
+        (
+            "ci: ",
+            lambda r: r.update(
+                {
+                    WORKFLOWS
+                    + "u.yml": b"permissions: {}\njobs:\n  a:\n    steps:\n      - run: echo ${{ secrets.UNITY_PASSWORD }}\n"
+                }
+            ),
+        ),
         ("mapa: ", lambda r: r.update({"client/tools/novo.py": b"x"})),
         (
             "mapa: ",
@@ -379,6 +523,9 @@ def selftest():
             lambda r: r.update({"docs/nota.md": falso["goo"][:-1] + b"- "}),
         ),
         ("privacidade: falta", lambda r: r.pop(POLITICAS[1])),
+        ("ficha: falta", lambda r: r.update({FICHA: ficha_boa.replace(b"curta_en", b"curta_xx")})),
+        ("ficha: titulo_pt", lambda r: r.update({FICHA: ficha_boa.replace(b"Little Terminal\n", b"Little Terminal: o maior aeroporto\n", 1)})),
+        ("ficha: longa_en", lambda r: r.update({FICHA: ficha_boa.replace(b"Run it.", b"Run it. No ads.")})),
         ("privacidade: ", lambda r: r.update({POLITICAS[0]: b"<p>sem contato</p>"})),
         (
             "privacidade: ",
@@ -394,12 +541,18 @@ def selftest():
                 {CORE + "Sim.cs": b"class Sim { UnityWebRequest w; }\n"}
             ),
         ),
+        ("ingles: sem par", lambda r: r.update({TEXTOS: TEXTOS_BOM, INGLES: INGLES_BOM, CORE + "Rotas.cs": b'new Rota { Nome = "Lisboa" };'})),
+        ("ingles: par vazio", lambda r: r.update({TEXTOS: TEXTOS_BOM, INGLES: b'[\"Ola\"] = \" \",\n'.replace(b"\\", b"")})),
+        ("ingles: ", lambda r: r.update({TEXTOS: TEXTOS_BOM, INGLES: b'            ["Ola "] = "Hi",\n'})),
     ]
     for esperado, quebra in casos:
         r = dict(base)
         quebra(r)
         erros = checa(r)
         assert any(e.startswith(esperado) for e in erros), (esperado, erros)
+    r = dict(base)
+    r.update({TEXTOS: TEXTOS_BOM, INGLES: INGLES_BOM})
+    assert checa_ingles(r) == [], checa_ingles(r)
     # comentario nao conta, e o erro de segredo nunca traz o valor
     r = dict(base)
     r[CORE + "Sim.cs"] = b"// sem interstitial, AudioSource so na View\nclass Sim {}\n"
