@@ -264,7 +264,7 @@ namespace TA
         public static string VaiFaltar(int sup) => Suprimento[sup] + L(" vai faltar");
         public static string Faltou(int sup) => L("Faltou ") + Suprimento[sup].ToLower(Br);
         public static string EsperaEntrega(string aviao, float seg) => aviao + L(" espera a entrega: ") + SegInt(seg);
-        public static string PousaAntes(string aviao, float seg) => aviao + L(" pousa antes da entrega, em ") + SegInt(seg);
+        public static string PousaAntes(string aviao, float seg) => aviao + L(" pousa antes, em ") + SegInt(seg);
         public static string TanqueNome(int sup, int nivel, int max) => L("Tanque de ") + Suprimento[sup].ToLower(Br) + " " + nivel + "/" + max;
         public static string TanqueDe(string n) => n + L(" cargas · menos entregas por dia");
 

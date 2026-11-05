@@ -8,6 +8,8 @@ namespace TA.Tests
 {
     /// <summary>Regras da Fase C4 (CONTRATO_FASE_C4 §2 a §4): relogio do jogo, demanda, os 5 climas com previsao e as saidas, e as 3 falhas de
     /// aviao. Cada evento tem o teste de regra e entra no teste de determinismo. As invariantes ficam no ExploitTests.</summary>
+    // 15 min por teste: no Unity do CI (runner Linux de 4 nucleos, codigo do Editor sem otimizacao) o C4 passou dos 180 s padrao (232 s em 05/11)
+    [Timeout(900000)]
     public class ClimaFalhasTests
     {
         const int Aurora = 2;
