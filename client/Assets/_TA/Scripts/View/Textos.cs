@@ -256,7 +256,7 @@ namespace TA
 
         // ---------- suprimentos: combustivel e refeicoes (ta-suprimentos; a ficha do despacho, o aviso e o cartao do patio) ----------
         public static readonly string[] Suprimento = { L("Combustível"), L("Refeições") };
-        public static readonly string Suprimentos = L("Suprimentos"), SupSoAtrasa = L("Só a decolagem atrasa; tanque maior evita"),
+        public static readonly string Suprimentos = L("Suprimentos"), SupSoAtrasa = L("Só atrasa; tanque maior evita"),
             SupReposicao = L("Reposição automática: a entrega enche o tanque"), SupCheio = L("Depósito em dia");
         /// <summary>"Combustível 6/8 · Refeições 5/8": o deposito dos dois na ficha do despacho.</summary>
         public static string Estoques(int[] estoque, int[] tanque) => Suprimento[0] + " " + estoque[0] + "/" + tanque[0] + " · " + Suprimento[1] + " " + estoque[1] + "/" + tanque[1];
