@@ -17,4 +17,5 @@ jobs:
       - run: python3 client/tools/checa_repo.py --selftest
       - run: python3 client/tools/checa_repo.py
       - run: python3 client/tools/auditar_arte.py --selftest
+      - run: python3 client/tools/checa_apk.py --selftest
       - run: dotnet test client/tools/coretests -nologo

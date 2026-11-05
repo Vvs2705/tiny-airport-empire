@@ -114,12 +114,30 @@ namespace TA
 
         /// <summary>Muda quando uma peça que a rota enxerga liga ou desliga (Acende): a perna de quem já anda é revista (Confere).</summary>
         static int _versao;
-        static void Acende(GameObject go, bool sim)
+
+        /// <summary>Liga ou desliga a peça e revê as pernas. A fita, o cordão e o posto fechado só acendem sem ninguém dentro: a tela anda atrás
+        /// do núcleo, e quem está ali passa primeiro.</summary>
+        void Acende(GameObject go, bool sim, bool esperaVazio = true)
         {
-            if (go.activeSelf == sim) return;
+            if (go.activeSelf == sim || (sim && esperaVazio && AlguemEm(go))) return;
             go.SetActive(sim);
             _versao++;
         }
+
+        /// <summary>Algum passageiro com o corpo na caixa de uma peça de `go`? Só roda enquanto a peça espera para acender.</summary>
+        bool AlguemEm(GameObject go)
+        {
+            foreach (List<Barreira> l in _barreiras)
+                if (l != null)
+                    foreach (Barreira c in l)
+                        if (c.Go.transform.IsChildOf(go.transform))
+                            foreach (Boneco b in _pax.Values)
+                                if (Bate(c, b.Pos, b.Pos, CorpoRaio)) return true;
+            return false;
+        }
+
+        /// <summary>Meia largura do adulto (0,2 m de ombros).</summary>
+        const float CorpoRaio = 0.1f;
 
         /// <summary>Folga da rede de proteção (Confere): o corpo do adulto menos a tolerância do diag_caixas.py.</summary>
         const float Raio = 0.08f;
@@ -135,7 +153,7 @@ namespace TA
             Vector2 p = b.Pos, q = b.Caminho[0];
             b.Conferido = q;
             b.Versao = _versao;
-            if (func && b.Caminho.Count == 1 && q == b.Alvo) return;
+            if (func && b.Caminho.Count == 1 && q == b.Alvo && (q - p).sqrMagnitude < 0.25f) return;   // só o último passo, não a perna inteira atrás do balcão
             int de = SalaEm(p), para = SalaEm(q);
             float l = Vector2.Distance(p, q);
             if (de < 0 || para < 0 || _barreiras[de] == null || _barreiras[para] == null || l < 0.02f) return;
@@ -188,11 +206,12 @@ namespace TA
         /// chegou perto de q com esta folga. A grade é refeita a cada busca: as peças ligadas mudam com a fila, e a busca é rara.</summary>
         static bool Busca(List<Vector2> r, int e, ref Vector2 p, Vector2 q, float f, bool ultima)
         {
-            Vector2 o = Salas[e].Min;
-            for (int i = 0; i < _grade.Length; i++)
+            Vector2 o = Salas[e].Min, p0 = p;
+            int r0 = r.Count;
+            for (int i = 0; i < _grade.Length; i++)   // a faixa do corredor, fora da parede, é de ninguém: a porta se passa pelo PelaPorta
             {
                 int x = i % GradeN, z = i / GradeN;
-                _grade[i] = x == 0 || z == 0 || x == GradeN - 1 || z == GradeN - 1 ? -1 : 0;
+                _grade[i] = x < Borda || z < Borda || x >= GradeN - Borda || z >= GradeN - Borda ? -1 : 0;
             }
             foreach (Barreira c in _barreiras[e])
             {
@@ -219,7 +238,8 @@ namespace TA
             }
             int fim = MaisPerto(e, q, true);
             Vector2 chegou = Ponto(e, fim);
-            bool perto = Vector2.Distance(chegou, q) < f + Celula * 1.5f;   // q colado numa peça (o balcão, a parede atrás do agente): o último passo entra na folga
+            float dq = Vector2.Distance(chegou, q);
+            bool perto = dq < Celula * 1.5f || (dq < f + Celula * 1.5f && Livre(e, chegou, q, 0f));   // q colado numa peça (o balcão): o último passo entra na folga, nunca na peça
             if (!perto && !ultima) return false;
 
             // de trás para a frente, seguindo reto enquanto der: entre os caminhos mais curtos, o de menos curvas
@@ -246,7 +266,37 @@ namespace TA
             for (int i = _curvas.Count - 1; i >= 0; i--) r.Add(_curvas[i]);
             p = perto ? q : chegou;
             r.Add(p);
+            _de = p0;
+            Enxuga(r, r0, p0, e, f);
             return true;
+        }
+
+        /// <summary>Células por lado da faixa do corredor (meio corredor), fora da parede.</summary>
+        static readonly int Borda = Mathf.FloorToInt(Corredor * 0.5f / Celula);
+        static readonly List<Vector2> _enxuto = new List<Vector2>();
+
+        /// <summary>A grade vira em cada quina de célula. Do ponto `a`, troca o trecho até o ponto mais longe (até 6 adiante) que uma perna em L
+        /// livre alcança: menos viradas, a mesma folga.</summary>
+        static void Enxuga(List<Vector2> r, int de, Vector2 a, int e, float f)
+        {
+            _enxuto.Clear();
+            for (int i = de; i < r.Count;)
+            {
+                int j = Mathf.Min(r.Count - 1, i + 6);
+                Vector2 quina = r[i];
+                for (; j > i; j--)
+                {
+                    Vector2 b = r[j], c1 = new Vector2(a.x, b.y), c2 = new Vector2(b.x, a.y);
+                    if (Livre(e, a, c2, f) && Livre(e, c2, b, f)) { quina = c2; break; }
+                    if (Livre(e, a, c1, f) && Livre(e, c1, b, f)) { quina = c1; break; }
+                }
+                if (j > i && (quina - a).sqrMagnitude > 1e-6f && (quina - r[j]).sqrMagnitude > 1e-6f) _enxuto.Add(quina);
+                _enxuto.Add(r[j]);
+                a = r[j];
+                i = j + 1;
+            }
+            r.RemoveRange(de, r.Count - de);
+            r.AddRange(_enxuto);
         }
 
         /// <summary>`c` na linha de `p` ao longo do rumo da grade.</summary>

@@ -1351,3 +1351,88 @@ Resultado em 2026-11-04: **14 de 14 mortos** na 1ª rodada.
 
 - **O motivo se lê?** Ver se a pessoa toca no selo e entende "Fila · CHECK-IN: -8" sem explicação, e se vai à sala que o toque abre.
 - **O executivo e a família se notam?** O perfil aparece só no topo da ficha. Ver se a pessoa repara que a rota turística reclama de sujeira antes.
+
+## 20. Políticas do diretor (2026-11-04, frente `ta-politicas`)
+
+Ideia do código de outra IA (03/11), refeita no nosso padrão (`Sim.Politicas.cs`): nenhum código de lá entrou. São regras que o jogador liga e regula para tirar a microgestão repetitiva, sem jogar por ele. As 3 começam desligadas; o X de cada uma sai de uma lista fixa da tabela, e o jogo novo fica no do meio. **Antes** = tudo desligado, que é o jogo de agora número a número (o save nem ganha a chave). **Depois** = os bots com as 3 ligadas (`BomPoliticas`, `LentoPoliticas`, `ParadoPoliticas`).
+
+### A tabela
+
+| política | o que faz | X (lista fixa; padrão em negrito) | trava |
+|---|---|---|---|
+| Hangar automático | o avião no pátio, antes do embarque, com desgaste ≥ X% vai ao hangar | 70, **80**, 90% | é a intenção `Hangar` do jogador, com o preço dela (100 Cash e o voo do avião); só se o caixa cobre o hangar e a conta do próximo fechamento; nada com a conta atrasada; um avião por vez |
+| Reposição antecipada | o depósito abaixo de 3/4 do tanque pede a entrega antes do ponto automático (3) | teto de 12, **24**, 48 Cash por dia | o gasto da política no dia de jogo nunca passa do teto; com entrega a caminho, não pede; o custo vai para a conta do dia, como o da reposição automática |
+| Reforço da fila | a fila mais longa, com X pessoas ou mais e posto livre, recebe 1 funcionário parado da estação mais calma, pelo vestiário | fila de 6, **10**, 15 | 1 a cada 20 s; só sai quem está parado numa estação normal; o mecânico fica quando um avião está pendente, em pane ou em checagem; não conta para a missão de mover |
+
+As decisões saem 1 vez por segundo de jogo, depois do pátio. Nada é sorteado.
+
+### D-Pa. A política usa a intenção do jogador, com o preço dela
+
+O hangar da política é a mesma intenção `Hangar` do botão: custa 100 Cash e o voo do avião naquela onda. O reforço é o mesmo `Move`, com o encerramento do atendimento, a ida ao vestiário, a troca e a ida ao posto. A entrega antecipada é o mesmo `Pede` da reposição automática, com prazo, custo e tanque iguais. Assim a política não tem vantagem escondida: ela só aperta o botão na hora certa.
+
+### D-Pb. O reforço não conta para as missões de mover
+
+As missões de mover (`Meta.Movidos`, 10 linhas entre diárias e semanais) premiam quem lê a fila e move alguém para a estação apertada. Se o movimento da política contasse, ligar o reforço cumpriria essas missões sozinho. O núcleo marca o movimento da política (`_pelaPolitica`) e o `AnotaMeta` não o conta; o hangar da política conta, porque custa o voo e foi o jogador quem escolheu o X.
+
+### D-Pc. A ação vai ao registro e sai antes das ocorrências
+
+Cada ação vira uma ocorrência (`TipoOcorrencia.Politica`, com a política no `Sub`, a causa, o custo e a estação), com a explicação em `Textos.PoliticaFez`. O registro guarda até 24 por dia: quando o dia enche, sai a ação automática mais antiga antes de qualquer incidente, clima, falha ou voo, que são o que a satisfação (G) e o painel (I) vão ler.
+
+### D-Pd. A reposição antecipada não muda o jogo com a tabela padrão
+
+Com a tabela de hoje a reposição automática já nunca deixa faltar (D-Sc), então a política de estoque só compra folga: com o teto padrão, 8 entregas da política em 10 ondas (+22 Cash na conta, porque algumas tomam o lugar das automáticas) e a mesma receita. Ela passa a valer quando a entrega atrasar ou o jato pousar logo depois do pedido; fica como escolha do jogador, sem portão de ganho.
+
+### A medida (`Medida_Politicas`, 40 sementes × 10 ondas)
+
+Cada política sozinha e as 3, em cada X da lista (pol = bits: 1 hangar, 2 estoque, 4 reforço, 7 as 3).
+
+| bot | embarque | receita | movimentos | entregas (Cash) | ações: hangar / estoque / reforço |
+|---|---|---|---|---|---|
+| Bom | 94,9% | 8 779 | 29,5 | 55 | — |
+| Bom, estoque x=1 | 94,9% | 8 779 | 29,5 | 77 | 0 / 8,0 / 0 |
+| Bom, reforço x=0 | 96,7% | 9 326 | 35,0 | 55 | 0 / 0 / 40,6 |
+| Bom, reforço x=1 | 96,8% | 8 997 | 34,7 | 55 | 0 / 0 / 34,9 |
+| Bom, reforço x=2 | 96,1% | 8 761 | 36,2 | 55 | 0 / 0 / 26,6 |
+| Lento | 80,3% | 5 269 | 44,7 | 55 | — |
+| Lento, reforço x=0 | 86,0% | 5 981 | 42,2 | 55 | 0 / 0 / 50,7 |
+| Lento, reforço x=1 | 86,1% | 5 891 | 46,0 | 55 | 0 / 0 / 42,0 |
+| Lento, reforço x=2 | 84,2% | 5 712 | 45,2 | 55 | 0 / 0 / 28,2 |
+| Parado | 88,9% | 4 797 | 0 | 55 | — |
+| Parado, reforço x=0 | 97,8% | 6 642 | 0 | 55 | 0 / 0 / 37,6 |
+| Parado, reforço x=1 | 98,1% | 6 770 | 0 | 55 | 0 / 0 / 30,9 |
+| Parado, reforço x=2 | 98,7% | 6 905 | 0 | 55 | 0 / 0 / 23,4 |
+
+O hangar não age nesses bots em 10 ondas: os 3 fazem a checagem rápida e o desgaste não chega a 70%. Com o `Automatico` (move, mas nunca checa nem manda ao hangar), 20 ondas:
+
+| bot | embarque | receita | hangar | entregas (Cash) |
+|---|---|---|---|---|
+| Automatico | 83,4% | 18 127 | 0 | 98 |
+| Automatico, hangar x=0 (70%) | 80,8% | 17 656 | 3,30 | 88 |
+| Automatico, hangar x=1 (80%) | 80,6% | 17 601 | 3,25 | 89 |
+| Automatico, hangar x=2 (90%) | 81,1% | 17 594 | 2,78 | 90 |
+
+**Leitura.** O reforço é o que pesa: tira do Parado a decisão que ele nunca toma (+41% de receita no X padrão) e ajuda o Lento (+12%), mas não chega ao Bom, que continua lendo a fila antes de ela passar do X. O hangar automático custa 3% da receita ao Automático, porque perde o voo e a inspeção obrigatória sai de graça: é a troca do §5.12 (zera o desgaste e evita a falha a partir de 80%), e por isso é escolha do jogador, desligada no jogo novo. A estoque não muda a receita (D-Pd).
+
+### O portão (`Portao_Politicas_NaoSubstituemOJogadorBom`, 200 sementes × 10 ondas)
+
+| bot | embarque | p10 | receita | movimentos | entregas (Cash) | ações: hangar / estoque / reforço |
+|---|---|---|---|---|---|---|
+| Bom | 94,8% | 92,6% | 8 739 | 29,8 | 55 | — |
+| Lento | 79,9% | 77,2% | 5 202 | 43,1 | 55 | — |
+| BomPoliticas | 96,9% | 94,8% | 9 069 | 35,5 | 77 | 0 / 8,0 / 34,8 |
+| LentoPoliticas | 86,3% | 83,0% | 5 956 | 45,7 | 77 | 0 / 8,0 / 42,1 |
+| ParadoPoliticas | 98,3% | 96,1% | 6 814 | 0 | 77 | 0 / 8,0 / 30,9 |
+
+Medido no PC com `--filter` (24 s). O Lento com as políticas fica em 0,68 da receita do Bom (5 956 / 8 739) e 8,5 pontos abaixo no embarque; o TA-2 com as políticas nos dois é **1,331** (sem elas, 1,82); o TA-1 passa (96,9% e 86,3%). Nenhuma espera de suprimento.
+
+As 3 regras do portão: o Lento com as políticas não passa o Bom sem elas, nem na receita nem no embarque (a política não substitui o jogador bom); o TA-1 continua com as políticas; e o TA-2 com as políticas nos dois (`BomPoliticas` / `ParadoPoliticas`) fica ≥ 1,10. Entra na parte "resto" do CI.
+
+### Prova de mutação (`MUTACAO_TESTES="FullyQualifiedName~PoliticasTests|FullyQualifiedName~HistoricoTests" python client/tools/mutacao.py politica:`)
+
+19 de 19 mortos. Hangar: só no X, só ligado, um avião por vez, deixa a conta do próximo fechamento no caixa e nada com a conta atrasada. Estoque: abaixo de 3/4, com entrega a caminho não pede, nunca passa do teto, soma o gasto e o teto volta no dia seguinte. Reforço: só com a fila no X, só para posto livre, só de estação normal, não tira o mecânico, 1 a cada 20 s e não conta a missão de mover. Registro: a ação entra e sai antes das ocorrências. Save: o nível fica na lista. O de posto livre sobreviveu à 1ª rodada e ganhou o `Reforco_NaoLevaParaEstacaoSemPostoLivre`.
+
+### Para medir com gente
+
+- **O reforço tira a decisão do TA-2 de quem não move ninguém.** Ver se, com ele ligado, a pessoa ainda arrasta funcionário ou só olha; se ninguém mais move, o X padrão sobe para 15.
+- **O hangar automático perde o voo.** Ver se a pessoa entende o aviso ("foi ao hangar com 82% de desgaste") e o voo que não embarcou, ou se acha que a política errou.
+- **A folha fica dentro de Melhorias.** Ver se alguém procura as políticas na pausa ou no pátio.

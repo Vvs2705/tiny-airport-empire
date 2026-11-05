@@ -5,16 +5,16 @@ using System.Text;
 namespace TA.Core
 {
     /// <summary>O que o registro guarda (frente ta-historico). Indice vai no save: so cresce no fim.</summary>
-    public enum TipoOcorrencia { Incidente, Clima, FalhaAviao, VooPerdido, VooAtrasado, FaltaCaixa }
+    public enum TipoOcorrencia { Incidente, Clima, FalhaAviao, VooPerdido, VooAtrasado, FaltaCaixa, Politica }
 
     /// <summary>A chave da explicacao curta (Textos.Explica): por que deu certo ou onde travou. Indice vai no save: so cresce no fim.</summary>
-    public enum Motivo { Nenhum, Fila, SemEquipe, Equipamento, Clima, Pista, Patio, Tripulacao, Manutencao, Pane, Hangar, Pouso, Caixa, Suprimento }
+    public enum Motivo { Nenhum, Fila, SemEquipe, Equipamento, Clima, Pista, Patio, Tripulacao, Manutencao, Pane, Hangar, Pouso, Caixa, Suprimento, Politica }
 
     /// <summary>Uma ocorrencia do dia de jogo: o que aconteceu, a causa, a resposta e o resultado (GDD de direcao §14).</summary>
     public sealed class Ocorrencia
     {
         public TipoOcorrencia Tipo;
-        /// <summary>TipoIncidente (incidente e clima) ou TipoFalha (falha de aviao); -1 nos voos.</summary>
+        /// <summary>TipoIncidente (incidente e clima), TipoFalha (falha de aviao) ou a Politica que agiu; -1 nos voos.</summary>
         public int Sub = -1;
         /// <summary>Passo do relogio do quadro em que comecou (Sim.HoraDe da a hora do jogo) e o dia do jogo dele.</summary>
         public long Passo; public int Dia;
@@ -212,7 +212,12 @@ namespace TA.Core
             Poda();
             int doDia = 0;
             foreach (Ocorrencia r in _hist) if (r.Dia == dia) doDia++;
-            if (doDia >= OcorrenciasPorDia) _hist.RemoveAt(_hist.FindIndex(r => r.Dia == dia));
+            if (doDia >= OcorrenciasPorDia)
+            {
+                // ta-politicas: a acao automatica mais antiga sai antes de qualquer ocorrencia
+                int k = _hist.FindIndex(r => r.Dia == dia && r.Tipo == TipoOcorrencia.Politica);
+                _hist.RemoveAt(k >= 0 ? k : _hist.FindIndex(r => r.Dia == dia));
+            }
             var o = new Ocorrencia { Tipo = tipo, Sub = sub, Voo = voo, Passo = passo, Dia = dia };
             _hist.Add(o);
             return o;

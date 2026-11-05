@@ -126,10 +126,10 @@ namespace TA
             float l = SaguaoL - Corredor, p = SaguaoP - Corredor;
             Bloco("PisoChegada", PrimitiveType.Cube, new Vector3(m.x + l * 0.5f, -0.05f, m.y + p * 0.5f), new Vector3(l, 0.1f, p), CorPisoChegada);
             Chao("CalcadaChegada", new Vector3((SaidaRua.x - 0.6f + PortaOeste.x) * 0.5f, -0.04f, PortaOeste.y), new Vector2(PortaOeste.x - SaidaRua.x + 0.6f, 0.7f), PisoPasseio);
-            ParedeSaguao(new Vector2(m.x, m.y), new Vector2(m.x + l, m.y), AltoFrente, -1f);                 // sul
+            ParedeSaguao(new Vector2(m.x, m.y), new Vector2(m.x + l, m.y), AltoFrente, SemPorta);                 // sul
             ParedeSaguao(new Vector2(m.x, m.y + p), new Vector2(m.x + l, m.y + p), AltoFundo, PortaNorte.x);  // norte, com a porta do corredor
             ParedeSaguao(new Vector2(m.x, m.y), new Vector2(m.x, m.y + p), AltoFrente, PortaOeste.y);         // oeste, com a porta da rua
-            ParedeSaguao(new Vector2(m.x + l, m.y), new Vector2(m.x + l, m.y + p), AltoFundo, -1f);           // leste
+            ParedeSaguao(new Vector2(m.x + l, m.y), new Vector2(m.x + l, m.y + p), AltoFundo, SemPorta);           // leste
             PlacaSaguao(V3(new Vector2(EsteiraC.x + 2.2f, m.y + p), AltoFundo + 0.2f));
             Esteira3D_Restituicao();
             for (int i = 0; i < 3; i++)   // carrinhos de mao encostados no canto sudoeste, longe da faixa: so decoracao
@@ -140,12 +140,17 @@ namespace TA
             }
         }
 
-        /// <summary>Parede de `a` a `b` com o vao de uma porta em `porta` (coordenada ao longo dela; &lt; 0 = sem porta).</summary>
+        /// <summary>Parede sem porta (o saguao fica em z &lt; 0: a coordenada da porta pode ser negativa, entao "sem porta" nao pode ser -1).</summary>
+        const float SemPorta = float.NaN;
+
+        /// <summary>Parede de `a` a `b` com o vao de uma porta em `porta` (coordenada do mundo ao longo dela, x ou z; SemPorta = sem porta).
+        /// ponytail: era "&lt; 0 = sem porta", e a porta oeste fica em z = -2: a parede oeste saia inteira e todo mundo saia atraves dela
+        /// (rodada da leva 3: 206 passageiro x parede na sala8).</summary>
         void ParedeSaguao(Vector2 a, Vector2 b, float alto, float porta)
         {
             Vector2 d = (b - a).normalized;
             bool x = Mathf.Abs(d.x) > 0.5f;
-            float len = Vector2.Distance(a, b), t = porta < 0f ? -1f : x ? porta - a.x : porta - a.y;
+            float len = Vector2.Distance(a, b), t = float.IsNaN(porta) ? -1f : x ? porta - a.x : porta - a.y;
             foreach (Vector2 v in t > 0f && t < len ? new[] { new Vector2(0f, t - PortaLarg * 0.5f), new Vector2(t + PortaLarg * 0.5f, len) } : new[] { new Vector2(0f, len) })
             {
                 Vector2 c = a + d * ((v.x + v.y) * 0.5f);
