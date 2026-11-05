@@ -491,6 +491,67 @@ namespace TA
             ExcluirDados = L("Excluir meus dados"), ExcluirLegenda = L("Apaga o progresso deste aparelho"), Excluir = L("Excluir"),
             Cancelar = L("Cancelar"), ApagarTudo = L("Apagar tudo"),
             ExcluirTexto = L("Apaga deste aparelho o seu progresso, as configurações, o tutorial já visto e o diário de jogo. Não dá para desfazer: o jogo fecha e, ao abrir de novo, começa do zero.\n\nO jogo não guarda seus dados em servidor nosso. Cópias do diário que você exportou ficam onde você as salvou. Para qualquer pedido sobre seus dados, escreva para ") + EmailSuporte + ".";
+        // ---------- painel de operacoes e relatorio do dia (frente I, Hud.Painel.cs; so le o nucleo, Sim.Painel.cs) ----------
+        public static readonly string Painel = L("Painel de operações"), PainelLegenda = L("Voos, alertas e o relatório do dia"), SaldoHoje = L("Saldo de hoje"),
+            TudoEmOrdem = L("Tudo em ordem"), SemAlertas = L("Nenhum alerta agora"), AvioesEChegadas = L("Pátio e chegadas"), RelatorioDia = L("Relatório do dia"),
+            SemOcorrencias = L("Nenhuma ocorrência hoje"), EmRisco = L("em risco"), EmAndamento = L("em andamento");
+        /// <summary>Na ordem de Gravidade, TipoAlerta, SituacaoVoo e TipoOcorrencia (Core).</summary>
+        public static readonly string[] GravidadeNome = { L("Crítico"), L("Importante"), L("Informativo") },
+            AlertaNome = { L("Conta do dia atrasada"), L("Avião em pane"), L("Equipamento em falha"), L("Fila crítica"), L("Incidente"), L("Voo atrasado"),
+                L("Avião pede inspeção"), L("Vai faltar suprimento"), L("Banheiro interditado"), L("Fila crescendo"), L("Sala suja"), L("Passageiros insatisfeitos") },
+            SituacaoNome = { L("Sem voo"), L("Previsto"), L("Embarcando"), L("Decolou"), L("Atrasado") },
+            OcorrenciaNome = { L("Incidente"), L("Clima"), L("Falha de avião"), L("Voo perdido"), L("Voo atrasado"), L("Falta de caixa") };
+        public static string Portao(int n) => L("Portão ") + n;
+        /// <summary>Onde o alerta leva: a sala, o banheiro, o voo da vaga, o aviao ou o caixa.</summary>
+        public static string AlertaLugar(Alerta a, Sim s)
+        {
+            switch (a.Alvo)
+            {
+                case Alvo.Estacao: return Estacao[a.Indice];
+                case Alvo.Area: return a.Indice == (int)Area.Banheiro ? Banheiro : Estacao[a.Indice];
+                case Alvo.Voo: return s.Voos[a.Indice] is Voo v ? Voo(v.Id) : AviaoNome[a.Indice];
+                case Alvo.Aviao: return AviaoNome[a.Indice];
+                default: return CashNome;
+            }
+        }
+        /// <summary>O numero do alerta, em palavras.</summary>
+        public static string AlertaInfo(Alerta a)
+        {
+            switch (a.Tipo)
+            {
+                case TipoAlerta.ContaAtrasada: return L("Faltaram ") + Num(a.Valor) + L(": contratar e melhorar ficam pausados até quitar");
+                case TipoAlerta.Pane: return CausaPane;
+                case TipoAlerta.Equipamento: return L("Atendimento mais lento até o reparo");
+                case TipoAlerta.FilaCritica: return Plural((int)a.Valor, L("pessoa na fila"), L("pessoas na fila")) + L(": alguém vai perder o voo");
+                case TipoAlerta.Incidente: return Perigo[(int)a.Valor];
+                case TipoAlerta.VooAtrasado: return L("Toque para ver o que segura o avião");
+                case TipoAlerta.Inspecao: return Desgaste((int)a.Valor);
+                case TipoAlerta.Suprimento: return Suprimento[(int)a.Valor] + L(": só a decolagem atrasa");
+                case TipoAlerta.BanheiroFechado: return L("Mande limpar para reabrir");
+                case TipoAlerta.FilaAtencao: return Plural((int)a.Valor, L("pessoa na fila"), L("pessoas na fila"));
+                case TipoAlerta.Sujeira: return L("Sujeira ") + Porcento((int)(a.Valor * 100 / Sim.SujeiraMax));
+                default: return L("Motivo principal: ") + FatorNome[(int)a.Valor];
+            }
+        }
+        public static string EmSolo(int n, int de) => L("Em solo: ") + n + L(" de ") + de;
+        public static string Chegando(int n) => L("chegando: ") + n;
+        public static string PaxChegando(int n) => Plural(n, L("passageiro chegando"), L("passageiros chegando"));
+        public static string MaiorFila(int e, int n) => L("maior fila ") + EstacaoNo[e] + ": " + n;
+        public static string ReceitaDespesa(long receita, long despesa) => L("Receita ") + Num(receita) + L(" · conta prevista ") + Num(despesa);
+        public static string Saldo(long v) => (v < 0 ? "-" : "+") + Num(System.Math.Abs(v));
+        public static string SaldoLinha(long v) => L("Saldo ") + Saldo(v);
+        public static string Ontem(DiaConta d) => d.Falta > 0 ? L("ontem faltaram ") + Num(d.Falta) : L("ontem: lucro ") + Saldo(d.Lucro);
+        public static string DoDia(int reclamacoes, int atrasos, int perdidos) =>
+            Plural(reclamacoes, L("reclamação"), L("reclamações")) + " · " + Plural(atrasos, L("voo atrasado"), L("voos atrasados")) + " · " + Plural(perdidos, L("perdeu o voo"), L("perderam o voo"));
+        /// <summary>Hora do jogo (0 a 24, Sim.HoraDe) em hh:mm.</summary>
+        public static string HoraDoDia(float h)
+        {
+            int m = (int)System.Math.Floor(h * 60f) % (24 * 60);
+            return (m / 60).ToString("00", CultureInfo.InvariantCulture) + ":" + (m % 60).ToString("00", CultureInfo.InvariantCulture);
+        }
+        public static string OcorrenciaResultado(Ocorrencia o) =>
+            (o.Voo >= 0 ? Voo(o.Voo) + " · " : "") + (o.Perdidos > 0 ? Plural(o.Perdidos, L("perdeu o voo"), L("perderam o voo"))
+            : o.Atraso > 0 ? L("saiu ") + o.Atraso + L(" min atrasado") : o.Aberta ? EmAndamento : L("resolvido"));
         /// <summary>O nome do idioma na propria lingua (nao passa por L: o botao tem de ser lido por quem nao entende o idioma atual).</summary>
         public static string NomeDoIdioma(Lingua l) => l == Lingua.En ? "English" : "Português";
         public const string ReabraIdioma = "Reabra o jogo para trocar o idioma · Reopen the game to switch language";
