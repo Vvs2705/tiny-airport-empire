@@ -16,7 +16,9 @@ namespace TA
     /// recusado) e paga o cofre offline ao abrir e ao voltar da pausa. O relogio do quadro nunca anda com o jogo fechado.
     /// Diario (CONTRATO_V01 §6): persistentDataPath/diario.csv, id anonimo da instalacao (GUID local), nada sai do aparelho sem o jogador
     /// tocar em Exportar diario (Exportar.cs). Colunas: utc,instalacao,versao,sessao,t_sessao,t_jogo,evento,a,b,c,onda
-    /// (client/tools/diario_report.py le e calcula o K2 e o embarque medio).
+    /// (client/tools/diario_report.py le e calcula o K2, o embarque medio e o K3 em campo). So eventos do catalogo Telemetria.Eventos, com 3
+    /// inteiros; sem modelo, nome ou ID do aparelho. Desempenho: device_class a=RAM em GB b=nucleos (grosso, com teto) na abertura, e
+    /// performance_sample a=p10 do FPS x10 b=media x10 c=pessoas na tela a cada 60 s reais de jogo aberto (Desempenho, no nucleo).
     /// Flags (CONTRATO_V01 §7; todas, menos -autoplay, so com -testsession, que nao le nem grava save nem diario e usa a semente 1):
     ///   -autoplay N   sem render: o bot joga N ondas (Bom, Lento, Parado; retomada no meio da onda), loga AUTOPLAY OK|FAIL e sai 0/1.
     ///                 Usar com -batchmode -nographics (client/tools/verify.sh full).
@@ -61,6 +63,7 @@ namespace TA
         float _ultimoFlush;
         readonly StringBuilder _buf = new StringBuilder();
         string _ofertaLogada;
+        readonly Desempenho _fps = new Desempenho();
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         static void Boot()
@@ -124,6 +127,7 @@ namespace TA
             _hud.TourAuto = _bot != null;
             Diario("session_start");
             Diario("save_loaded", status);
+            Diario("device_class", Telemetria.MemoriaGb(SystemInfo.systemMemorySize), Telemetria.Nucleos(SystemInfo.processorCount));
             if (!_test) Retorno();
         }
 
@@ -150,6 +154,7 @@ namespace TA
             if (v > 0) _bot?.Pensa(Sim, dt * v);
             DtJogo = dt * v;
             Anda(Sim, dt, v, _le);
+            if (_fps.Quadro(Time.unscaledDeltaTime, out AmostraFps fps)) Diario("performance_sample", fps.P10x10, fps.Mediax10, _hud.M.Pessoas());
             string oferta = Sim.Anuncios.Oferta(Anuncio.Receita);
             if (oferta != null && oferta != _ofertaLogada) { _ofertaLogada = oferta; Diario("rewarded_ad_offered", (int)Anuncio.Receita); }
             if (Sim.Steps - _ultimoSave >= 5 * Sim.Hz) Grava();
@@ -182,7 +187,7 @@ namespace TA
         {
             if (_headless || Sim == null) return;
             if (pausado) { Grava(); Flush(); }
-            else Retorno();
+            else { _fps.Reinicia(); Retorno(); }
         }
 
         void OnApplicationQuit()
@@ -331,6 +336,7 @@ namespace TA
         public void Diario(string evento, long a = 0, long b = 0, long c = 0)
         {
             if (Sim == null || _apagado) return;
+            if (!Telemetria.Valido(evento)) { Debug.LogError("TA diario: evento fora do catalogo Telemetria.Eventos: " + evento); return; }
             if (_test)
             {
                 // -testsession nao grava diario; o tutorial vai para o log (prova dos passos jogaveis com -tutorial -bot)

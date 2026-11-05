@@ -15,6 +15,7 @@
 | Item (GDD) | Situação | Evidência |
 |---|---|---|
 | Dados coletados (§9.1) | Nenhum sai do aparelho. Guardados no aparelho: save, `PlayerPrefs` (preferências, tutorial, `ta_instalacao`) e `diario.csv` | `Game.cs` (diário com GUID local aleatório, sem nome, e-mail, aparelho ou local); nenhum `InputField` no jogo, então não há texto livre do jogador |
+| Telemetria (§15.1, D-11) | Só no diário local: eventos do catálogo `Telemetria.Eventos` com 3 inteiros; desempenho como `performance_sample` (FPS) e `device_class` (RAM em GB e núcleos, com teto), sem modelo, nome ou ID do aparelho | `Telemetria.cs`, `TelemetriaTests`; `checa_repo` (telemetria) derruba evento fora do catálogo e `deviceModel`, `deviceName`, `deviceUniqueIdentifier`, local e ID de publicidade no código |
 | ID de publicidade (§7.2, §8.7) | Retirado do manifesto; o jogo não o lê | `Setup.cs` `SemIdDePublicidade`; `checa_apk` e `checa_repo` (guardrails) |
 | Permissões Android | Só as da lista curta; nenhuma perigosa | `checa_apk` agora derruba permissão fora de `PERMISSOES` (INTERNET, ACCESS_NETWORK_STATE, VIBRATE e BILLING) |
 | Serviços da Unity | Analytics, Crash/Cloud Diagnostics, Performance Reporting, Ads e IAP desligados | `ProjectSettings/UnityConnectSettings.asset` (`m_Enabled: 0` em todos) |
@@ -75,7 +76,7 @@ Uma frente que acrescente qualquer item abaixo atualiza, **no mesmo PR**, as dua
 
 - **Anúncio com recompensa (LevelPlay):** não personalizado para todos, configurado **antes** do `Init` (sem consentimento de personalização, "do not sell" e o equivalente de cada rede mediada); nenhuma rede que exija `AD_ID`; recompensa com ID único e limite diário (§8.7); anúncio de teste no QA e configuração de produção só no release. Lançar só em BR, PH e ID (D-09) evita a CMP do EEE e do Reino Unido.
 - **Compra (Unity IAP) e servidor (`ta-servidor`):** o servidor é a autoridade (§8.2): valida o token na API da Google Play com conta de serviço de menor privilégio, guarda o token por hash, recusa repetido, cancelado e reembolsado, responde sem stack trace, com limite de taxa e alerta de orçamento. A conta de serviço e qualquer chave ficam no secret manager, nunca no app nem no git.
-- **Telemetria (FPS e p10 no diário):** continua no diário local, sem modelo de aparelho que identifique junto com hora exata, e só sai pelo Exportar diário. Se um dia for enviada, vira "Informações e desempenho do app" no formulário e precisa de aviso na política antes.
+- **Telemetria (FPS e p10 no diário):** feita no diário local (05/11), sem modelo de aparelho (só RAM em GB e núcleos, com teto), e só sai pelo Exportar diário; a seção 3.1 continua "Não". **Quando o SDK do Unity Analytics (D-11) entrar:** manda só os eventos do catálogo, sem o código da instalação do diário; vira "Informações e desempenho do app › diagnóstico" e "Atividade no app › outras ações" (coletado, não compartilhado, análise) na seção 3.2; as duas políticas citam o pacote antes (o `checa_repo` cobra); e o envio só começa depois do aviso.
 - **Notificação, câmera, arquivos ou qualquer permissão nova:** só com linha nova em `PERMISSOES` do `checa_apk`, explicação contextual na hora de pedir (§9.2) e política atualizada.
 
 ## 5. CI e segredos no repositório público

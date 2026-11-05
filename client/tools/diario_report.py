@@ -21,6 +21,8 @@ Eventos (a/b/c):
   staff_hired a=funcionário b=custo c=estação | story_delivered a=história b=passageiro c=1 se nova no álbum |
   offline_claim a=cash b=segundos | rewarded_ad_offered/_completed a=anúncio(0 cofre 2x,1 receita 2x) |
   reward_granted a=anúncio b=valor | diary_export.
+  Desempenho (K3 em campo): device_class a=RAM em GB b=núcleos (na abertura, grosso, sem modelo do aparelho) |
+  performance_sample a=p10 do FPS x10 b=média x10 c=pessoas na tela (a cada 60 s reais de jogo aberto, sem o aquecimento).
   Fase C (a/b/c, contados no total, sem conta própria): crew_hired tripulante/custo/função | crew_assigned tripulante/voo/1 manual |
   crew_missing voo/função | crew_rest_started tripulante/s | aircraft_landed avião/voo | ground_service_done avião/serviço |
   turnaround_done avião/voo/1 depois do fechamento | flight_takeoff avião/voo/atraso s | ground_staff_hired pessoas/custo |
@@ -58,6 +60,7 @@ JANELA = 60.0  # K2: s de jogo, depois do início do episódio crítico, para mo
 MIN_PESSOAS = 5  # K2: amostra mínima (proposta do CONTRATO_V01 §7)
 EMBARQUE = (80, 65)  # Origem: >= 80 continuar, 65-80 iterar, < 65 cancelar
 K2 = (60, 45)  # Origem: >= 60 continuar, 45-60 iterar, < 45 cancelar
+K3 = 30.0  # GDD §5.13: p10 >= 30 FPS num Android de entrada; aqui, a mediana do p10 das janelas de cada aparelho
 
 Linha = namedtuple("Linha", "inst versao sessao utc ts tj ev a b c onda ordem")
 
@@ -240,6 +243,35 @@ def analisar(linhas, versao=None):
     }
 
 
+def desempenho(linhas):
+    """-> [(instalação, ram, núcleos, janelas, p10 mediano, pior p10, média mediana, janelas < K3, pessoas máx.)] dos
+    performance_sample (FPS x10 no diário). Quem não tem amostra fica fora."""
+    por, dev = defaultdict(list), {}
+    for l in linhas:
+        if l.ev == "device_class":
+            dev[l.inst] = (l.a, l.b)
+        elif l.ev == "performance_sample" and l.a and l.b:
+            por[l.inst].append((l.a / 10, l.b / 10, l.c or 0))
+    out = []
+    for inst, js in sorted(por.items()):
+        p10 = [j[0] for j in js]
+        ram, nuc = dev.get(inst, (None, None))
+        out.append(
+            (
+                inst,
+                ram,
+                nuc,
+                len(js),
+                statistics.median(p10),
+                min(p10),
+                statistics.median(j[1] for j in js),
+                sum(x < K3 for x in p10),
+                max(j[2] for j in js),
+            )
+        )
+    return out
+
+
 # ------------------------------------------------------------------ formatação e faixas
 
 
@@ -402,6 +434,37 @@ def relatorio(linhas, q, versao=None):
             for est, v in sorted(por_est.items(), key=lambda kv: (kv[0] is None, kv[0]))
         ]
         or [("-", 0, 0, "-")],
+    )
+
+    s += ["", "## K3 em campo (FPS)", ""]
+    ds = desempenho(linhas)
+    abaixo = [d for d in ds if d[4] < K3]
+    s += [
+        f"Aparelhos com amostra: **{len(ds)}** | p10 mediano < {K3:g} FPS: **{len(abaixo)}**"
+        + (f" ({', '.join(d[0][:8] for d in abaixo)})" if abaixo else "")
+        + f" | K3: **{'SEM DADOS' if not ds else 'PASSOU' if not abaixo else 'FALHOU'}**",
+        "",
+        "Uma janela = 60 s reais de jogo aberto. p10 = o quadro mais lento dos 90% mais rápidos (a conta do -perf). "
+        "RAM e núcleos vêm do device_class (sem modelo do aparelho): o aparelho de entrada é o de pouca RAM.",
+        "",
+    ]
+    s += tabela(
+        ["instalação", "RAM (GB)", "núcleos", "janelas", "p10 mediano", "pior p10", "média mediana", f"janelas < {K3:g}", "pessoas (máx.)"],
+        [
+            (
+                d[0][:8],
+                "-" if d[1] is None else d[1],
+                "-" if d[2] is None else d[2],
+                d[3],
+                f"{d[4]:.1f}",
+                f"{d[5]:.1f}",
+                f"{d[6]:.1f}",
+                d[7],
+                d[8],
+            )
+            for d in ds
+        ]
+        or [("-", "-", "-", 0, "-", "-", "-", 0, 0)],
     )
 
     # uso: contagens e somas por evento (n[(ev,)]) e por evento+anúncio/estação (n[(ev, a)]); quem[...] = instalações
@@ -818,6 +881,28 @@ def autoteste():
             and "versões misturadas" not in texto
             and "| cofre 2x | 2 | 1 | 1 | 1000 | 1 | 1 | 100.0% |" in texto
         )
+
+        # --- K3 em campo: aparelho de 3 GB com p10 28, 32 e 35 (mediano 32, passa); 4 GB com 25 e 24 (24,5, falha);
+        # um sem performance_sample fica fora; p10 0 (linha podre do jogo) não conta
+        d1 = Diario(1)
+        d1.sessao("aaaa0001").ln("device_class", 3, 8)
+        for p10, med, pes in ((280, 450, 40), (320, 500, 56), (350, 520, 60)):
+            d1.ln("performance_sample", p10, med, pes)
+        d2 = Diario(2)
+        d2.sessao("aaaa0002").ln("device_class", 4, 8)
+        d2.ln("performance_sample", 250, 400, 30).ln("performance_sample", 240, 380, 31).ln("performance_sample", 0, 0, 0)
+        d3 = jogador(3, 10)
+        ps, R, texto, q = rodar([d1.l, d2.l, d3.l])
+        ds = desempenho(ler([tmp])[0])
+        assert [(d[1], d[2], d[3], d[4], d[5], d[7], d[8]) for d in ds] == [
+            (3, 8, 3, 32.0, 28.0, 1, 60),
+            (4, 8, 2, 24.5, 24.0, 2, 31),
+        ], ds
+        assert q["linhas ruins"] == 0, q
+        assert "Aparelhos com amostra: **2** | p10 mediano < 30 FPS: **1** (00000002) | K3: **FALHOU**" in texto, texto
+        assert "| 00000001 | 3 | 8 | 3 | 32.0 | 28.0 | 50.0 | 1 | 60 |" in texto, texto
+        assert "K3: **PASSOU**" in rodar([d1.l])[2]
+        assert "K3: **SEM DADOS**" in rodar([d3.l])[2]
 
         # --- vazio: nunca exceção
         ps, R, texto, _ = rodar([[]])
