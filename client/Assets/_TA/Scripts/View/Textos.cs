@@ -4,12 +4,14 @@ using TA.Core;
 namespace TA
 {
     /// <summary>
-    /// Todo texto de tela num lugar so (padrao do dc:Scripts/View/Textos.cs). A v0.1 so tem pt-BR; os idiomas esperam a D-08: cada texto
-    /// passa por L(pt) e ganha as colunas en/es/id aqui, sem tocar nas telas. Nada de texto solto no Hud ou no Tour.
+    /// Todo texto de tela num lugar so (padrao do dc:Scripts/View/Textos.cs). pt-BR e en (D-08): cada texto passa por L(pt), que devolve
+    /// o par em ingles de Core/Ingles.cs quando o idioma e en (es e id ficam para depois, com revisao humana). Os campos static sao montados uma
+    /// vez, entao o idioma vale desde o primeiro acesso a Textos (Ajustes.Carrega); trocar de idioma pede reabrir o jogo. Texto novo aqui exige a
+    /// linha en em Ingles.cs (o checa_repo.py barra). Nada de texto solto no Hud ou no Tour.
     /// </summary>
     public static class Textos
     {
-        static string L(string pt) => pt;
+        static string L(string pt) => Idiomas.Traduz(pt);
         static readonly CultureInfo Br = CultureInfo.GetCultureInfo("pt-BR");
 
         public static readonly string[] Estacao = { L("CHECK-IN"), L("SEGURANÇA"), L("LOJA"), L("PORTÃO"), L("BAGAGEM"), L("ALIMENTAÇÃO"), L("OFICINA"), L("DESPACHO") };
@@ -47,8 +49,9 @@ namespace TA
         /// <summary>O que fecha a historia, numa linha (a regra do nucleo: Historia.Onde, Quem e Todos): "atendente no portão".</summary>
         public static string HistoriaPedido(Historia x) =>
             x.Todos ? L("o voo sair sem perder ninguém")
-            : x.Onde is TA.Core.Estacao e ? (x.Quem is TA.Core.Perfil q ? PerfilCurto[(int)q] + " " + EstacaoNa[(int)e] : L("passar ") + EstacaoNa[(int)e])
+            : x.Onde is TA.Core.Estacao e ? (x.Quem is TA.Core.Perfil q ? PerfilCurto[(int)q] + " " + EstacaoNa[(int)e] : PassarEm[(int)e])
             : L("embarcar a tempo");
+        public static readonly string[] PassarEm = { L("passar no check-in"), L("passar na segurança"), L("passar na loja"), L("passar no portão"), L("passar na bagagem"), L("passar na alimentação"), L("passar na oficina"), L("passar no despacho") };
         public static string HistoriaPede(Historia x) => L("Pede: ") + HistoriaPedido(x);
         public static readonly string[] PerfilCurto = { L("atendente"), L("agente"), L("vendedora"), L("bagageira"), L("mecânico"), L("despachante") };
         /// <summary>A nota do quadro: o titulo e, enquanto falta o pedido, o pedido a cada 3 s. Sem a RegraHistorias, a Dona Rosa da v0.1.</summary>
@@ -481,13 +484,16 @@ namespace TA
             Musica = L("Música"), Efeitos = L("Efeitos sonoros"), Vibracao = L("Vibração"), VibracaoLegenda = L("Liga ou desliga a vibração"),
             ReduzirMovimento = L("Reduzir movimento"), MovimentoLegenda = L("Sem balanço, tremor nem pulso"),
             TextoMaior = L("Texto maior"), TextoMaiorLegenda = L("Letras maiores onde couber"), Ligado = L("Ligado"), Desligado = L("Desligado"),
-            Idioma = L("Idioma"), IdiomaNome = L("Português (Brasil)"), EmUso = L("Em uso"),
+            Idioma = L("Idioma"), IdiomaNome = L("Português (Brasil)"),
             Privacidade = L("Política de privacidade"), PrivacidadeLegenda = L("O que o jogo guarda e por quê"),
             Suporte = L("Suporte"), Escrever = L("Escrever"), Creditos = L("Créditos"),
             CreditosTexto = L("Fontes Lilita One (© 2011 Juan Montoreano, com o Nome de Fonte Reservado Lilita) e Nunito (© 2014 The Nunito Project Authors), na SIL Open Font License 1.1."),
             ExcluirDados = L("Excluir meus dados"), ExcluirLegenda = L("Apaga o progresso deste aparelho"), Excluir = L("Excluir"),
             Cancelar = L("Cancelar"), ApagarTudo = L("Apagar tudo"),
             ExcluirTexto = L("Apaga deste aparelho o seu progresso, as configurações, o tutorial já visto e o diário de jogo. Não dá para desfazer: o jogo fecha e, ao abrir de novo, começa do zero.\n\nO jogo não guarda seus dados em servidor nosso. Cópias do diário que você exportou ficam onde você as salvou. Para qualquer pedido sobre seus dados, escreva para ") + EmailSuporte + ".";
+        /// <summary>O nome do idioma na propria lingua (nao passa por L: o botao tem de ser lido por quem nao entende o idioma atual).</summary>
+        public static string NomeDoIdioma(Lingua l) => l == Lingua.En ? "English" : "Português";
+        public const string ReabraIdioma = "Reabra o jogo para trocar o idioma · Reopen the game to switch language";
         public static string Porcento(float v) => (int)System.Math.Round(v * 100f) + "%";
         public static string Versao(string v) => L("Little Terminal, da V-STACK · versão ") + v;
     }
