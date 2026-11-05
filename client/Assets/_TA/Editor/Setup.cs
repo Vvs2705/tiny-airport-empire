@@ -115,9 +115,24 @@ namespace TA.EditorTools
                     options = BuildOptions.Development,
                 });
                 Debug.Log($"BuildSummary({target} dev {Version}): result={r.summary.result} errors={r.summary.totalErrors} size={r.summary.totalSize} path={path}");
+                Relatorio(r, target);
             }
             catch (System.Exception e) { Debug.LogError("TA Setup: build abortado: " + e.Message); }
             if (Application.isBatchMode) EditorApplication.Exit(r != null && r.summary.result == BuildResult.Succeeded ? 0 : 1);
+        }
+
+        /// <summary>Resumo do build em Builds/build_&lt;alvo&gt;.txt (erros e avisos de cada passo): o CI (unity.yml) sobe este arquivo como
+        /// artefato, porque la o log do Editor vai para a saida do job.</summary>
+        static void Relatorio(BuildReport r, BuildTarget target)
+        {
+            var sb = new System.Text.StringBuilder();
+            sb.AppendLine($"{target} dev {Version}: result={r.summary.result} errors={r.summary.totalErrors} warnings={r.summary.totalWarnings} " +
+                          $"size={r.summary.totalSize} tempo={r.summary.totalTime}");
+            foreach (BuildStep passo in r.steps)
+                foreach (BuildStepMessage m in passo.messages)
+                    if (m.type != LogType.Log) sb.AppendLine($"[{m.type}] {passo.name}: {m.content}");
+            Directory.CreateDirectory("Builds");
+            File.WriteAllText($"Builds/build_{target}.txt", sb.ToString());
         }
     }
 
