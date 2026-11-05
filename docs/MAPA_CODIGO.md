@@ -150,6 +150,7 @@ Em `client/Assets/_TA/Tests/EditModeView/` (`TA.ViewTests`, só no Unity: o `dot
 | Arquivo | Para quê | Origem |
 |---|---|---|
 | `verify.sh quick\|full\|android` | o portão: `checa_repo`, núcleo, viewcheck, EditMode, build Windows e `-autoplay 10` com 0 exceções; logs em `client/Builds/verify/`; o `quick` roda em worktree novo com a `UnityEngine.UI.dll` de outro worktree | `dc:client/tools/verify.sh` |
+| `ci-segredos.cmd` | cadastra no GitHub os segredos do `unity.yml` (`UNITY_LICENSE` direto do `Unity_lic.ulf`, e-mail e senha digitados) com o `gh`, sem copiar e colar; só o Vinicius roda | novo (05/11) |
 | `checa_repo.py` | portão estático (stdlib): `.meta` e GUID, núcleo sem Unity, módulos do `manifest.json`, guardrails, arquivos proibidos, segredos e este mapa; `--selftest` quebra um repo de mentira de cada jeito | `--selftest` de `fs:client/tools/conteudo_check.py` |
 | `auditar_arte.py` | arte fora do git (stdlib): `ASSETS.md` × zips HD × `PROVENIENCIA.md` × backup; `--sha` confere os hashes; `--selftest`. Só lê | — |
 | `checa_apk.py` | o APK contra a Play (stdlib + `aapt2` e `zipalign` do Unity): targetSdk ≥ 36, só arm64-v8a, sem `AD_ID`, `.so` e zip alinhados a 16 KB; `--selftest` | — |
