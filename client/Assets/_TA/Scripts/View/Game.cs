@@ -530,9 +530,11 @@ namespace TA
 
         static float ArgF(string name, float def) => float.TryParse(Arg(name), NumberStyles.Float, Inv, out float v) ? v : def;
 
-        /// <summary>Valor da flag (Environment.GetCommandLineArgs): null = ausente; "" = presente sem valor.</summary>
+        /// <summary>Valor da flag (Environment.GetCommandLineArgs): null = ausente; "" = presente sem valor. So em build de desenvolvimento e
+        /// no Editor (GDD §8.3): no Android, qualquer app abre a atividade do jogo com o extra "unity" e passaria -onda, -bot ou -cenario.</summary>
         static string Arg(string name)
         {
+            if (!Debug.isDebugBuild) return null;
             string[] a = Environment.GetCommandLineArgs();
             int i = Array.IndexOf(a, name);
             if (i < 0) return null;

@@ -147,9 +147,9 @@ Em `client/Assets/_TA/Tests/EditModeView/` (`TA.ViewTests`, só no Unity: o `dot
 | Arquivo | Para quê | Origem |
 |---|---|---|
 | `verify.sh quick\|full\|android` | o portão: `checa_repo`, núcleo, viewcheck, EditMode, build Windows e `-autoplay 10` com 0 exceções; logs em `client/Builds/verify/`; o `quick` roda em worktree novo com a `UnityEngine.UI.dll` de outro worktree | `dc:client/tools/verify.sh` |
-| `checa_repo.py` | portão estático (stdlib): `.meta` e GUID, núcleo sem Unity, módulos do `manifest.json`, guardrails, arquivos proibidos, segredos e este mapa; `--selftest` quebra um repo de mentira de cada jeito | `--selftest` de `fs:client/tools/conteudo_check.py` |
+| `checa_repo.py` | portão estático (stdlib): `.meta` e GUID, núcleo sem Unity, módulos do `manifest.json`, guardrails (com flag de linha de comando só em build de dev), arquivos proibidos, segredos, workflows do CI (sem `pull_request_target`, com `permissions:`) e este mapa; `--selftest` quebra um repo de mentira de cada jeito | `--selftest` de `fs:client/tools/conteudo_check.py` |
 | `auditar_arte.py` | arte fora do git (stdlib): `ASSETS.md` × zips HD × `PROVENIENCIA.md` × backup; `--sha` confere os hashes; `--selftest`. Só lê | — |
-| `checa_apk.py` | o APK contra a Play (stdlib + `aapt2` e `zipalign` do Unity): targetSdk ≥ 36, só arm64-v8a, sem `AD_ID`, `.so` e zip alinhados a 16 KB; `--selftest` | — |
+| `checa_apk.py` | o APK contra a Play (stdlib + `aapt2` e `zipalign` do Unity): targetSdk ≥ 36, só arm64-v8a, sem `AD_ID`, permissões na lista curta (`PERMISSOES`), `.so` e zip alinhados a 16 KB; `--release` derruba app depurável; `--selftest` | — |
 | `marca.py` | versões de marca que entram no git a partir dos originais 4K (numpy e Pillow) | — |
 | `coretests/TACore.Tests.csproj` | `dotnet test`: núcleo e testes EditMode sem abrir o Unity | `dc:client/tools/coretests` |
 | `viewcheck/` (`unity_refs.props`, `core/`, `view/`) | `dotnet build`: compila a View contra as DLLs do Unity 6000.3.27f1 e a `UnityEngine.UI.dll` de `client/Library/ScriptAssemblies`, sem abrir o Unity | `dc:client/tools/viewcheck` |

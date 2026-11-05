@@ -149,7 +149,7 @@ Ordem de trabalho de 2026-11-03, depois da mistura com o GDD de direção (`GDD.
 18. **`ta-estetica`:** auditoria visual contra os concorrentes; refazer o que estiver abaixo.
 19. **`ta-ingles`:** textos em inglês (D-08: pt-BR e en no lançamento; es e id depois, com revisão humana).
 20. **`ta-telemetria`:** Unity Analytics sem dado pessoal (D-11).
-21. **`ta-lgpd`:** consentimento, Data safety, exclusão de dados ponta a ponta.
+21. **`ta-lgpd`:** auditoria, Data safety e exclusão feitas (`docs/SEGURANCA_PRIVACIDADE.md`, 2026-11-05); falta o consentimento e o anúncio não personalizado quando o LevelPlay entrar.
 22. **`ta-playtest`:** K2 com 20 pessoas; K3 nos aparelhos dos amigos do dono.
 23. **`ta-loja-assets`:** ícone aplicado no build, screenshots, descrição, criativos gravados do jogo real.
 24. **Fim:** atualizações de ferramentas com a fila vazia, AAB assinado, regressão final, GO/NO-GO (GDD §25) e, por último, o celular de teste.
@@ -187,15 +187,15 @@ Nada disso o time de código consegue resolver sozinho.
 | Estado | Linhas | Pontos |
 |---|---|---|
 | Feito | 12 | 12,0 |
-| Parcial | 21 | 10,5 |
+| Parcial | 22 | 11,0 |
 | Depende | 2 | 0,5 |
-| Falta | 4 | 0,0 |
-| **Total** | **39** | **23,0 → 59%** |
+| Falta | 3 | 0,0 |
+| **Total** | **39** | **23,5 → 60%** |
 
 - **Feito (12):** projeto Unity e portão; equipe móvel; pátio e manutenção; quadro de partidas; fluxo de passageiros; 4 incidentes; campanha de 30 objetivos; missões; 20 conquistas; sem interstitial; offline de 2 h; tutorial de 12 passos.
-- **Falta (4):** segurança e privacidade ponta a ponta; regressão final; e 2 das 9 frentes de gestão da v1.5 (G satisfação, I painel de operações).
+- **Falta (3):** regressão final; e 2 das 9 frentes de gestão da v1.5 (G satisfação, I painel de operações).
 - **Depende (2):** anúncios recompensados reais; AAB assinado e enviado.
-- **Parcial (21):** aeroportos; rotas; aeronaves; estações; perfis; tripulação; dia a dia; histórias; passe de temporada; loja; save; configurações, política e suporte; telemetria; arte final; despesas e salários (A); velocidades (B); ficha ao tocar (C); contratação e demissão (D); vestiário (E); limpeza e banheiro (F); esteira de restituição (H). Uma a uma, estão em `docs/CONTRATO_LANCAMENTO.md` §1, com a evidência de cada PR e o que falta.
+- **Parcial (22):** segurança e privacidade (auditoria de 05/11; falta o servidor e o consentimento do anúncio); aeroportos; rotas; aeronaves; estações; perfis; tripulação; dia a dia; histórias; passe de temporada; loja; save; configurações, política e suporte; telemetria; arte final; despesas e salários (A); velocidades (B); ficha ao tocar (C); contratação e demissão (D); vestiário (E); limpeza e banheiro (F); esteira de restituição (H). Uma a uma, estão em `docs/CONTRATO_LANCAMENTO.md` §1, com a evidência de cada PR e o que falta.
 
 **O que o número não mostra.** A porcentagem mede **cobertura do contrato**, não esforço restante nem risco. A maior parte do que falta é tela (aeroportos, rotas, passe e loja), as 9 frentes de gestão (nenhuma começada, e cada uma só fecha com o critério de pronto em 10 itens, `GDD.md` §0.5), integração (IAP, servidor, anúncios, telemetria) e medida em aparelho, e quase toda a parte que depende do dono está na janela de 2026-11-25 em diante. As frentes A a I valem 9 linhas do mesmo peso das demais, mas variam muito de tamanho: a conta não diz isso.
 
