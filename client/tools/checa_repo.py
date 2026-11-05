@@ -96,7 +96,7 @@ SEGREDOS = {
 
 
 def texto(dados):
-    return dados.decode("utf-8-sig", "replace")  # o Visual Studio grava com BOM
+    return dados.decode("utf-8-sig", "replace").replace(chr(13) + chr(10), chr(10))  # BOM do Visual Studio; CRLF do checkout no Windows (autocrlf)
 
 
 def sem_comentario(cs):
