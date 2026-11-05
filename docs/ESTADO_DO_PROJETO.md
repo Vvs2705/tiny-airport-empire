@@ -111,7 +111,7 @@ Parada: a geração da peça `painel_ferramentas_parede` no Tripo (o navegador c
 
 Do mais importante para o menos.
 
-1. **Pessoa atravessando peça.** Em 2026-11-01 eram 237 encontros de pessoa com parede ou móvel nos 5 cenários de medida (153 de parede e 84 de móvel); a meta é **zero**. Medidores: `client/tools/diag_caixas.py` e `client/tools/diag_pessoas.py`. Frente: `ta-caminhos`.
+1. **Pessoa atravessando peça.** Em 2026-11-01 eram 237 encontros de pessoa com parede ou móvel nos 5 cenários de medida (153 de parede e 84 de móvel); a meta é **zero**. Medidores: `client/tools/diag_caixas.py` e `client/tools/diag_pessoas.py`. Frente: `ta-caminhos`. Na rodada local de 05/11 (#87, com as malhas) sobravam 73, todos rasos (até 4 cm) e no portão: pessoa × cadeiras e uma pessoa na parede sul. A frente `ta-portao-cadeiras` refez as 6 colunas de cadeiras costas com costas, com as mesmas 48, e folga de 0,03 m entre o corpo e cada cadeira ou parede (conta feita fora do Unity). **Falta confirmar com o `diag_caixas` na próxima rodada local**, com as malhas, e olhar a foto do portão.
 2. **Desempenho não medido no aparelho.** O K3 (p10 de FPS ≥ 30 num Android de entrada, com 60 pessoas) só foi medido no PC. Por decisão do dono, o celular de teste só entra no último passo de tudo; antes disso, o APK vai para amigos dele (D-24). Os diários exportados por eles já trazem o p10 de cada aparelho (seção "K3 em campo" do `diario_report.py`), mas só a partir do APK com a frente de telemetria.
 3. **K2 sem gente.** O portão da v0.1 pede teste com pelo menos 20 pessoas reais; hoje só o bot jogou. O relatório sai de `client/tools/diario_report.py`.
 4. **`painel_ferramentas_parede` sem gerar** (peça de parede da oficina). Parada por problema de navegador, sem crédito gasto.
