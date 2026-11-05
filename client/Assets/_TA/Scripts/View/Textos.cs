@@ -250,9 +250,29 @@ namespace TA
                 case Motivo.Pouso: return L("O avião não pousou a tempo");
                 case Motivo.Caixa: return L("O caixa não cobriu a conta do dia: contratar e melhorar ficam pausados até quitar");
                 case Motivo.Suprimento: return L("Faltou combustível ou refeição: o caminhão esperou a entrega");
+                case Motivo.Politica: return PoliticaFez(o.Sub, o.Causa, (int)o.Estacao);
                 default: return L("Deu certo: ninguém perdeu o voo");
             }
         }
+
+        // ---------- politicas do diretor (ta-politicas: a folha pela tela de Melhorias, o aviso de cada acao e o registro) ----------
+        public static readonly string Politicas = L("Políticas");
+        public static readonly string[] PoliticaNome = { L("Hangar automático"), L("Reposição antecipada"), L("Reforço da fila") };
+        public static readonly string[] PoliticaTrava = { L("Paga o hangar e o voo do avião; nunca deixa o caixa sem a conta do dia"),
+            L("Pede antes do ponto, até o teto do dia, na conta do dia"), L("Um por vez, pelo vestiário; nunca tira de estação apertada") };
+        public static string PoliticasLigadas(int n, int de) => n + L(" de ") + de + L(" ligadas: hangar, estoque e reforço");
+        /// <summary>O X no botao: 80%, 24/dia, 10 na fila.</summary>
+        public static string PoliticaValor(int p, int x) => p == 0 ? x + "%" : p == 1 ? x + L("/dia") : x + L(" na fila");
+        public static string PoliticaRegra(int p, int x) =>
+            p == 0 ? L("Ao hangar com ") + x + L("% de desgaste") : p == 1 ? L("Repõe abaixo de 3/4 do tanque, até ") + x + L(" por dia") : L("Reforça a fila com ") + x + L(" pessoas ou mais");
+        public static string PoliticaGasto(long gasto, int teto) => L("Hoje: ") + gasto + L(" de ") + teto + L(" nas entregas da política");
+        public static string PoliticaHangar(string aviao, int d) => L("Política: ") + aviao + L(" foi ao hangar com ") + d + L("% de desgaste");
+        public static string PoliticaEstoque(int sup, int antes, int tanque) => L("Política: entrega de ") + Suprimento[sup].ToLower(Br) + L(" pedida com ") + antes + "/" + tanque;
+        public static string PoliticaReforco(string nome, int e) => L("Política: ") + nome + L(" foi reforçar a fila ") + EstacaoNo[e];
+        /// <summary>A explicacao do registro (Motivo.Politica): Sub = a politica, Causa = desgaste, deposito ou fila.</summary>
+        public static string PoliticaFez(int p, int causa, int e) =>
+            p == 0 ? L("Política: ao hangar com ") + causa + L("% de desgaste") : p == 1 ? L("Política: entrega pedida com ") + causa + L(" no depósito")
+            : L("Política: reforço ") + EstacaoNo[e] + L(", com ") + causa + L(" na fila");
 
         // ---------- suprimentos: combustivel e refeicoes (ta-suprimentos; a ficha do despacho, o aviso e o cartao do patio) ----------
         public static readonly string[] Suprimento = { L("Combustível"), L("Refeições") };
@@ -290,7 +310,7 @@ namespace TA
         public static string Pct(float x) => (x * 100f).ToString("0", Br) + "%";
         public static string Vaga(int f) => L("Vaga ") + (f + 1);
         public static string ParaDestino(string destino) => "» " + destino;
-        public static string ViagemMarcada(int a) => L("Viagem para ") + AeroportoNome[a] + L(" marcada");
+        public static string ViagemMarcada(int a) => L("Viagem marcada: ") + AeroportoNome[a];
         /// <summary>Tipo, distancia (o tempo de cada trecho fora do patio) e frequencia.</summary>
         public static string RotaLinha(Rota r, float trechoSeg) => TipoRotaNome[(int)r.Tipo] + " · " + Tempo(trechoSeg) + L(" de voo · ") + (r.Cada <= 1 ? L("toda onda") : L("a cada ") + r.Cada + L(" ondas"));
         /// <summary>2 linhas: receita por onda (em relacao a rota da v0.1) e risco; depois o que o tipo muda.</summary>
@@ -299,9 +319,9 @@ namespace TA
         {
             switch (r.Tipo)
             {
-                case TipoRota.Turistica: return L("Loja e comida ") + Fator(r.Gasto) + L(" · chegada em pico");
+                case TipoRota.Turistica: return L("Compras ") + Fator(r.Gasto) + L(" · chegada em pico");
                 case TipoRota.Conexao: return L("Sem check-in · pontualidade +") + Pct(r.Bonus);
-                case TipoRota.Longa: return L("O avião fica fora na onda seguinte");
+                case TipoRota.Longa: return L("Avião fora na onda seguinte");
                 default: return L("Passageiros ") + Fator(r.Pax) + L(" · tarifa ") + Fator(r.Tarifa);
             }
         }
@@ -321,10 +341,10 @@ namespace TA
         /// <summary>As regras visiveis (GDD §6.4): de onde vem o ponto, quando o premio entra, o que expira e quanto dura.</summary>
         public static string[] RegrasPasse(Tuning t, int dias) => new[]
         {
-            L("Ponto vem do jogo: voo que partiu ") + t.PasseVoo + L(", diária ") + t.PasseDiaria + L(", semanal ") + t.PasseSemanal
-                + L(", objetivo da campanha ") + t.PasseObjetivo + L(". Ponto não se compra."),
-            L("O prêmio entra na hora em que o nível fecha. Coletar só marca como visto: não há prazo para resgatar, nem depois do fim."),
-            L("Nada expira: Cash, 2× e cosmético ficam com você. A temporada dura ") + dias + L(" dias do jogo e só anda com o jogo aberto."),
+            L("Pontos: voo que partiu ") + t.PasseVoo + L(", diária ") + t.PasseDiaria + L(", semanal ") + t.PasseSemanal
+                + L(", objetivo da campanha ") + t.PasseObjetivo + L(". Não se compra ponto."),
+            L("O prêmio entra quando o nível fecha. Coletar só marca como visto, sem prazo, nem após o fim."),
+            L("Nada expira: Cash, 2× e cosmético ficam com você. A temporada dura ") + dias + L(" dias de jogo aberto."),
         };
         public static string CosmeticoNome(string id)
         {
@@ -397,7 +417,7 @@ namespace TA
         public static readonly string[] FaseTransf = { L("No posto"), L("Terminando o atendimento"), L("Indo ao vestiário"), L("Trocando o uniforme"), L("Indo ao posto") };
         public static readonly string Vestiario = L("Vestiário");
         /// <summary>Frente F: o letreiro do banheiro (interditado = fechado para limpeza) e o que o zelador faz (Sim.Limpeza.cs, na ordem de Faxina).</summary>
-        public static readonly string Banheiro = L("Banheiro"), BanheiroFechado = L("Banheiro · em limpeza");
+        public static readonly string Banheiro = L("Banheiro"), BanheiroFechado = L("Banheiro · em limpeza"), NoBanheiro = L("Indo ao banheiro ou voltando");
         public static readonly string[] Faxina = { L("Livre"), L("Indo limpar"), L("Limpando") };
         public static string Preparo(float frac, float seg) => L("Preparo ") + (int)System.Math.Round(frac * 100f) + L("% · no posto em ") + Tempo(seg);
         public static string NaFila(int n) => n + L(" na fila");
@@ -406,6 +426,27 @@ namespace TA
         public static string Trechos(int n, int limite) => n + "/" + limite + L(" trechos desde o descanso");
         public static string GargaloRisco(int voo) => L("Gargalo: a fila não dá conta do ") + Voo(voo);
         public static string GargaloFolga(int voo) => L("Atenção: folga curta para o ") + Voo(voo);
+
+        // ---------- frente G: satisfacao com motivo (Sim.Satisfacao.cs, Direcao §8.4) ----------
+        /// <summary>Na ordem de TA.Core.Fator: o nome (HUD) e o porque, do lado ruim e do lado bom (ficha). Na ordem de Carinha e de PerfilPax: o nome.</summary>
+        public static readonly string[] FatorNome = { L("Fila"), L("Limpeza"), L("Banheiro"), L("Pontualidade"), L("Conforto") },
+            FatorContra = { L("fila longa"), L("lugar sujo"), L("banheiro com fila ou fechado"), L("embarque atrasado"), L("em pé, sem cadeira") },
+            FatorAFavor = { L("fila rápida"), L("tudo limpo"), L("banheiro sem fila"), L("embarque na hora"), L("sentado na espera") },
+            CarinhaNome = { L("Contente"), L("Neutro"), L("Bravo") },
+            PerfilPaxNome = { L("Executivo"), L("Família"), L("Conexão"), L("Viagem longa") };
+        public static readonly string Satisfacao = L("Satisfação"), Reclamou = L("Reclamou"), SemSatisfacao = L("Ninguém embarcou ainda");
+        public static string SatPeso(double peso)
+        {
+            int p = (int)System.Math.Round(peso, System.MidpointRounding.AwayFromZero);
+            return (p > 0 ? "+" : "") + p.ToString(CultureInfo.InvariantCulture);   // o sinal de menos U+2212 nao existe nas fontes: hifen
+        }
+        /// <summary>Ficha do passageiro: a carinha (ou Reclamou), a nota e o motivo principal com o peso dele.</summary>
+        public static string SatPax(int nota, Carinha c, Fator f, int peso, bool reclamou) =>
+            (reclamou ? Reclamou : CarinhaNome[(int)c]) + " " + nota + " · " + (peso < 0 ? FatorContra : FatorAFavor)[(int)f] + " (" + SatPeso(peso) + ")";
+        /// <summary>Toque num motivo do HUD: o motivo, onde pesa, o peso medio e as reclamacoes do dia.</summary>
+        public static string SatMotivo(Fator f, string onde, double peso, int reclamacoes) =>
+            FatorNome[(int)f] + (onde.Length > 0 ? " · " + onde : "") + ": " + SatPeso(peso)
+            + (reclamacoes > 0 ? " · " + Plural(reclamacoes, L("reclamação hoje"), L("reclamações hoje")) : "");
 
         // ---------- tutorial (GDD_ORIGEM "Onboarding", passos 1-12) ----------
         // Titulo = o que fazer; texto = por que, em uma ou duas frases. Seta: use o guillemet U+00BB; a seta U+2192 nao existe nas fontes. Passos 10 a 12 = evento.

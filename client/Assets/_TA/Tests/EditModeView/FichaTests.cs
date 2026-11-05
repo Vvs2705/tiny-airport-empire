@@ -51,6 +51,10 @@ namespace TA.Tests
             StringAssert.Contains(Textos.Voo(s.Voos[p.Voo].Id), d.Nome);
             StringAssert.StartsWith(Textos.PaxNaFila[0], d.Linha);
             StringAssert.Contains(Textos.Tempo((s.Voos[p.Voo].FechaPasso - s.PassoNaOnda) * Sim.Step), d.Info, "quanto falta para o portao fechar");
+            int nota = s.Nota(p);
+            Fator fp = s.Principal(p);
+            Assert.AreEqual(Textos.SatPax(nota, s.CarinhaDe(nota), fp, s.Peso(p, fp), p.Reclamou), d.Nota, "frente G: a satisfacao do nucleo com o motivo principal");
+            StringAssert.Contains(Textos.PerfilPaxNome[(int)s.PerfilDe(p)], d.Topo, "o perfil muda a tolerancia: aparece no topo");
             Assert.IsNull(Hud.FichaPax(s, 999999, false, false), "fora do nucleo e da tela, a ficha fecha");
             Assert.AreEqual(Textos.IndoEmbora, Hud.FichaPax(s, 999999, true, false).Linha, "saiu sem embarcar");
             s.Cash += 10000;
@@ -70,6 +74,13 @@ namespace TA.Tests
                 Textos.FaltamEmbarques(10000), Textos.VoltaSala, Textos.Trechos(3, 3), Textos.EscalaNaTela };
             linhas.AddRange(Textos.PaxAtendido);
             for (int h = 0; h < Textos.Humor.Length; h++) linhas.Add(Textos.HumorLinha(h));
+            for (int f = 0; f < Sim.Fatores; f++)   // frente G: a nota mais larga dos dois lados, com o reclamou
+            {
+                linhas.Add(Textos.SatPax(100, Carinha.Contente, (Fator)f, 5, false));
+                linhas.Add(Textos.SatPax(35, Carinha.Brava, (Fator)f, -45, true));
+                linhas.Add(Textos.SatPax(55, Carinha.Neutra, (Fator)f, -25, false));
+            }
+            linhas.Add(Textos.NoBanheiro + Textos.ComHistoria);
             foreach (string l in linhas) Assert.LessOrEqual(Largura(corpo, l), Hud.LargFicha, l);
             foreach (string d in Textos.Destino) Assert.LessOrEqual(Largura(nome, Textos.Voo(199) + " · " + d), Hud.LargFicha, d);
             foreach (string h in Textos.Historia) Assert.LessOrEqual(Largura(nome, h), Hud.LargFicha, h);   // TA-3: a ficha de quem tem historia

@@ -96,7 +96,7 @@ namespace TA.Core
                 case Ev.MissaoConcluida: Conta(Meta.Missoes); break;
                 case Ev.HangarFeito: Conta(Meta.Hangar); break;
                 case Ev.ChecagemIniciada: if (c == 0) Conta(Meta.Checagens); break;
-                case Ev.Movido: if (St((Estacao)c).Estado != Estado.Normal) Conta(Meta.Movidos); break;
+                case Ev.Movido: if (!_pelaPolitica && St((Estacao)c).Estado != Estado.Normal) Conta(Meta.Movidos); break;   // o reforco da politica nao conta
                 case Ev.IncidenteFim: if (b == 1) Conta(ClimaDe((TipoIncidente)a) != null ? Meta.Climas : Meta.Incidentes, a); break;
                 case Ev.VooPartiu:
                     if (c == 0) break;

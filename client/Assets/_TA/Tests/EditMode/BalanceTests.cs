@@ -29,11 +29,14 @@ namespace TA.Tests
             public double Usos, Negados, Interdicoes, Limpezas, FilaBanheiro, SujeiraMedia;
             /// <summary>ta-suprimentos: esperas por suprimento e custo das entregas (medias por partida).</summary>
             public double Faltas, Suprimentos;
+            public double SatMedia, Reclamacoes, Gorjetas;
+            /// <summary>ta-politicas: acoes de cada Politica (hangar, estoque, reforco), medias por partida.</summary>
+            public double[] Politicas;
         }
 
         public static Linha Rodar(BotProfile p, Tuning t = null, int sementes = Sementes, int ondas = Ondas, int threads = Threads)
         {
-            var l = new Linha { P = p, Marco = new double[3] };
+            var l = new Linha { P = p, Marco = new double[3], Politicas = new double[Sim.Politicas] };
             var emb = new double[sementes];
             var marcos = new int[3];
             // ponytail: cada semente tem o seu Sim e o Tuning so e' lido: rodam em paralelo (o job do CI tem teto de 20 min) e somam na ordem de sempre
@@ -53,6 +56,8 @@ namespace TA.Tests
                 l.Usos += r.Usos * k; l.Negados += r.Negados * k; l.Interdicoes += r.Interdicoes * k; l.Limpezas += r.Limpezas * k;
                 l.FilaBanheiro = Math.Max(l.FilaBanheiro, r.FilaBanheiro); l.SujeiraMedia += r.SujeiraMedia * k;
                 l.Faltas += r.Faltas * k; l.Suprimentos += r.Suprimentos * k;
+                l.SatMedia += r.SatMedia * k; l.Reclamacoes += r.Reclamacoes * k; l.Gorjetas += r.Gorjetas * k;
+                for (int q = 0; q < Sim.Politicas; q++) l.Politicas[q] += r.Politicas[q] * k;
                 for (int m = 0; m < 3; m++) if (r.MarcoEm[m] >= 0) { l.Marco[m] += r.MarcoEm[m]; marcos[m]++; }
             }
             for (int m = 0; m < 3; m++) l.Marco[m] = marcos[m] > 0 ? l.Marco[m] / marcos[m] : -1;
@@ -546,6 +551,33 @@ namespace TA.Tests
             }
         }
 
+        /// <summary>Portao da frente G (BALANCE.md §19, GDD §5.13): a satisfacao so le e a gorjeta so soma. Com a gorjeta, o bot embarca o mesmo e
+        /// recebe ao menos o mesmo (nao pune); e quem reage aos motivos (Satisfeito: manda limpar onde suja, contrata zelador, acelera a fila da
+        /// espera) contra o mesmo bot sem reagir, os dois com a gorjeta, pelo lucro (receita - conta paga). Abaixo de 1,10 a gorjeta fica desligada
+        /// (RegraSatBonus = false) e a satisfacao e so leitura.</summary>
+        [Test]
+        public void Portao_FrenteG_Satisfacao() => Assert.IsEmpty(MedeSatisfacao(Sementes), "GDD §5.13 e §5.4: a gorjeta nao pune e so liga com ganho >= 1,10");
+
+        public static string MedeSatisfacao(int sementes, int threads = Threads)
+        {
+            var ci = CultureInfo.InvariantCulture;
+            var gorjeta = new Tuning { RegraSatBonus = true };
+            TestContext.Out.WriteLine("| bot | ondas | embarque sem / com gorjeta | receita sem / com | gorjetas | satisfacao media | reclamacoes | lucro reagindo | lucro sem reagir | ganho | gorjeta |\n|---|---|---|---|---|---|---|---|---|---|---|");
+            string falhas = "";
+            foreach ((BotProfile r, BotProfile p) in new[] { (BotProfile.Satisfeito, BotProfile.Bom), (BotProfile.LentoSatisfeito, BotProfile.Lento) })
+            {
+                Linha sem = Rodar(p, null, sementes, OndasFaseC, threads), com = Rodar(p, gorjeta, sementes, OndasFaseC, threads), re = Rodar(r, gorjeta, sementes, OndasFaseC, threads);
+                double g = (re.Receita - re.Despesas) / (com.Receita - com.Despesas);
+                bool regra = Tuning.Padrao.RegraSatBonus;
+                TestContext.Out.WriteLine(string.Format(ci, "| {0} | {1} | {2:0.0}% / {3:0.0}% | {4:0} / {5:0} | {6:0} | {7:0.0} | {8:0.0} | {9:0} | {10:0} | {11:0.000} | {12} |", p.Name, OndasFaseC,
+                    sem.Embarque * 100, com.Embarque * 100, sem.Receita, com.Receita, com.Gorjetas, sem.SatMedia, sem.Reclamacoes, re.Receita - re.Despesas, com.Receita - com.Despesas, g,
+                    regra ? "ligada" : "so leitura"));
+                if (com.Embarque < sem.Embarque - 0.005 || com.Receita < sem.Receita * 0.98) falhas += " " + p.Name + " pune";
+                if (regra && g < 1.10) falhas += " " + r.Name + "=" + g.ToString("0.000", ci);
+            }
+            return falhas;
+        }
+
         /// <summary>Portao do GDD §5.13 para os 3 candidatos (CONTRATO_FASE_C9 §6): quem compara e troca pelo Senior contra quem contrata sempre o Pleno
         /// e nunca demite, pelo lucro (receita - conta paga), com o Bom e o Lento, 200 sementes x 20 ondas. Abaixo de 1,10 a experiencia fica so visual.</summary>
         [Test]
@@ -700,6 +732,56 @@ namespace TA.Tests
                 if (com.Faltas > 0 || com.Embarque < sem.Embarque - 0.005 || r < 0.98) falhas += " " + p.Name + "=" + r.ToString("0.000", ci);
             }
             Assert.IsEmpty(falhas, "suprimento nao pode tirar embarque nem pesar mais de 2% da receita");
+        }
+
+        /// <summary>Portao da ta-politicas (GDD §5.13; BALANCE.md §20): as politicas tiram microgestao, nao substituem o jogador bom. Com as 3 ligadas no X
+        /// padrao, o Lento nao passa o Bom sem elas (receita e embarque), o TA-1 continua e o TA-2 (Bom / Parado, os dois com as politicas) fica &gt;= 1,10.</summary>
+        [Test]
+        public void Portao_Politicas_NaoSubstituemOJogadorBom()
+        {
+            Linha bom = Rodar(BotProfile.Bom), lento = Rodar(BotProfile.Lento), bomP = Rodar(BotProfile.BomPoliticas), lentoP = Rodar(BotProfile.LentoPoliticas),
+                paradoP = Rodar(BotProfile.ParadoPoliticas);
+            ImprimePoliticas(new[] { bom, lento, bomP, lentoP, paradoP });
+            double ta2 = bomP.Receita / paradoP.Receita;
+            TestContext.Out.WriteLine(string.Format(CultureInfo.InvariantCulture, "TA-2 com as politicas (BomPoliticas / ParadoPoliticas) = {0:0.000}", ta2));
+            Assert.LessOrEqual(lentoP.Receita, bom.Receita, "o Lento com as politicas nao passa o Bom (receita)");
+            Assert.LessOrEqual(lentoP.Embarque, bom.Embarque, "o Lento com as politicas nao passa o Bom (embarque)");
+            Assert.GreaterOrEqual(bomP.Embarque, 0.85, "TA-1: Bom com as politicas");
+            Assert.GreaterOrEqual(lentoP.Embarque, 0.60, "TA-1: Lento com as politicas");
+            Assert.GreaterOrEqual(ta2, 1.10, "TA-2 com as politicas ligadas");
+        }
+
+        static void ImprimePoliticas(Linha[] ls)
+        {
+            var ci = CultureInfo.InvariantCulture;
+            TestContext.Out.WriteLine("| bot | embarque | p10 | receita | movimentos | hangar | entregas (Cash) | esperas | politica: hangar / estoque / reforco |\n|---|---|---|---|---|---|---|---|---|");
+            foreach (Linha l in ls)
+                TestContext.Out.WriteLine(string.Format(ci, "| {0} | {1:0.0}% | {2:0.0}% | {3:0} | {4:0.0} | {5:0.00} | {6:0} | {7:0.00} | {8:0.00} / {9:0.00} / {10:0.0} |", l.P.Name, l.Embarque * 100,
+                    l.EmbarqueP10 * 100, l.Receita, l.Moves, l.Hangares, l.Suprimentos, l.Faltas, l.Politicas[0], l.Politicas[1], l.Politicas[2]));
+        }
+
+        /// <summary>Calibragem (BALANCE.md §20): cada politica sozinha e as 3, em cada X da lista, com o Bom, o Lento e o Parado, 40 sementes x 10 ondas.</summary>
+        [Test]
+        public void Medida_Politicas()
+        {
+            const int N = 40;
+            foreach (BotProfile b in new[] { BotProfile.Bom, BotProfile.Lento, BotProfile.Parado })
+            {
+                var ls = new System.Collections.Generic.List<Linha> { Rodar(b, null, N) };
+                for (int quais = 1; quais <= 7; quais = quais == 4 ? 7 : quais * 2)
+                    for (int x = 0; x < 3; x++)
+                    {
+                        var t = new Tuning();
+                        t.PoliticaPadrao = new[] { x, x, x };
+                        ls.Add(Rodar(BotProfile.ComPoliticas(b, b.Name + " pol=" + quais + " x=" + x, quais), t, N));
+                    }
+                ImprimePoliticas(ls.ToArray());
+            }
+            // o hangar: os bots de cima checam antes de 70%; o Automatico nunca checa nem manda ao hangar
+            var la = new System.Collections.Generic.List<Linha> { Rodar(BotProfile.Automatico, null, N, OndasFaseC) };
+            for (int x = 0; x < 3; x++)
+                la.Add(Rodar(BotProfile.ComPoliticas(BotProfile.Automatico, "Automatico pol=1 x=" + x, 1), new Tuning { PoliticaPadrao = new[] { x, 1, 1 } }, N, OndasFaseC));
+            ImprimePoliticas(la.ToArray());
         }
 
         /// <summary>Quanto as entregas pesam ao longo da partida e o que o tanque maior (os 2 niveis, nos dois suprimentos) economiza (BALANCE.md §18).</summary>

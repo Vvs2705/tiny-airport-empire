@@ -32,7 +32,12 @@ namespace TA.Tests
             return null;
         }
 
-        static string SemHist(string save) => string.Join("\n", save.Split('\n').Where(l => !l.StartsWith("hist=") && !l.StartsWith("hp=") && !l.StartsWith("sha256=")));
+        // ponytail: a media movel (ema) do save real foi gravada pelo dotnet; o Mono do Unity refaz a conta com diferenca na 8a casa (rodada da
+        // leva 2, 04/11), entao a comparacao arredonda o ema em 6 casas. O resto do save continua comparado caractere a caractere.
+        // schema 17: a satisfacao (sat, satm, satp) so le o jogo; o save antigo nao a tinha.
+        static string SemHist(string save) => string.Join("\n", save.Split('\n').Where(l => !l.StartsWith("hist=") && !l.StartsWith("hp=") && !l.StartsWith("sha256=")
+            && !l.StartsWith("sat"))
+            .Select(l => l.StartsWith("ema=") ? "ema=" + double.Parse(l.Substring(4), System.Globalization.CultureInfo.InvariantCulture).ToString("0.000000", System.Globalization.CultureInfo.InvariantCulture) : l));
 
         static string Hist(string save) => save.Split('\n').Single(l => l.StartsWith("hist="));
 
@@ -297,7 +302,7 @@ namespace TA.Tests
             Sim s = Sim.Load(SaveEnvelope.Wrap("t=90\nonda=0\nhist=" + lixo + "\n", "x", 1));
             Assert.AreEqual(new[] { 8L, 9L }, s.Ocorrencias.Select(o => o.Passo).ToArray(), "negativo, longe no futuro, torto e curto saem");
             Ocorrencia a = s.Ocorrencias[0], b = s.Ocorrencias[1];
-            Assert.AreEqual((TipoOcorrencia.FaltaCaixa, 7, 100, 1, 499, 499, 3600, Opcao.Hangar, 0L, Motivo.Suprimento, Estacao.Despacho, 3600, 8),
+            Assert.AreEqual((TipoOcorrencia.Politica, 7, 100, 1, 499, 499, 3600, Opcao.Hangar, 0L, Motivo.Politica, Estacao.Despacho, 3600, 8),   // o ultimo de cada enum
                 (a.Tipo, a.Sub, a.Causa, a.Voo, a.Total, a.Perdidos, a.Atraso, a.Resposta, a.Custo, a.Motivo, a.Estacao, a.Espera, a.Postos));
             Assert.AreEqual((TipoOcorrencia.Incidente, -1, 0, -1, 0, 0, 0, Opcao.Segurar, (long)int.MaxValue, Motivo.Nenhum, Estacao.CheckIn, 0, 0),
                 (b.Tipo, b.Sub, b.Causa, b.Voo, b.Total, b.Perdidos, b.Atraso, b.Resposta, b.Custo, b.Motivo, b.Estacao, b.Espera, b.Postos));

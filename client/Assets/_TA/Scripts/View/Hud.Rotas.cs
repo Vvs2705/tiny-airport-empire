@@ -30,7 +30,7 @@ namespace TA
         {
             { "vv", new Vector2(-48.6f, -22.4f) }, { "ca", new Vector2(-36.3f, -10.6f) }, { "ag", new Vector2(-45f, -21f) },
             { "vv_campinas", new Vector2(-47.1f, -22.9f) }, { "vv_ribeirao", new Vector2(-47.8f, -21.2f) }, { "vv_curitiba", new Vector2(-49.3f, -25.4f) }, { "vv_bh", new Vector2(-43.9f, -19.9f) },
-            { "ca_salvador", new Vector2(-38.5f, -13f) }, { "ca_recife", new Vector2(-34.9f, -8.05f) }, { "ca_fortaleza", new Vector2(-38.5f, -3.7f) }, { "ca_brasilia", new Vector2(-47.9f, -15.8f) },
+            { "ca_salvador", new Vector2(-38.5f, -13f) }, { "ca_recife", new Vector2(-34.9f, -8.05f) }, { "ca_fortaleza", new Vector2(-38.5f, -3.7f) }, { "ca_brasilia", new Vector2(-47.9f, -14.5f) },   // ponytail: real -15,8; 1,3° ao norte só no desenho, para o ponto não cobrir o de Salvador
             { "ag_guarulhos", new Vector2(-46.5f, -23.4f) }, { "ag_galeao", new Vector2(-43.2f, -22.8f) }, { "ag_manaus", new Vector2(-60f, -3.1f) }, { "ag_lisboa", new Vector2(-9.1f, 38.7f) },
         };
 
