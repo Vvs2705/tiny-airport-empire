@@ -521,7 +521,7 @@ namespace TA
                 pessoas = Mathf.Max(pessoas, p); avioes = Mathf.Max(avioes, a); veiculos = Mathf.Max(veiculos, v);
             }
             dts.Sort();
-            float p90 = dts[Mathf.Clamp((int)(dts.Count * 0.9f), 0, dts.Count - 1)], soma = 0f;
+            float p90 = dts[Mathf.Clamp(dts.Count * 9 / 10, 0, dts.Count - 1)], soma = 0f;   // conta inteira, como o Telemetria.Calcula
             foreach (float d in dts) soma += d;
             float p10 = 1f / p90;
             Debug.Log(string.Format(Inv, "PERF p10={0:0.0} media={1:0.0} quadros={2} {3} {4}x{5}", p10, dts.Count / soma, dts.Count, _hud.M.Contagem(), Screen.width, Screen.height));
