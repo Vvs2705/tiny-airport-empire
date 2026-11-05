@@ -31,7 +31,38 @@ namespace TA
         public static readonly string[] AviaoNome = { L("Regional"), L("Jato") };
         /// <summary>Os nomes da Tabelas.Rotas, na mesma ordem: o destino tem um nome so, no quadro, na campanha e na tela do voo.</summary>
         public static readonly string[] Destino = System.Array.ConvertAll(Tabelas.Rotas, r => L(r.Nome));
-        public static readonly string[] Historia = System.Array.ConvertAll(Historias.Texto, L);
+        /// <summary>As 20 historias do TA-3, na ordem de Tabelas.Historias (o indice e' o bit do album). Uma linha cada: cabe na nota do quadro.</summary>
+        public static readonly string[] Historia =
+        {
+            L("Dona Rosa vai ao casamento da neta"), L("Lia vai à entrevista de emprego"), L("Pipoca, o gato, viaja na caixinha"),
+            L("Vô Tonico leva um presente ao neto"), L("A família Souza visita a bisavó"), L("Seu Zé leva o violão da serenata"),
+            L("Gabi reencontra a amiga de escola"), L("Theo, 8 anos, voa pela 1ª vez"), L("Léo e Rafa saem em lua de mel"),
+            L("O time de vôlei vai à final"), L("Dona Lurdes vai ver o mar"), L("Nina leva a prancha de surfe"),
+            L("Bolinha, o cão, sai de férias"), L("Seu Abílio volta à terra natal"), L("Kenji faz conexão para o Japão"),
+            L("O coral da escola canta em Lisboa"), L("Dra. Iara apresenta sua pesquisa"), L("Mariana parte para o intercâmbio"),
+            L("Vô Hiro vai conhecer a netinha"), L("A banda Sol Maior vai ao festival"),
+        };
+        /// <summary>A estacao com a preposicao: "no check-in", "na loja".</summary>
+        public static readonly string[] EstacaoNa = { L("no check-in"), L("na segurança"), L("na loja"), L("no portão"), L("na bagagem"), L("na alimentação"), L("na oficina"), L("no despacho") };
+        /// <summary>O que fecha a historia, numa linha (a regra do nucleo: Historia.Onde, Quem e Todos): "atendente no portão".</summary>
+        public static string HistoriaPedido(Historia x) =>
+            x.Todos ? L("o voo sair sem perder ninguém")
+            : x.Onde is TA.Core.Estacao e ? (x.Quem is TA.Core.Perfil q ? PerfilCurto[(int)q] + " " + EstacaoNa[(int)e] : L("passar ") + EstacaoNa[(int)e])
+            : L("embarcar a tempo");
+        public static string HistoriaPede(Historia x) => L("Pede: ") + HistoriaPedido(x);
+        public static readonly string[] PerfilCurto = { L("atendente"), L("agente"), L("vendedora"), L("bagageira"), L("mecânico"), L("despachante") };
+        /// <summary>A nota do quadro: o titulo e, enquanto falta o pedido, o pedido a cada 3 s. Sem a RegraHistorias, a Dona Rosa da v0.1.</summary>
+        public static string HistoriaNota(Sim s)
+        {
+            Historia x = s.HistoriaAtual;
+            if (x == null) return Historia[0];
+            bool pede = s.HistoriaPasso == 0 && (x.Onde != null || x.Todos) && (int)(s.Time / 3f) % 2 == 1;
+            return pede ? HistoriaPede(x) : Historia[s.HistoriaOnda];
+        }
+        /// <summary>Album: a que ainda nao apareceu mostra so onde vive; a que apareceu, o pedido; a entregue, o selo.</summary>
+        public static string HistoriaOnde(Historia x) => L("Aparece em ") + AeroportoNome[x.Aeroporto] + ", " + L("terminal ") + Nivel(x.Marco);
+        public static string AlbumEstado(bool tem, Historia x) => (tem ? L("Entregue: ") : L("Pede: ")) + HistoriaPedido(x);
+        public static readonly string HistoriaOculta = L("História ainda não vista");
         public static readonly string[] Melhoria = { L("Velocidade"), L("Capacidade") };
 
         public static string Num(long n) => n.ToString("#,0", Br);
@@ -172,7 +203,6 @@ namespace TA
         public static string NaEstacao(int n) => n == 0 ? L("Ninguém aqui") : n == 1 ? L("1 pessoa aqui") : n + L(" pessoas aqui");
         public static string ChecagemEfeito(int tira, float seg) => "-" + tira + "% · " + Seg(seg);
         public static string HangarEfeito(float seg) => L("Zera o desgaste em ") + Tempo(seg);
-        public static string AlbumEstado(bool tem) => tem ? L("Entregue") : L("Ainda não");
 
         // ---------- avisos de perigo (GDD §5.8: causa, duracao e opcoes; bombeiros so de rotina, sem fogo nem acidente) ----------
         /// <summary>Na ordem de TipoIncidente.</summary>
@@ -280,7 +310,7 @@ namespace TA
         public static string Pct(float x) => (x * 100f).ToString("0", Br) + "%";
         public static string Vaga(int f) => L("Vaga ") + (f + 1);
         public static string ParaDestino(string destino) => "» " + destino;
-        public static string ViagemMarcada(int a) => L("Viagem para ") + AeroportoNome[a] + L(" marcada");
+        public static string ViagemMarcada(int a) => L("Viagem marcada: ") + AeroportoNome[a];
         /// <summary>Tipo, distancia (o tempo de cada trecho fora do patio) e frequencia.</summary>
         public static string RotaLinha(Rota r, float trechoSeg) => TipoRotaNome[(int)r.Tipo] + " · " + Tempo(trechoSeg) + L(" de voo · ") + (r.Cada <= 1 ? L("toda onda") : L("a cada ") + r.Cada + L(" ondas"));
         /// <summary>2 linhas: receita por onda (em relacao a rota da v0.1) e risco; depois o que o tipo muda.</summary>
@@ -289,9 +319,9 @@ namespace TA
         {
             switch (r.Tipo)
             {
-                case TipoRota.Turistica: return L("Loja e comida ") + Fator(r.Gasto) + L(" · chegada em pico");
+                case TipoRota.Turistica: return L("Compras ") + Fator(r.Gasto) + L(" · chegada em pico");
                 case TipoRota.Conexao: return L("Sem check-in · pontualidade +") + Pct(r.Bonus);
-                case TipoRota.Longa: return L("O avião fica fora na onda seguinte");
+                case TipoRota.Longa: return L("Avião fora na onda seguinte");
                 default: return L("Passageiros ") + Fator(r.Pax) + L(" · tarifa ") + Fator(r.Tarifa);
             }
         }
@@ -311,10 +341,10 @@ namespace TA
         /// <summary>As regras visiveis (GDD §6.4): de onde vem o ponto, quando o premio entra, o que expira e quanto dura.</summary>
         public static string[] RegrasPasse(Tuning t, int dias) => new[]
         {
-            L("Ponto vem do jogo: voo que partiu ") + t.PasseVoo + L(", diária ") + t.PasseDiaria + L(", semanal ") + t.PasseSemanal
-                + L(", objetivo da campanha ") + t.PasseObjetivo + L(". Ponto não se compra."),
-            L("O prêmio entra na hora em que o nível fecha. Coletar só marca como visto: não há prazo para resgatar, nem depois do fim."),
-            L("Nada expira: Cash, 2× e cosmético ficam com você. A temporada dura ") + dias + L(" dias do jogo e só anda com o jogo aberto."),
+            L("Pontos: voo que partiu ") + t.PasseVoo + L(", diária ") + t.PasseDiaria + L(", semanal ") + t.PasseSemanal
+                + L(", objetivo da campanha ") + t.PasseObjetivo + L(". Não se compra ponto."),
+            L("O prêmio entra quando o nível fecha. Coletar só marca como visto, sem prazo, nem após o fim."),
+            L("Nada expira: Cash, 2× e cosmético ficam com você. A temporada dura ") + dias + L(" dias de jogo aberto."),
         };
         public static string CosmeticoNome(string id)
         {
@@ -387,7 +417,7 @@ namespace TA
         public static readonly string[] FaseTransf = { L("No posto"), L("Terminando o atendimento"), L("Indo ao vestiário"), L("Trocando o uniforme"), L("Indo ao posto") };
         public static readonly string Vestiario = L("Vestiário");
         /// <summary>Frente F: o letreiro do banheiro (interditado = fechado para limpeza) e o que o zelador faz (Sim.Limpeza.cs, na ordem de Faxina).</summary>
-        public static readonly string Banheiro = L("Banheiro"), BanheiroFechado = L("Banheiro · em limpeza");
+        public static readonly string Banheiro = L("Banheiro"), BanheiroFechado = L("Banheiro · em limpeza"), NoBanheiro = L("Indo ao banheiro ou voltando");
         public static readonly string[] Faxina = { L("Livre"), L("Indo limpar"), L("Limpando") };
         public static string Preparo(float frac, float seg) => L("Preparo ") + (int)System.Math.Round(frac * 100f) + L("% · no posto em ") + Tempo(seg);
         public static string NaFila(int n) => n + L(" na fila");
@@ -396,6 +426,27 @@ namespace TA
         public static string Trechos(int n, int limite) => n + "/" + limite + L(" trechos desde o descanso");
         public static string GargaloRisco(int voo) => L("Gargalo: a fila não dá conta do ") + Voo(voo);
         public static string GargaloFolga(int voo) => L("Atenção: folga curta para o ") + Voo(voo);
+
+        // ---------- frente G: satisfacao com motivo (Sim.Satisfacao.cs, Direcao §8.4) ----------
+        /// <summary>Na ordem de TA.Core.Fator: o nome (HUD) e o porque, do lado ruim e do lado bom (ficha). Na ordem de Carinha e de PerfilPax: o nome.</summary>
+        public static readonly string[] FatorNome = { L("Fila"), L("Limpeza"), L("Banheiro"), L("Pontualidade"), L("Conforto") },
+            FatorContra = { L("fila longa"), L("lugar sujo"), L("banheiro com fila ou fechado"), L("embarque atrasado"), L("em pé, sem cadeira") },
+            FatorAFavor = { L("fila rápida"), L("tudo limpo"), L("banheiro sem fila"), L("embarque na hora"), L("sentado na espera") },
+            CarinhaNome = { L("Contente"), L("Neutro"), L("Bravo") },
+            PerfilPaxNome = { L("Executivo"), L("Família"), L("Conexão"), L("Viagem longa") };
+        public static readonly string Satisfacao = L("Satisfação"), Reclamou = L("Reclamou"), SemSatisfacao = L("Ninguém embarcou ainda");
+        public static string SatPeso(double peso)
+        {
+            int p = (int)System.Math.Round(peso, System.MidpointRounding.AwayFromZero);
+            return (p > 0 ? "+" : "") + p.ToString(CultureInfo.InvariantCulture);   // o sinal de menos U+2212 nao existe nas fontes: hifen
+        }
+        /// <summary>Ficha do passageiro: a carinha (ou Reclamou), a nota e o motivo principal com o peso dele.</summary>
+        public static string SatPax(int nota, Carinha c, Fator f, int peso, bool reclamou) =>
+            (reclamou ? Reclamou : CarinhaNome[(int)c]) + " " + nota + " · " + (peso < 0 ? FatorContra : FatorAFavor)[(int)f] + " (" + SatPeso(peso) + ")";
+        /// <summary>Toque num motivo do HUD: o motivo, onde pesa, o peso medio e as reclamacoes do dia.</summary>
+        public static string SatMotivo(Fator f, string onde, double peso, int reclamacoes) =>
+            FatorNome[(int)f] + (onde.Length > 0 ? " · " + onde : "") + ": " + SatPeso(peso)
+            + (reclamacoes > 0 ? " · " + Plural(reclamacoes, L("reclamação hoje"), L("reclamações hoje")) : "");
 
         // ---------- tutorial (GDD_ORIGEM "Onboarding", passos 1-12) ----------
         // Titulo = o que fazer; texto = por que, em uma ou duas frases. Seta: use o guillemet U+00BB; a seta U+2192 nao existe nas fontes. Passos 10 a 12 = evento.

@@ -1293,7 +1293,66 @@ As 17 travas novas entram no `mutacao.py`. A 1ª rodada deu 14 de 17: o teste n�
 - **O aviso de suprimento quase nunca acende** com a tabela padrão (D-Sc). Ver se, com a reposição manual da `ta-politicas`, a pessoa entende o aviso e o caminhão esperando, e se o tanque maior parece valer a pena.
 - **A ficha do despacho** é o único lugar que mostra o depósito sem falta. Ver se alguém procura o estoque em outro lugar, como o pátio ou o avião.
 
-## 19. Políticas do diretor (2026-11-04, frente `ta-politicas`)
+## 19. Frente G: satisfação com motivo (2026-11-04, `GDD.md` §4.1, linha G)
+
+Satisfação de cada passageiro e do aeroporto no núcleo (`Sim.Satisfacao.cs`, save schema 17) e na tela (ficha do passageiro e selo do HUD, `Hud.Satisfacao.cs`). Só lê o que os outros sistemas já fazem; com `RegraSatBonus = false`, o padrão, o jogo é o mesmo número a número (`SoLe_SemAGorjeta_OJogoEOMesmoNumeroANumero_ComAGorjetaNinguemContenteNaoGanhaNada`).
+
+| | valor |
+|---|---|
+| nota de partida; o que cada fator soma quando vai bem (fila, limpeza, banheiro, pontualidade, conforto) | 75; 5, 5, 3, 5, 3 |
+| o pior que cada fator tira | 45, 20, 15, 25, 15 |
+| tolerância de fila em s (executivo, família, conexão, viagem longa) | 45, 70, 60, 90 |
+| tolerância de sujeira (de 1 000) | 600, 400, 600, 500 |
+| tolerância de embarque atrasado e de espera em pé, em s | 20, 40, 15, 40; 30, 20, 30, 20 |
+| fila do banheiro tolerada; quem achou fechado | 10 s; -15 |
+| cadeiras do portão (as da planta, `Mundo.Espera`) | 48 |
+| carinha contente, brava, reclama | ≥ 70, < 50, < 40 |
+| média do aeroporto | os últimos ~100 que saíram |
+| gorjeta (desligada) | 10% da tarifa de quem embarca com ≥ 80 |
+
+Cada fator anda numa reta pela tolerância: soma o máximo com 0, fica em 0 na metade e tira o máximo na tolerância, até o teto. Atraso e espera em pé só tiram. O perfil é o tipo da rota do voo (curta = executivo, turística = família, conexão, longa = viagem longa); o grupo extra de conexão do incidente é conexão.
+
+### D-Ga. A 1ª tabela deixava todo executivo bravo
+
+Com 20 s de fila tolerados pelo executivo e sujeira 400, o Bom ficava com 57 de média e o Parado com 58: a nota não separava quem joga bem de quem não joga. Com as tolerâncias acima (fila somada na viagem toda) e **quem perde o voo na fila sai com a fila no teto**, o Bom fica em 67, o Lento em 65 e o Parado em 54 (40 sementes × 20 ondas; com 200, no portão abaixo, Bom 68,0 e Lento 64,1). Quem perde o voo sai com 75 - 45 + 5 = 35: bravo, e reclama da fila.
+
+### D-Gb. A gorjeta fica desligada: a satisfação é só leitura
+
+O portão do §5.13 pergunta se reagir aos motivos rende ≥ 1,10 × não reagir. O bot `Satisfeito` olha os 3 motivos que mais pesam contra e reage: manda limpar onde suja, contrata zelador e compra velocidade na estação da fila. Com a gorjeta ligada nos dois, o ganho é 1,000 (Bom) e 0,996 (Lento): a gorjeta paga quase igual a quem reage e a quem não reage, porque o motivo que pesa é a fila, e o bot de sempre já move gente para ela. Gorjeta maior viraria moeda, o que o §6.1 proíbe. Ela fica no núcleo, desligada (`RegraSatBonus = false`), e a satisfação diz o porquê sem mexer no Cash.
+
+### O portão da G (`Portao_FrenteG_Satisfacao`, 200 sementes × 20 ondas, medido no PC com `--filter`)
+
+| bot | embarque sem / com gorjeta | receita sem / com | gorjetas (Cash) | satisfação média | reclamações | lucro reagindo | lucro sem reagir | ganho |
+|---|---|---|---|---|---|---|---|---|
+| Bom | 93,1% / 93,4% | 27 678 / 28 325 | 381 | 68,0 | 143,6 | 26 867 | 26 866 | 1,000 |
+| Lento | 77,2% / 78,1% | 14 726 / 15 231 | 259 | 64,1 | 341,4 | 13 802 | 13 854 | 0,996 |
+
+O portão exige que a gorjeta não puna (embarque com ela ≥ sem ela - 0,5 ponto e receita ≥ 98%) e só deixa ligar com ganho ≥ 1,10. As reclamações são quase todas de quem perdeu o voo na fila. A gorjeta ligada daria 1,4% (Bom) e 1,7% (Lento) a mais de receita a qualquer um.
+
+### Prova de mutação (`MUTACAO_TESTES="FullyQualifiedName~SatisfacaoTests|FullyQualifiedName~SaveTests|FullyQualifiedName~LimpezaTests" python client/tools/mutacao.py satisfacao:`)
+
+Resultado em 2026-11-04: **14 de 14 mortos** na 1ª rodada.
+
+| trava retirada | testes que caíram |
+|---|---|
+| sem a regra não paga gorjeta | 15, entre eles `Gorjeta_SoComARegra_SoDeQuemEmbarcaContente_SatBonusDaTarifa` e as migrações dos saves reais |
+| gorjeta só de quem está contente | `SoLe_SemAGorjeta_...` |
+| no portão, a fila só com o embarque aberto; as cadeiras no teto; o atraso só depois da hora de abrir | `Portao_SentaAteAcabarACadeira_AtrasoSoDepoisDaHoraDeAbrir_EAFilaSomaEspera` (os 3) |
+| reclama 1x; as reclamações são do dia | `Reclama_UmaVez_DoMotivoPrincipal_EZeraNoDiaSeguinte` (os 2) |
+| quem perdeu o voo entra na média | 2, entre eles `Aeroporto_TodoQueSaiEntraNaMedia_OTopEOrdenado_ENadaForaDaFaixa` |
+| perdeu na fila, a fila vai ao teto | `PerdeuOVoo_NaFila_AEsperaVaiAoTeto_ESaiNaMedia` |
+| o perfil sai da rota | `Perfil_SaiDaRotaDoVoo_OGrupoDeConexaoEConexao` e `Tolerancia_...` |
+| a nota de 0 a 100 | `SoLe_SemAGorjeta_...` |
+| o save guarda quem está no aeroporto | 3, entre eles `Save_NoMeioDaOnda_IdaEVoltaEstavel_EOMesmoJogo` |
+| o save limita o lixo | `Lixo_NoSave_ViraOPadraoLimitado` |
+| achou o banheiro fechado | `Banheiro_SoPesaEmQuemPrecisava_FilaENegadoContra_UsarSemFilaAjuda` |
+
+### Para medir com gente
+
+- **O motivo se lê?** Ver se a pessoa toca no selo e entende "Fila · CHECK-IN: -8" sem explicação, e se vai à sala que o toque abre.
+- **O executivo e a família se notam?** O perfil aparece só no topo da ficha. Ver se a pessoa repara que a rota turística reclama de sujeira antes.
+
+## 20. Políticas do diretor (2026-11-04, frente `ta-politicas`)
 
 Ideia do código de outra IA (03/11), refeita no nosso padrão (`Sim.Politicas.cs`): nenhum código de lá entrou. São regras que o jogador liga e regula para tirar a microgestão repetitiva, sem jogar por ele. As 3 começam desligadas; o X de cada uma sai de uma lista fixa da tabela, e o jogo novo fica no do meio. **Antes** = tudo desligado, que é o jogo de agora número a número (o save nem ganha a chave). **Depois** = os bots com as 3 ligadas (`BomPoliticas`, `LentoPoliticas`, `ParadoPoliticas`).
 

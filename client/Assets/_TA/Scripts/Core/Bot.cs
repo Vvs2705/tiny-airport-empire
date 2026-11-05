@@ -28,7 +28,13 @@ namespace TA.Core
         /// rende 25% na estacao toda, cerca do dobro de um nivel de velocidade (CONTRATO_FASE_C9 §6, BALANCE §16). Sem ele, contrata sempre o Pleno e
         /// nunca demite.</summary>
         public bool Candidatos;
-        /// <summary>Politicas = as politicas do diretor que liga no X padrao (bit = Politica; 7 = as 3) na 1a decisao (frente ta-politicas, BALANCE §19).
+        /// <summary>Historias = joga pelas historias do TA-3: leva o perfil pedido (ou alguem, na parada opcional) a estacao antes de o passageiro
+        /// passar e so troca de aeroporto com o album dele cheio. Sem ele, a historia fecha quando o jogo de sempre ja cumpre o pedido.</summary>
+        public bool Historias;
+        /// <summary>Satisfacao = olha os 3 motivos que mais pesam no aeroporto (frente G): limpeza ou banheiro contra = manda limpar ali e contrata
+        /// zelador; espera contra = velocidade na estacao da espera. Sem ele, a satisfacao nao muda nenhuma decisao do bot.</summary>
+        public bool Satisfacao;
+        /// <summary>Politicas = as politicas do diretor que liga no X padrao (bit = Politica; 7 = as 3) na 1a decisao (frente ta-politicas, BALANCE §20).
         /// O resto do bot nao muda.</summary>
         public int Politicas;
 
@@ -56,10 +62,19 @@ namespace TA.Core
         public static readonly BotProfile Baleia = Comprador("Baleia", Enumerable.Repeat("gems_pack_large", 200).ToArray());
         /// <summary>Portao da Fase C9: o Bom e o Lento que comparam os candidatos e trocam pelo Senior.</summary>
         public static readonly BotProfile Contratador = Candidato(Bom, "Contratador"), LentoContratador = Candidato(Lento, "LentoContratador");
+        public static readonly BotProfile Satisfeito = Satisfaz(Bom, "Satisfeito"), LentoSatisfeito = Satisfaz(Lento, "LentoSatisfeito");
         /// <summary>Portao da ta-politicas: os 3 de sempre com as politicas ligadas.</summary>
         public static readonly BotProfile BomPoliticas = ComPoliticas(Bom, "BomPoliticas"), LentoPoliticas = ComPoliticas(Lento, "LentoPoliticas"),
             ParadoPoliticas = ComPoliticas(Parado, "ParadoPoliticas");
         public static readonly BotProfile[] All = { Bom, Lento, Parado };
+        /// <summary>Alcance do TA-3: o Completo e o LentoCompleto que jogam pelas historias.</summary>
+        public static readonly BotProfile Contador = ComHistorias(Completo, "Contador"), LentoContador = ComHistorias(LentoCompleto, "LentoContador");
+
+        static BotProfile ComHistorias(BotProfile p, string nome)
+        {
+            p.Name = nome; p.Historias = true;
+            return p;
+        }
 
         public static BotProfile ComPoliticas(BotProfile p, string nome, int quais = 7)
         {
@@ -70,6 +85,12 @@ namespace TA.Core
         static BotProfile Candidato(BotProfile p, string nome)
         {
             p.Name = nome; p.Candidatos = true;
+            return p;
+        }
+
+        static BotProfile Satisfaz(BotProfile p, string nome)
+        {
+            p.Name = nome; p.Satisfacao = true;
             return p;
         }
 
@@ -113,7 +134,7 @@ namespace TA.Core
             if (_t + 1e-4f < P.Decide) return;
             _t = Math.Min(_t - P.Decide, P.Decide);   // le o estado das estacoes como a tela mostra (atualizado a cada 0,5 s)
             for (int p = 0; p < Sim.Politicas; p++) if ((P.Politicas >> p & 1) != 0) s.LigaPolitica((Politica)p, true);
-            bool moveu = P.Move && Mover(s);
+            bool moveu = P.Historias && Historia(s) || P.Move && Mover(s);
             if (!moveu && Tocar(s)) Taps++;
             _rotaFixa = false;
             bool junta = P.Objetivos && Guia(s);
@@ -127,6 +148,24 @@ namespace TA.Core
             if (P.Segue) SegueEpoca(s);
             if (P.Falhas) foreach (Aviao a in s.Avioes) if (a.Pane && s.ReparaAviao(a.Id)) Reparos++;
             if (P.Gasta) Gasta(s);
+            if (P.Satisfacao) Satisfaz(s);
+        }
+
+        /// <summary>Frente G: reage aos 3 motivos que mais pesam contra (para no primeiro que ajuda). O zelador novo so com o dobro do preco em caixa.</summary>
+        void Satisfaz(Sim s)
+        {
+            for (int k = 0; k < 3; k++)
+            {
+                Fator f = s.SatTop(k);
+                if (s.SatFator(f) >= 0) return;
+                if (f == Fator.Limpeza || f == Fator.Banheiro)
+                {
+                    s.Limpar((Area)s.SatOnde(f));
+                    long c = s.CustoLimpeza();
+                    if (c >= 0 && s.Cash >= 2 * c && s.HireLimpeza()) Buys++;
+                }
+                else if (f == Fator.Espera && s.Buy((Estacao)s.SatOnde(f), Melhoria.Velocidade)) Buys++;
+            }
         }
 
         bool _rotaFixa;
@@ -150,6 +189,7 @@ namespace TA.Core
             Objetivo o = s.ObjetivoAtual(s.AeroportoAtual);
             if (o == null)
             {
+                if (P.Historias && FaltaHistoria(s)) return false;   // so viaja com o album deste aeroporto cheio
                 for (int a = 0; a < s.T.Objetivos.Length; a++)
                 {
                     int destino = a;
@@ -261,7 +301,7 @@ namespace TA.Core
             if (s.Alocados(e) > 0) return;
             Funcionario quem = null;
             foreach (Funcionario f in s.Staff)
-                if (f.Andando == 0 && !(foraDoFluxo && (Fluxo(f.Em) || Pedida(s, f.Em))) && (quem == null || s.St(f.Em).Folga > s.St(quem.Em).Folga)) quem = f;
+                if (f.Andando == 0 && !Reservado(s, f) && !(foraDoFluxo && (Fluxo(f.Em) || Pedida(s, f.Em))) && (quem == null || s.St(f.Em).Folga > s.St(quem.Em).Folga)) quem = f;
             if (quem != null && s.Move(quem.Id, e)) Moves++;
         }
 
@@ -343,7 +383,7 @@ namespace TA.Core
                 Funcionario quem = null;
                 foreach (Funcionario f in s.Staff)
                 {
-                    if (f.Andando > 0 || f.Em == Estacao.Manutencao || s.St(f.Em).Estado == Estado.Critico) continue;
+                    if (f.Andando > 0 || f.Em == Estacao.Manutencao || s.St(f.Em).Estado == Estado.Critico || Reservado(s, f)) continue;
                     bool mec = f.Perfil == Perfil.Mecanico;
                     if (quem == null || mec || quem.Perfil != Perfil.Mecanico && s.St(f.Em).Estado == Estado.Normal && s.St(f.Em).Folga > s.St(quem.Em).Folga) quem = f;
                 }
@@ -354,7 +394,7 @@ namespace TA.Core
             {
                 Estacao casa = Funcionario.Casa(f.Perfil);
                 // Ana e Beto so voltam pela especializacao; o Caio vai a alimentacao (estacao nova) quando ela abre
-                if (f.Andando > 0 || f.Perfil == Perfil.Mecanico || !s.Especializa && (int)casa < 4 || P.Missoes && Pedida(s, f.Em)) continue;
+                if (f.Andando > 0 || f.Perfil == Perfil.Mecanico || !s.Especializa && (int)casa < 4 || P.Missoes && Pedida(s, f.Em) || Reservado(s, f)) continue;
                 if (!s.Ativa(casa) || Funcionario.Especialidade(f.Perfil, f.Em) || s.St(f.Em).Estado != Estado.Normal || s.Alocados(casa) >= s.St(casa).Postos) continue;
                 if (f.Em == Estacao.Manutencao && OficinaPrecisa(s)) continue;
                 if (s.Move(f.Id, casa)) { Moves++; return; }
@@ -369,6 +409,44 @@ namespace TA.Core
         }
 
         static bool Fluxo(Estacao e) => e == Estacao.CheckIn || e == Estacao.Seguranca || e == Estacao.Portao;
+
+        /// <summary>A ordem do fluxo, por Estacao: check-in, bagagem, seguranca, loja, alimentacao, portao (oficina e despacho fora).</summary>
+        static readonly int[] Ordem = { 0, 2, 3, 5, 1, 4, 9, 9 };
+
+        /// <summary>TA-3: o passageiro da historia esta no aeroporto e ainda nao passou da estacao `e`.</summary>
+        static bool AindaVai(Sim s, Estacao e)
+        {
+            foreach (Station st in s.Estacoes)
+                if (st.Fila.Exists(p => p.Id == s.HistoriaPax) || st.Atendendo.Exists(p => p.Id == s.HistoriaPax)) return Ordem[(int)st.Tipo] <= Ordem[(int)e];
+            return false;
+        }
+
+        /// <summary>TA-3 (Historias): leva o perfil pedido, ou alguem se a parada opcional estiver vazia, a estacao do pedido. true = moveu.</summary>
+        bool Historia(Sim s)
+        {
+            Historia x = s.HistoriaAtual;
+            if (x?.Onde is not Estacao e || s.HistoriaPasso != 0 || !AindaVai(s, e)) return false;
+            if (x.Quem is Perfil q)
+            {
+                Funcionario f = s.Staff.Find(g => g.Perfil == q);
+                if (f == null || f.Em == e || !s.Move(f.Id, e)) return false;
+                Moves++;
+                return true;
+            }
+            int antes = Moves;
+            PoeGente(s, e);
+            return Moves > antes;
+        }
+
+        static bool FaltaHistoria(Sim s)
+        {
+            for (int h = 0; h < s.T.Historias.Length; h++) if (s.T.Historias[h].Aeroporto == s.AeroportoAtual && (s.Album >> h & 1) == 0) return true;
+            return false;
+        }
+
+        /// <summary>Quem a historia segura na estacao do pedido ate o passageiro passar: o perfil pedido, ou o unico da parada opcional.</summary>
+        bool Reservado(Sim s, Funcionario f) =>
+            P.Historias && s.HistoriaAtual is Historia x && x.Onde == f.Em && s.HistoriaPasso == 0 && (x.Quem is Perfil q ? f.Perfil == q : s.Alocados(f.Em) == 1) && AindaVai(s, f.Em);
 
         /// <summary>
         /// Tripulacao: em cada voo no patio antes do embarque, a bordo fica quem tem menos trechos (descansado = 0); no empate, quem acabou de
@@ -417,7 +495,7 @@ namespace TA.Core
             foreach (Funcionario f in s.Staff)
             {
                 Station de = s.St(f.Em);
-                if (f.Andando > 0 || de == alvo || de.Estado != Estado.Normal || oficina && f.Em == Estacao.Manutencao) continue;
+                if (f.Andando > 0 || de == alvo || de.Estado != Estado.Normal || oficina && f.Em == Estacao.Manutencao || Reservado(s, f)) continue;
                 bool esp = P.Equipe && s.Especializa && Funcionario.Especialidade(f.Perfil, alvo.Tipo);
                 bool fixo = P.Equipe && (int)f.Em >= 4 && f.Em == Funcionario.Casa(f.Perfil);
                 int nota = (fixo ? 0 : 2) + (esp ? 1 : 0);
@@ -523,6 +601,8 @@ namespace TA.Core
             public int Usos, Negados, Interdicoes, Limpezas, FilaBanheiro; public double SujeiraMedia;
             /// <summary>ta-suprimentos: vezes que um aviao esperou suprimento e o custo das entregas pedidas.</summary>
             public int Faltas; public long Suprimentos;
+            /// <summary>Frente G: a media do aeroporto no fim (-1 = ninguem saiu), as reclamacoes e o Cash das gorjetas (ja na Receita).</summary>
+            public double SatMedia; public int Reclamacoes; public long Gorjetas;
             /// <summary>ta-politicas: acoes de cada Politica (hangar, estoque, reforco).</summary>
             public int[] Politicas;
         }
@@ -572,6 +652,8 @@ namespace TA.Core
                         case Ev.BanheiroInterditado: if (e.A == 1) r.Interdicoes++; break;
                         case Ev.SuprimentoFaltou: r.Faltas++; break;
                         case Ev.SuprimentoPedido: r.Suprimentos += e.C; break;
+                        case Ev.Reclamou: r.Reclamacoes++; break;
+                        case Ev.Gorjeta: r.Receita += e.B; r.Gorjetas += e.B; break;
                         case Ev.PoliticaAgiu: r.Politicas[e.A]++; break;
                     }
                 if (s.Steps % Sim.Hz == 0)
@@ -584,6 +666,7 @@ namespace TA.Core
                 usando = s.Banheiro.Usando.Count;
             }
             r.SujeiraMedia = amostras > 0 ? r.SujeiraMedia / amostras : 0;
+            r.SatMedia = s.SatMedia;
             r.Usos = usos; r.Negados = (int)Math.Min(int.MaxValue, s.Banheiro.Negados);
             r.Embarque = r.Voos > 0 ? soma / r.Voos : 0;
             r.Moves = bot.Moves; r.Taps = bot.Taps; r.Reacoes = bot.Reacoes; r.Reparos = bot.Reparos;

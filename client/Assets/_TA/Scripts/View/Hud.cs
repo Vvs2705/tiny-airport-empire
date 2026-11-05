@@ -82,6 +82,7 @@ namespace TA
             BuildOperacao(_canvas);
             BuildMetas(_canvas);
             BuildRotas(_canvas);   // o atalho fica ao lado da faixa da meta (Hud.Rotas.cs)
+            BuildSatisfacao();   // acima da ficha, a direita (Hud.Satisfacao.cs)
             BuildFicha();   // por cima da faixa da meta
             BuildTour(_canvas);
             if (Ajustes.TextoMaior) AplicaTexto();
@@ -258,6 +259,7 @@ namespace TA
             PintaVelocidade();
             PintaMetas(s);
             PintaRotas(s);
+            PintaSatisfacao(s);
             PintaFicha(s);
             PintaTelas();
             PintaTour();
@@ -291,7 +293,7 @@ namespace TA
             // uma nota so: o que pede acao agora, depois o que e bom saber
             if (falta > 0f && falta < 0.2f && v.Embarcados < v.Total) Nota(l, Art.Relogio(), Art.Bad, Art.Bad, Textos.FechaEm(Mathf.CeilToInt((v.FechaPasso - s.PassoNaOnda) * Sim.Step)));
             else if (a.Desgaste >= s.T.DesgasteAviso) Nota(l, Art.Chave(), CorDesgaste(a, s), CorDesgaste(a, s), s.EmRisco(a.Id) ? Textos.RiscoFalha(a.Desgaste) : Textos.Desgaste(a.Desgaste));
-            else if (HistoriaNoAeroporto(s, v)) Nota(l, Art.Heart(), Art.Bad, Art.Paper, Textos.Historia[0]);
+            else if (HistoriaNoAeroporto(s, v)) Nota(l, Art.Heart(), Art.Bad, Art.Paper, Textos.HistoriaNota(s));
             else
             {
                 string piloto = "", comissario = "";
