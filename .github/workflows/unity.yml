@@ -1,0 +1,68 @@
+# Rodada de Unity na nuvem (o PC tem 7,7 GB de RAM): testes EditMode/PlayMode e AAB Android, uma vez por leva, na main.
+# Segredos (o Vinicius cadastra com client/tools/ci-segredos.cmd): UNITY_LICENSE (conteúdo do Unity_lic.ulf), UNITY_EMAIL, UNITY_PASSWORD.
+# Assinatura opcional: ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASS, ANDROID_KEYALIAS_NAME, ANDROID_KEYALIAS_PASS; sem eles sai AAB de debug.
+name: unity
+on:
+  push:
+    branches: [main]
+    paths: ['client/Assets/**', 'client/Packages/**', 'client/ProjectSettings/**', '.github/workflows/unity.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+  checks: write
+concurrency:
+  group: unity-${{ github.ref }}
+  cancel-in-progress: true
+env:
+  UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+  UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+  UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+jobs:
+  testes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with: { lfs: true }
+      - uses: actions/cache@v4
+        with:
+          path: client/Library
+          key: Library-testes-${{ hashFiles('client/Packages/packages-lock.json', 'client/ProjectSettings/ProjectVersion.txt') }}
+          restore-keys: Library-testes-
+      - uses: game-ci/unity-test-runner@v4
+        id: testes
+        with:
+          projectPath: client
+          testMode: all
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          checkName: Testes Unity
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: resultados-testes, path: '${{ steps.testes.outputs.artifactsPath }}' }
+
+  android:
+    needs: testes
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with: { lfs: true }
+      - uses: jlumbroso/free-disk-space@v1.3.1   # imagem Android do Unity estoura o disco padrão do runner
+        with: { tool-cache: false }
+      - uses: actions/cache@v4
+        with:
+          path: client/Library
+          key: Library-android-${{ hashFiles('client/Packages/packages-lock.json', 'client/ProjectSettings/ProjectVersion.txt') }}
+          restore-keys: Library-android-
+      - uses: game-ci/unity-builder@v4
+        with:
+          projectPath: client
+          targetPlatform: Android
+          androidExportType: androidAppBundle
+          androidKeystoreName: release.keystore
+          androidKeystoreBase64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          androidKeystorePass: ${{ secrets.ANDROID_KEYSTORE_PASS }}
+          androidKeyaliasName: ${{ secrets.ANDROID_KEYALIAS_NAME }}
+          androidKeyaliasPass: ${{ secrets.ANDROID_KEYALIAS_PASS }}
+      - uses: actions/upload-artifact@v4
+        with: { name: aab-android, path: build/Android, retention-days: 14 }
