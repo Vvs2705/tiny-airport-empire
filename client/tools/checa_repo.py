@@ -15,6 +15,8 @@ conteudo_check.py do Forge). Olha os arquivos versionados e os novos ainda sem c
               permissions: explicito e sem segredo impresso em run: (GDD §8.4)
   privacidade as 2 politicas (docs/privacidade, docs/privacy) com o e-mail de suporte e citando cada pacote que pode coletar dados e
               cada API de rede do jogo (a politica tem de bater com o codigo, GDD §9.3)
+  telemetria  todo Diario("...") do jogo usa um nome do catalogo Telemetria.Eventos (Core/Telemetria.cs), todo evento do GDD §15.1 esta
+              no catalogo, e nenhum script le modelo, nome ou ID do aparelho, local ou ID de publicidade (Data safety, SEGURANCA §3.1)
 Aviso, sem falhar: arquivo .cs acima de ~600 linhas (regra do estudio: vira partial).
 """
 
@@ -31,6 +33,10 @@ ASMDEF_CORE = CORE + "TA.Core.asmdef"
 SETUP = "client/Assets/_TA/Editor/Setup.cs"
 MANIFESTO = "client/Packages/manifest.json"
 MAPA = "docs/MAPA_CODIGO.md"
+TELEMETRIA = CORE + "Telemetria.cs"
+GDD = "docs/GDD.md"
+# dado do aparelho ou da pessoa que o diario e a telemetria nunca leem (o build da loja responde "Nao coleta" no Data safety)
+PESSOAL = r"\b(deviceUniqueIdentifier|deviceModel|deviceName|RequestAdvertisingIdentifierAsync|LocationService|Input\.location|AdvertisingIdClient)\b"
 POLITICAS = ["docs/privacidade/index.html", "docs/privacy/index.html"]
 EMAIL_SUPORTE = "suporte@vstack-solutions.com.br"
 REDE = r"\b(UnityWebRequest|HttpClient|WebClient|TcpClient|UdpClient|ClientWebSocket)\b"
@@ -270,6 +276,33 @@ def checa_privacidade(repo):
     return erros
 
 
+def checa_telemetria(repo):
+    if TELEMETRIA not in repo:
+        return [f"telemetria: falta {TELEMETRIA} (catalogo dos eventos do diario)"]
+    m = re.search(r"Eventos\s*=\s*new[^{]*\{(.*?)\};", sem_comentario(texto(repo[TELEMETRIA])), re.S)
+    catalogo = set(re.findall(r'"([^"]*)"', m.group(1))) if m else set()
+    if not catalogo:
+        return [f"telemetria: {TELEMETRIA} sem o HashSet Eventos"]
+    erros = []
+    if GDD in repo:
+        sec = re.search(r"^## 15\.1\.(.*?)^## ", texto(repo[GDD]), re.S | re.M)
+        for ev in re.findall(r"^- `([a-z_]+)`", sec.group(1) if sec else "", re.M):
+            if ev not in catalogo:
+                erros.append(f"telemetria: {ev} (GDD §15.1) fora do catalogo de {TELEMETRIA}")
+    for p in sorted(x for x in repo if x.startswith("client/Assets/_TA/Scripts/") and x.endswith(".cs")):
+        cs = sem_comentario(texto(repo[p]))
+        for chamada in re.findall(r"\bDiario\(([^;]*)", cs):
+            erros += [
+                f"telemetria: {p} grava '{ev}' no diario, fora do catalogo de {TELEMETRIA}"
+                for ev in re.findall(r'"([^"]*)"', chamada)
+                if ev not in catalogo
+            ]
+        a = re.search(PESSOAL, cs)
+        if a:
+            erros.append(f"telemetria: {p} usa {a.group(1)} (dado do aparelho ou da pessoa; o Data safety diz que nada e coletado)")
+    return erros
+
+
 def avisos_tamanho(repo):
     for p in sorted(repo):
         if p.startswith("client/Assets/_TA/") and p.endswith(".cs"):
@@ -289,6 +322,7 @@ def checa(repo):
         + checa_ci(repo)
         + checa_mapa(repo)
         + checa_privacidade(repo)
+        + checa_telemetria(repo)
     )
 
 
@@ -314,7 +348,7 @@ def repo_bom():
     a = ASSETS + "_TA"
     return {
         ".gitignore": "\n".join(TRAVAS_GITIGNORE).encode(),
-        MAPA: b"Sim.cs Setup.cs verify.sh",
+        MAPA: b"Sim.cs Setup.cs verify.sh Telemetria.cs",
         MANIFESTO: b'{"dependencies": {}}',
         ASMDEF_CORE: b'{"noEngineReferences": true}',
         SETUP: b"class Setup { SemIdDePublicidade(); /* com.google.android.gms.permission.AD_ID */ }",
@@ -332,6 +366,9 @@ def repo_bom():
         POLITICAS[0]: EMAIL_SUPORTE.encode(),
         POLITICAS[1]: EMAIL_SUPORTE.encode(),
         WORKFLOWS + "nucleo.yml": b"on:\n  pull_request:\npermissions:\n  contents: read\n",
+        TELEMETRIA: b'class Telemetria { HashSet<string> Eventos = new HashSet<string> { "session_start", "flight_spawned" }; }',
+        CORE + "Telemetria.cs.meta": b"guid: " + b"5" * 32,
+        GDD: b"## 15.1. Eventos\n\n- `flight_spawned`\n\n## 15.2. Indicadores\n- `fora_da_lista`\n",
     }
 
 
@@ -432,10 +469,23 @@ def selftest():
                 }
             ),
         ),
+        ("telemetria: falta", lambda r: r.pop(TELEMETRIA)),
+        (
+            "telemetria: ",
+            lambda r: r.update({CORE + "Sim.cs": b'class Sim { void F() { Diario("nome_do_jogador"); } }\n'}),
+        ),
+        (
+            "telemetria: ",
+            lambda r: r.update({GDD: b"## 15.1. Eventos\n\n- `flight_spawned`\n- `app_crash`\n\n## 15.2.\n"}),
+        ),
+        (
+            "telemetria: ",
+            lambda r: r.update({CORE + "Sim.cs": b"class Sim { string m = SystemInfo.deviceModel; }\n"}),
+        ),
         ("mapa: ", lambda r: r.update({"client/tools/novo.py": b"x"})),
         (
             "mapa: ",
-            lambda r: r.update({MAPA: b"AirportSim.cs Setup.cs verify.sh"}),
+            lambda r: r.update({MAPA: b"AirportSim.cs Setup.cs verify.sh Telemetria.cs"}),
         ),  # Sim.cs nao pode passar por AirportSim.cs
         (
             "segredos: chave do Google",
@@ -465,7 +515,7 @@ def selftest():
         assert any(e.startswith(esperado) for e in erros), (esperado, erros)
     # comentario nao conta, e o erro de segredo nunca traz o valor
     r = dict(base)
-    r[CORE + "Sim.cs"] = b"// sem interstitial, AudioSource so na View\nclass Sim {}\n"
+    r[CORE + "Sim.cs"] = b"// sem interstitial, AudioSource so na View, sem deviceModel\nclass Sim { void F() { Diario(\"session_start\", 1); } }\n"
     assert checa(r) == [], checa(r)
     r = dict(base)
     r["docs/nota.md"] = falso["gh"]

@@ -438,10 +438,13 @@ namespace TA
             EventoPatio(e);
         }
 
+        /// <summary>Pessoas na tela agora (o c do performance_sample): conta barata, sem varrer renderers.</summary>
+        public int Pessoas() => _pax.Count + _patio.Count + _equipe.Count + _andantes.Count + S.Staff.Count;
+
         /// <summary>Para a medida do K3 (-perf): pessoas, avioes e veiculos ativos agora.</summary>
         public string Contagem()
         {
-            int pessoas = _pax.Count + _patio.Count + _equipe.Count + _andantes.Count + S.Staff.Count, avioes = 0;
+            int pessoas = Pessoas(), avioes = 0;
             foreach (Aviao a in _avioes) if (a.T.gameObject.activeSelf) avioes++;
             int ligados = 0;   // aproxima as chamadas de desenho: o PC prende em 60 qps e nao mostra piora
             foreach (Renderer r in _raiz.GetComponentsInChildren<Renderer>()) if (r.enabled) ligados++;
