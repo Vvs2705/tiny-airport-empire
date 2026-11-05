@@ -447,11 +447,19 @@ namespace TA
         /// <summary>Para a medida do K3 (-perf): pessoas, avioes e veiculos ativos agora.</summary>
         public string Contagem()
         {
-            int pessoas = _pax.Count + _patio.Count + _equipe.Count + _andantes.Count + S.Staff.Count, avioes = 0;
-            foreach (Aviao a in _avioes) if (a.T.gameObject.activeSelf) avioes++;
+            Conta(out int pessoas, out int avioes, out int veiculos);
             int ligados = 0;   // aproxima as chamadas de desenho: o PC prende em 60 qps e nao mostra piora
             foreach (Renderer r in _raiz.GetComponentsInChildren<Renderer>()) if (r.enabled) ligados++;
-            return "pessoas=" + pessoas + " avioes=" + avioes + " veiculos=" + _veiculos.Count + " renderers=" + ligados;
+            return "pessoas=" + pessoas + " avioes=" + avioes + " veiculos=" + veiculos + " renderers=" + ligados;
+        }
+
+        /// <summary>O K3 sem os renderers (barato o bastante para amostrar durante a medida do -perf).</summary>
+        public void Conta(out int pessoas, out int avioes, out int veiculos)
+        {
+            pessoas = _pax.Count + _patio.Count + _equipe.Count + _andantes.Count + S.Staff.Count;
+            avioes = 0;
+            foreach (Aviao a in _avioes) if (a.T.gameObject.activeSelf) avioes++;
+            veiculos = _veiculos.Count;
         }
 
         void Coloca(RectTransform rt, Vector3 mundo)

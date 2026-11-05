@@ -89,7 +89,7 @@ Link de cada PR: `https://github.com/Vvs2705/tiny-airport-empire/pull/<n>`.
 | **Áudio** | 8 sons em 13 arquivos e 3 músicas, sintetizados por script (sem licença); `Audio.cs` ligado no `Game.cs`: 7 sons tocam por evento do núcleo (`AudioEventos.cs`) e a música segue o aeroporto; volume de música e efeitos na tela de configurações (0% = mudo); falta o dono ouvir antes de valer | [#19](https://github.com/Vvs2705/tiny-airport-empire/pull/19) |
 | **Nome e marca** | "Little Terminal", appId, chave de upload (fora do git), 5 companhias renomeadas, aeroportos mantidos | [#39](https://github.com/Vvs2705/tiny-airport-empire/pull/39) |
 
-Medidas que existem: K3 no **PC** (p10 de 58,7 FPS, média de 59,5, trava de 60, com 56 pessoas, 2 aviões e 6 veículos em 540×960; `docs/CONTRATO_V01.md`). O resto das medidas está no `docs/BALANCE.md`.
+Medidas que existem: K3 no **PC** (p10 de 58,7 FPS, média de 59,5, trava de 60, com 56 pessoas, 2 aviões e 6 veículos em 540×960; `docs/CONTRATO_V01.md`) e o K3 do núcleo (`K3Tests`, 2026-11-05: na cena do `-passageiros 60` a 3x, pico de 64 passageiros, mediana de 0,004 ms e p99 de 0,05 ms por quadro, 59 bytes de lixo por quadro). O resto das medidas está no `docs/BALANCE.md`.
 
 ## 6. Em andamento (não está na `main`)
 
@@ -111,7 +111,7 @@ Parada: a geração da peça `painel_ferramentas_parede` no Tripo (o navegador c
 Do mais importante para o menos.
 
 1. **Pessoa atravessando peça.** Em 2026-11-01 eram 237 encontros de pessoa com parede ou móvel nos 5 cenários de medida (153 de parede e 84 de móvel); a meta é **zero**. Medidores: `client/tools/diag_caixas.py` e `client/tools/diag_pessoas.py`. Frente: `ta-caminhos`.
-2. **Desempenho não medido no aparelho.** O K3 (p10 de FPS ≥ 30 num Android de entrada, com 60 pessoas) só foi medido no PC. Por decisão do dono, o celular de teste só entra no último passo de tudo; antes disso, o APK vai para amigos dele (D-24).
+2. **Desempenho não medido no aparelho.** O K3 (p10 de FPS ≥ 30 num Android de entrada, com 60 pessoas, 2 aviões e 6 veículos) só foi medido na tela do PC. Desde 2026-11-05 o K3 é de máquina, sem amigos (D-24 atualizada): o `K3Tests` mede o núcleo no `quick`, o `-perf` dá o veredito `K3 OK|FAIL` e o `client/tools/k3.sh pc|android` roda a medida; falta o `k3.sh pc` na rodada da leva e o `k3.sh android` no celular de teste, no último passo.
 3. **K2 sem gente.** O portão da v0.1 pede teste com pelo menos 20 pessoas reais; hoje só o bot jogou. O relatório sai de `client/tools/diario_report.py`.
 4. **`painel_ferramentas_parede` sem gerar** (peça de parede da oficina). Parada por problema de navegador, sem crédito gasto.
 5. **Aviso do firewall do Windows no build de desenvolvimento.** O `.exe` que o `verify.sh full` e as fotos abrem pede liberação do firewall; só o dono aprova esse tipo de janela (UAC e firewall ficam com ele), e há um comando preparado para ele. Enquanto não for liberado, o aviso aparece em cada máquina nova.
@@ -151,7 +151,7 @@ Ordem de trabalho de 2026-11-03, depois da mistura com o GDD de direção (`GDD.
 19. **`ta-ingles`:** feito em 2026-11-05 (D-08: pt-BR e en no lançamento): `Core/Ingles.cs` com o par de cada texto, `Idiomas.cs`, troca nas configurações (vale ao reabrir) e o portão `ingles` no `checa_repo`. Falta a revisão humana do inglês e olhar as telas em inglês no aparelho (textos mais compridos, `-idioma en` nas fotos); es e id depois, com revisão humana.
 20. **`ta-telemetria`:** Unity Analytics sem dado pessoal (D-11).
 21. **`ta-lgpd`:** auditoria, Data safety e exclusão feitas (`docs/SEGURANCA_PRIVACIDADE.md`, 2026-11-05); falta o consentimento e o anúncio não personalizado quando o LevelPlay entrar.
-22. **`ta-playtest`:** K2 com 20 pessoas; K3 nos aparelhos dos amigos do dono.
+22. **`ta-playtest`:** saiu do projeto em 2026-11-05: o dono faz o teste com amigos por conta, sem registro aqui, e os relatos entram depois como ajustes. O K3 virou medida de máquina (`K3Tests` no `quick`, `client/tools/k3.sh pc` na rodada da leva e `k3.sh android` no último passo).
 23. **`ta-loja-assets`:** ficha da Play pronta para colar em `docs/FICHA_PLAY.md` (2026-11-05): textos pt-BR e en, ícone 512 e gráfico de recursos em `docs/play/`, roteiro das 8 capturas, `fotos_play.sh` e `ficha_play.py`. Faltam o ícone aplicado no build (`Setup.cs`, adaptativo), as 8 capturas com o Tripo na rodada local e os criativos de vídeo.
 24. **Fim:** atualizações de ferramentas com a fila vazia, AAB assinado, regressão final, GO/NO-GO (GDD §25) e, por último, o celular de teste.
 
@@ -172,7 +172,7 @@ Nada disso o time de código consegue resolver sozinho.
 | **Cópia segura da chave de upload** | Sem ela, recuperar o acesso exige pedir reset à Google Play | Antes do 1º AAB |
 | **App e chaves no LevelPlay** | O appId já existe; falta criar o app na conta da V-STACK para os anúncios recompensados reais | Depois da Play Console |
 | **Liberar o firewall** e demais janelas de segurança do Windows | Só ele aprova | Quando aparecer |
-| **K2 com 20 pessoas e K3 com amigos** | Medida com gente real; APK enviado por ele | Fim das Fases C e D |
+| **Teste com amigos (por conta dele)** | Fora do projeto desde 2026-11-05, sem registro aqui; os relatos entram como ajustes futuros. Não trava o lançamento | Quando ele quiser |
 | **Renovar o plano do Tripo** (se ainda houver arte a gerar) | Vence em 2026-11-29 | Antes de 2026-11-29 |
 | **Aprovar o texto do GDD v1.5** | A mistura foi aprovada em 2026-11-03 ("pode seguir desta forma", D-25), mas ele ainda não leu o texto do GDD v1.5 nem o roteiro do §4.4 | Quando ler |
 | **Autorização final de envio** (D-17) | Publicar é irreversível | No fim |
