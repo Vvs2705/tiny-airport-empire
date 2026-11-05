@@ -2037,7 +2037,7 @@ Impacto: nenhum em regra de design, guardrail, monetização, privacidade ou seg
 | 6 | Ferramenta de balanço (§6.2) | `client/tools/econsim` | `Bot.cs`, `BalanceTests` e `balanco.yml` | o código; texto corrigido | PRs #5 e #16 |
 | 7 | Tabela do passe (§6.4, P-07) | `docs/TEMPORADA_S1.md`, 28 dias, 150 pontos por nível | o arquivo não existe; a trilha gratuita está em medição | a decidir quando o PR da `ta-passe` entrar; vale o que o bot medir | em andamento |
 | 8 | Histórias e aeronaves (§4.1) | 20 histórias e 8 variantes de aeronave | 1 história; 8 aeronaves no pátio (PR #69, medido no ramo, à espera da confirmação na rodada da leva) | o texto; é trabalho a fazer | `ta-historias`, `ta-patio-avioes` |
-| 9 | Idiomas (D-08) | pt-BR e en no lançamento | `Textos.cs` só tem pt-BR | o texto; é trabalho a fazer | `ta-ingles` |
+| 9 | Idiomas (D-08) | pt-BR e en no lançamento | **feito** (2026-11-05, `ta-ingles`): todo texto de tela passa por `Textos.L` e tem o par em inglês em `Core/Ingles.cs` (o `checa_repo` barra texto sem par); o idioma vem do aparelho (inglês = en, o resto = pt-BR) e pode ser trocado nas configurações, valendo ao reabrir o jogo; a política já tinha as duas línguas. Falta só a revisão humana do inglês antes de publicar | o texto | `ta-ingles` |
 | 10 | Áudio (§12) | efeitos e música no jogo | gerados e sem chamada | o texto; é trabalho a fazer | PR #19; `ta-audio` |
 | 11 | Gems (§6.1) | "só se D-05 aprovar" | aprovadas; no save (schema 8); a cadeia de um aeroporto fechada paga 100 Gems | a decisão e o código | PR #43; `CONTRATO_FASE_D1.md` |
 

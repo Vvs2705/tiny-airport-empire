@@ -147,7 +147,7 @@ Ordem de trabalho de 2026-11-03, depois da mistura com o GDD de direção (`GDD.
 16. **`ta-passe-tela`:** tela do passe de temporada (`Hud.Passe.cs`), PR aberto em 2026-11-03; faltam a arte dos 3 cosméticos e o conteúdo da trilha premium, que vem com a loja.
 17. **`ta-incidente5`:** o 5º incidente (volta ao portão por aviso técnico); só entra se passar no portão do §5.13.
 18. **`ta-estetica`:** auditoria visual contra os concorrentes; refazer o que estiver abaixo.
-19. **`ta-ingles`:** textos em inglês (D-08: pt-BR e en no lançamento; es e id depois, com revisão humana).
+19. **`ta-ingles`:** feito em 2026-11-05 (D-08: pt-BR e en no lançamento): `Core/Ingles.cs` com o par de cada texto, `Idiomas.cs`, troca nas configurações (vale ao reabrir) e o portão `ingles` no `checa_repo`. Falta a revisão humana do inglês e olhar as telas em inglês no aparelho (textos mais compridos, `-idioma en` nas fotos); es e id depois, com revisão humana.
 20. **`ta-telemetria`:** Unity Analytics sem dado pessoal (D-11).
 21. **`ta-lgpd`:** consentimento, Data safety, exclusão de dados ponta a ponta.
 22. **`ta-playtest`:** K2 com 20 pessoas; K3 nos aparelhos dos amigos do dono.

@@ -10,6 +10,8 @@ conteudo_check.py do Forge). Olha os arquivos versionados e os novos ainda sem c
   proibidos   nada de chave, build ou arte crua no git; nada acima de 10 MB; .gitignore com as travas
   segredos    padroes de token e de chave privada em qualquer arquivo (mostra so o arquivo e o tipo, nunca o valor)
   mapa        todo .cs, .py e .sh citado no docs/MAPA_CODIGO.md
+  ingles      todo texto de tela (L("...") do Textos.cs e Nome = "..." das tabelas do nucleo) com o par em ingles em Core/Ingles.cs, sem
+              par vazio (D-08: pt-BR e en no lancamento)
   privacidade as 2 politicas (docs/privacidade, docs/privacy) com o e-mail de suporte e citando cada pacote que pode coletar dados e
               cada API de rede do jogo (a politica tem de bater com o codigo, GDD §9.3)
 Aviso, sem falhar: arquivo .cs acima de ~600 linhas (regra do estudio: vira partial).
@@ -31,6 +33,9 @@ MAPA = "docs/MAPA_CODIGO.md"
 POLITICAS = ["docs/privacidade/index.html", "docs/privacy/index.html"]
 EMAIL_SUPORTE = "suporte@vstack-solutions.com.br"
 REDE = r"\b(UnityWebRequest|HttpClient|WebClient|TcpClient|UdpClient|ClientWebSocket)\b"
+TEXTOS = "client/Assets/_TA/Scripts/View/Textos.cs"
+INGLES = CORE + "Ingles.cs"
+LITERAL = r'"((?:[^"\\\n]|\\.)*)"'
 MAX_BYTES = 10 * 1024 * 1024
 MAX_LINHAS = 600
 
@@ -245,6 +250,36 @@ def avisos_tamanho(repo):
                 yield f"AVISO: {p} tem {n} linhas (acima de ~{MAX_LINHAS} vira partial)"
 
 
+def desescapa(lit):
+    """O literal C# como o jogo o enxerga: \\u00A0, \\n, \\" e \\\\ viram o caractere."""
+    return re.sub(r"\\(u00A0|n|\"|\\)", lambda m: {"u00A0": "\u00a0", "n": "\n"}.get(m.group(1), m.group(1)), lit)
+
+
+def textos_de_tela(repo):
+    """Os textos pt-BR que passam por Idiomas.Traduz: os L("...") do Textos.cs e os Nome = "..." dos arquivos do nucleo."""
+    achados = set(re.findall(r"\bL\(" + LITERAL + r"\)", texto(repo[TEXTOS])))
+    for p in repo:
+        if p.startswith(CORE) and p.endswith(".cs") and p != INGLES:
+            achados.update(re.findall(r"\bNome = " + LITERAL, texto(repo[p])))
+    return {desescapa(a) for a in achados if a}
+
+
+def checa_ingles(repo):
+    if TEXTOS not in repo or INGLES not in repo:
+        return []
+    pares = re.findall(r"^\s*\[" + LITERAL + r"\]\s*=\s*" + LITERAL + ",?$", texto(repo[INGLES]), re.M)
+    en = {desescapa(pt): desescapa(val) for pt, val in pares}
+    erros = [f"ingles: sem par em {INGLES}: {pt!r}" for pt in sorted(textos_de_tela(repo)) if pt not in en]
+    erros += [f"ingles: par vazio para {pt!r}" for pt, val in sorted(en.items()) if not val.strip()]
+    # quem tem espaco (ou quebra) no comeco ou no fim e' pedaco de frase: o par tem de ter o mesmo molde
+    erros += [
+        f"ingles: {pt!r} e {val!r} diferem no espaco do comeco ou do fim"
+        for pt, val in sorted(en.items())
+        if val.strip() and (pt[:1].isspace() != val[:1].isspace() or pt[-1:].isspace() != val[-1:].isspace())
+    ]
+    return erros
+
+
 def checa(repo):
     return (
         checa_meta(repo)
@@ -255,6 +290,7 @@ def checa(repo):
         + checa_segredos(repo)
         + checa_mapa(repo)
         + checa_privacidade(repo)
+        + checa_ingles(repo)
     )
 
 
@@ -298,6 +334,10 @@ def repo_bom():
         POLITICAS[0]: EMAIL_SUPORTE.encode(),
         POLITICAS[1]: EMAIL_SUPORTE.encode(),
     }
+
+
+TEXTOS_BOM = b'static string L(string pt) => pt; var x = L("Ola ") + L("Mundo");'
+INGLES_BOM = b'            ["Ola "] = "Hi ",\n            ["Mundo"] = "World",\n'
 
 
 def selftest():
@@ -394,12 +434,18 @@ def selftest():
                 {CORE + "Sim.cs": b"class Sim { UnityWebRequest w; }\n"}
             ),
         ),
+        ("ingles: sem par", lambda r: r.update({TEXTOS: TEXTOS_BOM, INGLES: INGLES_BOM, CORE + "Rotas.cs": b'new Rota { Nome = "Lisboa" };'})),
+        ("ingles: par vazio", lambda r: r.update({TEXTOS: TEXTOS_BOM, INGLES: b'[\"Ola\"] = \" \",\n'.replace(b"\\", b"")})),
+        ("ingles: ", lambda r: r.update({TEXTOS: TEXTOS_BOM, INGLES: b'            ["Ola "] = "Hi",\n'})),
     ]
     for esperado, quebra in casos:
         r = dict(base)
         quebra(r)
         erros = checa(r)
         assert any(e.startswith(esperado) for e in erros), (esperado, erros)
+    r = dict(base)
+    r.update({TEXTOS: TEXTOS_BOM, INGLES: INGLES_BOM})
+    assert checa_ingles(r) == [], checa_ingles(r)
     # comentario nao conta, e o erro de segredo nunca traz o valor
     r = dict(base)
     r[CORE + "Sim.cs"] = b"// sem interstitial, AudioSource so na View\nclass Sim {}\n"
