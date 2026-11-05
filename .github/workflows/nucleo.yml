@@ -1,4 +1,5 @@
 # Núcleo do Tiny Airport (TA.Core) e testes EditMode puros, sem Unity: o mesmo dotnet test do client/tools/verify.sh quick, mais o checa_repo.
+# E o servidor de validação de compra (servidor/, Node sem dependência de terceiros): node --test.
 name: nucleo
 on:
   push:
@@ -19,3 +20,13 @@ jobs:
       - run: python3 client/tools/auditar_arte.py --selftest
       - run: python3 client/tools/checa_apk.py --selftest
       - run: dotnet test client/tools/coretests -nologo
+  servidor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test
+        working-directory: servidor
