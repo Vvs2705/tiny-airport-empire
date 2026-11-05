@@ -170,6 +170,8 @@ Em `client/Assets/_TA/Tests/EditModeView/` (`TA.ViewTests`, só no Unity: o `dot
 | `elenco_gestos.sh` | soma os gestos do atendimento (`render_sprites.py --gestos`, poses no rig a partir do Idle) nas folhas que já existem: passageiros, equipe e agentes do portão | — |
 | `montagem.py` | folha de contato e GIF de um `-record` (Pillow) | — |
 | `fotos_salas.sh` | fotos 540×960 das 8 salas de perto (`-vista sala0` a `sala7`) e de longe, e o estresse de 60 passageiros, numa pasta de saída | — |
+| `fotos_play.sh` | as 8 capturas cruas da ficha da Google Play (`docs/FICHA_PLAY.md` §5) em 1080×1920 (janela 540×960, `-shotescala 2`), numa pasta fora do git; avisa se faltar a `ArtLocal` | — |
+| `ficha_play.py` | ficha da Play: `check` confere os limites (título 30, curta 80, longa 4.000) e as palavras proibidas dos textos de `docs/FICHA_PLAY.md` (a mesma regra do `checa_repo`, que roda no CI); `icone`, `grafico` e `capturas` geram o ícone 512, o gráfico de recursos 1024×500 e a faixa de legenda das capturas (Pillow) | — |
 | `audio_gen.py` | sintetiza todo o áudio com numpy e scipy, de forma determinística, e confere pico, DC, laço e o alerta macio; `--md` imprime as linhas do `PROVENIENCIA.md` | `dc:client/tools/audio_gen.py` (blocos, medição e escrita; banco e música novos) |
 | `mutacao.py` | prova de mutação das travas da Fase C: tira cada trava, roda o `dotnet test` e exige que algum teste caia | —; `MUTACAO_TESTES` limita o `dotnet test` aos testes da trava |
 | `diario_report.py` | relatório do playtest a partir dos diários CSV exportados: K2 (pessoas e episódios), embarque médio, uso de offline, anúncio, histórias e upgrades; `--autoteste` com diários sintéticos | `dc:client/tools/diario_report.py` |
