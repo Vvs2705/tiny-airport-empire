@@ -2038,7 +2038,7 @@ Impacto: nenhum em regra de design, guardrail, monetização, privacidade ou seg
 | 7 | Tabela do passe (§6.4, P-07) | `docs/TEMPORADA_S1.md`, 28 dias, 150 pontos por nível | o arquivo não existe; a trilha gratuita está em medição | a decidir quando o PR da `ta-passe` entrar; vale o que o bot medir | em andamento |
 | 8 | Histórias e aeronaves (§4.1) | 20 histórias e 8 variantes de aeronave | 1 história; 8 aeronaves no pátio (PR #69, medido no ramo, à espera da confirmação na rodada da leva) | o texto; é trabalho a fazer | `ta-historias`, `ta-patio-avioes` |
 | 9 | Idiomas (D-08) | pt-BR e en no lançamento | `Textos.cs` só tem pt-BR | o texto; é trabalho a fazer | `ta-ingles` |
-| 10 | Áudio (§12) | efeitos e música no jogo | gerados e sem chamada | o texto; é trabalho a fazer | PR #19; `ta-audio` |
+| 10 | Áudio (§12) | efeitos e música no jogo | tocam por evento e a música segue o aeroporto | o dono ouvir antes de valer | PR #19; `ta-audio` |
 | 11 | Gems (§6.1) | "só se D-05 aprovar" | aprovadas; no save (schema 8); a cadeia de um aeroporto fechada paga 100 Gems | a decisão e o código | PR #43; `CONTRATO_FASE_D1.md` |
 
 ## v1.5 — 03/11/2026 (Claude; mistura aprovada pelo Vinicius em 03/11/2026 com "pode seguir desta forma"; aprovação do texto: **pendente**)
