@@ -95,7 +95,8 @@ namespace TA.Core
             double soma = 0;
             foreach (float d in dts) soma += d;
             dts.Sort();
-            float p90 = dts[Math.Min(dts.Count - 1, (int)(dts.Count * 0.9f))];
+            // so inteiro: (int)(n * 0.9f) da 89 no Mono do Unity (conta em double) e 90 no dotnet
+            float p90 = dts[Math.Min(dts.Count - 1, dts.Count * 9 / 10)];
             return new AmostraFps(X10(1.0 / p90), X10(dts.Count / soma), dts.Count);
         }
 
