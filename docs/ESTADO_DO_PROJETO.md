@@ -151,7 +151,7 @@ Ordem de trabalho de 2026-11-03, depois da mistura com o GDD de direção (`GDD.
 20. **`ta-telemetria`:** Unity Analytics sem dado pessoal (D-11).
 21. **`ta-lgpd`:** auditoria, Data safety e exclusão feitas (`docs/SEGURANCA_PRIVACIDADE.md`, 2026-11-05); falta o consentimento e o anúncio não personalizado quando o LevelPlay entrar.
 22. **`ta-playtest`:** K2 com 20 pessoas; K3 nos aparelhos dos amigos do dono.
-23. **`ta-loja-assets`:** ícone aplicado no build, screenshots, descrição, criativos gravados do jogo real.
+23. **`ta-loja-assets`:** ficha da Play pronta para colar em `docs/FICHA_PLAY.md` (2026-11-05): textos pt-BR e en, ícone 512 e gráfico de recursos em `docs/play/`, roteiro das 8 capturas, `fotos_play.sh` e `ficha_play.py`. Faltam o ícone aplicado no build (`Setup.cs`, adaptativo), as 8 capturas com o Tripo na rodada local e os criativos de vídeo.
 24. **Fim:** atualizações de ferramentas com a fila vazia, AAB assinado, regressão final, GO/NO-GO (GDD §25) e, por último, o celular de teste.
 
 Fora do lançamento por decisão do dono (D-04): iOS (exige macOS e conta Apple) e o 5º incidente antes do teste.
