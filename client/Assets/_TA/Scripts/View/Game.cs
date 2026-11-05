@@ -91,7 +91,7 @@ namespace TA
             if (_instalacao.Length == 0) { _instalacao = Guid.NewGuid().ToString("N"); PlayerPrefs.SetString("ta_instalacao", _instalacao); PlayerPrefs.Save(); }
             _sessao = Guid.NewGuid().ToString("N").Substring(0, 8);
             Ajustes.Carrega(!_test);
-            if (_test) { Ajustes.TextoMaior = Arg("-textomaior") != null; Ajustes.ReduzMovimento = Arg("-reduzmovimento") != null; }
+            if (_test) { if (Arg("-idioma") != null) Idiomas.Atual = Ajustes.Escolhido = Idiomas.De(Arg("-idioma")); Ajustes.TextoMaior = Arg("-textomaior") != null; Ajustes.ReduzMovimento = Arg("-reduzmovimento") != null; }
 
             int status;
             if (_test)
