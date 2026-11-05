@@ -1,8 +1,10 @@
 """Confere o APK contra o que a Play exige (GDD §3: "reconferidos no dia do envio"). Stdlib + aapt2 e zipalign do SDK que vem no Unity.
 
-uso: python client/tools/checa_apk.py <app.apk>   |   --selftest
-Sai 1 com qualquer falta: targetSdk abaixo de 36; ABI diferente de so arm64-v8a; AD_ID no manifesto; .so com segmento alinhado a menos
-de 16 KB; zip nao alinhado a 16 KB. Imprime uma linha com o que achou.
+uso: python client/tools/checa_apk.py <app.apk> [--release]   |   --selftest
+Sai 1 com qualquer falta: targetSdk abaixo de 36; ABI diferente de so arm64-v8a; AD_ID no manifesto; permissao fora da lista curta
+(PERMISSOES: o jogo nao pede camera, microfone, localizacao, contatos, arquivos nem notificacao; GDD §9.1 e Data safety em
+docs/SEGURANCA_PRIVACIDADE.md); .so com segmento alinhado a menos de 16 KB; zip nao alinhado a 16 KB. Com --release, tambem o app
+depuravel (android:debuggable, GDD §8.3). Imprime uma linha com o que achou, com as permissoes (INTERNET decide o Data safety).
 ponytail: so APK; o AAB entra com o Setup.BuildAndroidBundle (o manifesto dele pede o bundletool-all que vem no Unity).
 """
 
@@ -20,6 +22,14 @@ BUILD_TOOLS = os.path.join(
 TARGET_MIN = 36
 PAGINA = 16 * 1024
 PT_LOAD = 1
+# ponytail: permissao nova so com linha nova aqui E a politica (docs/privacidade, docs/privacy) e o Data safety atualizados no mesmo PR
+PERMISSOES = {
+    "android.permission.INTERNET",  # anuncio com recompensa e compra (lancamento); o build de dev do Unity ja a pede pelo profiler
+    "android.permission.ACCESS_NETWORK_STATE",  # SDK de anuncio/compra pergunta se ha rede
+    "android.permission.VIBRATE",  # Configuracoes > Vibracao
+    "com.android.vending.BILLING",  # Google Play Billing (Unity IAP)
+}
+SUFIXO_INTERNO = ".DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"  # o androidx cria uma com o appId; nao e pedida ao jogador
 
 
 def alinhamento_elf(b):
@@ -36,7 +46,11 @@ def alinhamento_elf(b):
     return min(aligns) if aligns else None
 
 
-def veredito(badging, libs, zip_alinhado):
+def permissoes(badging):
+    return sorted(set(re.findall(r"^uses-permission(?:-sdk-23)?: name='([^']+)'", badging, re.M)))
+
+
+def veredito(badging, libs, zip_alinhado, release=False):
     erros = []
     m = re.search(r"targetSdkVersion:'(\d+)'", badging)
     alvo = int(m.group(1)) if m else 0
@@ -47,6 +61,11 @@ def veredito(badging, libs, zip_alinhado):
         erros.append(f"ABI {abis}: so arm64-v8a")
     if "AD_ID" in badging:
         erros.append("AD_ID no manifesto")
+    for p in permissoes(badging):
+        if p not in PERMISSOES and not p.endswith(SUFIXO_INTERNO) and "AD_ID" not in p:
+            erros.append(f"permissao {p} fora da lista (PERMISSOES): politica e Data safety mudam junto")
+    if release and re.search(r"^application-debuggable", badging, re.M):
+        erros.append("app depuravel num build de release")
     for nome, a in sorted(libs.items()):
         if a is None or a < PAGINA:
             erros.append(f"{nome}: alinhado a {a}, abaixo de 16 KB")
@@ -72,6 +91,10 @@ def selftest():
     bom = "package: name='x'\ntargetSdkVersion:'36'\n"
     so = {"lib/arm64-v8a/libil2cpp.so": 16384}
     assert veredito(bom, so, True)[2] == []
+    rede = bom + "uses-permission: name='android.permission.INTERNET'\nuses-permission: name='br.com.vstack.littleterminal" + SUFIXO_INTERNO + "'\n"
+    assert veredito(rede, so, True, release=True)[2] == []
+    assert veredito(bom + "application-debuggable\n", so, True)[2] == []  # dev pode
+    assert permissoes(rede) == ["android.permission.INTERNET", "br.com.vstack.littleterminal" + SUFIXO_INTERNO]
     casos = [
         ("targetSdk 35", "targetSdkVersion:'35'", so, True),
         ("targetSdk 0", "sem nada", so, True),
@@ -89,9 +112,17 @@ def selftest():
             True,
         ),
         ("zip nao alinhado", bom, so, False),
+        ("permissao android.permission.CAMERA", bom + "uses-permission: name='android.permission.CAMERA'\n", so, True),
+        (
+            "permissao android.permission.ACCESS_COARSE_LOCATION",
+            bom + "uses-permission-sdk-23: name='android.permission.ACCESS_COARSE_LOCATION'\n",
+            so,
+            True,
+        ),
+        ("app depuravel", bom + "application-debuggable\n", so, True, True),
     ]
-    for esperado, badging, libs, zipa in casos:
-        erros = veredito(badging, libs, zipa)[2]
+    for esperado, badging, libs, zipa, *rel in casos:
+        erros = veredito(badging, libs, zipa, release=bool(rel))[2]
         assert any(e.startswith(esperado) for e in erros), (esperado, erros)
     print(f"selftest OK: {len(casos)} quebras pegas")
 
@@ -100,7 +131,8 @@ def main():
     if "--selftest" in sys.argv:
         selftest()
         return 0
-    apk = sys.argv[1]
+    apk = next(a for a in sys.argv[1:] if not a.startswith("--"))
+    release = "--release" in sys.argv
     badging = subprocess.run(
         [os.path.join(BUILD_TOOLS, "aapt2.exe"), "dump", "badging", apk],
         capture_output=True,
@@ -121,11 +153,12 @@ def main():
         ).returncode
         == 0
     )
-    alvo, abis, erros = veredito(badging, libs, zip_ok)
+    alvo, abis, erros = veredito(badging, libs, zip_ok, release)
     for e in erros:
         print(e)
     print(
-        f"targetSdk={alvo} abi={','.join(abis)} libs={len(libs)} tamanho={os.path.getsize(apk) / 2**20:.1f} MiB erros={len(erros)}"
+        f"targetSdk={alvo} abi={','.join(abis)} permissoes={','.join(p.rsplit('.', 1)[-1] for p in permissoes(badging)) or 'nenhuma'}"
+        f" depuravel={'sim' if 'application-debuggable' in badging else 'nao'} libs={len(libs)} tamanho={os.path.getsize(apk) / 2**20:.1f} MiB erros={len(erros)}"
     )
     return 1 if erros else 0
 
