@@ -169,7 +169,11 @@ namespace TA.Core
                 p.Resto = p.Total = BanheiroAndarPassos;
                 Banheiro.Indo.Add(p);
             }
-            else St(Estacao.Portao).Fila.Add(p);
+            else
+            {
+                if (p.Banheiro && T.RegraLimpeza && Banheiro.Interditado) p.Negado = true;   // frente G: precisava e achou fechado
+                St(Estacao.Portao).Fila.Add(p);
+            }
         }
 
         /// <summary>Sim.Fecha: o voo que fechou leva quem ainda estava no banheiro (perdeu, como numa fila; com a folga, so com o portao adiantado).</summary>
@@ -194,7 +198,7 @@ namespace TA.Core
             {
                 // fechado para limpeza: quem esperava volta ao portao (quem ja estava na cabine termina)
                 b.Negados += b.Fila.Count;
-                foreach (Pax p in b.Fila) VoltaAoPortao(p);
+                foreach (Pax p in b.Fila) { p.Negado = true; VoltaAoPortao(p); }
                 b.Fila.Clear();
             }
             while (b.Usando.Count < b.Cabines && b.Fila.Count > 0)
@@ -202,6 +206,7 @@ namespace TA.Core
                 Pax p = b.Fila[0];
                 b.Fila.RemoveAt(0);
                 p.Resto = p.Total = UsoPassos;
+                UsaBanheiro(p);
                 b.Usando.Add(p);
             }
             foreach (Zelador z in Limpeza)

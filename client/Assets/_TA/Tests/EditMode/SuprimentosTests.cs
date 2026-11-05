@@ -243,7 +243,8 @@ namespace TA.Tests
 
         static string SemEma(string save) =>
             string.Join("\n", save.Split('\n').Where(l => !l.StartsWith("ema=") && !l.StartsWith("sha256=") && !l.StartsWith("stt.") && !l.StartsWith("camp.") && !l.StartsWith("miss=") && !l.StartsWith("md.") && !l.StartsWith("ms.") && !l.StartsWith("cq=") && !l.StartsWith("passe=")
-                && !l.StartsWith("atrasada=") && !l.StartsWith("hoje=") && !l.StartsWith("dc.") && !l.StartsWith("hist=") && !l.StartsWith("hp=")));
+                && !l.StartsWith("atrasada=") && !l.StartsWith("hoje=") && !l.StartsWith("dc.") && !l.StartsWith("hist=") && !l.StartsWith("hp=")
+                && !l.StartsWith("sat")));   // schema 17: o save antigo nao tinha a satisfacao (sat, satm, satp), que so le o jogo
 
         /// <summary>O schema 14 (sem suprimentos) abre com o deposito cheio, nada a caminho, nenhum aviao devendo carga e a 5a categoria zerada; e migrar =
         /// jogar ate ali com o codigo novo sem a regra (o jogo que o 14 gravava). A cadeia 12 -> 13 -> 14 esta no SaveTests.</summary>
