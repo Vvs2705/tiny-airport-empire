@@ -135,7 +135,7 @@ Ordem de trabalho de 2026-11-03, depois da mistura com o GDD de direção (`GDD.
 6. **E, transferência pelo vestiário**: parcial (`ta-vestiario`: núcleo, tela e as peças do Tripo); falta a validação em build na rodada do Unity da leva.
 7. **F, limpeza e banheiro**: parcial (frente F: núcleo, tela e save schema 14; o banheiro nunca faz perder voo e a sujeira ainda não mexe no Cash); falta a validação em build na rodada do Unity da leva, as malhas da pia, da lavadora e do cone, e a tela de contratar e mandar limpar. A API que a G lê está no `CONTRATO_LANCAMENTO.md` §5.
 8. **G, satisfação com motivo**: parcial (frente G: núcleo, ficha do passageiro e selo do HUD, save schema 17; só leitura, a gorjeta ficou desligada pelo portão do §5.13); falta a validação em build na rodada do Unity da leva e o balão de humor do boneco ler a nota do núcleo. A API que a I lê está no `CONTRATO_LANCAMENTO.md` §6.
-9. **I, painel de operações** com o relatório do dia: parcial (frente I, 05/11: núcleo `Sim.Painel.cs`, só leitura e sem save, e a tela `Hud.Painel.cs`, pela pausa e pelo coração do selo da satisfação); falta a validação em build na rodada da leva (fotos `-tela painel`) e o inglês revisado. Os pares em inglês dos textos novos esperam o PR do inglês em `docs/ingles/painel.txt`.
+9. **I, painel de operações** com o relatório do dia: parcial (frente I, 05/11: núcleo `Sim.Painel.cs`, só leitura e sem save, e a tela `Hud.Painel.cs`, pela pausa e pelo coração do selo da satisfação); falta a validação em build na rodada da leva (fotos `-tela painel`) e o inglês revisado. Os textos novos têm o par em inglês em `Ingles.cs`.
 
 **Depois, a loja e o servidor, e então a lista de antes:**
 
@@ -148,7 +148,7 @@ Ordem de trabalho de 2026-11-03, depois da mistura com o GDD de direção (`GDD.
 16. **`ta-passe-tela`:** tela do passe de temporada (`Hud.Passe.cs`), PR aberto em 2026-11-03; faltam a arte dos 3 cosméticos e o conteúdo da trilha premium, que vem com a loja.
 17. **`ta-incidente5`:** o 5º incidente (volta ao portão por aviso técnico); só entra se passar no portão do §5.13.
 18. **`ta-estetica`:** auditoria visual contra os concorrentes; refazer o que estiver abaixo.
-19. **`ta-ingles`:** textos em inglês (D-08: pt-BR e en no lançamento; es e id depois, com revisão humana).
+19. **`ta-ingles`:** feito em 2026-11-05 (D-08: pt-BR e en no lançamento): `Core/Ingles.cs` com o par de cada texto, `Idiomas.cs`, troca nas configurações (vale ao reabrir) e o portão `ingles` no `checa_repo`. Falta a revisão humana do inglês e olhar as telas em inglês no aparelho (textos mais compridos, `-idioma en` nas fotos); es e id depois, com revisão humana.
 20. **`ta-telemetria`:** Unity Analytics sem dado pessoal (D-11).
 21. **`ta-lgpd`:** auditoria, Data safety e exclusão feitas (`docs/SEGURANCA_PRIVACIDADE.md`, 2026-11-05); falta o consentimento e o anúncio não personalizado quando o LevelPlay entrar.
 22. **`ta-playtest`:** K2 com 20 pessoas; K3 nos aparelhos dos amigos do dono.

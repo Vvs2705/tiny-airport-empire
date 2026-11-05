@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using TA.Core;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -12,8 +13,10 @@ namespace TA
     /// </summary>
     public static class Ajustes
     {
-        const string VibrarKey = "ta_vibrar", MovimentoKey = "ta_movimento", TextoKey = "ta_texto";
+        const string VibrarKey = "ta_vibrar", MovimentoKey = "ta_movimento", TextoKey = "ta_texto", IdiomaKey = "ta_idioma";
         public static bool Vibrar = true, ReduzMovimento, TextoMaior;
+        /// <summary>O idioma escolhido na tela de configuracoes; so vale (Idiomas.Atual) na proxima abertura do jogo.</summary>
+        public static Lingua Escolhido = Lingua.Pt;
         static bool _grava;
 
         public static void Carrega(bool grava)
@@ -23,6 +26,17 @@ namespace TA
             Vibrar = PlayerPrefs.GetInt(VibrarKey, 1) == 1;
             ReduzMovimento = PlayerPrefs.GetInt(MovimentoKey, 0) == 1;
             TextoMaior = PlayerPrefs.GetInt(TextoKey, 0) == 1;
+            // Sem escolha guardada, o idioma do aparelho (ingles = en, o resto = pt-BR). Tem de rodar antes do primeiro acesso a Textos.
+            string guardado = PlayerPrefs.GetString(IdiomaKey, "");
+            Idiomas.Atual = Escolhido = guardado.Length == 0 ? Idiomas.DoAparelho(Application.systemLanguage.ToString()) : Idiomas.De(guardado);
+        }
+
+        public static void EscolheIdioma(Lingua l)
+        {
+            Escolhido = l;
+            if (!_grava) return;
+            PlayerPrefs.SetString(IdiomaKey, Idiomas.Codigo(l));
+            PlayerPrefs.Save();
         }
 
         public static void Grava()
@@ -72,7 +86,14 @@ namespace TA
                 it => { Ajustes.ReduzMovimento = !Ajustes.ReduzMovimento; Ajustes.Grava(); });
             _texto = ItemPausa(lista, "Texto", Art.Bilhete(), Art.EstacaoCor[3], Textos.TextoMaior, Textos.TextoMaiorLegenda, "",
                 it => { Ajustes.TextoMaior = !Ajustes.TextoMaior; Ajustes.Grava(); AplicaTexto(); });
-            ItemPausa(lista, "Idioma", Art.Aviao(), Art.EstacaoCor[4], Textos.Idioma, Textos.IdiomaNome, "", it => { }).Btn.Maximo(Textos.EmUso);
+            ItemPausa(lista, "Idioma", Art.Aviao(), Art.EstacaoCor[4], Textos.Idioma, Textos.IdiomaNome, Textos.NomeDoIdioma(Outro(Ajustes.Escolhido)),
+                it =>
+                {
+                    Lingua nova = Outro(Ajustes.Escolhido);
+                    Ajustes.EscolheIdioma(nova);
+                    it.Linha.text = Textos.ReabraIdioma;
+                    it.Btn.Secundario(Textos.NomeDoIdioma(Outro(nova)));
+                });
             ItemPausa(lista, "Privacidade", Art.Escudo(), Art.EstacaoCor[5], Textos.Privacidade, Textos.PrivacidadeLegenda, Textos.Abrir,
                 it => Application.OpenURL(Textos.UrlPrivacidade));
             ItemPausa(lista, "Suporte", Art.Balao(), Art.EstacaoCor[0], Textos.Suporte, Textos.EmailSuporte, Textos.Escrever,
@@ -91,6 +112,8 @@ namespace TA
             BotaoDoPe(pe, Vector2.zero, new Vector2(0.5f, 0f), () => Fecha(_excluir)).Secundario(Textos.Cancelar);
             BotaoDoPe(pe, new Vector2(0.5f, 0f), new Vector2(1f, 0f), () => _g.ApagaDados()).Principal(Textos.ApagarTudo, Art.Perigo);
         }
+
+        static Lingua Outro(Lingua l) => l == Lingua.En ? Lingua.Pt : Lingua.En;
 
         /// <summary>Volume k (0 musica, 1 efeitos): barra de 5 degraus e, no canhoto, - e +.</summary>
         void ItemVolume(RectTransform lista, int k, string nome, Sprite icone)
