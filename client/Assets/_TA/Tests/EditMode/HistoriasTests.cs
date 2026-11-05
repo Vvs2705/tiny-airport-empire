@@ -319,8 +319,9 @@ namespace TA.Tests
             Assert.AreEqual(SemHp(n.Save("0.15.0", U)), SemHp(Sim.Load(V15, sem, 7).Save("0.15.0", U)), "migrar = jogar ate ali com o codigo novo");
         }
 
-        /// <summary>Sem a linha hp= e o hash, com os double em 5 casas: o save real saiu do .NET, e o Mono do Unity difere na 8a casa.</summary>
-        static string SemHp(string save) => string.Join("\n", save.Split('\n').Where(l => !l.StartsWith("hp=") && !l.StartsWith("sha256="))
+        /// <summary>Sem a linha hp=, a satisfacao (schema 17: sat, satm, satp, que so le o jogo) e o hash, com os double em 5 casas: o save real saiu do
+        /// .NET, e o Mono do Unity difere na 8a casa.</summary>
+        static string SemHp(string save) => string.Join("\n", save.Split('\n').Where(l => !l.StartsWith("hp=") && !l.StartsWith("sat") && !l.StartsWith("sha256="))
             .Select(l => System.Text.RegularExpressions.Regex.Replace(l, @"-?\d+\.\d+", x => double.Parse(x.Value, System.Globalization.CultureInfo.InvariantCulture)
                 .ToString("F5", System.Globalization.CultureInfo.InvariantCulture))));
 
