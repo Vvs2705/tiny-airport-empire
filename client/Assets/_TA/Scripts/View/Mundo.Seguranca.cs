@@ -18,8 +18,11 @@ namespace TA
         static readonly float[] SegA = { -0.43f, 0.43f, -1.26f, 1.26f };
         const float EscalaSeg = 0.5f, PassoX = -0.22f, BeltX = 0.2f, EscalaCabine = EscalaSeg * 0.85f;
         /// <summary>Distâncias da parede de saída: parada diante da mesa, pórtico, cabine, raio-x, parada atrás das máquinas, agente e as pontas da
-        /// esteira (centro do rolo: ela passa disso meia largura). Altura e largura da mesa.</summary>
-        const float EntraD = 1.22f, PorticoD = 1.06f, CabineD = 0.6f, RaioXD = 0.66f, SaiD = 0.2f, AgenteD = 0.09f, MesaIniD = 1.08f, MesaFimD = 0.4f, AltMesa = 0.2f, LargMesa = 0.24f;
+        /// esteira (centro do rolo: ela passa disso meia largura). Altura e largura da mesa. Atrás das máquinas há um corredor de um corpo só, entre a
+        /// ponta da esteira e o agente: quem sai da linha anda nele (SaiD) a 0,1 m de cada um.</summary>
+        const float EntraD = 1.22f, PorticoD = 1.06f, CabineD = 0.6f, RaioXD = 0.66f, SaiD = 0.22f, AgenteD = 0.13f, MesaIniD = 1.08f, MesaFimD = 0.44f, AltMesa = 0.2f, LargMesa = 0.24f;
+        /// <summary>Faixa de quem vai da fila até a linha: entre a 1ª fileira (FilaDe) e as mesas, a 0,09 m de quem espera e 0,1 m do cordão do posto fechado.</summary>
+        const float FaixaSegD = 1.4f;
         static readonly Color CorLuz = Art.Hex(0x7FD8A0), CorFeixe = new Color(0.35f, 0.95f, 1f, 0.85f);
 
         readonly GameObject[] _linha = new GameObject[4];
@@ -124,7 +127,7 @@ namespace TA
             float x = (atras ? p : alvo).x;
             int i = 0;
             for (int k = 1; k < 4; k++) if (Mathf.Abs(Parada(k, 2).x - x) < Mathf.Abs(Parada(i, 2).x - x)) i = k;
-            Eixos(r, ref p, Parada(i, atras ? 2 : 0), false);
+            Eixos(r, ref p, Parada(i, atras ? 2 : 0), atras);   // atrás: primeiro desce ao corredor, depois anda nele; rente à parede passaria por cima do agente
             p = Parada(i, atras ? 0 : 2);
             r.Add(p);
         }
