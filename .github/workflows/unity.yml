@@ -1,10 +1,14 @@
-# Unity no CI com GameCI (frente ta-unity-ci, plano de aceleração de 05/11): EditMode e os builds StandaloneWindows64 e Android dev em todo PR
-# que mexe em client/, para a frente ver o próprio erro antes do merge. Roda com as primitivas: as malhas do Tripo ficam fora do git
-# (client/Assets/_TA/ArtLocal/, licença) e o repositório é público, então medidas e fotos com malha (diag_caixas, K3, folha de fotos)
-# continuam na rodada local. O autoplay do .exe também fica no PC: o runner é Linux.
+# Unity no CI (frente ta-unity-ci, plano de aceleração de 05/11): EditMode, build Windows + autoplay e build Android dev em todo PR que
+# mexe em client/, para a frente ver o próprio erro antes do merge. São os mesmos portões do client/tools/verify.sh full e android.
 #
-# Segredos (Settings > Secrets and variables > Actions; só o Vinicius põe): UNITY_LICENSE (o conteúdo inteiro do Unity_lic.ulf),
-# UNITY_EMAIL e UNITY_PASSWORD. Sem eles (antes de pôr, ou num PR de fork) os jobs do Unity são pulados com um aviso, não ficam vermelhos.
+# Plano B do plano: runner self-hosted no PC do Vinicius (rótulo "unity-ta"), com o Unity 6000.3.27f1 já ativado lá. O GameCI no runner
+# do GitHub não serve: a licença Personal do Unity 6 ativa pela conta e não gera mais o Unity_lic.ulf que ele pede (05/11).
+# No PC as malhas do Tripo (client/Assets/_TA/ArtLocal/) não estão no checkout do runner, então o jogo roda com as primitivas;
+# medidas e fotos com malha (diag_caixas, K3, folha de fotos) continuam na rodada local.
+#
+# Segurança (repositório público): só roda código deste repositório, nunca de fork. O verify.sh aborta se houver Unity aberto neste
+# checkout ou emulador, Blender ou Docker ligado (um processo pesado por vez, PC de 7,7 GB); um job do Unity por vez (concurrency).
+# Sem runner ligado, os jobs ficam na fila: ligue o serviço do runner fora do horário das frentes.
 name: unity
 on:
   pull_request:
@@ -12,112 +16,47 @@ on:
       - 'client/**'
       - '.github/workflows/unity.yml'
   push:
-    branches: [main]   # a main guarda a Library no cache que todos os PRs leem (cache de PR só vale para o próprio PR)
+    branches: [main]
     paths:
       - 'client/**'
       - '.github/workflows/unity.yml'
   workflow_dispatch:
 permissions:
   contents: read
-  checks: write   # o test-runner publica o resultado do EditMode como check
 concurrency:
-  group: unity-${{ github.ref }}
-  cancel-in-progress: true
-env:
-  UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-  UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-  UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+  group: unity-pc   # o PC aguenta um Unity por vez; o mais novo de cada ref espera o anterior
+  cancel-in-progress: false
 
 jobs:
-  licenca:
-    runs-on: ubuntu-latest
-    timeout-minutes: 2
-    outputs:
-      ok: ${{ steps.v.outputs.ok }}
-    steps:
-      - id: v
-        run: |
-          if [ -n "$UNITY_LICENSE" ] && [ -n "$UNITY_EMAIL" ] && [ -n "$UNITY_PASSWORD" ]; then echo ok=true >> "$GITHUB_OUTPUT"
-          else echo "::warning ::Faltam os segredos UNITY_LICENSE, UNITY_EMAIL ou UNITY_PASSWORD: EditMode e builds do Unity pulados."; echo ok=false >> "$GITHUB_OUTPUT"; fi
-
-  editmode:
-    needs: licenca
-    if: needs.licenca.outputs.ok == 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
+  unity:
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: [self-hosted, Windows, unity-ta]
+    timeout-minutes: 120
+    defaults:
+      run:
+        shell: bash   # Git Bash, o mesmo do verify.sh
+    env:
+      UNITY_TIMEOUT: '3000'   # teto por chamada do Unity (s)
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/cache@v6
         with:
-          path: client/Library
-          key: Library-editmode-${{ hashFiles('client/Packages/**', 'client/ProjectSettings/**') }}-${{ hashFiles('client/Assets/**') }}
-          restore-keys: Library-editmode-${{ hashFiles('client/Packages/**', 'client/ProjectSettings/**') }}-
-      - uses: game-ci/unity-test-runner@v4
-        id: testes
-        with:
-          projectPath: client
-          unityVersion: 6000.3.27f1
-          testMode: editmode
-          artifactsPath: editmode
-          githubToken: ${{ secrets.GITHUB_TOKEN }}
-          checkName: EditMode (resultado)
+          clean: false   # mantém client/Library entre as rodadas (é o cache: o git clean -x apagaria)
+      - name: EditMode, build Windows e autoplay (verify.sh full)
+        run: client/tools/verify.sh full
+      - name: Build Android dev e checa_apk (verify.sh android)
+        run: client/tools/verify.sh android
+      - name: Resumo
+        if: always()
+        run: |
+          f=client/Builds/verify/editmode.xml
+          [ -f "$f" ] && grep -m1 -o '<test-run [^>]*>' "$f" | grep -oE '(result|total|passed|failed)="[^"]*"' | paste -sd' ' >> "$GITHUB_STEP_SUMMARY" || true
+          cat client/Builds/build_*.txt >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
       - uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: editmode-logs
+          name: unity-logs
           path: |
-            editmode
-            client/Logs
-          retention-days: 14
-          if-no-files-found: ignore
-
-  build:
-    needs: licenca
-    if: needs.licenca.outputs.ok == 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 90
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - alvo: StandaloneWindows64
-            metodo: TA.EditorTools.Setup.BuildWindows
-          - alvo: Android
-            metodo: TA.EditorTools.Setup.BuildAndroidDev
-    name: build (${{ matrix.alvo }})
-    steps:
-      # a imagem Android do GameCI tem ~8 GB comprimida e o disco livre do runner é curto: tira o que este job não usa
-      - name: Libera disco
-        run: |
-          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/.ghcup /opt/hostedtoolcache/CodeQL /usr/local/share/boost
-          sudo docker image prune -af > /dev/null
-          df -h /
-      - uses: actions/checkout@v7
-      - uses: actions/cache@v6
-        with:
-          path: client/Library
-          key: Library-${{ matrix.alvo }}-${{ hashFiles('client/Packages/**', 'client/ProjectSettings/**') }}-${{ hashFiles('client/Assets/**') }}
-          restore-keys: Library-${{ matrix.alvo }}-${{ hashFiles('client/Packages/**', 'client/ProjectSettings/**') }}-
-      # o mesmo método do verify.sh full/android (Setup.Apply + BuildPlayer, APK de dev com a chave de debug e sem AD_ID);
-      # ele mesmo sai com 0 ou 1 e grava client/Builds/build_<alvo>.txt
-      - uses: game-ci/unity-builder@v4
-        with:
-          projectPath: client
-          unityVersion: 6000.3.27f1
-          targetPlatform: ${{ matrix.alvo }}
-          buildMethod: ${{ matrix.metodo }}
-          versioning: None
-          allowDirtyBuild: true   # o Setup.Apply regrava ProjectSettings antes do build
-      - name: Confere o resumo do build
-        run: |
-          cat client/Builds/build_${{ matrix.alvo }}.txt
-          grep -q 'result=Succeeded' client/Builds/build_${{ matrix.alvo }}.txt
-      - uses: actions/upload-artifact@v7
-        if: always()
-        with:
-          name: build-${{ matrix.alvo }}-logs
-          path: |
+            client/Builds/verify
             client/Builds/build_*.txt
-            client/Logs
           retention-days: 14
           if-no-files-found: ignore
