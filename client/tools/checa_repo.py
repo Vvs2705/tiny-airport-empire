@@ -13,6 +13,8 @@ conteudo_check.py do Forge). Olha os arquivos versionados e os novos ainda sem c
   mapa        todo .cs, .py e .sh citado no docs/MAPA_CODIGO.md
   ci          workflows do repo publico: nunca pull_request_target nem workflow_run (dariam os segredos a PR de fork), sempre com
               permissions: explicito e sem segredo impresso em run: (GDD §8.4)
+  ficha       os textos da ficha da Play (docs/FICHA_PLAY.md) cabem nos limites (titulo 30, curta 80, longa 4000) e nao prometem o
+              que a regra da ficha proibe ("sem anuncios", "para criancas", "melhor jogo"...)
   privacidade as 2 politicas (docs/privacidade, docs/privacy) com o e-mail de suporte e citando cada pacote que pode coletar dados e
               cada API de rede do jogo (a politica tem de bater com o codigo, GDD §9.3)
 Aviso, sem falhar: arquivo .cs acima de ~600 linhas (regra do estudio: vira partial).
@@ -33,6 +35,9 @@ MANIFESTO = "client/Packages/manifest.json"
 MAPA = "docs/MAPA_CODIGO.md"
 POLITICAS = ["docs/privacidade/index.html", "docs/privacy/index.html"]
 EMAIL_SUPORTE = "suporte@vstack-solutions.com.br"
+FICHA = "docs/FICHA_PLAY.md"
+LIMITES_FICHA = {"titulo": 30, "curta": 80, "longa": 4000}
+PROIBIDAS_FICHA = ("sem anúncios", "no ads", "melhor jogo", "best game", "nº 1", "#1", "crianças", "kids", "grátis", "free to play")
 REDE = r"\b(UnityWebRequest|HttpClient|WebClient|TcpClient|UdpClient|ClientWebSocket)\b"
 MAX_BYTES = 10 * 1024 * 1024
 MAX_LINHAS = 600
@@ -270,6 +275,34 @@ def checa_privacidade(repo):
     return erros
 
 
+def textos_ficha(md):
+    """{(tipo, lingua): texto} dos blocos marcados com (`titulo_pt`), (`curta_en`)... no docs/FICHA_PLAY.md."""
+    return {
+        (m.group(1), m.group(2)): m.group(3)
+        for m in re.finditer(r"\(`(titulo|curta|longa)_(pt|en)`\)\s+```\n(.*?)\n```", md, re.S)
+    }
+
+
+def checa_ficha(repo):
+    if FICHA not in repo:
+        return []
+    ts, erros = textos_ficha(texto(repo[FICHA])), []
+    for tipo, limite in LIMITES_FICHA.items():
+        for lingua in ("pt", "en"):
+            s = ts.get((tipo, lingua))
+            if s is None:
+                erros.append(f"ficha: falta o bloco {tipo}_{lingua} em {FICHA}")
+                continue
+            if len(s) > limite:
+                erros.append(f"ficha: {tipo}_{lingua} tem {len(s)} caracteres (limite da Play: {limite})")
+            erros += [
+                f"ficha: {tipo}_{lingua} tem '{p}' (regra da ficha em {FICHA})"
+                for p in PROIBIDAS_FICHA
+                if p in s.lower()
+            ]
+    return erros
+
+
 def avisos_tamanho(repo):
     for p in sorted(repo):
         if p.startswith("client/Assets/_TA/") and p.endswith(".cs"):
@@ -289,6 +322,7 @@ def checa(repo):
         + checa_ci(repo)
         + checa_mapa(repo)
         + checa_privacidade(repo)
+        + checa_ficha(repo)
     )
 
 
@@ -337,6 +371,13 @@ def repo_bom():
 
 def selftest():
     base = repo_bom()
+    assert checa(base) == [], checa(base)
+    ficha_boa = "".join(
+        f"(`{t}_{l}`)\n```\n{'Little Terminal' if t == 'titulo' else 'Run it.'}\n```\n"
+        for t in LIMITES_FICHA
+        for l in ("pt", "en")
+    ).encode()
+    base[FICHA] = ficha_boa
     assert checa(base) == [], checa(base)
     falso = {  # montados aqui para o proprio arquivo nao ter um segredo inteiro
         "gh": b"gh" + b"p_" + b"a" * 36,
@@ -442,6 +483,9 @@ def selftest():
             lambda r: r.update({"docs/nota.md": falso["goo"][:-1] + b"- "}),
         ),
         ("privacidade: falta", lambda r: r.pop(POLITICAS[1])),
+        ("ficha: falta", lambda r: r.update({FICHA: ficha_boa.replace(b"curta_en", b"curta_xx")})),
+        ("ficha: titulo_pt", lambda r: r.update({FICHA: ficha_boa.replace(b"Little Terminal\n", b"Little Terminal: o maior aeroporto\n", 1)})),
+        ("ficha: longa_en", lambda r: r.update({FICHA: ficha_boa.replace(b"Run it.", b"Run it. No ads.")})),
         ("privacidade: ", lambda r: r.update({POLITICAS[0]: b"<p>sem contato</p>"})),
         (
             "privacidade: ",

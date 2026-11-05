@@ -169,6 +169,7 @@ namespace TA
         void BuildTelas(RectTransform canvas)
         {
             BuildMelhorias(canvas);
+            BuildPoliticas(canvas);   // ta-politicas (Hud.Politicas.cs)
             BuildMover(canvas);
 
             _cofre = NovaFolhaModal(canvas, "Cofre", Textos.CofreTitulo, Art.Estrela(), 830f);
@@ -217,6 +218,7 @@ namespace TA
         {
             _melhorias = NovaFolhaModal(canvas, "Melhorias", Textos.Melhorias, Art.Raio(), 1600f);
             RectTransform lista = NovoResumo(_melhorias, Textos.Compradas, Art.Raio(), Art.Azul, out _melhoriasResumo);
+            EntradaPoliticas(lista);
             for (int i = 0; i < 8; i++)
             {
                 var e = (Estacao)i;
@@ -261,12 +263,13 @@ namespace TA
             m.Rt.SetAsLastSibling();
         }
 
-        /// <summary>Abre uma tela pelo nome (botoes e a flag -tela): melhorias, mover, cofre, anuncio, pausa, album, config, excluir, metas, missoes, conquistas, rotas (rotas0 a rotas2: a aba do aeroporto), passe, painel. "jogo" = nenhuma.</summary>
+        /// <summary>Abre uma tela pelo nome (botoes e a flag -tela): melhorias, politicas, mover, cofre, anuncio, pausa, album, config, excluir, metas, missoes, conquistas, rotas (rotas0 a rotas2: a aba do aeroporto), passe, painel. "jogo" = nenhuma.</summary>
         public void AbreTela(string nome)
         {
             switch (nome)
             {
                 case "melhorias": Abre(_melhorias); break;
+                case "politicas": Abre(_politicas); break;
                 case "mover": if (S.Staff.Count > 0) AbreMover(0); break;
                 case "pausa": _g.Pausa(true); _pausaDiario.Linha.text = Textos.DiarioLegenda; Abre(_pausa); break;   // fechar no X fica na pausa operacional
                 case "album": Abre(_album); break;
@@ -373,6 +376,7 @@ namespace TA
         {
             Sim s = S;
             if (_melhorias.Rt.gameObject.activeSelf) PintaMelhorias(s);
+            PintaPoliticas(s);
             if (_mover.Rt.gameObject.activeSelf && _moverQuem >= 0 && _moverQuem < s.Staff.Count) PintaMover(s);
             if (_pausa.Rt.gameObject.activeSelf) _pausaResumo.Pinta(s, Textos.Num(s.TotalEmbarcados));
             if (_cofre.Rt.gameObject.activeSelf)
