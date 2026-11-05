@@ -535,27 +535,43 @@ Gerado por `client/tools/audio_gen.py` (Python 3.14.4, numpy 2.4.6, scipy 1.18.1
 - 2026-10-30: 16 arquivos, 9,28 MB: os 7 momentos do GDD §12 em 8 sons e 13 WAV (a decolagem tem hélice e jato) e 3 laços de música, a mesma composição com tom, andamento e voz próprios de cada aeroporto.
 - `audio_gen.py`: SHA-256 `0f4a82f4118136c5858ab53132e918c207b73d5764aaa5885865b0a20cfcb3d8` (calculado com fim de linha LF, o mesmo com checkout CRLF).
 - Comando: `python client/tools/audio_gen.py --md` (gera os arquivos, confere pico, DC, laço e alerta macio e imprime estas linhas).
+- Os 13 WAV de `sfx/` foram substituídos em 2026-11-05 pelos MP3 do ElevenLabs (seção 3.1a); nesta tabela fica só a música.
 - Licença: própria (sintetizado). Os `.meta` de import do Unity saem do mesmo script e não entram na tabela.
 - Motor de avião, o risco do GDD §12, testado antes do resto e aprovado **por medida**: ninguém ouviu ainda, nem em celular. Com um filtro de 300 Hz a 8 kHz imitando o alto-falante do celular, sobram 90% da energia da hélice e 74% da do jato. A hélice mostra as harmônicas das pás e o batimento das duas hélices (2,7 Hz); o jato mostra o apito da turbina 16 dB acima do fundo, subindo com a rotação e caindo com o Doppler. Plano B do GDD (faixa licenciada) não acionado; se soar pobre ao ouvido, a troca é só destes 4 WAV.
 
 | Arquivo (`Resources/`) | Ferramenta | SHA-256 do script | SHA-256 do WAV | Licença |
 |---|---|---|---|---|
-| `Audio/sfx/toque_1.wav` | `client/tools/audio_gen.py` (numpy/scipy) | `0f4a82f4…b3d8` | `49b4fdcc8d8b7b2da4f6354a47b0108b144edb3780ffc5cf928b4cf7805a7552` | própria (sintetizado) |
-| `Audio/sfx/toque_2.wav` | `client/tools/audio_gen.py` (numpy/scipy) | `0f4a82f4…b3d8` | `d86c102c586cf2b47ab56dcffd9bd435449274eb513843d5c2367f24248c2560` | própria (sintetizado) |
-| `Audio/sfx/melhoria_1.wav` | `client/tools/audio_gen.py` (numpy/scipy) | `0f4a82f4…b3d8` | `fecddb12d3bf1fd295ddec449b0e43d16e8d6e3f64ae4fb235fa9f2c7191c0a3` | própria (sintetizado) |
-| `Audio/sfx/embarque_1.wav` | `client/tools/audio_gen.py` (numpy/scipy) | `0f4a82f4…b3d8` | `04bbde5c9b6df6b9283dc3cef30d6b2fb7b28d24879c07d00a2cd5d4408887c7` | própria (sintetizado) |
-| `Audio/sfx/decolagem_helice_1.wav` | `client/tools/audio_gen.py` (numpy/scipy) | `0f4a82f4…b3d8` | `8be19abbc6b530352a2c7813d7f98271f966bc22d689a3f607750b7c7b68776e` | própria (sintetizado) |
-| `Audio/sfx/decolagem_helice_2.wav` | `client/tools/audio_gen.py` (numpy/scipy) | `0f4a82f4…b3d8` | `a71f247ee68ae977fd7e8f96c55a32ec67757357a587728c75a259ea5cb8cb13` | própria (sintetizado) |
-| `Audio/sfx/decolagem_jato_1.wav` | `client/tools/audio_gen.py` (numpy/scipy) | `0f4a82f4…b3d8` | `8ada0ce70ae57f621012c83f75eacf81aa471417f6dba751b69291f9cf13e132` | própria (sintetizado) |
-| `Audio/sfx/decolagem_jato_2.wav` | `client/tools/audio_gen.py` (numpy/scipy) | `0f4a82f4…b3d8` | `6ea59450cd9467060a8a2cb958881b34e9a5dba4c0fed091a024cd52ca6660fc` | própria (sintetizado) |
-| `Audio/sfx/recompensa_1.wav` | `client/tools/audio_gen.py` (numpy/scipy) | `0f4a82f4…b3d8` | `02945cca07be5005b5637a8ae9fa8b935e98212ebe095cd72539a94faa2224d2` | própria (sintetizado) |
-| `Audio/sfx/recompensa_2.wav` | `client/tools/audio_gen.py` (numpy/scipy) | `0f4a82f4…b3d8` | `f0b0bf86a3fe5cee7ce1504575981f696c7b1cb0a2499a5d59f1a7660d5b4ab2` | própria (sintetizado) |
-| `Audio/sfx/recompensa_3.wav` | `client/tools/audio_gen.py` (numpy/scipy) | `0f4a82f4…b3d8` | `37bb4eab77045a6c35fb5f8be57ba34244371be004ed8bd3abc41a69960a2dd6` | própria (sintetizado) |
-| `Audio/sfx/alerta_1.wav` | `client/tools/audio_gen.py` (numpy/scipy) | `0f4a82f4…b3d8` | `da839a123edf0ea118c2bc96d6155d67632760730b1ec720fb21ae4a6f1c4ed6` | própria (sintetizado) |
-| `Audio/sfx/missao_1.wav` | `client/tools/audio_gen.py` (numpy/scipy) | `0f4a82f4…b3d8` | `5c33328787b60281453b54eb475bfe82cae02ae9ec64afa0acc565bc8ca15774` | própria (sintetizado) |
 | `Audio/musica/vale_verde.wav` | `client/tools/audio_gen.py` (numpy/scipy) | `0f4a82f4…b3d8` | `23bc1d8c3c1771297cf7ad716f1b8cf5b2aff5048064b5d2cd04f326fb9fa5a9` | própria (sintetizado) |
 | `Audio/musica/costa_azul.wav` | `client/tools/audio_gen.py` (numpy/scipy) | `0f4a82f4…b3d8` | `c0d8479b1f4566d27f04d77fade814a48bd23c719faba153db363141c86f94aa` | própria (sintetizado) |
 | `Audio/musica/aurora_global.wav` | `client/tools/audio_gen.py` (numpy/scipy) | `0f4a82f4…b3d8` | `62b5ef05d5bbb031e711fdb74be46716e25510229865cd38e41f9d7e355985d5` | própria (sintetizado) |
+
+## 3.1a. Efeitos sonoros do ElevenLabs (plano Starter, pago)
+
+Os 8 sons do GDD §12, em 18 MP3 de 44,1 kHz e 128 kbps, gerados em 2026-11-05 pelo CLI `@elevenlabs/cli` (`text-to-sound-effects convert`, modelo `eleven_text_to_sound_v3`, `prompt_influence` 0,7), na conta do Vinicius no plano **Starter (pago)**. Substituem os 13 WAV de `sfx/` da seção 3.1; a música continua sintetizada. Cada prompt termina com "Casual mobile airport management game, clean and pleasant, no voice, no speech.". Nenhum prompt pede queda, incêndio, explosão ou morte. Os `toque` saíram com 0,5 s (mínimo do serviço) e foram cortados para 0,15 s com ffmpeg (silêncio inicial removido, fade de 40 ms no fim).
+
+- Licença: conferir nos termos do ElevenLabs o uso comercial do plano Starter **antes de publicar** (portão do `docs/CONTRATO_LANCAMENTO.md`).
+- Atenção: `python client/tools/audio_gen.py` ainda grava os WAV antigos em `sfx/`; se rodar de novo, apague esses WAV para não misturar os dois bancos.
+
+| Arquivo (`Resources/`) | Duração (s) | Prompt | SHA-256 do MP3 |
+|---|---|---|---|
+| `Audio/sfx/alerta_1.mp3` | 1 | Gentle attention notification, soft two-note descending chime, calm and non-alarming. | `1fced8d02ebf851f0e934cf7a31ecf5f814d6ad26ffe7ba6c4ea33ee266ee6bd` |
+| `Audio/sfx/alerta_2.mp3` | 1 | Soft informational ping, single mellow bell tone, polite reminder, not urgent. | `6ea0749791dc12b56be9bfcf5ec536dc911ddad42ee0f0511065ff588f1ebbf8` |
+| `Audio/sfx/decolagem_helice_1.mp3` | 5 | Small propeller airplane taking off, engine revving up and smoothly flying away into the distance, gentle and not loud. | `aee592edbb318e6b9488cea578246a2728f499e9d1fae19e953b14ed2137afa6` |
+| `Audio/sfx/decolagem_helice_2.mp3` | 5 | Twin propeller commuter plane accelerating down the runway and lifting off, steady hum fading away. | `dd3278f1c9e3862b116e3aaad53a2ae05303017b933fa7d0ba3e016b117643d4` |
+| `Audio/sfx/decolagem_jato_1.mp3` | 6 | Passenger jet airliner taking off, smooth turbine whine rising into a soft roar, then fading away into the sky, not harsh. | `72015ac7bbe0f7fdd2379a15d6b1ab349a5a6c9959aa8f637ebdea3092e752f0` |
+| `Audio/sfx/decolagem_jato_2.mp3` | 6 | Distant jet plane takeoff heard from the terminal, rising turbine swell then gently fading into the distance. | `461f932b4867aa4040709caed38cec230e7a0b29ae1f6e62621c68b231b7f1a5` |
+| `Audio/sfx/embarque_1.mp3` | 1,5 | Airport boarding announcement chime, warm two-tone ding-dong bell, soft and friendly. | `9ee48c4f213c140cbcf2ad838f98dc2f3224b0197867245eea2e70fcc705de96` |
+| `Audio/sfx/embarque_2.mp3` | 1,5 | Passengers boarding cue, gentle three-tone airport PA chime, warm and calm. | `9e23f5cd86ff93552f3d4887c8140d893b4eb16afa681ea2e1d56971cd06e49e` |
+| `Audio/sfx/melhoria_1.mp3` | 1,5 | Upgrade complete sound, bright rising three-note marimba arpeggio with a soft sparkle shimmer. | `e5888352b821f37b7b0ed85390941bc711050ca931e3acdc26503c7a20efd026` |
+| `Audio/sfx/melhoria_2.mp3` | 1,5 | Building upgraded jingle, cheerful ascending bell chime with a light magical sparkle. | `d13d4cf75a6d2db069a24ee33005cc3133f48bcae15e21ab42648dd1e2a07d76` |
+| `Audio/sfx/missao_1.mp3` | 2 | Mission accomplished fanfare, short cheerful brass and bell jingle, triumphant but light. | `e14db05e651a96583ffd328caa6c200b6ea1033aa97986e717cb67e95c13eb7b` |
+| `Audio/sfx/missao_2.mp3` | 2 | Quest complete jingle, upbeat xylophone and chime melody ending on a bright resolved note. | `6aafdadf35089019477aec46f467b0702cd129c68a957135be3ff97bfa7bd6e8` |
+| `Audio/sfx/recompensa_1.mp3` | 1,2 | Reward collected, cheerful coin chime with a bright sparkle. | `71db619673ca4a01a901ec7b70bd7b090751775480c831bb49dd6ca77434c260` |
+| `Audio/sfx/recompensa_2.mp3` | 1,2 | Bonus earned sound, short happy glockenspiel flourish with soft twinkle. | `f988163a217d66c72ac598f1f46293f6b35e204960b53d280a39ba755f0ec552` |
+| `Audio/sfx/recompensa_3.mp3` | 1,2 | Cash register style ka-ching, light and friendly, with a sparkling tail. | `eb4a751af7e60a2d468c2123355c12dc515bf2665d5b2d7fcde206338cddac05` |
+| `Audio/sfx/toque_1.mp3` | 0,15 (cortado de 0,5) | Very short soft UI tap, single gentle wooden click, crisp attack, instant decay. | `22ae8e17e918357ac70bbea442870b925519e80ae254218b5f9c8b4775b1db6d` |
+| `Audio/sfx/toque_2.mp3` | 0,15 (cortado de 0,5) | Very short soft UI tap, tiny bubbly pop, crisp and quiet, instant decay. | `e9a96307cf4f9f44c083ff45e0b31edfbd48c782a1e225868e4fe79d9f769e8c` |
+| `Audio/sfx/toque_3.mp3` | 0,15 (cortado de 0,5) | Very short soft UI button tick, light glassy click, instant decay. | `80d352a9466816cb5a6a9c2b07ffcbe3fe90b74d25aae71859a4c249fdf3f5b3` |
 
 ## 3.2. Fontes (SIL OFL 1.1, sem crédito)
 
