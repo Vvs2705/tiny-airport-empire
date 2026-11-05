@@ -37,6 +37,9 @@ namespace TA
         Transform _coneDaPorta;
         TextMesh _placaBanheiro;
 
+        /// <summary>Leva o banheiro para o meio da faixa do mundo, sem mudar o zoom (toque no motivo da satisfacao, Hud.Satisfacao.cs).</summary>
+        public void FocaBanheiro() => _alvo += V3(BanMin + Vector2.one * (Lado * 0.5f) - Chao(_regiao.center));
+
         public static bool DentroBanheiro(Vector2 p) => p.x > BanMin.x + 0.1f && p.x < BanMin.x + Lado && p.y > BanMin.y && p.y < BanMin.y + Lado;
 
         /// <summary>Lugar k da fila do banheiro: a cabeca junto das cabines, a fila anda para a porta ao longo da parede norte (10 por fileira).</summary>

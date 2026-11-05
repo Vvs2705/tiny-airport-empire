@@ -111,6 +111,9 @@ namespace TA.Core
         SuprimentoChegou,   // A = Suprimento, B = cargas                                         -> supply_delivered
         SuprimentoFaltou,   // A = aviao, B = Suprimento (o caminhao espera; so a decolagem atrasa) -> supply_shortage
         SuprimentoMelhorou, // A = Suprimento, B = Melhoria, C = nivel novo                       -> supply_upgraded
+        // Frente G (Sim.Satisfacao.cs): satisfacao com motivo
+        Reclamou,           // A = passageiro, B = Fator (o motivo principal; 1x por passageiro)   -> pax_complained
+        Gorjeta,            // A = passageiro, B = Cash (bonus da satisfacao, so com RegraSatBonus) -> pax_tip
     }
 
     /// <summary>Funcoes da tripulacao (GDD §5.11). Indice vai no save.</summary>
@@ -185,6 +188,9 @@ namespace TA.Core
         public int Resto, Total;
         /// <summary>Loja, mala despachada, fome e banheiro (frente F) saem da semente (nao se compram).</summary>
         public bool Loja, Historia, Mala, Fome, Banheiro;
+        /// <summary>Frente G (Sim.Satisfacao.cs): passos na fila, pior sujeira vista nas salas, passos na fila do banheiro, passos no portao com o
+        /// embarque atrasado e em pe no portao (sem cadeira livre); Negado = achou o banheiro fechado; Sentou; Reclamou (1x); UsouBanheiro. Vao no save (satp).</summary>
+        public int Espera, Sujo, FilaBanheiro, Atraso, EmPe; public bool Negado, Sentou, Reclamou, UsouBanheiro;
         public int Onda => Id / 1000;
         public int Voo => Id / 500 % 2;
         public int Indice => Id % 500;
@@ -467,6 +473,25 @@ namespace TA.Core
         public int[] SupCusto = { 6, 5 };
         /// <summary>A melhoria (tanque maior: menos entregas por dia), preco de cada nivel; a quantidade de niveis e' o tamanho.</summary>
         public int[] SupTanqueCusto = { 40, 80 };
+        // ---- Frente G (Sim.Satisfacao.cs, hipoteses): satisfacao com motivo ----
+        /// <summary>Paga a gorjeta de quem embarca contente (false = a satisfacao so e' leitura: nada muda no jogo). Portao do GDD §5.13 no
+        /// Portao_FrenteG_Satisfacao (BALANCE.md §19): so liga se reagir aos motivos render &gt;= 1,10.</summary>
+        public bool RegraSatBonus = false;
+        /// <summary>Nota de partida (0 a 100) e o maximo que cada Fator soma quando vai bem (ordem de Fator); o pior que cada um tira. Quem perde o voo
+        /// na fila sai com a espera no teto: 75 - 45 + 5 = 35, bravo e reclama.</summary>
+        public int SatBase = 75; public int[] SatMais = { 5, 5, 3, 5, 3 }, SatTeto = { 45, 20, 15, 25, 15 };
+        /// <summary>Tolerancia por PerfilPax (Executivo, Familia, Conexao, Viajante): s de fila, sujeira (de Sim.SujeiraMax), s de embarque atrasado e
+        /// s em pe no portao, somados na viagem toda. Na metade da tolerancia o Fator fica em 0; nela, tira SatMais. A 1a tabela (20 s de fila do executivo,
+        /// sujeira 400) dava 57 de media ao Bom, com o executivo bravo em toda fila (BALANCE.md §19).</summary>
+        public float[] TolEspera = { 45f, 70f, 60f, 90f }, TolAtraso = { 20f, 40f, 15f, 40f }, TolEmPe = { 30f, 20f, 30f, 20f };
+        public int[] TolSujeira = { 600, 400, 600, 500 };
+        /// <summary>s na fila do banheiro que o passageiro tolera e o que tira quem achou o banheiro fechado.</summary>
+        public float TolBanheiro = 10f; public int SatNegado = 15;
+        /// <summary>Cadeiras da sala de espera do portao (as 48 da planta, Mundo.Espera: 6 colunas de 2 cadeiras de 4 lugares). Quem passa disso espera em pe.</summary>
+        public int CadeirasPortao = 48;
+        /// <summary>Carinha: contente a partir de SatContente, brava abaixo de SatBrava; abaixo de SatReclama o passageiro reclama (1x). Gorjeta de
+        /// quem embarca com nota &gt;= SatGorjeta: SatBonus x a tarifa dele. A media do aeroporto e' a dos ultimos ~SatJanela que sairam.</summary>
+        public int SatContente = 70, SatBrava = 50, SatReclama = 40, SatGorjeta = 80, SatJanela = 100; public float SatBonus = 0.1f;
 
         // ---- ta-historias ----
         /// <summary>As 20 historias do TA-3 (Sim.Historias.cs). False = a v0.1: so a Dona Rosa, do meio da fila, entregue ao embarcar.</summary>
