@@ -290,7 +290,7 @@ namespace TA
         public static string Pct(float x) => (x * 100f).ToString("0", Br) + "%";
         public static string Vaga(int f) => L("Vaga ") + (f + 1);
         public static string ParaDestino(string destino) => "» " + destino;
-        public static string ViagemMarcada(int a) => L("Viagem para ") + AeroportoNome[a] + L(" marcada");
+        public static string ViagemMarcada(int a) => L("Viagem marcada: ") + AeroportoNome[a];
         /// <summary>Tipo, distancia (o tempo de cada trecho fora do patio) e frequencia.</summary>
         public static string RotaLinha(Rota r, float trechoSeg) => TipoRotaNome[(int)r.Tipo] + " · " + Tempo(trechoSeg) + L(" de voo · ") + (r.Cada <= 1 ? L("toda onda") : L("a cada ") + r.Cada + L(" ondas"));
         /// <summary>2 linhas: receita por onda (em relacao a rota da v0.1) e risco; depois o que o tipo muda.</summary>
@@ -299,9 +299,9 @@ namespace TA
         {
             switch (r.Tipo)
             {
-                case TipoRota.Turistica: return L("Loja e comida ") + Fator(r.Gasto) + L(" · chegada em pico");
+                case TipoRota.Turistica: return L("Compras ") + Fator(r.Gasto) + L(" · chegada em pico");
                 case TipoRota.Conexao: return L("Sem check-in · pontualidade +") + Pct(r.Bonus);
-                case TipoRota.Longa: return L("O avião fica fora na onda seguinte");
+                case TipoRota.Longa: return L("Avião fora na onda seguinte");
                 default: return L("Passageiros ") + Fator(r.Pax) + L(" · tarifa ") + Fator(r.Tarifa);
             }
         }
@@ -321,10 +321,10 @@ namespace TA
         /// <summary>As regras visiveis (GDD §6.4): de onde vem o ponto, quando o premio entra, o que expira e quanto dura.</summary>
         public static string[] RegrasPasse(Tuning t, int dias) => new[]
         {
-            L("Ponto vem do jogo: voo que partiu ") + t.PasseVoo + L(", diária ") + t.PasseDiaria + L(", semanal ") + t.PasseSemanal
-                + L(", objetivo da campanha ") + t.PasseObjetivo + L(". Ponto não se compra."),
-            L("O prêmio entra na hora em que o nível fecha. Coletar só marca como visto: não há prazo para resgatar, nem depois do fim."),
-            L("Nada expira: Cash, 2× e cosmético ficam com você. A temporada dura ") + dias + L(" dias do jogo e só anda com o jogo aberto."),
+            L("Pontos: voo que partiu ") + t.PasseVoo + L(", diária ") + t.PasseDiaria + L(", semanal ") + t.PasseSemanal
+                + L(", objetivo da campanha ") + t.PasseObjetivo + L(". Não se compra ponto."),
+            L("O prêmio entra quando o nível fecha. Coletar só marca como visto, sem prazo, nem após o fim."),
+            L("Nada expira: Cash, 2× e cosmético ficam com você. A temporada dura ") + dias + L(" dias de jogo aberto."),
         };
         public static string CosmeticoNome(string id)
         {

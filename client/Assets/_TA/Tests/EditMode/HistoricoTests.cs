@@ -32,7 +32,10 @@ namespace TA.Tests
             return null;
         }
 
-        static string SemHist(string save) => string.Join("\n", save.Split('\n').Where(l => !l.StartsWith("hist=") && !l.StartsWith("hp=") && !l.StartsWith("sha256=")));
+        // ponytail: a media movel (ema) do save real foi gravada pelo dotnet; o Mono do Unity refaz a conta com diferenca na 8a casa (rodada da
+        // leva 2, 04/11), entao a comparacao arredonda o ema em 6 casas. O resto do save continua comparado caractere a caractere.
+        static string SemHist(string save) => string.Join("\n", save.Split('\n').Where(l => !l.StartsWith("hist=") && !l.StartsWith("hp=") && !l.StartsWith("sha256="))
+            .Select(l => l.StartsWith("ema=") ? "ema=" + double.Parse(l.Substring(4), System.Globalization.CultureInfo.InvariantCulture).ToString("0.000000", System.Globalization.CultureInfo.InvariantCulture) : l));
 
         static string Hist(string save) => save.Split('\n').Single(l => l.StartsWith("hist="));
 
