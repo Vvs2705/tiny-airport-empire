@@ -196,6 +196,7 @@ namespace TA
             _pausa = NovaFolhaModal(canvas, "Pausa", Textos.Pausado, Art.Relogio(), 1300f);
             RectTransform lp = NovoResumo(_pausa, Textos.Embarcados, Art.Pessoas(), Art.Azul, out _pausaResumo);
             Art.Margem((RectTransform)lp.parent, 24f, 186f, 24f, 184f);
+            ItemPausa(lp, "Painel", Art.Bilhete(), Art.EstacaoCor[2], Textos.Painel, Textos.PainelLegenda, Textos.Abrir, it => { Fecha(_pausa); AbreTela("painel"); });
             ItemPausa(lp, "Config", Art.Chave(), Art.EstacaoCor[6], Textos.Configuracoes, Textos.ConfigLegenda, Textos.Abrir, it => { Fecha(_pausa); AbreTela("config"); });
             ItemPausa(lp, "Tutorial", Art.Mao(), Art.EstacaoCor[0], Textos.ReverTutorial, Textos.TutorialLegenda, Textos.Rever, it => { Fecha(_pausa); _g.Pausa(false); ReverTour(); });
             _pausaDiario = ItemPausa(lp, "Diario", Art.Bilhete(), Art.EstacaoCor[3], Textos.ExportarDiario, Textos.DiarioLegenda, Textos.Exportar, it => it.Linha.text = _g.ExportarDiario());
@@ -260,7 +261,7 @@ namespace TA
             m.Rt.SetAsLastSibling();
         }
 
-        /// <summary>Abre uma tela pelo nome (botoes e a flag -tela): melhorias, mover, cofre, anuncio, pausa, album, config, excluir, metas, missoes, conquistas, rotas (rotas0 a rotas2: a aba do aeroporto), passe. "jogo" = nenhuma.</summary>
+        /// <summary>Abre uma tela pelo nome (botoes e a flag -tela): melhorias, mover, cofre, anuncio, pausa, album, config, excluir, metas, missoes, conquistas, rotas (rotas0 a rotas2: a aba do aeroporto), passe, painel. "jogo" = nenhuma.</summary>
         public void AbreTela(string nome)
         {
             switch (nome)
@@ -279,6 +280,7 @@ namespace TA
                 case "metas": case "missoes": case "conquistas": AbreMetas(nome); break;
                 case "rotas": case "rotas0": case "rotas1": case "rotas2": AbreRotas(nome); break;
                 case "passe": AbrePasse(); break;
+                case "painel": AbrePainel(); break;   // frente I (Hud.Painel.cs)
                 case "fichapax": case "fichafunc": case "fichaestacao": case "fichatrip": FichaDev(nome); break;
                 case "vaga": case "demitir": TelaEquipeDev(nome); break;   // Fase C9 (Hud.Operacao.cs)
             }
@@ -406,6 +408,7 @@ namespace TA
             }
             PintaConfig();
             PintaOperacao();
+            PintaPainel(s);
         }
 
         /// <summary>

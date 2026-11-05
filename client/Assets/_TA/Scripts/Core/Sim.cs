@@ -74,6 +74,10 @@ using System.Collections.Generic;
 //   Frente G:   satisfacao com motivo (Sim.Satisfacao.cs). Passageiro: sim.Nota(p) (0 a 100), sim.Peso(p, fator), sim.Principal(p), sim.PerfilDe(p),
 //               sim.CarinhaDe(nota), Pax.Reclamou. Aeroporto: sim.SatMedia (-1 sem ninguem ainda), sim.SatFator(f), sim.SatTop(n), sim.Reclamacoes(f)
 //               (hoje), sim.SatOnde(f) (a Estacao, a Area ou a vaga do voo ligada ao motivo), sim.SatAmostras. Ev.Reclamou, Ev.Gorjeta (RegraSatBonus).
+//   Frente I:   painel de operacoes (Sim.Painel.cs), so leitura e sem save: sim.Alertas() (Alerta: Tipo, Gravidade, Alvo e Indice do toque, Valor),
+//               sim.Situacao(f) e sim.Partida(f) (LinhaVoo), sim.AvioesEmSolo, sim.AvioesChegando, sim.ChegantesNoTerminal, sim.Congestionada; o relatorio
+//               do dia: sim.ReceitaHoje, sim.DespesaHoje (a conta prevista), sim.SaldoHoje, sim.Ontem, sim.OcorrenciasHoje(), sim.UltimaOcorrencia,
+//               sim.AtrasosHoje, sim.PerdidosHoje, sim.ReclamacoesHoje.
 //   Gravar:     texto = sim.Save(versaoDoJogo, nowUnix): payload chave=valor dentro do SaveEnvelope (SHA-256 + schema). Grava filas e o
 //               relogio do quadro: reabrir retoma a onda do ponto gravado. Schema 17; os saves dos schemas 1 a 16 migram no Load.
 //

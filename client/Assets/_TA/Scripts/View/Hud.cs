@@ -80,6 +80,7 @@ namespace TA
             BuildAlerta();
             BuildTelas(_canvas);
             BuildOperacao(_canvas);
+            BuildPainel(_canvas);   // painel de operacoes (Hud.Painel.cs)
             BuildMetas(_canvas);
             BuildRotas(_canvas);   // o atalho fica ao lado da faixa da meta (Hud.Rotas.cs)
             BuildSatisfacao();   // acima da ficha, a direita (Hud.Satisfacao.cs)
