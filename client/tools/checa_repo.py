@@ -6,10 +6,13 @@ conteudo_check.py do Forge). Olha os arquivos versionados e os novos ainda sem c
   meta        todo asset de client/Assets tem .meta, nenhum .meta orfao, nenhum GUID repetido
   nucleo      TA.Core sem UnityEngine/UnityEditor e com noEngineReferences
   modulos     API usada no codigo tem o modulo no manifest.json (o viewcheck compila contra todos os modulos e nao pega)
-  guardrails  sem interstitial nem sorteio pago no codigo; o Setup tira o AD_ID do manifesto Android
+  guardrails  sem interstitial nem sorteio pago no codigo; o Setup tira o AD_ID do manifesto Android; flag de linha de comando so com
+              Debug.isDebugBuild (no Android qualquer app passa o extra "unity")
   proibidos   nada de chave, build ou arte crua no git; nada acima de 10 MB; .gitignore com as travas
   segredos    padroes de token e de chave privada em qualquer arquivo (mostra so o arquivo e o tipo, nunca o valor)
   mapa        todo .cs, .py e .sh citado no docs/MAPA_CODIGO.md
+  ci          workflows do repo publico: nunca pull_request_target nem workflow_run (dariam os segredos a PR de fork), sempre com
+              permissions: explicito e sem segredo impresso em run: (GDD §8.4)
   privacidade as 2 politicas (docs/privacidade, docs/privacy) com o e-mail de suporte e citando cada pacote que pode coletar dados e
               cada API de rede do jogo (a politica tem de bater com o codigo, GDD §9.3)
 Aviso, sem falhar: arquivo .cs acima de ~600 linhas (regra do estudio: vira partial).
@@ -44,7 +47,7 @@ MODULOS = {
     "video": r"\bVideoPlayer\b",
 }
 PROIBIDOS = re.compile(
-    r"(\.(keystore|jks|p12|pfx|pem|apk|aab|obb|fbx|blend|blend1|zip|ttf\.bak)$)|(^|/)(\.env(\..+)?|upload\.properties|google-services\.json|GoogleService-Info\.plist)$",
+    r"(\.(keystore|jks|p12|pfx|pem|ulf|alf|apk|aab|obb|fbx|blend|blend1|zip|ttf\.bak)$)|(^|/)(\.env(\..+)?|upload\.properties|keystore\.properties|google-services\.json|GoogleService-Info\.plist)$",
     re.I,
 )
 TRAVAS_GITIGNORE = [
@@ -54,13 +57,24 @@ TRAVAS_GITIGNORE = [
     ".env",
     "*.apk",
     "*.aab",
+    "*.jks",
+    "*.keystore",
+    "*.ulf",
+    "upload.properties",
 ]
+WORKFLOWS = ".github/workflows/"
+CI_PROIBIDO = re.compile(r"^\s*(pull_request_target|workflow_run)\s*:", re.M)
+CI_ECO = re.compile(r"\b(echo|printf|cat)\b[^\n]*\$\{\{\s*secrets\.", re.I)
 SEGREDOS = {
     "token do GitHub": rb"\b(ghp|gho|ghs|ghu)_[0-9A-Za-z]{36}\b|\bgithub_pat_[0-9A-Za-z_]{40,}",
     "chave da Anthropic": rb"\bsk-ant-[0-9A-Za-z_-]{20,}",
     "chave do Google": rb"\bAIza[0-9A-Za-z_-]{35}(?![0-9A-Za-z_-])",
     "chave da AWS": rb"\bAKIA[0-9A-Z]{16}\b",
     "chave privada": rb"-----BEGIN [A-Z ]*PRIVATE KEY-----",
+    "chave da Stripe": rb"\b(sk|rk)_live_[0-9A-Za-z]{20,}",
+    "token do Slack": rb"\bxox[abprs]-[0-9A-Za-z-]{10,}",
+    "segredo OAuth do Google": rb"\bGOCSPX-[0-9A-Za-z_-]{20,}",
+    "licenca da Unity": rb"<DeveloperData Value=\"[A-Za-z0-9+/=]{20,}",
     "JWT": rb"\beyJ[0-9A-Za-z_-]{20,}\.eyJ[0-9A-Za-z_-]{20,}\.[0-9A-Za-z_-]{10,}",
 }
 
@@ -151,6 +165,11 @@ def checa_guardrails(repo):
             erros.append(
                 f"guardrails: {p} tem '{m.group(0)}' (nenhum interstitial, nada aleatorio pago)"
             )
+        cs = sem_comentario(texto(repo[p]))
+        if "GetCommandLineArgs" in cs and "isDebugBuild" not in cs:
+            erros.append(
+                f"guardrails: {p} le flags de linha de comando sem Debug.isDebugBuild (flag de teste so em build de dev, GDD §8.3)"
+            )
     setup = texto(repo[SETUP])
     if "SemIdDePublicidade" not in setup or "permission.AD_ID" not in setup:
         erros.append(f"guardrails: {SETUP} nao tira o AD_ID do manifesto Android")
@@ -184,6 +203,20 @@ def checa_segredos(repo):
         for nome, rx in SEGREDOS.items()
         if re.search(rx, d)
     ]
+
+
+def checa_ci(repo):
+    erros = []
+    for p in sorted(x for x in repo if x.startswith(WORKFLOWS) and x.endswith((".yml", ".yaml"))):
+        y = texto(repo[p])
+        m = CI_PROIBIDO.search(y)
+        if m:
+            erros.append(f"ci: {p} usa {m.group(1)} (repo publico: PR de fork rodaria com os segredos)")
+        if not re.search(r"^permissions\s*:", y, re.M):
+            erros.append(f"ci: {p} sem permissions: no topo (o GITHUB_TOKEN fica com o padrao amplo)")
+        if CI_ECO.search(y):
+            erros.append(f"ci: {p} imprime um segredo num run:")
+    return erros
 
 
 def checa_mapa(repo):
@@ -253,6 +286,7 @@ def checa(repo):
         + checa_guardrails(repo)
         + checa_proibidos(repo)
         + checa_segredos(repo)
+        + checa_ci(repo)
         + checa_mapa(repo)
         + checa_privacidade(repo)
     )
@@ -297,6 +331,7 @@ def repo_bom():
         a + "/Resources/.gitkeep": b"",  # dotfile nao pede .meta, mas a pasta sim
         POLITICAS[0]: EMAIL_SUPORTE.encode(),
         POLITICAS[1]: EMAIL_SUPORTE.encode(),
+        WORKFLOWS + "nucleo.yml": b"on:\n  pull_request:\npermissions:\n  contents: read\n",
     }
 
 
@@ -307,6 +342,8 @@ def selftest():
         "gh": b"gh" + b"p_" + b"a" * 36,
         "pem": b"-----BEGIN " + b"RSA PRIVATE KEY-----",
         "goo": b"AI" + b"za" + b"b" * 35,
+        "stripe": b"sk" + b"_live_" + b"a" * 24,
+        "ulf": b"<Developer" + b"Data Value=\"" + b"QUJD" * 8,
         "jwt": b"ey" + b"J" + b"a" * 20 + b".ey" + b"J" + b"a" * 20 + b"." + b"c" * 12,
     }
     ceu = CORE + "Ceu.cs"
@@ -354,6 +391,12 @@ def selftest():
             lambda r: r.update({CORE + "Sim.cs": b"class Sim { Gacha g; }\n"}),
         ),
         ("guardrails: ", lambda r: r.update({SETUP: b"class Setup {}"})),
+        (
+            "guardrails: ",
+            lambda r: r.update(
+                {CORE + "Sim.cs": b"class Sim { string[] a = Environment.GetCommandLineArgs(); }\n"}
+            ),
+        ),
         ("proibidos: ", lambda r: r.update({"arte/tripo/x_hd/x.zip": b"x"})),
         ("proibidos: ", lambda r: r.update({"upload.properties": b"x"})),
         ("proibidos: ", lambda r: r.update({".env.local": b"x"})),
@@ -369,6 +412,26 @@ def selftest():
             lambda r: r.update({"docs/nota.md": falso["goo"]}),
         ),
         ("segredos: JWT", lambda r: r.update({"docs/nota.md": falso["jwt"]})),
+        ("segredos: chave da Stripe", lambda r: r.update({"docs/nota.md": falso["stripe"]})),
+        ("segredos: licenca", lambda r: r.update({"docs/nota.md": falso["ulf"]})),
+        ("proibidos: ", lambda r: r.update({"Unity_v6000.ulf": b"x"})),
+        ("proibidos: ", lambda r: r.update({"client/keystore.properties": b"x"})),
+        (
+            "ci: ",
+            lambda r: r.update(
+                {WORKFLOWS + "u.yml": b"on:\n  pull_request_target:\npermissions: {}\n"}
+            ),
+        ),
+        ("ci: ", lambda r: r.update({WORKFLOWS + "u.yml": b"on:\n  push:\n"})),
+        (
+            "ci: ",
+            lambda r: r.update(
+                {
+                    WORKFLOWS
+                    + "u.yml": b"permissions: {}\njobs:\n  a:\n    steps:\n      - run: echo ${{ secrets.UNITY_PASSWORD }}\n"
+                }
+            ),
+        ),
         ("mapa: ", lambda r: r.update({"client/tools/novo.py": b"x"})),
         (
             "mapa: ",
