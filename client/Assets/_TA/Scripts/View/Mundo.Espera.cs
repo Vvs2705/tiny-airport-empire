@@ -17,16 +17,21 @@ namespace TA
         static readonly float[] PodioA = { -0.6f, 0.6f, -1.45f, 1.45f };
         /// <summary>Vaga da pessoa no portão: cadeira (o índice), lugar na serpentina (VagaFila + k) ou pódio (VagaPosto + posto).</summary>
         const int VagaFila = 1000, VagaPosto = 2000, Chamados = 13;
-        /// <summary>Medidas em m, na régua do adulto de 0,5 m. A cadeira tem 4 lugares, encosto em -Frente e o centro do assento a RecuoAssento à frente do centro da malha.</summary>
-        const float EscalaCadeira = 0.5f, LarguraCadeira = 1.6f * EscalaCadeira, PassoAssento = LarguraCadeira / 4f, PassoFileira = 0.47f, FolgaParede = 0.14f, RecuoAssento = 0.045f;
-        /// <summary>De pé diante do lugar, antes de sentar; meio corredor central; d do corredor atrás da fila, na linha das portas oeste e leste; 1ª fileira da serpentina; a agente e a pessoa da vez, cada uma de um lado do pódio.</summary>
-        const float RecuoPe = 0.185f, MeioCorredor = 0.17f, DCorredor = 1.62f, DFila = 1.06f, PassoFila = 0.22f, PassoLinha = 0.24f, FolgaPorta = 0.24f, PassoPodio = 0.22f;
+        /// <summary>Medidas em m, na régua do adulto de 0,5 m. A cadeira tem 4 lugares, encosto atrás da frente e o centro do assento a RecuoAssento à frente do centro da malha.
+        /// ProfCadeira é a fundura da malha na escala (0,60 × 0,5, PROVENIENCIA.md §5), não a do bloco de primitiva.</summary>
+        const float EscalaCadeira = 0.5f, LarguraCadeira = 1.6f * EscalaCadeira, ProfCadeira = 0.6f * EscalaCadeira, PassoAssento = 0.19f, RecuoAssento = 0.045f;
+        /// <summary>Folga entre o corpo (CorpoRaio, de Mundo.Caminhos, o CORPO_RAIO do diag_caixas.py) e a cadeira ou a parede: 0,03 m, mais que a tolerância de 0,02 do diag.
+        /// De pé diante do lugar, o corpo fica a FolgaCorpo da frente da cadeira. PassoPar: de um par de cadeiras de costas para o outro (2 fundas e o
+        /// corredor de 0,5 m entre elas, onde cabem as 2 filas de quem senta, uma de cada lado).</summary>
+        const float FolgaCorpo = 0.03f, RecuoPe = ProfCadeira * 0.5f - RecuoAssento + CorpoRaio + FolgaCorpo, PassoPar = 1.1f;
+        /// <summary>d do corredor atrás da fila, na linha das portas oeste e leste; 1ª fileira da serpentina; a agente e a pessoa da vez, cada uma de um lado do pódio.</summary>
+        const float DCorredor = 1.62f, DFila = 1.06f, PassoFila = 0.22f, PassoLinha = 0.24f, FolgaPorta = 0.24f, PassoPodio = 0.22f;
         /// <summary>Tempo de sentar (s) e o quanto o boneco sai do chão para a câmera: sentado, desenha por cima da própria cadeira e por baixo da da frente;
         /// no pódio, por cima do tampo, que é alto e está logo atrás dele.</summary>
         const float TempoSenta = 0.42f, FrenteSentado = 0.25f, FrentePodio = 0.28f;
 
-        /// <summary>Um lugar: o centro do assento e o ponto no corredor da fileira, de onde a pessoa senta e para onde levanta.</summary>
-        struct Assento { public Vector2 P, Pe; public Assento(Vector2 p, Vector2 pe) { P = p; Pe = pe; } }
+        /// <summary>Um lugar: o centro do assento, o ponto no corredor da fileira, de onde a pessoa senta e para onde levanta, e para onde ela olha sentada.</summary>
+        struct Assento { public Vector2 P, Pe, F; public Assento(Vector2 p, Vector2 pe, Vector2 f) { P = p; Pe = pe; F = f; } }
 
         readonly List<Assento> _assentos = new List<Assento>();
         readonly List<Vector2> _cadeiras = new List<Vector2>();   // o centro de cada malha, para o -diag
@@ -40,17 +45,23 @@ namespace TA
         Boneco _agente, _porteiro;
         bool _agenteSaiu;
 
-        /// <summary>Para onde quem está sentado olha.</summary>
-        static Vector2 FrenteCadeira => -Salas[Portao].T;
         static float DeSaida(Vector2 p) => Vector2.Dot(Salas[Portao].Out - p, Salas[Portao].N);
         static float Ao(Vector2 p) => Vector2.Dot(p - Salas[Portao].Out, Salas[Portao].T);
 
-        /// <summary>Cadeiras, serpentina, cordas e zona de atendimento (Sala3D): as cadeiras no fundo da sala, de costas para a parede leste de cada bloco.</summary>
+        /// <summary>Cadeiras, serpentina, cordas e zona de atendimento (Sala3D): no fundo da sala, 3 pares de colunas de costas um para o outro (a do
+        /// meio no eixo da sala), com um corredor de 0,26 m junto de cada parede e de 0,5 m entre os pares.
+        /// ponytail: a rodada de 05/11 (#87, com as malhas) achou 52 pessoa x cadeiras_espera e 1 pessoa x parede (10,9; 4,4), até 4 cm. As 6 colunas
+        /// olhavam todas para -T a 0,47 m uma da outra, e a malha tem 0,30 m de fundo, não os 0,21 do bloco: no corredor de cada fileira o corpo
+        /// (0,2 m) encostava na frente de uma cadeira e no encosto da outra. Costas com costas, 6 colunas pedem 4 corredores em vez de 6, e cada um
+        /// cabe com folga. Quem ia ao último lugar da coluna encostava na parede sul; agora o corpo fica a 0,03 m dela.</summary>
         void Espera3D()
         {
             float borda = Interno * 0.5f;
-            for (float a = borda - FolgaParede; a > MeioCorredor + RecuoPe + 0.1f; a -= PassoFileira) Fileiras(a);   // bloco leste
-            for (float a = -MeioCorredor - 0.11f; a > -borda + RecuoPe + 0.1f; a -= PassoFileira) Fileiras(a);       // bloco oeste
+            for (int k = -1; k <= 1; k++)
+            {
+                Fileiras(k * PassoPar - ProfCadeira * 0.5f, -Salas[Portao].T);   // olha para oeste
+                Fileiras(k * PassoPar + ProfCadeira * 0.5f, Salas[Portao].T);    // olha para leste
+            }
             for (int i = 0; i < _assentos.Count; i++) _dono.Add(-1);
 
             float aMax = borda - 0.14f, aMin = -borda + FolgaPorta + 0.1f;
@@ -58,8 +69,12 @@ namespace TA
             int perna1 = Perna(DFila, ref fim, aMax, PassoFila);
             int perna2 = perna1 + Perna(DFila + PassoLinha, ref fim, aMin, -PassoFila);
             _pernas = perna2 + Perna(DFila + 2f * PassoLinha, ref fim, aMax, PassoFila);
-            // o excedente do estresse: em pé no corredor central e nos corredores das fileiras, em linha
-            for (float d = DCorredor + 0.1f; d < Interno - 0.15f; d += PassoFila) _serpente.Add(Em(Portao, d, 0f));
+            // o excedente do estresse: em pé no meio dos 2 corredores largos entre os pares e nos corredores das fileiras, em linha
+            for (float d = DCorredor + 0.1f; d < Interno - 0.15f; d += PassoFila)
+            {
+                _serpente.Add(Em(Portao, d, -PassoPar * 0.5f));
+                _serpente.Add(Em(Portao, d, PassoPar * 0.5f));
+            }
             foreach (Assento c in _assentos)
                 if (_serpente.IndexOf(c.Pe) < 0) _serpente.Add(c.Pe);
             Cordao(DFila + PassoLinha * 0.5f, 0.06f, aMax - 0.17f, perna1);
@@ -77,23 +92,23 @@ namespace TA
             }
         }
 
-        /// <summary>As cadeiras de uma coluna em `a`, do fundo da sala até o corredor.
-        /// ponytail: a rodada da leva 3 achou 45 a 90 pessoa x cadeiras_espera. A folga era 0,01 m entre o corpo (0,1 m) e a frente da cadeira no
-        /// corredor da fileira, 0,02 m até o encosto da coluna seguinte e 0,01 m entre o corredor de trás da fila e a ponta da cadeira. Agora: a pessoa
-        /// fica a 0,185 m do assento (0,025 m da frente), as colunas a 0,47 m (0,035 m do encosto) e as cadeiras a 0,02 m da parede do fundo (0,04 m
-        /// do corredor). Continuam 6 colunas de 2 cadeiras de 4 lugares (as 48 da Tuning.CadeirasPortao).</summary>
-        void Fileiras(float a)
+        /// <summary>As 2 cadeiras de uma coluna em `a`, viradas para `frente`, do fundo da sala até o corredor, encostadas uma na outra. O último lugar
+        /// fica com o corpo a FolgaCorpo da parede sul; a cadeira de perto do corredor fica a 0,025 m do corpo de quem passa nele. Continuam 6
+        /// colunas de 2 cadeiras de 4 lugares (as 48 da Tuning.CadeirasPortao).</summary>
+        void Fileiras(float a, Vector2 frente)
         {
-            for (float d = Interno - 0.02f - LarguraCadeira * 0.5f; d - LarguraCadeira * 0.5f > DCorredor + 0.08f; d -= LarguraCadeira + 0.02f)
+            float fundo = Interno - EspParede * 0.5f - CorpoRaio - FolgaCorpo - 1.5f * PassoAssento;   // centro da cadeira do fundo
+            for (int n = 0; n < 2; n++)
             {
+                float d = fundo - n * LarguraCadeira;
                 Vector2 c = Em(Portao, d, a);
                 _cadeiras.Add(c);
-                Transform t = Peca("cadeiras_espera", V3(c), Rumo(FrenteCadeira), EscalaCadeira);
+                Transform t = Peca("cadeiras_espera", V3(c), Rumo(frente), EscalaCadeira);
                 if (t == null) Bloco("Cadeira", PrimitiveType.Cube, V3(c, 0.08f), new Vector3(0.21f, 0.16f, LarguraCadeira), Art.Hex(0x2F5FA8));
                 for (int i = 0; i < 4; i++)
                 {
-                    Vector2 p = Em(Portao, d + (i - 1.5f) * PassoAssento, a) + FrenteCadeira * RecuoAssento;
-                    _assentos.Add(new Assento(p, p + FrenteCadeira * RecuoPe));
+                    Vector2 p = Em(Portao, d + (i - 1.5f) * PassoAssento, a) + frente * RecuoAssento;
+                    _assentos.Add(new Assento(p, p + frente * RecuoPe, frente));
                 }
             }
         }
@@ -221,7 +236,7 @@ namespace TA
             Assento c = _assentos[b.Cadeira];
             b.Pos = Vector2.Lerp(c.Pe, c.P, b.Senta);
             Movido(b, Vector2.zero, dt);
-            Olha(b, FrenteCadeira);
+            Olha(b, c.F);
             if (b.Senta > 0f || quer) return true;
             b.Cadeira = -1;
             return false;
@@ -259,7 +274,7 @@ namespace TA
             if (_agente.Atende) GestoFunc(_agente, Portao, 0);
             Pinta(_agente);
             _porteiro.T.gameObject.SetActive(s.Presentes(Estacao.Portao) < 4);
-            Olha(_porteiro, FrenteCadeira - Salas[Portao].N);
+            Olha(_porteiro, -Salas[Portao].T - Salas[Portao].N);
             Movido(_porteiro, Vector2.zero, dt);
             Pinta(_porteiro);
         }
