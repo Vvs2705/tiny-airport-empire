@@ -33,16 +33,16 @@
 <body>
 <header><div>
   <h1>Política de privacidade do Little Terminal</h1>
-  <p>Atualizada em 5 de novembro de 2026 · <a href="../privacy/" hreflang="en">English</a></p>
+  <p>Atualizada em 6 de novembro de 2026 · <a href="../privacy/" hreflang="en">English</a></p>
 </div></header>
 <main>
 
 <section>
   <h2>Em resumo</h2>
   <ul class="resumo">
-    <li>Não tem conta nem login. O jogo não pede nome, e-mail, telefone, localização, fotos, câmera nem microfone.</li>
+    <li>A conta é opcional (Google Play Games ou Facebook), só para guardar o progresso na nuvem. O jogo não pede nome, e-mail, telefone, localização, fotos, câmera nem microfone.</li>
     <li>Seu progresso fica guardado neste aparelho (e no backup do Android, se você o deixa ligado).</li>
-    <li>Esta versão não envia dados do jogo para nós nem para empresas de anúncios, de análise ou de pagamento.</li>
+    <li>Sem conta, o jogo não envia dados para nós nem para empresas de anúncios, de análise ou de pagamento. Com a conta, o save vai para a Unity (veja Conta).</li>
     <li>O jogo não usa o ID de publicidade do Android: a permissão <code>AD_ID</code> é retirada do app.</li>
     <li>Não há chat nem compra de item aleatório.</li>
     <li>Você apaga tudo pelo próprio jogo: Pausa › Configurações › Excluir meus dados.</li>
@@ -71,11 +71,17 @@
 <section>
   <h2>O que sai do aparelho</h2>
   <ul>
-    <li><strong>Do jogo, nada nesta versão.</strong> O jogo não tem servidor, análise de uso, anúncios de verdade nem compras. Os anúncios com recompensa são opcionais e, nesta versão, simulados dentro do jogo: nenhum anúncio é carregado da internet.</li>
+    <li><strong>Do jogo, nada sem a conta.</strong> Sem ligar a conta, o jogo não usa servidor, análise de uso, anúncios de verdade nem compras. Os anúncios com recompensa são opcionais e, nesta versão, simulados dentro do jogo: nenhum anúncio é carregado da internet.</li>
     <li><strong>Unity.</strong> O jogo é feito com o motor Unity. A Unity Technologies pode receber estatísticas técnicas anônimas do aparelho, como modelo, sistema e memória, para melhorar o motor. Veja a <a href="https://unity.com/legal/game-player-and-app-user-privacy-policy">política da Unity</a>.</li>
     <li><strong>Google Play.</strong> Se você baixou pela Google Play, a Google trata os dados da sua conta conforme a <a href="https://policies.google.com/privacy">política da Google</a>. Ela pode nos mostrar números somados e relatórios de falha do app (Android vitals), sem identificar você.</li>
     <li><strong>Links que você toca.</strong> “Política de privacidade” abre esta página no navegador e “Suporte” abre o seu app de e-mail.</li>
   </ul>
+</section>
+
+<section>
+  <h2>Conta (opcional)</h2>
+  <p>Você pode ligar o jogo a uma conta do Google Play Games ou do Facebook em Configurações › Conta, para guardar o progresso na nuvem e jogar em outro aparelho. Sem ligar, o jogo funciona igual, só com o save do aparelho. Para isso usamos a Unity Authentication e o Cloud Save da Unity (<code>com.unity.services.authentication</code>, <code>com.unity.services.cloudsave</code>): a Unity cria um ID de jogador e guarda o seu save. Com o Google Play Games, a Unity recebe o código do seu login no Google (o plugin do Play Games usa o módulo <code>com.unity.modules.unitywebrequesttexture</code> para imagens do Google; o jogo não pede nenhuma). Com o Facebook, recebe o token do login, e o jogo pede só o perfil público: nem e-mail, nem amigos, nem publicação. Não lemos nem guardamos seu nome, foto ou e-mail. Nosso servidor de compras (pelo <code>UnityWebRequest</code>, módulo <code>com.unity.modules.unitywebrequest</code>) recebe o token da conta para ligar a compra a ela e guarda o histórico de compras (produto e data) com um código derivado do ID, nunca o ID em si. O SDK do Facebook fica sem eventos automáticos e sem o ID de publicidade.</p>
+  <p><strong>Excluir:</strong> Configurações › Excluir meus dados apaga a conta, o save na nuvem e o histórico de compras, e depois o aparelho. Sem o jogo instalado: <a href="https://vvs2705.github.io/tiny-airport-empire/privacidade/excluir-conta/">vvs2705.github.io/tiny-airport-empire/privacidade/excluir-conta/</a>.</p>
 </section>
 
 <section>

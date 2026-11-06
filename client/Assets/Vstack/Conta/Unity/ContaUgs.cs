@@ -13,7 +13,7 @@ using Unity.Services.Core;
 using Unity.Services.Core.Environments;
 using UnityEngine;
 using UnityEngine.Networking;
-#if VS_GPGS
+#if VS_GPGS && UNITY_ANDROID
 using GooglePlayGames;
 using GooglePlayGames.BasicApi;
 #endif
@@ -46,11 +46,12 @@ namespace Vstack.Conta.Unity
 
         public bool Oferece(Provedor p)
         {
+            // o SDK no projeto nao basta: o provedor so aparece com o id do jogo/app configurado (fora do git), senao o botao falharia
 #if VS_GPGS && UNITY_ANDROID
-            if (p == Provedor.GooglePlayGames) return true;
+            if (p == Provedor.GooglePlayGames) return !string.IsNullOrEmpty(PlayGamesSettings.LoadInstance()?.AppId);
 #endif
 #if VS_FACEBOOK
-            if (p == Provedor.Facebook) return true;
+            if (p == Provedor.Facebook) return Facebook.Unity.Settings.FacebookSettings.IsValidAppId;
 #endif
             return false;
         }
