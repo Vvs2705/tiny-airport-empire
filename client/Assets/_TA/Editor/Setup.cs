@@ -56,6 +56,7 @@ namespace TA.EditorTools
             // 36 fixo: a Play exige 36 desde 31/08/2026 e o Unity 6.3 promete 35 e 36; o Auto segue o SDK instalado, que ja traz o android-37.0
             PlayerSettings.Android.targetSdkVersion = (AndroidSdkVersions)36;
             PlayerSettings.Android.predictiveBackSupport = true; // API 36
+            SimbolosDaConta();
 
             // Windows: janela retrato 540x960 (dev) para jogar e fotografar no PC.
             PlayerSettings.fullScreenMode = FullScreenMode.Windowed;
@@ -79,6 +80,20 @@ namespace TA.EditorTools
             IncluiShader("TA/Sombra");   // a sombra plana dos avioes (Mundo.SombraPlana)
             AssetDatabase.SaveAssets();
             Debug.Log("TA Setup: ok (" + AppId + " " + Version + " code " + VersionCode(Version) + ", retrato, Android ARM64 IL2CPP API 26+)");
+        }
+
+        const string RspConta = "Assets/Vstack/Conta/Unity/csc.rsp";
+
+        /// <summary>Logins da conta (docs/CONTAS.md §6): os SDKs ficam fora do git, so no PC do build de loja. O VS_GPGS e o VS_FACEBOOK vao num
+        /// csc.rsp do assembly da conta (tambem fora do git), nunca nas Player Settings: o CI, sem os SDKs, compila sem eles.</summary>
+        [InitializeOnLoadMethod]
+        static void SimbolosDaConta()
+        {
+            string rsp = (Directory.Exists("Assets/GooglePlayGames") ? "-define:VS_GPGS " : "") + (Directory.Exists("Assets/FacebookSDK") ? "-define:VS_FACEBOOK " : "");
+            string era = File.Exists(RspConta) ? File.ReadAllText(RspConta) : "";
+            if (rsp == era) return;
+            if (rsp == "") File.Delete(RspConta); else File.WriteAllText(RspConta, rsp);
+            AssetDatabase.ImportAsset("Assets/Vstack/Conta/Unity/Vstack.Conta.Unity.asmdef", ImportAssetOptions.ForceUpdate);   // recompila o assembly
         }
 
         /// <summary>Poe o shader em "Always Included Shaders": o Mundo cria o material em tempo de execucao, sem asset que o referencie.</summary>
@@ -185,6 +200,8 @@ namespace TA.EditorTools
         {
             "com.google.android.gms.permission.AD_ID", "android.permission.ACCESS_ADSERVICES_AD_ID",
             "android.permission.ACCESS_ADSERVICES_ATTRIBUTION", "android.permission.ACCESS_ADSERVICES_TOPICS",
+            // o SDK do Facebook (so login, docs/CONTAS.md) traz a audiencia do Privacy Sandbox e o referenciador de instalacao, que sao de anuncio
+            "android.permission.ACCESS_ADSERVICES_CUSTOM_AUDIENCE", "com.google.android.finsky.permission.BIND_GET_INSTALL_REFERRER_SERVICE",
         };
         public int callbackOrder => 999;
 
