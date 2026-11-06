@@ -57,6 +57,7 @@ namespace TA.EditorTools
             PlayerSettings.Android.targetSdkVersion = (AndroidSdkVersions)36;
             PlayerSettings.Android.predictiveBackSupport = true; // API 36
             SimbolosDaConta();
+            ConfiguraFacebook();
 
             // Windows: janela retrato 540x960 (dev) para jogar e fotografar no PC.
             PlayerSettings.fullScreenMode = FullScreenMode.Windowed;
@@ -94,6 +95,30 @@ namespace TA.EditorTools
             if (rsp == era) return;
             if (rsp == "") File.Delete(RspConta); else File.WriteAllText(RspConta, rsp);
             AssetDatabase.ImportAsset("Assets/Vstack/Conta/Unity/Vstack.Conta.Unity.asmdef", ImportAssetOptions.ForceUpdate);   // recompila o assembly
+        }
+
+        /// <summary>FacebookSettings do SDK (fora do git, dentro de Assets/FacebookSDK) a partir de %USERPROFILE%\.tiny-airport\facebook.txt
+        /// (linha 1 o App ID, linha 2 o Client Token; quem cola o token e' o Vinicius). So login: eventos automaticos, metadados e id de
+        /// publicidade desligados (GDD §9.3). Por reflexao, para compilar sem o SDK (CI). Depois regera o manifesto Android do SDK.</summary>
+        [MenuItem("TA/Configurar Facebook")]
+        public static void ConfiguraFacebook()
+        {
+            System.Type fs = System.Type.GetType("Facebook.Unity.Settings.FacebookSettings, Facebook.Unity.Settings");
+            string txt = Path.Combine(System.Environment.GetEnvironmentVariable("USERPROFILE") ?? "", ".tiny-airport", "facebook.txt");
+            if (fs == null || !File.Exists(txt)) return;
+            string[] l = File.ReadAllLines(txt);
+            if (l.Length < 2 || l[0].Trim() == "" || l[1].Trim() == "") { Debug.LogWarning("TA Setup: facebook.txt sem App ID e Client Token"); return; }
+            void Poe(string nome, object v) => fs.GetProperty(nome)?.SetValue(null, v);
+            Poe("AppIds", new System.Collections.Generic.List<string> { l[0].Trim() });
+            Poe("ClientTokens", new System.Collections.Generic.List<string> { l[1].Trim() });
+            Poe("AutoLogAppEventsEnabled", false);
+            Poe("AdvertiserIDCollectionEnabled", false);
+            Poe("AutoLogMetaDataEnabled", false);
+            Poe("AutoLogProductImprovementEnabled", false);
+            if (fs.GetProperty("Instance")?.GetValue(null) is Object inst) EditorUtility.SetDirty(inst);
+            AssetDatabase.SaveAssets();
+            System.Type.GetType("Facebook.Unity.Editor.ManifestMod, Facebook.Unity.Editor")?.GetMethod("GenerateManifest")?.Invoke(null, null);
+            Debug.Log("TA Setup: Facebook configurado (so login, sem eventos automaticos nem id de publicidade)");
         }
 
         /// <summary>Poe o shader em "Always Included Shaders": o Mundo cria o material em tempo de execucao, sem asset que o referencie.</summary>
