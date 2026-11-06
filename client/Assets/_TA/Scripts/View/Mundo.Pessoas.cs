@@ -430,6 +430,10 @@ namespace TA
                         else RotaPessoa(b.Caminho, b.Pos, de < 0 ? (int)f.De : de, (int)f.Em, lugar, false);
                         b.Alvo = lugar;
                     }
+                    else if (NoVestiario(b.Pos) || NoCorredor(b.Pos))   // o posto mudou no caminho de volta: refaz pelo corredor. O Segue partiria da sala
+                    {                                                   // em que o corredor cai (a alimentação) e entraria pela porta sul do portão
+                        if (lugar != b.Alvo) { b.Caminho.Clear(); RotaDoVestiario(b.Caminho, b.Pos, (int)f.Em, lugar); b.Alvo = lugar; }
+                    }
                     else Segue(b, lugar, Mathf.Abs(Salas[(int)f.Em].N.x) > 0.5f);
                     if (b.Caminho.Count > 0 && b.Caminho[b.Caminho.Count - 1] != lugar) b.Caminho.Add(lugar);   // a rota parou antes do posto (no vão do bar): o último passo entra nele
                     Confere(b, true);
