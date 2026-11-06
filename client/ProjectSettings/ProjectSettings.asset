@@ -780,10 +780,10 @@ PlayerSettings:
   captureStartupLogs: {}
   activeInputHandler: 0
   windowsGamepadBackendHint: 0
-  cloudProjectId: 
+  cloudProjectId: 4a7c824c-0202-45e6-86c4-b6de3ca3ae98
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
-  projectName: 
+  projectName: Little Terminal
   organizationId: 
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0

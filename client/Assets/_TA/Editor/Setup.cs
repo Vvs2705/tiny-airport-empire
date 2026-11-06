@@ -98,7 +98,37 @@ namespace TA.EditorTools
         public static void BuildWindows() => Build(BuildTarget.StandaloneWindows64, "Builds/win/TinyAirport.exe");
         public static void BuildAndroidDev() => Build(BuildTarget.Android, ApkDir + "/TinyAirport-dev.apk");
 
-        static void Build(BuildTarget target, string path)
+        /// <summary>AAB de loja, assinado com a chave de upload, so no PC do dono: a chave, a senha e o AAB ficam em %USERPROFILE%\.tiny-airport
+        /// (fora do repositorio, que e' publico; docs/NOME.md e SEGURANCA_PRIVACIDADE.md §5). Nunca roda no CI.</summary>
+        public static void BuildAndroidRelease()
+        {
+            string dir = Path.Combine(System.Environment.GetEnvironmentVariable("USERPROFILE") ?? "", ".tiny-airport");
+            string jks = Path.Combine(dir, "littleterminal-upload.jks"), pass = Path.Combine(dir, "littleterminal-upload.pass");
+            if (!File.Exists(jks) || !File.Exists(pass))
+            {
+                Debug.LogError("TA Setup: sem a chave de upload em " + dir + " (docs/NOME.md)");
+                if (Application.isBatchMode) EditorApplication.Exit(1);
+                return;
+            }
+            string senha = File.ReadAllText(pass).Trim();   // nunca vai para log
+            PlayerSettings.Android.useCustomKeystore = true;
+            PlayerSettings.Android.keystoreName = jks;
+            PlayerSettings.Android.keystorePass = senha;
+            PlayerSettings.Android.keyaliasName = "upload";
+            PlayerSettings.Android.keyaliasPass = senha;
+            bool ok = false;
+            try { ok = Build(BuildTarget.Android, Path.Combine(dir, "release", "LittleTerminal-" + Version + ".aab"), true); }
+            finally
+            {
+                // a senha e o caminho da chave nao ficam no ProjectSettings nem no proximo build de dev
+                PlayerSettings.Android.keystorePass = PlayerSettings.Android.keyaliasPass = PlayerSettings.Android.keystoreName = "";
+                PlayerSettings.Android.useCustomKeystore = false;
+                EditorUserBuildSettings.buildAppBundle = false;
+            }
+            if (Application.isBatchMode) EditorApplication.Exit(ok ? 0 : 1);
+        }
+
+        static bool Build(BuildTarget target, string path, bool release = false)
         {
             Apply();
             BuildReport r = null;
@@ -111,21 +141,24 @@ namespace TA.EditorTools
                     // o empacotamento incremental do Gradle reaproveita o APK anterior e ja' deixou buracos/sem libunity no Forge Street
                     const string gradleOut = "Library/Bee/Android/Prj/IL2CPP/Gradle/launcher/build";
                     if (Directory.Exists(gradleOut)) Directory.Delete(gradleOut, true);
-                    EditorUserBuildSettings.buildAppBundle = false;
-                    PlayerSettings.Android.useCustomKeystore = false;   // APK de dev: chave de debug do Unity
+                    EditorUserBuildSettings.buildAppBundle = release;
+                    if (release) Directory.CreateDirectory(Path.GetDirectoryName(path));
+                    else PlayerSettings.Android.useCustomKeystore = false;   // APK de dev: chave de debug do Unity
                 }
                 r = BuildPipeline.BuildPlayer(new BuildPlayerOptions
                 {
                     scenes = new[] { Scene },
                     locationPathName = path,
                     target = target,
-                    options = BuildOptions.Development,
+                    options = release ? BuildOptions.None : BuildOptions.Development,
                 });
-                Debug.Log($"BuildSummary({target} dev {Version}): result={r.summary.result} errors={r.summary.totalErrors} size={r.summary.totalSize} path={path}");
+                Debug.Log($"BuildSummary({target} {(release ? "release" : "dev")} {Version}): result={r.summary.result} errors={r.summary.totalErrors} size={r.summary.totalSize} path={path}");
                 Relatorio(r, target);
             }
             catch (System.Exception e) { Debug.LogError("TA Setup: build abortado: " + e.Message); }
-            if (Application.isBatchMode) EditorApplication.Exit(r != null && r.summary.result == BuildResult.Succeeded ? 0 : 1);
+            bool ok = r != null && r.summary.result == BuildResult.Succeeded;
+            if (Application.isBatchMode && !release) EditorApplication.Exit(ok ? 0 : 1);
+            return ok;
         }
 
         /// <summary>Resumo do build em Builds/build_&lt;alvo&gt;.txt (erros e avisos de cada passo): o CI (unity.yml) sobe este arquivo como
