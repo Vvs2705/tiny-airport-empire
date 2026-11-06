@@ -168,8 +168,12 @@ namespace TA.EditorTools
             if (Application.isBatchMode) EditorApplication.Exit(ok ? 0 : 1);
         }
 
+        /// <summary>Durante o BuildAndroidRelease: o SemIdDePublicidade tira o android:debuggable que o manifesto do SDK do Facebook traz fixo.</summary>
+        internal static bool EmRelease;
+
         static bool Build(BuildTarget target, string path, bool release = false)
         {
+            EmRelease = release;
             Apply();
             BuildReport r = null;
             try
@@ -246,6 +250,8 @@ namespace TA.EditorTools
                 e.SetAttribute("node", tools, "remove");
                 root.AppendChild(e);
             }
+            if (Setup.EmRelease)   // a Play recusa app depuravel; o checa_apk --release confere
+                foreach (System.Xml.XmlElement app in doc.GetElementsByTagName("application")) app.RemoveAttribute("debuggable", android);
             doc.Save(f);
             Debug.Log("TA Setup: AD_ID e Privacy Sandbox removidos do manifesto (" + Tirar.Length + ")");
         }

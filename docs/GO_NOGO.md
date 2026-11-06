@@ -22,11 +22,11 @@ Base: `CONTRATO_LANCAMENTO.md` §1 e GDD §25. Rodada local na `main` `18e44a7` 
 |---|---|---|
 | Play Console (D-U-N-S, previsão 25/11) | Vinicius | sem ela não há envio, produtos, testadores, Play Games nem Data safety |
 | `diag_caixas` em zero | frente do portão | funcionário encostado na parede sul do portão |
-| Play Games e Facebook no projeto | Vinicius (download) e Claude | SDKs oficiais baixados à mão; depois `full` e `android` de novo |
-| Painéis da UGS e do Facebook | Vinicius (login) e Claude | Authentication, Cloud Save e os 2 provedores |
+| Play Games e Facebook no projeto | feito no PC | SDKs fora do git; `full` e `android` verdes; falta o id do Play Games (Play Console) e a plataforma Android no app do Facebook (pede o app na Play) |
+| Painéis da UGS e do Facebook | parcial | UGS com Authentication, Cloud Save e ambiente `development`; app do Facebook criado; os 2 provedores na UGS esperam o App Secret do Facebook e o OAuth do Play Games |
 | Loja (Unity IAP) e anúncio (LevelPlay) no build | Claude, rodada do PC | pacotes fora do manifest (`LOJA_SERVIDOR.md` §5) |
 | K2 com 20 pessoas e teste no POCO F4 | Vinicius e amigos | último passo |
-| AAB assinado | Claude | `Setup.BuildAndroidRelease` pronto; a chave de upload foi trocada em 06/11 (`NOME.md`) |
+| AAB assinado | feito | `LittleTerminal-0.0.1-alpha.aab` (49 MB) em `%USERPROFILE%\.tiny-airportelease\`, assinado com a chave de 06/11 (SHA-256 53:B2…41:F8), sem `AD_ID` e sem `debuggable`, com UGS, Play Games e Facebook; versão alpha só para o teste interno |
 | Revisão jurídica da política (D-10) | sem responsável | — |
 | Linhas parciais do contrato (A a I, S, P, 1 a 5, 9a, 10, 14, 15, 18, 21, 22, 23) | frentes | cada uma fecha com o critério de 10 itens |
 
