@@ -45,8 +45,9 @@ Cada busca por controle: antes de aceitar um "zero", a mesma ferramenta foi test
 ### Chave de upload (fora do git)
 
 - Arquivo: `%USERPROFILE%\.tiny-airport\littleterminal-upload.jks` (alias `upload`, RSA 2048, SHA384withRSA, validade 10.000 dias, `CN=Little Terminal Upload, O=V-STACK, C=BR`).
-- Senha: gerada por script (32 caracteres aleatórios) e guardada só em `%USERPROFILE%\.tiny-airport\littleterminal-upload.pass`, ambos com permissão só para o usuário. Não está no repositório nem em log, e não foi mostrada na conversa.
-- Impressão digital SHA-256 do certificado (pública; é o que a Play Console pede para conferir o envio): `83:09:78:3B:71:E5:56:36:A0:D2:F6:5C:5F:99:77:A9:CC:7A:CF:56:54:77:C2:20:FA:54:41:A0:AE:F7:AF:66`.
+- Senha: gerada por script (32 caracteres aleatórios) e guardada só em `%USERPROFILE%\.tiny-airport\littleterminal-upload.pass`, ambos com permissão só para o usuário. Não está no repositório nem em log.
+- Impressão digital SHA-256 do certificado (pública; é o que a Play Console pede para conferir o envio): `53:B2:BA:18:A4:92:1A:70:FD:D3:FE:77:B2:D0:25:27:D8:84:95:C0:90:A6:A4:24:98:6C:08:BE:74:AE:41:F8`. Hash para o Facebook (SHA-1 em base64): `SE/z2hqREBgRa6SgA2qa82Kgmbk=`.
+- **Trocada em 2026-11-06**, antes de qualquer envio à Play: a senha da chave de 01/11 apareceu numa sessão de trabalho (não no git). A antiga (`83:09:78:3B…AF:66`) ficou em `%USERPROFILE%\.tiny-airport\chave_antiga_2026-11-01\` e não deve ser usada. O AAB sai por `Setup.BuildAndroidRelease`, que lê os dois arquivos e grava em `%USERPROFILE%\.tiny-airportelease\`.
 - **Faça cópia dos dois arquivos num lugar seguro e separado do PC.** Sem a chave de upload só se recupera o acesso pedindo reset à Google Play. Com a Play App Signing, a chave que assina o app para o jogador é da Google; esta é só a chave de envio.
 - O `Setup.cs` ainda gera só APK de desenvolvimento (chave de debug do Unity). A assinatura de release com esta chave entra junto do build AAB.
 
