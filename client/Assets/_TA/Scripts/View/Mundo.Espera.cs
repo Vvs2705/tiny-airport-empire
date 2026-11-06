@@ -18,12 +18,15 @@ namespace TA
         /// <summary>Vaga da pessoa no portão: cadeira (o índice), lugar na serpentina (VagaFila + k) ou pódio (VagaPosto + posto).</summary>
         const int VagaFila = 1000, VagaPosto = 2000, Chamados = 13;
         /// <summary>Medidas em m, na régua do adulto de 0,5 m. A cadeira tem 4 lugares, encosto atrás da frente e o centro do assento a RecuoAssento à frente do centro da malha.
-        /// ProfCadeira é a fundura da malha na escala (0,60 × 0,5, PROVENIENCIA.md §5), não a do bloco de primitiva.</summary>
-        const float EscalaCadeira = 0.5f, LarguraCadeira = 1.6f * EscalaCadeira, ProfCadeira = 0.6f * EscalaCadeira, PassoAssento = 0.19f, RecuoAssento = 0.045f;
+        /// ProfCadeira é a fundura da malha na escala (0,60 × a escala, PROVENIENCIA.md §5), não a do bloco de primitiva. Escala 0,47, e não 0,5: as colunas
+        /// junto da parede só começam depois da porta oeste e da leste (d = 1,7), e as 2 cadeiras ainda cabem até a parede sul.</summary>
+        const float EscalaCadeira = 0.47f, LarguraCadeira = 1.6f * EscalaCadeira, ProfCadeira = 0.6f * EscalaCadeira, PassoAssento = 0.18f, RecuoAssento = 0.09f * EscalaCadeira;
         /// <summary>Folga entre o corpo (CorpoRaio, de Mundo.Caminhos, o CORPO_RAIO do diag_caixas.py) e a cadeira ou a parede: 0,03 m, mais que a tolerância de 0,02 do diag.
-        /// De pé diante do lugar, o corpo fica a FolgaCorpo da frente da cadeira. PassoPar: de um par de cadeiras de costas para o outro (2 fundas e o
-        /// corredor de 0,5 m entre elas, onde cabem as 2 filas de quem senta, uma de cada lado).</summary>
-        const float FolgaCorpo = 0.03f, RecuoPe = ProfCadeira * 0.5f - RecuoAssento + CorpoRaio + FolgaCorpo, PassoPar = 1.1f;
+        /// De pé diante do lugar, o corpo fica a FolgaCorpo da frente da cadeira.</summary>
+        const float FolgaCorpo = 0.03f, RecuoPe = ProfCadeira * 0.5f - RecuoAssento + CorpoRaio + FolgaCorpo;
+        /// <summary>Face de dentro das paredes oeste e leste (a) e largura de cada um dos 3 corredores entre as colunas (0,54 m: as 2 filas de quem senta,
+        /// uma de cada lado; no do meio, também quem entra pela porta sul).</summary>
+        const float FaceParede = Interno * 0.5f - EspParede * 0.5f, Vao = (2f * FaceParede - 6f * ProfCadeira) / 3f;
         /// <summary>d do corredor atrás da fila, na linha das portas oeste e leste; 1ª fileira da serpentina; a agente e a pessoa da vez, cada uma de um lado do pódio.</summary>
         const float DCorredor = 1.62f, DFila = 1.06f, PassoFila = 0.22f, PassoLinha = 0.24f, FolgaPorta = 0.24f, PassoPodio = 0.22f;
         /// <summary>Tempo de sentar (s) e o quanto o boneco sai do chão para a câmera: sentado, desenha por cima da própria cadeira e por baixo da da frente;
@@ -48,20 +51,22 @@ namespace TA
         static float DeSaida(Vector2 p) => Vector2.Dot(Salas[Portao].Out - p, Salas[Portao].N);
         static float Ao(Vector2 p) => Vector2.Dot(p - Salas[Portao].Out, Salas[Portao].T);
 
-        /// <summary>Cadeiras, serpentina, cordas e zona de atendimento (Sala3D): no fundo da sala, 3 pares de colunas de costas um para o outro (a do
-        /// meio no eixo da sala), com um corredor de 0,26 m junto de cada parede e de 0,5 m entre os pares.
-        /// ponytail: a rodada de 05/11 (#87, com as malhas) achou 52 pessoa x cadeiras_espera e 1 pessoa x parede (10,9; 4,4), até 4 cm. As 6 colunas
-        /// olhavam todas para -T a 0,47 m uma da outra, e a malha tem 0,30 m de fundo, não os 0,21 do bloco: no corredor de cada fileira o corpo
-        /// (0,2 m) encostava na frente de uma cadeira e no encosto da outra. Costas com costas, 6 colunas pedem 4 corredores em vez de 6, e cada um
-        /// cabe com folga. Quem ia ao último lugar da coluna encostava na parede sul; agora o corpo fica a 0,03 m dela.</summary>
+        /// <summary>Cadeiras, serpentina, cordas e zona de atendimento (Sala3D): no fundo da sala, 6 colunas, uma de costas para cada parede e 2 pares de
+        /// costas um para o outro, com os 3 corredores entre elas. O do meio fica diante da porta sul (a da alimentação, em a = 0).
+        /// ponytail: a rodada de 05/11 (#87) achou 52 pessoa x cadeiras_espera: as 6 colunas olhavam todas para -T a 0,47 m uma da outra, e a malha tem
+        /// 0,30 m de fundo, não os 0,21 do bloco, então o corpo (0,2 m) não cabia no corredor de cada fileira. O #89 pôs 3 pares costas com costas, mas o
+        /// par do meio tampava a porta sul: a rodada de 06/11 achou o func#2 preso nela, contra a parede e as cadeiras (v1 253, v3 376). Agora o corredor
+        /// do meio passa pela porta, e as colunas de parede começam depois das portas oeste e leste.</summary>
         void Espera3D()
         {
             float borda = Interno * 0.5f;
-            for (int k = -1; k <= 1; k++)
-            {
-                Fileiras(k * PassoPar - ProfCadeira * 0.5f, -Salas[Portao].T);   // olha para oeste
-                Fileiras(k * PassoPar + ProfCadeira * 0.5f, Salas[Portao].T);    // olha para leste
-            }
+            Vector2 t = Salas[Portao].T;
+            Fileiras(-FaceParede + ProfCadeira * 0.5f, t);                 // de costas para a parede oeste
+            Fileiras(-Vao * 0.5f - ProfCadeira * 1.5f, -t);                // par oeste
+            Fileiras(-Vao * 0.5f - ProfCadeira * 0.5f, t);
+            Fileiras(Vao * 0.5f + ProfCadeira * 0.5f, -t);                 // par leste
+            Fileiras(Vao * 0.5f + ProfCadeira * 1.5f, t);
+            Fileiras(FaceParede - ProfCadeira * 0.5f, -t);                 // de costas para a parede leste
             for (int i = 0; i < _assentos.Count; i++) _dono.Add(-1);
 
             float aMax = borda - 0.14f, aMin = -borda + FolgaPorta + 0.1f;
@@ -69,11 +74,11 @@ namespace TA
             int perna1 = Perna(DFila, ref fim, aMax, PassoFila);
             int perna2 = perna1 + Perna(DFila + PassoLinha, ref fim, aMin, -PassoFila);
             _pernas = perna2 + Perna(DFila + 2f * PassoLinha, ref fim, aMax, PassoFila);
-            // o excedente do estresse: em pé no meio dos 2 corredores largos entre os pares e nos corredores das fileiras, em linha
+            // o excedente do estresse: em pé no meio dos 2 corredores de fora (o do meio fica livre para a porta sul) e nos corredores das fileiras
             for (float d = DCorredor + 0.1f; d < Interno - 0.15f; d += PassoFila)
             {
-                _serpente.Add(Em(Portao, d, -PassoPar * 0.5f));
-                _serpente.Add(Em(Portao, d, PassoPar * 0.5f));
+                _serpente.Add(Em(Portao, d, -Vao - 2f * ProfCadeira));
+                _serpente.Add(Em(Portao, d, Vao + 2f * ProfCadeira));
             }
             foreach (Assento c in _assentos)
                 if (_serpente.IndexOf(c.Pe) < 0) _serpente.Add(c.Pe);
@@ -93,7 +98,7 @@ namespace TA
         }
 
         /// <summary>As 2 cadeiras de uma coluna em `a`, viradas para `frente`, do fundo da sala até o corredor, encostadas uma na outra. O último lugar
-        /// fica com o corpo a FolgaCorpo da parede sul; a cadeira de perto do corredor fica a 0,025 m do corpo de quem passa nele. Continuam 6
+        /// fica com o corpo a FolgaCorpo da parede sul; a cadeira de perto do corredor fica a 0,03 m do corpo de quem sai da porta oeste ou da leste (d = 1,7) e a 0,11 m de quem passa no corredor. Continuam 6
         /// colunas de 2 cadeiras de 4 lugares (as 48 da Tuning.CadeirasPortao).</summary>
         void Fileiras(float a, Vector2 frente)
         {
