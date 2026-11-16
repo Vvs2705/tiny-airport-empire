@@ -15,3 +15,17 @@ __pycache__/
 /Builds/**/*.log
 /.utmp/
 *.slnx
+# SDKs de login de terceiros: entram so no PC que gera o build de loja (docs/CONTAS.md §6); sem eles o VS_GPGS/VS_FACEBOOK fica desligado
+/Assets/GooglePlayGames/
+/Assets/GooglePlayGames.meta
+/Assets/FacebookSDK/
+/Assets/FacebookSDK.meta
+/Assets/ExternalDependencyManager/
+/Assets/ExternalDependencyManager.meta
+/Assets/Plugins/
+/Assets/Plugins.meta
+/Assets/Vstack/Conta/Unity/csc.rsp
+/Assets/Vstack/Conta/Unity/csc.rsp.meta
+/ProjectSettings/AndroidResolverDependencies.xml
+/ProjectSettings/GooglePlayGameSettings.txt
+/ProjectSettings/GvhProjectSettings.xml

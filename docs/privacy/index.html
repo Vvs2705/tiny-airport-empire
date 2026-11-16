@@ -33,16 +33,16 @@
 <body>
 <header><div>
   <h1>Little Terminal privacy policy</h1>
-  <p>Updated on November 5, 2026 · <a href="../privacidade/" hreflang="pt-BR">Português</a></p>
+  <p>Updated on November 6, 2026 · <a href="../privacidade/" hreflang="pt-BR">Português</a></p>
 </div></header>
 <main>
 
 <section>
   <h2>In short</h2>
   <ul class="resumo">
-    <li>No account and no login. The game does not ask for your name, email, phone number, location, photos, camera or microphone.</li>
+    <li>The account is optional (Google Play Games or Facebook), only to keep your progress in the cloud. The game does not ask for your name, email, phone number, location, photos, camera or microphone.</li>
     <li>Your progress is stored on this device (and in Android backup, if you keep it on).</li>
-    <li>This version does not send game data to us or to any advertising, analytics or payment company.</li>
+    <li>Without an account, the game sends no data to us or to any advertising, analytics or payment company. With an account, the save goes to Unity (see Account).</li>
     <li>The game does not use the Android advertising ID: the <code>AD_ID</code> permission is removed from the app.</li>
     <li>There is no chat and no paid random item.</li>
     <li>You can erase everything from inside the game: Pause › Settings › Delete my data.</li>
@@ -71,11 +71,17 @@
 <section>
   <h2>What leaves your device</h2>
   <ul>
-    <li><strong>From the game, nothing in this version.</strong> The game has no server, no usage analytics, no real ads and no purchases. Rewarded ads are optional and, in this version, simulated inside the game: no ad is loaded from the internet.</li>
+    <li><strong>From the game, nothing without an account.</strong> Without linking an account, the game uses no server, no usage analytics, no real ads and no purchases. Rewarded ads are optional and, in this version, simulated inside the game: no ad is loaded from the internet.</li>
     <li><strong>Unity.</strong> The game is built with the Unity engine. Unity Technologies may receive anonymous technical statistics about the device, such as model, operating system and memory, to improve the engine. See <a href="https://unity.com/legal/game-player-and-app-user-privacy-policy">Unity's policy</a>.</li>
     <li><strong>Google Play.</strong> If you downloaded the game from Google Play, Google handles your account data under the <a href="https://policies.google.com/privacy">Google privacy policy</a>. Google may show us aggregated numbers and app crash reports (Android vitals) that do not identify you.</li>
     <li><strong>Links you tap.</strong> “Privacy policy” opens this page in your browser and “Support” opens your email app.</li>
   </ul>
+</section>
+
+<section>
+  <h2>Account (optional)</h2>
+  <p>You can link the game to a Google Play Games or Facebook account in Settings › Account, to keep your progress in the cloud and play on another device. Without linking, the game works the same, with the save on this device only. For this we use Unity Authentication and Unity Cloud Save (<code>com.unity.services.authentication</code>, <code>com.unity.services.cloudsave</code>): Unity creates a player ID and stores your save. With Google Play Games, Unity receives the code of your Google sign-in (the Play Games plugin uses the <code>com.unity.modules.unitywebrequesttexture</code> module for Google images; the game requests none). With Facebook, it receives the sign-in token, and the game asks only for the public profile: no email, no friends, no posting. We do not read or keep your name, photo or email. Our purchase server (through <code>UnityWebRequest</code>, module <code>com.unity.modules.unitywebrequest</code>) receives the account token to link purchases to it and keeps the purchase history (product and date) under a code derived from the ID, never the ID itself. The Facebook SDK runs with automatic events and the advertising ID turned off.</p>
+  <p><strong>Delete:</strong> Settings › Delete my data deletes the account, the cloud save and the purchase history, and then the device data. Without the game installed: <a href="https://vvs2705.github.io/tiny-airport-empire/privacidade/excluir-conta/">vvs2705.github.io/tiny-airport-empire/privacidade/excluir-conta/</a>.</p>
 </section>
 
 <section>

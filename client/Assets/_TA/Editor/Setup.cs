@@ -56,6 +56,8 @@ namespace TA.EditorTools
             // 36 fixo: a Play exige 36 desde 31/08/2026 e o Unity 6.3 promete 35 e 36; o Auto segue o SDK instalado, que ja traz o android-37.0
             PlayerSettings.Android.targetSdkVersion = (AndroidSdkVersions)36;
             PlayerSettings.Android.predictiveBackSupport = true; // API 36
+            SimbolosDaConta();
+            ConfiguraFacebook();
 
             // Windows: janela retrato 540x960 (dev) para jogar e fotografar no PC.
             PlayerSettings.fullScreenMode = FullScreenMode.Windowed;
@@ -81,6 +83,44 @@ namespace TA.EditorTools
             Debug.Log("TA Setup: ok (" + AppId + " " + Version + " code " + VersionCode(Version) + ", retrato, Android ARM64 IL2CPP API 26+)");
         }
 
+        const string RspConta = "Assets/Vstack/Conta/Unity/csc.rsp";
+
+        /// <summary>Logins da conta (docs/CONTAS.md §6): os SDKs ficam fora do git, so no PC do build de loja. O VS_GPGS e o VS_FACEBOOK vao num
+        /// csc.rsp do assembly da conta (tambem fora do git), nunca nas Player Settings: o CI, sem os SDKs, compila sem eles.</summary>
+        [InitializeOnLoadMethod]
+        static void SimbolosDaConta()
+        {
+            string rsp = (Directory.Exists("Assets/GooglePlayGames") ? "-define:VS_GPGS " : "") + (Directory.Exists("Assets/FacebookSDK") ? "-define:VS_FACEBOOK " : "");
+            string era = File.Exists(RspConta) ? File.ReadAllText(RspConta) : "";
+            if (rsp == era) return;
+            if (rsp == "") File.Delete(RspConta); else File.WriteAllText(RspConta, rsp);
+            AssetDatabase.ImportAsset("Assets/Vstack/Conta/Unity/Vstack.Conta.Unity.asmdef", ImportAssetOptions.ForceUpdate);   // recompila o assembly
+        }
+
+        /// <summary>FacebookSettings do SDK (fora do git, dentro de Assets/FacebookSDK) a partir de %USERPROFILE%\.tiny-airport\facebook.txt
+        /// (linha 1 o App ID, linha 2 o Client Token; quem cola o token e' o Vinicius). So login: eventos automaticos, metadados e id de
+        /// publicidade desligados (GDD §9.3). Por reflexao, para compilar sem o SDK (CI). Depois regera o manifesto Android do SDK.</summary>
+        [MenuItem("TA/Configurar Facebook")]
+        public static void ConfiguraFacebook()
+        {
+            System.Type fs = System.Type.GetType("Facebook.Unity.Settings.FacebookSettings, Facebook.Unity.Settings");
+            string txt = Path.Combine(System.Environment.GetEnvironmentVariable("USERPROFILE") ?? "", ".tiny-airport", "facebook.txt");
+            if (fs == null || !File.Exists(txt)) return;
+            string[] l = File.ReadAllLines(txt);
+            if (l.Length < 2 || l[0].Trim() == "" || l[1].Trim() == "") { Debug.LogWarning("TA Setup: facebook.txt sem App ID e Client Token"); return; }
+            void Poe(string nome, object v) => fs.GetProperty(nome)?.SetValue(null, v);
+            Poe("AppIds", new System.Collections.Generic.List<string> { l[0].Trim() });
+            Poe("ClientTokens", new System.Collections.Generic.List<string> { l[1].Trim() });
+            Poe("AutoLogAppEventsEnabled", false);
+            Poe("AdvertiserIDCollectionEnabled", false);
+            Poe("AutoLogMetaDataEnabled", false);
+            Poe("AutoLogProductImprovementEnabled", false);
+            if (fs.GetProperty("Instance")?.GetValue(null) is Object inst) EditorUtility.SetDirty(inst);
+            AssetDatabase.SaveAssets();
+            System.Type.GetType("Facebook.Unity.Editor.ManifestMod, Facebook.Unity.Editor")?.GetMethod("GenerateManifest")?.Invoke(null, null);
+            Debug.Log("TA Setup: Facebook configurado (so login, sem eventos automaticos nem id de publicidade)");
+        }
+
         /// <summary>Poe o shader em "Always Included Shaders": o Mundo cria o material em tempo de execucao, sem asset que o referencie.</summary>
         static void IncluiShader(string nome)
         {
@@ -98,8 +138,42 @@ namespace TA.EditorTools
         public static void BuildWindows() => Build(BuildTarget.StandaloneWindows64, "Builds/win/TinyAirport.exe");
         public static void BuildAndroidDev() => Build(BuildTarget.Android, ApkDir + "/TinyAirport-dev.apk");
 
-        static void Build(BuildTarget target, string path)
+        /// <summary>AAB de loja, assinado com a chave de upload, so no PC do dono: a chave, a senha e o AAB ficam em %USERPROFILE%\.tiny-airport
+        /// (fora do repositorio, que e' publico; docs/NOME.md e SEGURANCA_PRIVACIDADE.md §5). Nunca roda no CI.</summary>
+        public static void BuildAndroidRelease()
         {
+            string dir = Path.Combine(System.Environment.GetEnvironmentVariable("USERPROFILE") ?? "", ".tiny-airport");
+            string jks = Path.Combine(dir, "littleterminal-upload.jks"), pass = Path.Combine(dir, "littleterminal-upload.pass");
+            if (!File.Exists(jks) || !File.Exists(pass))
+            {
+                Debug.LogError("TA Setup: sem a chave de upload em " + dir + " (docs/NOME.md)");
+                if (Application.isBatchMode) EditorApplication.Exit(1);
+                return;
+            }
+            string senha = File.ReadAllText(pass).Trim();   // nunca vai para log
+            PlayerSettings.Android.useCustomKeystore = true;
+            PlayerSettings.Android.keystoreName = jks;
+            PlayerSettings.Android.keystorePass = senha;
+            PlayerSettings.Android.keyaliasName = "upload";
+            PlayerSettings.Android.keyaliasPass = senha;
+            bool ok = false;
+            try { ok = Build(BuildTarget.Android, Path.Combine(dir, "release", "LittleTerminal-" + Version + ".aab"), true); }
+            finally
+            {
+                // a senha e o caminho da chave nao ficam no ProjectSettings nem no proximo build de dev
+                PlayerSettings.Android.keystorePass = PlayerSettings.Android.keyaliasPass = PlayerSettings.Android.keystoreName = "";
+                PlayerSettings.Android.useCustomKeystore = false;
+                EditorUserBuildSettings.buildAppBundle = false;
+            }
+            if (Application.isBatchMode) EditorApplication.Exit(ok ? 0 : 1);
+        }
+
+        /// <summary>Durante o BuildAndroidRelease: o SemIdDePublicidade tira o android:debuggable que o manifesto do SDK do Facebook traz fixo.</summary>
+        internal static bool EmRelease;
+
+        static bool Build(BuildTarget target, string path, bool release = false)
+        {
+            EmRelease = release;
             Apply();
             BuildReport r = null;
             try
@@ -111,21 +185,24 @@ namespace TA.EditorTools
                     // o empacotamento incremental do Gradle reaproveita o APK anterior e ja' deixou buracos/sem libunity no Forge Street
                     const string gradleOut = "Library/Bee/Android/Prj/IL2CPP/Gradle/launcher/build";
                     if (Directory.Exists(gradleOut)) Directory.Delete(gradleOut, true);
-                    EditorUserBuildSettings.buildAppBundle = false;
-                    PlayerSettings.Android.useCustomKeystore = false;   // APK de dev: chave de debug do Unity
+                    EditorUserBuildSettings.buildAppBundle = release;
+                    if (release) Directory.CreateDirectory(Path.GetDirectoryName(path));
+                    else PlayerSettings.Android.useCustomKeystore = false;   // APK de dev: chave de debug do Unity
                 }
                 r = BuildPipeline.BuildPlayer(new BuildPlayerOptions
                 {
                     scenes = new[] { Scene },
                     locationPathName = path,
                     target = target,
-                    options = BuildOptions.Development,
+                    options = release ? BuildOptions.None : BuildOptions.Development,
                 });
-                Debug.Log($"BuildSummary({target} dev {Version}): result={r.summary.result} errors={r.summary.totalErrors} size={r.summary.totalSize} path={path}");
+                Debug.Log($"BuildSummary({target} {(release ? "release" : "dev")} {Version}): result={r.summary.result} errors={r.summary.totalErrors} size={r.summary.totalSize} path={path}");
                 Relatorio(r, target);
             }
             catch (System.Exception e) { Debug.LogError("TA Setup: build abortado: " + e.Message); }
-            if (Application.isBatchMode) EditorApplication.Exit(r != null && r.summary.result == BuildResult.Succeeded ? 0 : 1);
+            bool ok = r != null && r.summary.result == BuildResult.Succeeded;
+            if (Application.isBatchMode && !release) EditorApplication.Exit(ok ? 0 : 1);
+            return ok;
         }
 
         /// <summary>Resumo do build em Builds/build_&lt;alvo&gt;.txt (erros e avisos de cada passo): o CI (unity.yml) sobe este arquivo como
@@ -152,6 +229,8 @@ namespace TA.EditorTools
         {
             "com.google.android.gms.permission.AD_ID", "android.permission.ACCESS_ADSERVICES_AD_ID",
             "android.permission.ACCESS_ADSERVICES_ATTRIBUTION", "android.permission.ACCESS_ADSERVICES_TOPICS",
+            // o SDK do Facebook (so login, docs/CONTAS.md) traz a audiencia do Privacy Sandbox e o referenciador de instalacao, que sao de anuncio
+            "android.permission.ACCESS_ADSERVICES_CUSTOM_AUDIENCE", "com.google.android.finsky.permission.BIND_GET_INSTALL_REFERRER_SERVICE",
         };
         public int callbackOrder => 999;
 
@@ -171,6 +250,8 @@ namespace TA.EditorTools
                 e.SetAttribute("node", tools, "remove");
                 root.AppendChild(e);
             }
+            if (Setup.EmRelease)   // a Play recusa app depuravel; o checa_apk --release confere
+                foreach (System.Xml.XmlElement app in doc.GetElementsByTagName("application")) app.RemoveAttribute("debuggable", android);
             doc.Save(f);
             Debug.Log("TA Setup: AD_ID e Privacy Sandbox removidos do manifesto (" + Tirar.Length + ")");
         }
