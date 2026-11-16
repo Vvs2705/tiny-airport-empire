@@ -98,11 +98,15 @@ namespace TA
 
         public int Quadros(int clip) => _clips[clip].frames;
 
-        /// <summary>Quadro no tempo `t` (s): sempre em laco (andar, parado e atender sao lacos no jogo).</summary>
+        /// <summary>Quadro no tempo `t` (s), sempre em laco. O clipe que nao fecha o laco (loop false no meta: o Atende, que e o Grab de 0,5 s, e os
+        /// gestos) vai e volta: recomecar do 1o quadro fazia o braco saltar de volta a cada 0,5 s.</summary>
         public int FrameAt(int clip, float t)
         {
             ClipMeta c = _clips[clip];
-            return Mathf.Max(0, (int)(t * (c.fps > 0f ? c.fps : 12f))) % c.frames;
+            int q = Mathf.Max(0, (int)(t * (c.fps > 0f ? c.fps : 12f)));
+            if (c.loop || c.frames < 3) return q % c.frames;
+            q %= 2 * c.frames - 2;
+            return q < c.frames ? q : 2 * c.frames - 2 - q;
         }
 
         /// <summary>Sprite do quadro: celula pela textura real (o import pode reduzir a folha), so na metade de cima quando ha mascara.</summary>

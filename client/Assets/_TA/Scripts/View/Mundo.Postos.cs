@@ -312,10 +312,10 @@ namespace TA
             }
             if (f < EntregaAte) Gesto(b, b.Pega, IdaEVolta(f, 0f, EntregaAte));
             else if (f >= DevolveDe) Gesto(b, b.Pega, IdaEVolta(f, DevolveDe, 1f));
-            else if (e == SalaCheckIn && f >= MalaAte && f < EtiquetaAte && DespachaAqui(S, p))
+            else if (f >= MalaAte && f < EtiquetaAte && ((e == SalaCheckIn && DespachaAqui(S, p)) || (e == SalaMalas && p.Mala)))
             {
-                Gesto(b, b.Etiqueta, IdaEVolta(f, MalaAte, EtiquetaAte));
-                Olha(b, BalancaChk(i) - b.Pos);
+                Gesto(b, b.Etiqueta, IdaEVolta(f, MalaAte, EtiquetaAte));   // na bagagem também: a mala está na balança do posto (Pousa)
+                Olha(b, (e == SalaCheckIn ? BalancaChk(i) : PontoBalanca(i)) - b.Pos);
             }
             else Gesto(b, b.Digita, -1f);
         }
