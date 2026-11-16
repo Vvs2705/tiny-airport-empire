@@ -20,7 +20,7 @@ conteudo_check.py do Forge). Olha os arquivos versionados e os novos ainda sem c
   privacidade as 2 politicas (docs/privacidade, docs/privacy) com o e-mail de suporte e citando cada pacote que pode coletar dados e
               cada API de rede do jogo (a politica tem de bater com o codigo, GDD §9.3). Arquivo que comeca com #if TA_X so conta quando o
               TA.asmdef liga TA_X por versionDefines de um pacote que esta no manifest (a loja e o anuncio reais, docs/LOJA_SERVIDOR.md)
-  anuncio     LevelPlay.Init so depois de SetConsent(false) e do do_not_sell (nao personalizado para todos, GDD §7.2)
+  anuncio     LevelPlay.Init so depois de SetGDPRConsent(false) e SetCCPA(true) (antes do 9.5, SetConsent(false) e do_not_sell) (nao personalizado para todos, GDD §7.2)
   telemetria  todo Diario("...") do jogo usa um nome do catalogo Telemetria.Eventos (Core/Telemetria.cs), todo evento do GDD §15.1 esta
               no catalogo, e nenhum script le modelo, nome ou ID do aparelho, local ou ID de publicidade (Data safety, SEGURANCA §3.1)
 Aviso, sem falhar: arquivo .cs acima de ~600 linhas (regra do estudio: vira partial).
@@ -225,9 +225,11 @@ def checa_guardrails(repo):
                 f"facebook: {p} chama FB.Init sem desligar os eventos automaticos e o id de publicidade (o SDK so serve para o login, docs/CONTAS.md)"
             )
         i = cs.find("LevelPlay.Init(")
-        if i >= 0 and not all(0 <= cs.find(x) < i for x in ("SetConsent(false)", '"do_not_sell", "true"')):
+        antes = lambda xs: all(0 <= cs.find(x) < i for x in xs)
+        # 9.5+: LevelPlayPrivacySettings.SetGDPRConsent(false) e SetCCPA(true); antes, SetConsent(false) e o do_not_sell
+        if i >= 0 and not (antes(("SetGDPRConsent(false)", "SetCCPA(true)")) or antes(("SetConsent(false)", '"do_not_sell", "true"'))):
             erros.append(
-                f"anuncio: {p} chama LevelPlay.Init antes de SetConsent(false) e do do_not_sell (nao personalizado para todos, GDD §7.2)"
+                f"anuncio: {p} chama LevelPlay.Init antes de SetGDPRConsent(false) e SetCCPA(true) (nao personalizado para todos, GDD §7.2)"
             )
     setup = texto(repo[SETUP])
     if "SemIdDePublicidade" not in setup or "permission.AD_ID" not in setup:
@@ -680,6 +682,7 @@ def selftest():
         ),
         ("anuncio: ", lambda r: r.update({CORE + "Sim.cs": b'class A { void I() { LevelPlay.Init(k); LevelPlay.SetConsent(false); } }\n'})),
         ("anuncio: ", lambda r: r.update({CORE + "Sim.cs": b'class A { void I() { LevelPlay.SetConsent(false); LevelPlay.Init(k); } }\n'})),
+        ("anuncio: ", lambda r: r.update({CORE + "Sim.cs": b'class A { void I() { LevelPlayPrivacySettings.SetGDPRConsent(false); LevelPlay.Init(k); LevelPlayPrivacySettings.SetCCPA(true); } }\n'})),
         ("modulos: ", lambda r: r.update(iap_ligado(r))),
         ("nucleo: ", lambda r: r.update(vstack(b"using UnityEngine;\nclass C {}\n"))),
         ("nucleo: ", lambda r: r.update(vstack(asmdef=b'{"noEngineReferences": false}'))),
@@ -711,6 +714,8 @@ def selftest():
     r.update(view_asmdef())
     assert checa(r) == [], checa(r)
     r[CORE + "Sim.cs"] = b'class A { void I() { LevelPlay.SetConsent(false); LevelPlay.SetMetaData("do_not_sell", "true"); LevelPlay.Init(k); } }\n'
+    assert checa(r) == [], checa(r)
+    r[CORE + "Sim.cs"] = b'class A { void I() { LevelPlayPrivacySettings.SetGDPRConsent(false); LevelPlayPrivacySettings.SetCCPA(true); LevelPlay.Init(k); } }\n'
     assert checa(r) == [], checa(r)
     # o modulo do estudio bom passa; com o pacote fora do manifest, a rede atras do VS_UGS nao conta; FB.Init com tudo desligado passa
     r = dict(base)

@@ -67,6 +67,13 @@ namespace TA
         readonly StringBuilder _buf = new StringBuilder();
         string _ofertaLogada;
         readonly Desempenho _fps = new Desempenho();
+#if TA_IAP
+        /// <summary>A loja real (docs/LOJA_SERVIDOR.md §5): o núcleo decide (Loja), o LojaIap só repassa. null no -testsession.</summary>
+        public LojaIap Iap { get; private set; }
+#endif
+#if TA_LEVELPLAY
+        AnunciosLevelPlay _anuncioReal;   // com a config do PC; sem ela o anúncio continua simulado
+#endif
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         static void Boot()
@@ -120,9 +127,17 @@ namespace TA
             {
                 string servidor = "";
 #if TA_IAP || TA_LEVELPLAY
-                servidor = LojaConfig.Carrega().servidor;
+                LojaConfig cfg = LojaConfig.Carrega();
+                servidor = cfg.servidor;
 #endif
                 Conta = ContaJogo.Cria(this, servidor);
+#if TA_IAP
+                Iap = new LojaIap(new Loja(() => Sim), cfg, GravaConfirma, () => Conta?.Token);
+                Iap.Conecta();
+#endif
+#if TA_LEVELPLAY
+                if (cfg.TemAnuncio) { _anuncioReal = new AnunciosLevelPlay(cfg); _anuncioReal.Inicia(); }
+#endif
             }
 
             Camera cam = new GameObject("Camera", typeof(Camera)).GetComponent<Camera>();
@@ -171,6 +186,9 @@ namespace TA
             if (oferta != null && oferta != _ofertaLogada) { _ofertaLogada = oferta; Diario("rewarded_ad_offered", (int)Anuncio.Receita); }
             if (Sim.Steps - _ultimoSave >= 5 * Sim.Hz) Grava();
             Conta?.Tick(Time.realtimeSinceStartupAsDouble);
+#if TA_IAP
+            Iap?.Tick();
+#endif
             if (Time.unscaledTime - _ultimoFlush > 5f) Flush();
         }
 
@@ -245,6 +263,13 @@ namespace TA
             string tx = Sim.Anuncios.Oferta(a);
             if (tx == null) return;
             if (a == Anuncio.Cofre) Diario("rewarded_ad_offered", (int)a);
+#if TA_LEVELPLAY
+            if (_anuncioReal != null)   // com a config, só o real: sem vídeo carregado, nada (nunca o simulado de graça)
+            {
+                _anuncioReal.Mostra(tx, pago => AnuncioConcluido(a, pago));
+                return;
+            }
+#endif
             _hud.AbreAnuncio(a, tx);
         }
 
@@ -418,12 +443,15 @@ namespace TA
             return true;
         }
 
-        void Grava()
+        void Grava() => GravaConfirma();
+
+        /// <summary>Grava o save e diz se gravou: a loja só confirma a compra (acknowledge) depois de o item estar no disco (LojaIap).</summary>
+        bool GravaConfirma()
         {
             _ultimoSave = Sim.Steps;
-            if (_test || _apagado || _trocado || Sim.SaveRefused) return;
+            if (_test || _apagado || _trocado || Sim.SaveRefused) return false;
             string texto = Sim.Save(Application.version, Agora);
-            if (texto == null) return;
+            if (texto == null) return false;
             Conta?.Gravou(texto);
             if (Sim.ClockWentBack > 0) Diario("clock_back", Sim.ClockWentBack);
             try
@@ -433,7 +461,8 @@ namespace TA
                 if (File.Exists(_save)) File.Replace(tmp, _save, null);
                 else File.Move(tmp, _save);
             }
-            catch (Exception e) { Debug.LogWarning("TA save: " + e.Message); }
+            catch (Exception e) { Debug.LogWarning("TA save: " + e.Message); return false; }
+            return true;
         }
 
         /// <summary>Ao abrir e ao voltar da pausa: anda o dia local e paga o cofre pelo tempo fora (id = o SavedAt). Nenhum voo andou.</summary>

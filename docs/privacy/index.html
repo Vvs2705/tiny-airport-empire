@@ -33,7 +33,7 @@
 <body>
 <header><div>
   <h1>Little Terminal privacy policy</h1>
-  <p>Updated on November 6, 2026 · <a href="../privacidade/" hreflang="pt-BR">Português</a></p>
+  <p>Updated on November 16, 2026 · <a href="../privacidade/" hreflang="pt-BR">Português</a></p>
 </div></header>
 <main>
 
@@ -42,7 +42,7 @@
   <ul class="resumo">
     <li>The account is optional (Google Play Games or Facebook), only to keep your progress in the cloud. The game does not ask for your name, email, phone number, location, photos, camera or microphone.</li>
     <li>Your progress is stored on this device (and in Android backup, if you keep it on).</li>
-    <li>Without an account, the game sends no data to us or to any advertising, analytics or payment company. With an account, the save goes to Unity (see Account).</li>
+    <li>Without an account, the game only sends data when you buy something (the receipt goes to our validation server) or choose to watch a rewarded ad (see Purchases and ads). With an account, the save goes to Unity (see Account).</li>
     <li>The game does not use the Android advertising ID: the <code>AD_ID</code> permission is removed from the app.</li>
     <li>There is no chat and no paid random item.</li>
     <li>You can erase everything from inside the game: Pause › Settings › Delete my data.</li>
@@ -71,11 +71,17 @@
 <section>
   <h2>What leaves your device</h2>
   <ul>
-    <li><strong>From the game, nothing without an account.</strong> Without linking an account, the game uses no server, no usage analytics, no real ads and no purchases. Rewarded ads are optional and, in this version, simulated inside the game: no ad is loaded from the internet.</li>
+    <li><strong>From the game, only the purchases and ads you choose.</strong> Without linking an account, the game uses no usage analytics. Purchases and rewarded ads are described in Purchases and ads, below.</li>
     <li><strong>Unity.</strong> The game is built with the Unity engine. Unity Technologies may receive anonymous technical statistics about the device, such as model, operating system and memory, to improve the engine. See <a href="https://unity.com/legal/game-player-and-app-user-privacy-policy">Unity's policy</a>.</li>
     <li><strong>Google Play.</strong> If you downloaded the game from Google Play, Google handles your account data under the <a href="https://policies.google.com/privacy">Google privacy policy</a>. Google may show us aggregated numbers and app crash reports (Android vitals) that do not identify you.</li>
     <li><strong>Links you tap.</strong> “Privacy policy” opens this page in your browser and “Support” opens your email app.</li>
   </ul>
+</section>
+
+<section>
+  <h2>Purchases and ads</h2>
+  <p><strong>In-app purchases.</strong> When you buy something in the game, Google Play processes the payment; we never receive card details. The game sends our validation server (Google Cloud Run, São Paulo region), through <code>UnityWebRequest</code> (module <code>com.unity.modules.unitywebrequest</code>) and Unity IAP (<code>com.unity.purchasing</code>), only the product id and the purchase receipt, to check with Google that the purchase is genuine and deliver the item once. We keep a cryptographic digest (SHA-256) of the receipt, the product and the date, to stop the same purchase from being used twice, for up to 5 years or until you ask for deletion through the support e-mail. We do not use this for advertising.</p>
+  <p><strong>Rewarded ads.</strong> If you choose to watch a video for a reward, Unity LevelPlay (<code>com.unity.services.levelplay</code>) and its ad networks receive technical device data, your IP address (approximate location) and your interaction with the ad, to serve the ad, measure it and prevent fraud. Ads are <strong>non-personalized for everyone</strong>, and the game does not use the device advertising ID. No ad shows unless you tap the video button.</p>
 </section>
 
 <section>
