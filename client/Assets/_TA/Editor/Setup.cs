@@ -220,6 +220,27 @@ namespace TA.EditorTools
         }
     }
 
+#if TA_LEVELPLAY
+    /// <summary>O SDK nativo do LevelPlay no Gradle, sem resolvedor (EDM/MDR) e sem o Network Manager: a ponte Java do pacote
+    /// (com.ironsource.unity.androidbridge) nao compila sem ele, e o CI nao tem resolvedor. So o mediation-sdk do Maven Central, na versao do pacote
+    /// (Packages/manifest.json); o play-services-ads-identifier que o XML do Network Manager tambem traz fica de fora (AD_ID: SemIdDePublicidade).</summary>
+    sealed class SdkLevelPlay : UnityEditor.Android.IPostGenerateGradleAndroidProject
+    {
+        public const string Versao = "9.6.0";   // a mesma do com.unity.services.levelplay; o XML oficial do 9.6.0 pede o mediation-sdk:9.6.0
+        public int callbackOrder => 998;
+
+        public void OnPostGenerateGradleAndroidProject(string path)
+        {
+            string f = Path.Combine(path, "build.gradle");
+            if (!File.Exists(f)) { Debug.LogWarning("TA Setup: build.gradle do unityLibrary nao achado: " + f); return; }
+            string g = File.ReadAllText(f);
+            if (g.Contains("com.unity3d.ads-mediation:mediation-sdk")) return;   // um resolvedor ja pos
+            File.AppendAllText(f, "\ndependencies {\n    implementation 'com.unity3d.ads-mediation:mediation-sdk:" + Versao + "'\n}\n");
+            Debug.Log("TA Setup: mediation-sdk " + Versao + " no Gradle do unityLibrary");
+        }
+    }
+#endif
+
     /// <summary>Anuncio nao personalizado para todos (guardrail do estudio; GDD §7.2): tira do APK o ID de publicidade e as APIs do Privacy
     /// Sandbox que um SDK de anuncio traga. Marcadores tools:node="remove" no manifesto do unityLibrary, que tem prioridade sobre as
     /// dependencias (AARs) na fusao do Gradle. Copia do dc:Editor/Setup.cs; vale desde ja para nenhum SDK futuro trazer o AD_ID calado.</summary>
