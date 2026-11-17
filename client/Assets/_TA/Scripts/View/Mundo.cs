@@ -170,6 +170,8 @@ namespace TA
         readonly GameObject[,,] _mesa = new GameObject[8, 4, 3];
         readonly SpriteRenderer[,] _arco = new SpriteRenderer[8, 4], _vazio = new SpriteRenderer[8, 4];
         readonly GameObject[,] _fita = new GameObject[8, 4];
+        readonly Transform[] _postes = new Transform[8];
+        readonly int[] _nivelFita = { -1, -1, -1, -1, -1, -1, -1, -1 };
         readonly SpriteRenderer[] _mao = new SpriteRenderer[8];
         readonly TextMesh[] _placa = new TextMesh[8];
         readonly RectTransform[] _selo = new RectTransform[8];
@@ -386,7 +388,10 @@ namespace TA
                     while (nivel > 0 && _mesa[e, i, nivel] == null) nivel--;
                     for (int n = 0; n < NivelMalha.Length; n++) if (_mesa[e, i, n] != null) Acende(_mesa[e, i, n], i < st.Postos && n == nivel, false);
                 }
-                for (int r = 0; r < 4; r++) if (_fita[e, r] != null) Acende(_fita[e, r], st.Fila.Count > 12 * (r + 1));   // a fita abre conforme a fila cresce: ninguem a atravessa
+                // a fita entre 2 fileiras acende quando a de trás tem gente: a faixa de uma fileira vazia é o corredor de quem anda pela sala
+                // (com a de trás vazia, a equipe e quem chega passavam rente ao cordão: diag_caixas de 16/11)
+                for (int r = 0; r < 4; r++) if (_fita[e, r] != null) Acende(_fita[e, r], st.Fila.Count > 12 * (r + 1));
+                PintaFitas(e, NivelDe(st.Vel));
                 int gente = s.Presentes(st.Tipo);
                 for (int i = 0; i < 4; i++)   // posto sem ninguem: um X em cima do balcao
                 {
@@ -423,6 +428,17 @@ namespace TA
                     _seloTexto[e].color = st.Estado == Estado.Critico ? Art.Bad : Art.Warn;
                 }
             }
+        }
+
+        /// <summary>Postes e fita da fila pelo nível da sala, o mesmo das malhas do balcão: plástico cinza e fita azul, depois cromado, e no último
+        /// dourado com cordão vermelho. Só repinta quando o nível muda.</summary>
+        static readonly Color[] PosteCor = { Art.Hex(0x8C929C), Art.Hex(0xD3D8DF), Art.Hex(0xD9A834) }, FitaCor = { Fita, Fita, Art.Hex(0xB3232F) };
+        void PintaFitas(int e, int nivel)
+        {
+            if (_postes[e] == null || _nivelFita[e] == nivel) return;   // com o cordão do Tripo (escolha A) não há postes de primitiva: a malha tem a cor dela
+            _nivelFita[e] = nivel;
+            foreach (Renderer r in _postes[e].GetComponentsInChildren<Renderer>(true)) Cor(r, PosteCor[nivel]);
+            for (int r = 0; r < 4; r++) if (_fita[e, r] != null) Cor(_fita[e, r].GetComponent<Renderer>(), FitaCor[nivel]);
         }
 
         /// <summary>Nivel da malha (0..2) pelo nivel de Velocidade.</summary>

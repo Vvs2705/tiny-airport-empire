@@ -216,6 +216,7 @@ namespace TA
                         b.Alvo = alvo;   // a mancha sumiu: um passo ate a seguinte
                         if (z.Em == Area.Banheiro || b.Caminho.Count > 0) b.Caminho.Add(alvo); else Segue(b, alvo, false);
                     }
+                    if (z.Em != Area.Banheiro) Confere(b, true);   // a rede de proteção de quem anda: a fita que acendeu depois da rota não é atravessada
                     Anda(b, z.Fase == Faxina.Indo ? NoRitmo(b, z.Andando) : VelFunc * 0.6f, dt);
                     bool esfrega = z.Fase == Faxina.Limpando && b.Caminho.Count == 0;
                     b.Atende = esfrega;
