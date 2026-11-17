@@ -219,7 +219,7 @@ namespace TA
                 }
                 for (int r = 0; r < 4; r++)
                 {
-                    float ca = r % 2 == 0 ? -0.16f : 0.16f, d = FilaD + (r + 0.5f) * FilaLinha;   // aberta no lado em que a fila vira para a fileira de trás (Fila)
+                    float ca = r % 2 == 0 ? -0.16f : 0.16f, d = (cordao ? FilaDe(e) : FilaD) + (r + 0.5f) * FilaLinha;   // aberta no lado em que a fila vira (Fila); o cordão no meio das vagas (a segurança recua 7 cm)
                     if (cordao)
                     {
                         const float Passo = 0.4f;

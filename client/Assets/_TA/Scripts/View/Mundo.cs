@@ -388,8 +388,9 @@ namespace TA
                     while (nivel > 0 && _mesa[e, i, nivel] == null) nivel--;
                     for (int n = 0; n < NivelMalha.Length; n++) if (_mesa[e, i, n] != null) Acende(_mesa[e, i, n], i < st.Postos && n == nivel, false);
                 }
-                // a fita atrás de cada fileira com gente acende (ninguém a atravessa: quem chega entra pelo vão da ponta, como numa serpentina de verdade)
-                for (int r = 0; r < 4; r++) if (_fita[e, r] != null) Acende(_fita[e, r], st.Fila.Count > 12 * r);
+                // a fita entre 2 fileiras acende quando a de trás tem gente: a faixa de uma fileira vazia é o corredor de quem anda pela sala
+                // (com a de trás vazia, a equipe e quem chega passavam rente ao cordão: diag_caixas de 16/11)
+                for (int r = 0; r < 4; r++) if (_fita[e, r] != null) Acende(_fita[e, r], st.Fila.Count > 12 * (r + 1));
                 PintaFitas(e, NivelDe(st.Vel));
                 int gente = s.Presentes(st.Tipo);
                 for (int i = 0; i < 4; i++)   // posto sem ninguem: um X em cima do balcao
