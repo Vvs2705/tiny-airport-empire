@@ -39,7 +39,7 @@ namespace TA
             _ad = new LevelPlayRewardedAd(_cfg.levelplayRecompensado);
             _ad.OnAdRewarded += (info, recompensa) => { string tx = _tx; _tx = null; if (tx != null) _pago?.Invoke(tx); };
             _ad.OnAdClosed += _ => { _tx = null; _ad.LoadAd(); };
-            _ad.OnAdDisplayFailed += _ => { _tx = null; _ad.LoadAd(); };
+            _ad.OnAdDisplayFailed += (_, erro) => { _tx = null; _ad.LoadAd(); };
             _ad.LoadAd();
         }
 
