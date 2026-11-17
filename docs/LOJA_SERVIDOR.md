@@ -74,6 +74,8 @@ Nenhum desses valores é segredo (todos vão dentro do APK), mas são da conta d
 
 ### Rodada do PC (Unity), uma vez
 
+**Feita em 2026-11-16** (itens 1 a 5): IAP 5.5.0 e LevelPlay 9.6.0 (o 8.x buscava as dependências Android no repositório da is.com, que foi desligado; o 9.x usa o Maven Central). No 9.5+, `SetConsent` e o `do_not_sell` viraram `LevelPlayPrivacySettings.SetGDPRConsent(false)` e `SetCCPA(true)`, e o `checa_repo` aceita os dois jeitos. Com a config, o vídeo é só o real: sem vídeo carregado o botão não paga nada. O item 6 (aparelho) fica para o teste no POCO F4.
+
 1. `client/Packages/manifest.json`: `com.unity.purchasing` (5.x, a do DC), `com.unity.services.levelplay` (a do DC) e `com.unity.modules.unitywebrequest`.
 2. `client/Assets/_TA/Scripts/View/TA.asmdef`: em `references`, os assemblies dos dois pacotes (os nomes aparecem no asmdef de cada pacote, em `Library/PackageCache`); em `versionDefines`:
    ```json

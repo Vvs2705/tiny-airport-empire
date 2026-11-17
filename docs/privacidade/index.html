@@ -33,7 +33,7 @@
 <body>
 <header><div>
   <h1>Política de privacidade do Little Terminal</h1>
-  <p>Atualizada em 6 de novembro de 2026 · <a href="../privacy/" hreflang="en">English</a></p>
+  <p>Atualizada em 16 de novembro de 2026 · <a href="../privacy/" hreflang="en">English</a></p>
 </div></header>
 <main>
 
@@ -42,7 +42,7 @@
   <ul class="resumo">
     <li>A conta é opcional (Google Play Games ou Facebook), só para guardar o progresso na nuvem. O jogo não pede nome, e-mail, telefone, localização, fotos, câmera nem microfone.</li>
     <li>Seu progresso fica guardado neste aparelho (e no backup do Android, se você o deixa ligado).</li>
-    <li>Sem conta, o jogo não envia dados para nós nem para empresas de anúncios, de análise ou de pagamento. Com a conta, o save vai para a Unity (veja Conta).</li>
+    <li>Sem conta, o jogo só envia dados quando você compra algo (o comprovante vai para o nosso servidor de validação) ou escolhe ver um anúncio com recompensa (veja Compras e anúncios). Com a conta, o save vai para a Unity (veja Conta).</li>
     <li>O jogo não usa o ID de publicidade do Android: a permissão <code>AD_ID</code> é retirada do app.</li>
     <li>Não há chat nem compra de item aleatório.</li>
     <li>Você apaga tudo pelo próprio jogo: Pausa › Configurações › Excluir meus dados.</li>
@@ -71,11 +71,17 @@
 <section>
   <h2>O que sai do aparelho</h2>
   <ul>
-    <li><strong>Do jogo, nada sem a conta.</strong> Sem ligar a conta, o jogo não usa servidor, análise de uso, anúncios de verdade nem compras. Os anúncios com recompensa são opcionais e, nesta versão, simulados dentro do jogo: nenhum anúncio é carregado da internet.</li>
+    <li><strong>Do jogo, só compras e anúncios que você escolhe.</strong> Sem ligar a conta, o jogo não usa análise de uso. Compras e anúncios com recompensa estão descritos em Compras e anúncios, logo abaixo.</li>
     <li><strong>Unity.</strong> O jogo é feito com o motor Unity. A Unity Technologies pode receber estatísticas técnicas anônimas do aparelho, como modelo, sistema e memória, para melhorar o motor. Veja a <a href="https://unity.com/legal/game-player-and-app-user-privacy-policy">política da Unity</a>.</li>
     <li><strong>Google Play.</strong> Se você baixou pela Google Play, a Google trata os dados da sua conta conforme a <a href="https://policies.google.com/privacy">política da Google</a>. Ela pode nos mostrar números somados e relatórios de falha do app (Android vitals), sem identificar você.</li>
     <li><strong>Links que você toca.</strong> “Política de privacidade” abre esta página no navegador e “Suporte” abre o seu app de e-mail.</li>
   </ul>
+</section>
+
+<section>
+  <h2>Compras e anúncios</h2>
+  <p><strong>Compras no app.</strong> Quando você compra algo no jogo, a Google Play processa o pagamento; nós não recebemos dados do cartão. O jogo envia ao nosso servidor de validação (Google Cloud Run, região São Paulo), pela biblioteca <code>UnityWebRequest</code> (módulo <code>com.unity.modules.unitywebrequest</code>) e o Unity IAP (<code>com.unity.purchasing</code>), apenas o identificador do produto e o comprovante da compra, para conferir com a Google que ela é verdadeira e entregar o item uma vez. Guardamos um resumo criptográfico (SHA-256) do comprovante, o produto e a data, para impedir que a mesma compra seja usada duas vezes, por até 5 anos ou até você pedir a exclusão pelo e-mail de suporte. Não usamos isso para publicidade.</p>
+  <p><strong>Anúncios com recompensa.</strong> Se você escolher assistir a um vídeo para ganhar uma recompensa, o LevelPlay da Unity (<code>com.unity.services.levelplay</code>) e as redes de anúncio dele recebem dados técnicos do aparelho, o endereço IP (local aproximado) e a interação com o anúncio, para mostrar o anúncio, medir e prevenir fraude. Os anúncios são <strong>não personalizados para todos</strong>, e o jogo não usa o ID de publicidade do aparelho. Nenhum anúncio aparece sem você tocar no botão do vídeo.</p>
 </section>
 
 <section>

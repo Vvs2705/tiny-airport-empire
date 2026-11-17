@@ -7,9 +7,9 @@ using Unity.Services.LevelPlay;
 namespace TA
 {
     /// <summary>
-    /// O rewarded real (GDD §7.2). Privacidade ANTES do Init: nao personalizado para todos (sem consentimento de personalizacao, "do not sell"
+    /// O rewarded real (GDD §7.2). Privacidade ANTES do Init: nao personalizado para todos (sem consentimento GDPR, opt-out do CCPA
     /// e nao dirigido a crianca); o AD_ID sai do manifesto no Setup.SemIdDePublicidade. O checa_repo derruba este arquivo se o Init vier antes
-    /// do SetConsent(false) e do do_not_sell. Teste (build de desenvolvimento ou config "teste"): metadado de test suite e o atalho para abri-la.
+    /// do SetGDPRConsent(false) e do SetCCPA(true). Teste (build de desenvolvimento ou config "teste"): metadado de test suite e o atalho para abri-la.
     /// Regras (limite diario, 1x por id, o que paga) continuam no nucleo (Anuncios.cs): aqui so se mostra e se avisa que acabou.
     /// </summary>
     public sealed class AnunciosLevelPlay
@@ -26,9 +26,9 @@ namespace TA
         public void Inicia()
         {
             if (!_cfg.TemAnuncio) return;
-            LevelPlay.SetConsent(false);
-            LevelPlay.SetMetaData("do_not_sell", "true");
-            LevelPlay.SetMetaData("is_child_directed", "false");
+            LevelPlayPrivacySettings.SetGDPRConsent(false);   // 9.5+: o SetConsent(false) e o do_not_sell antigos viraram estes
+            LevelPlayPrivacySettings.SetCCPA(true);
+            LevelPlayPrivacySettings.SetCOPPA(false);
             if (_cfg.Teste) LevelPlay.SetMetaData("is_test_suite", "enable");
             LevelPlay.OnInitSuccess += _ => Cria();
             LevelPlay.Init(_cfg.levelplayApp);
@@ -39,7 +39,7 @@ namespace TA
             _ad = new LevelPlayRewardedAd(_cfg.levelplayRecompensado);
             _ad.OnAdRewarded += (info, recompensa) => { string tx = _tx; _tx = null; if (tx != null) _pago?.Invoke(tx); };
             _ad.OnAdClosed += _ => { _tx = null; _ad.LoadAd(); };
-            _ad.OnAdDisplayFailed += _ => { _tx = null; _ad.LoadAd(); };
+            _ad.OnAdDisplayFailed += (_, erro) => { _tx = null; _ad.LoadAd(); };
             _ad.LoadAd();
         }
 

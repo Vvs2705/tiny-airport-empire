@@ -45,6 +45,8 @@ Condição para responder "Não": `checa_apk --release` sem `INTERNET` na lista 
 
 ### 3.2. Build de lançamento (anúncio com recompensa do LevelPlay, Unity IAP e servidor de validação)
 
+**Esta é a coluna do build desde 2026-11-16:** `com.unity.purchasing` 5.5.0 e `com.unity.services.levelplay` 9.6.0 entraram no `manifest.json`, e as duas políticas citam os pacotes e o `UnityWebRequest`. O anúncio segue não personalizado para todos (`SetGDPRConsent(false)`, `SetCCPA(true)`, `SetCOPPA(false)` antes do `Init`) e o `checa_apk` confere que o `AD_ID` não volta.
+
 Referência do LevelPlay: [Google Data Safety Questionnaire](https://docs.unity.com/en-us/grow/levelplay/platform/legal-resources/google-data-safety-questionnaire) (conferido em 2026-11-05; a frente de anúncio reconfere no dia, junto com o questionário de cada rede mediada).
 
 | Categoria › tipo | Coletado | Compartilhado | Finalidade | Opcional? | Quem |
