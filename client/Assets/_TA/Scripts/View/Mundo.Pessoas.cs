@@ -126,7 +126,7 @@ namespace TA
             {
                 int e = (int)st.Tipo;
                 if (e == Portao) FilaPortao(s, st);
-                else for (int k = 0; k < st.Fila.Count; k++) Liga(st.Fila[k], e, Fila(e, k), s, false, st.Estado == Estado.Critico && k < 3);
+                else for (int k = 0; k < st.Fila.Count; k++) { Liga(st.Fila[k], e, Fila(e, k), s, false, st.Estado == Estado.Critico && k < 3); OlhaPosto(st.Fila[k].Id, e, st.Postos); }
                 bool seg = st.Tipo == Estacao.Seguranca;
                 Reparte(s, st);
                 int agentes = seg ? s.Presentes(st.Tipo) : 0;
@@ -208,6 +208,16 @@ namespace TA
             Voo v = s.VooDe(p);
             Color mala = Art.VooCor[p.Voo];
             b.Tinta = e == (int)Estacao.Portao && v != null && !v.Embarque && !noBalcao ? Color.Lerp(mala, Art.Hex(0x8A8F99), 0.5f) : mala;   // no portao, apagada ate abrir o embarque
+        }
+
+        /// <summary>Quem espera parado na fila olha para o posto aberto mais perto (o balcão, ou o raio-x na segurança), não para o lado em que andou por
+        /// último: antes, a fileira inteira ficava virada para o mesmo canto. Andando, o Movido vira para onde vai.</summary>
+        void OlhaPosto(int id, int e, int postos)
+        {
+            if (!_pax.TryGetValue(id, out Boneco b) || b.Zona != e || b.NoBalcao || b.Caminho.Count > 0) return;
+            Vector2 alvo = MesaEm(e, 0);
+            for (int i = 1; i < postos; i++) if ((MesaEm(e, i) - b.Pos).sqrMagnitude < (alvo - b.Pos).sqrMagnitude) alvo = MesaEm(e, i);
+            Olha(b, alvo - b.Pos);
         }
 
         /// <summary>Boneco novo (ou do pool) para o passageiro, na calcada da rua.</summary>

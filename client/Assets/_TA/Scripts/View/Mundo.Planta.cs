@@ -199,18 +199,42 @@ namespace TA
             else if (e != (int)Estacao.Manutencao && e != (int)Estacao.Despacho)   // oficina e despacho nao tem fila de passageiros
             {
                 Tapete(e, 2.1f, 2.84f, 1.7f);
-                // fitas da fila: postes nas pontas das fileiras
-                for (int r = 0; r < 5; r++)
-                    for (int lado = -1; lado <= 1; lado += 2)
-                    {
-                        Vector2 p = Em(e, FilaD + (r + 0.5f) * FilaLinha, lado * PosteA);
-                        Fixo(PrimitiveType.Cylinder, new Vector3(p.x, 0.12f, p.y), new Vector3(0.03f, 0.12f, 0.03f), Fita);
-                    }
+                // fitas da fila (escolha A de 06/11): o cordão do Tripo do portão, poste e corda vermelha, em peças de 0,4 m entre as fileiras, cada fita
+                // num grupo que acende inteiro. Sem a malha, a reserva de primitiva: postes de base, haste e bola nas pontas, pintados pelo nível (PintaFitas).
+                bool cordao = Resources.Load<GameObject>("Malhas/cordao_fila") != null && Material != null;
+                if (!cordao)
+                {
+                    // A haste e a bola têm a largura do poste antigo (3 cm): quem vira de uma fileira para a outra passa a 10 cm do centro dele (diag_caixas).
+                    // A base é um disco de 1 cm de altura, abaixo do que a rota e o diag contam como corpo.
+                    _postes[e] = _cont = Grupo("Postes", _sala[e]);
+                    for (int r = 0; r < 5; r++)
+                        for (int lado = -1; lado <= 1; lado += 2)
+                        {
+                            Vector2 p = Em(e, FilaD + (r + 0.5f) * FilaLinha, lado * PosteA);
+                            Fixo(PrimitiveType.Cylinder, new Vector3(p.x, 0.005f, p.y), new Vector3(0.06f, 0.005f, 0.06f), Fita);
+                            Fixo(PrimitiveType.Cylinder, new Vector3(p.x, 0.15f, p.y), new Vector3(0.03f, 0.15f, 0.03f), Fita);
+                            Fixo(PrimitiveType.Sphere, new Vector3(p.x, 0.3f, p.y), new Vector3(0.034f, 0.034f, 0.034f), Fita);
+                        }
+                    _cont = _sala[e];
+                }
                 for (int r = 0; r < 4; r++)
                 {
-                    Vector2 p = Em(e, FilaD + (r + 0.5f) * FilaLinha, (r % 2 == 0 ? -0.16f : 0.16f));   // aberta no lado em que a fila vira para a fileira de trás (Fila)
-                    bool longoX = Mathf.Abs(s.T.x) > 0.5f;
-                    _fita[e, r] = Bloco("Fita", PrimitiveType.Cube, new Vector3(p.x, 0.2f, p.y), longoX ? new Vector3(FitaLarg, 0.03f, 0.02f) : new Vector3(0.02f, 0.03f, FitaLarg), Fita).gameObject;
+                    float ca = r % 2 == 0 ? -0.16f : 0.16f, d = (cordao ? FilaDe(e) : FilaD) + (r + 0.5f) * FilaLinha;   // aberta no lado em que a fila vira (Fila); o cordão no meio das vagas (a segurança recua 7 cm)
+                    if (cordao)
+                    {
+                        const float Passo = 0.4f;
+                        int n = Mathf.FloorToInt(FitaLarg / Passo);   // 6 peças, 2,4 m: o vão da ponta fica com 0,28 m até quem vira
+                        Transform g = _cont = Grupo("Fita", _sala[e]);
+                        for (int i = 0; i < n; i++) Peca("cordao_fila", V3(Em(e, d, ca + (i - (n - 1) * 0.5f) * Passo)), Rumo(s.N), Passo);
+                        _cont = _sala[e];
+                        _fita[e, r] = g.gameObject;
+                    }
+                    else
+                    {
+                        Vector2 p = Em(e, d, ca);
+                        bool longoX = Mathf.Abs(s.T.x) > 0.5f;
+                        _fita[e, r] = Bloco("Fita", PrimitiveType.Cube, new Vector3(p.x, 0.25f, p.y), longoX ? new Vector3(FitaLarg, 0.045f, 0.02f) : new Vector3(0.02f, 0.045f, FitaLarg), Fita).gameObject;
+                    }
                 }
             }
             Mobilia(e);

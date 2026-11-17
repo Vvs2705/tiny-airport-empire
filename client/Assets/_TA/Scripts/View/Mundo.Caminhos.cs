@@ -57,7 +57,7 @@ namespace TA
                     Quaternion q = Quaternion.Euler(0f, t.eulerAngles.y, 0f);
                     Vector3 c = t.position + q * b.center, u = q * Vector3.forward;
                     var p = new Barreira { Go = t.gameObject, C = new Vector2(c.x, c.z), U = new Vector2(u.x, u.z), L = b.extents.z, W = b.extents.x };
-                    if (t.name == "cordao_fila" && !t.parent.name.StartsWith("Fechado")) p.L = 0.01f;   // a do portão: a caixa é a da diagonal da malha, mais larga que o corredor da fila; a corda é um fio
+                    if (t.name == "cordao_fila" && !t.parent.name.StartsWith("Fechado")) p.L = t.parent.name == "Fita" ? 0.04f : 0.01f;   // a fita das salas: quem passa ao longo dela fica a 12 cm da linha (Confere), fora da caixa da malha (11,7 cm, diag_caixas)   // a do portão: a caixa é a da diagonal da malha, mais larga que o corredor da fila; a corda é um fio
                     _barreiras[e].Add(p);
                 }
                 foreach (Fundido f in _fundidos)   // bloco fixo nunca anda: vale onde está, mesmo fora da sala (a parede fica de pé com a sala fechada)
@@ -124,15 +124,18 @@ namespace TA
             _versao++;
         }
 
-        /// <summary>Algum passageiro com o corpo na caixa de uma peça de `go`? Só roda enquanto a peça espera para acender.</summary>
+        /// <summary>Alguém (passageiro, funcionário ou limpeza) com o corpo na caixa de uma peça de `go`? Só roda enquanto a peça espera para acender.</summary>
         bool AlguemEm(GameObject go)
         {
             foreach (List<Barreira> l in _barreiras)
                 if (l != null)
                     foreach (Barreira c in l)
                         if (c.Go.transform.IsChildOf(go.transform))
-                            foreach (Boneco b in _pax.Values)
-                                if (Bate(c, b.Pos, b.Pos, CorpoRaio)) return true;
+                        {
+                            foreach (Boneco b in _pax.Values) if (Bate(c, b.Pos, b.Pos, CorpoRaio)) return true;
+                            foreach (Boneco b in _func) if (b != null && b.T.gameObject.activeSelf && Bate(c, b.Pos, b.Pos, CorpoRaio)) return true;   // a equipe e a limpeza também
+                            foreach (Boneco b in _zel) if (b.T.gameObject.activeSelf && Bate(c, b.Pos, b.Pos, CorpoRaio)) return true;
+                        }
             return false;
         }
 
